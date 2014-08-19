@@ -3,6 +3,7 @@
 # see instructions at http://www.drumminhands.com/2014/06/15/raspberry-pi-photo-booth/
 
 import os
+import glob
 import time
 from time import sleep
 import RPi.GPIO as GPIO
@@ -35,7 +36,7 @@ capture_delay = 3 # delay between pics
 prep_delay = 4 # number of seconds at step 1 as users prep to have photo taken
 gif_delay = 100 # How much time between frames in the animated gif
 
-file_path = '/home/pi/photobooth/' #where do you want to save the photos
+file_path = '/home/pi/photobooth/pics/' #where do you want to save the photos
 tumblr_blog = 'username.tumblr.com' # change to your tumblr page
 addr_to   = 'secretcodehere@tumblr.com' # The special tumblr auto post email address
 addr_from = 'username@gmail.com' # change to your full gmail address
@@ -215,6 +216,11 @@ def start_photobooth():
 # else is happening in the program, their function will be run   
 GPIO.add_event_detect(button2_pin, GPIO.FALLING, callback=shut_it_down, bouncetime=300) 
 GPIO.add_event_detect(button3_pin, GPIO.FALLING, callback=exit_photobooth, bouncetime=300)  
+
+# delete files in folder on startup
+files = glob.glob(file_path + '*')
+for f in files:
+    os.remove(f)
 
 print "Photo booth app running..." 
 GPIO.output(led1_pin,True); #light up the lights to show the app is running at the beginning
