@@ -178,7 +178,7 @@ def start_photobooth():
 			part = MIMEBase('image', 'gif')
 			part.set_payload( fp.read() )
 			Encoders.encode_base64(part)
-			part.add_header('Content-Disposition', 'attachment; filename="%s"' % os.path.basename(file_path))
+			part.add_header('Content-Disposition', 'attachment; filename="%s"' % os.path.basename(file_to_upload))
 			fp.close()
 			msg.attach(part)
 			server = smtplib.SMTP('smtp.gmail.com:587')
