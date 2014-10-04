@@ -35,6 +35,7 @@ total_pics = 4 # number of pics  to be taken
 capture_delay = 3 # delay between pics
 prep_delay = 4 # number of seconds at step 1 as users prep to have photo taken
 gif_delay = 100 # How much time between frames in the animated gif
+file_path = '/home/pi/photobooth/pics/' #where do you want to save the photos
 
 file_path = '/home/pi/photobooth/pics/' #where do you want to save the photos
 tumblr_blog = 'username.tumblr.com' # change to your tumblr page
@@ -44,12 +45,12 @@ user_name = 'username' # change to your gmail username
 password = 'secretpasswordhere' # change to your gmail password
 test_server = 'www.google.com'
 
-w = 800 # width of screen in pixels
-h = 480 # height of screen in pixels
-transform_x = 640 # how wide to scale the jpg when replaying
-transfrom_y = 480 # how high to scale the jpg when replaying
-offset_x = 80 # how far off to left corner to display photos
-offset_y = 0 # how far off to left corner to display photos
+w = 800
+h = 480
+transform_x = 640 #how wide to scale the jpg when replaying
+transfrom_y = 480 #how high to scale the jpg when replaying
+offset_x = 80 #how far off to left corner to display photos
+offset_y = 0 #how far off to left corner to display photos
 replay_delay = 1 # how much to wait in-between showing pics on-screen after taking
 replay_cycles = 4 # how many times to show each photo on-screen after taking
 
@@ -93,6 +94,24 @@ def exit_photobooth(channel):
     time.sleep(3)
     sys.exit()
     
+def clear_pics(foo): #why is this function being passed an arguments?
+    #delete files in folder on startup
+	files = glob.glob(file_path + '*')
+	for f in files:
+		os.remove(f) 
+	#light the lights in series to show completed
+	print "Deleted previous pics"
+	GPIO.output(led1_pin,False); #turn off the lights
+	GPIO.output(led2_pin,False);
+	GPIO.output(led3_pin,False);
+	GPIO.output(led4_pin,False)
+	pins = [led1_pin, led2_pin, led3_pin, led4_pin]
+	for p in pins:
+		GPIO.output(p,True); 
+		sleep(0.25)
+		GPIO.output(p,False);
+		sleep(0.25)
+      
 def is_connected():
   try:
     # see if we can resolve the host name -- tells us if there is
@@ -171,10 +190,11 @@ def start_photobooth():
 	while connected: 
 		try:
 			msg = MIMEMultipart()
-			msg['Subject'] = now
+			msg['Subject'] = "Photo Booth " + now
 			msg['From'] = addr_from
 			msg['To'] = addr_to
 			file_to_upload = file_path + now + ".gif"
+			print file_to_upload
 			fp = open(file_to_upload, 'rb')
 			part = MIMEBase('image', 'gif')
 			part.set_payload( fp.read() )
@@ -215,7 +235,10 @@ def start_photobooth():
 # when a falling edge is detected on button2_pin and button3_pin, regardless of whatever   
 # else is happening in the program, their function will be run   
 GPIO.add_event_detect(button2_pin, GPIO.FALLING, callback=shut_it_down, bouncetime=300) 
-GPIO.add_event_detect(button3_pin, GPIO.FALLING, callback=exit_photobooth, bouncetime=300)  
+
+#choose one of the two following lines to be un-commented
+#GPIO.add_event_detect(button3_pin, GPIO.FALLING, callback=exit_photobooth, bouncetime=300) #use third button to exit python. Good while developing
+GPIO.add_event_detect(button3_pin, GPIO.FALLING, callback=clear_pics, bouncetime=300) #use the third button to clear pics stored on the SD card from previous events
 
 # delete files in folder on startup
 files = glob.glob(file_path + '*')
@@ -223,7 +246,7 @@ for f in files:
     os.remove(f)
 
 print "Photo booth app running..." 
-GPIO.output(led1_pin,True); #light up the lights to show the app is running at the beginning
+GPIO.output(led1_pin,True); #light up the lights to show the app is running
 GPIO.output(led2_pin,True);
 GPIO.output(led3_pin,True);
 GPIO.output(led4_pin,True);
@@ -233,7 +256,6 @@ GPIO.output(led2_pin,False);
 GPIO.output(led3_pin,False);
 GPIO.output(led4_pin,False);
 
-# wait for the big button to be pressed
 while True:
 	GPIO.wait_for_edge(button1_pin, GPIO.FALLING)
 	time.sleep(0.2) #debounce
