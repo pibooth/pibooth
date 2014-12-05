@@ -121,6 +121,20 @@ def is_connected():
      pass
   return False    
 
+def init_pygame():
+    pygame.init()
+    size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
+    pygame.display.set_caption('Photo Booth Pics')
+    pygame.mouse.set_visible(False) #hide the mouse cursor	
+    return pygame.display.set_mode(size, pygame.FULLSCREEN)
+
+def show_image(image_path):
+    screen = init_pygame()
+    img=pygame.image.load(image_path) 
+    img = pygame.transform.scale(img,(transform_x,transfrom_y))
+    screen.blit(img,(offset_x,offset_y))
+    pygame.display.flip()
+
 def display_pics(jpg_group):
     # this section is an unbelievable nasty hack - for some reason Pygame
     # needs a keyboardinterrupt to initialise in some limited circs (second time running)
@@ -132,22 +146,15 @@ def display_pics(jpg_group):
     signal(SIGALRM, alarm_handler)
     alarm(3)
     try:
-        pygame.init()
-        size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-        screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+        screen = init_pygame()
 
         alarm(0)
     except Alarm:
         raise KeyboardInterrupt
-    pygame.display.set_caption('Photo Booth Pics')
-    pygame.mouse.set_visible(False) #hide the mouse cursor	
     for i in range(0, replay_cycles): #show pics a few times
 		for i in range(1, total_pics+1): #show each pic
 			filename = config.file_path + jpg_group + "-0" + str(i) + ".jpg"
-			img=pygame.image.load(filename) 
-			img = pygame.transform.scale(img,(transform_x,transfrom_y))
-			screen.blit(img,(offset_x,offset_y))
-			pygame.display.flip() # update the display
+                        show_image(filename);
 			time.sleep(replay_delay) # pause 
 			
 # define the photo taking function for when the big button is pressed 
@@ -183,6 +190,8 @@ def start_photobooth():
 		camera.close()
 	########################### Begin Step 3 #################################
 	print "Creating an animated gif" 
+        show_image("cat.png")
+
 	GPIO.output(led3_pin,True) #turn on the LED
 	graphicsmagick = "gm convert -delay " + str(gif_delay) + " " + config.file_path + now + "*.jpg " + config.file_path + now + ".gif" 
 	os.system(graphicsmagick) #make the .gif
@@ -213,6 +222,8 @@ def start_photobooth():
 	pygame.quit()
 	print "Done"
 	GPIO.output(led4_pin,False) #turn off the LED
+        show_image("finished.png");
+        time.sleep(5)
 
 ####################
 ### Main Program ###
@@ -243,6 +254,7 @@ GPIO.output(led3_pin,False);
 GPIO.output(led4_pin,False);
 
 while True:
-	GPIO.wait_for_edge(button1_pin, GPIO.FALLING)
-	time.sleep(0.2) #debounce
+        show_image("intro.png");
+        GPIO.wait_for_edge(button1_pin, GPIO.FALLING)
+	time.sleep(0.5) #debounce
 	start_photobooth()
