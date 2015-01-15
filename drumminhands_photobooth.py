@@ -29,11 +29,12 @@ button2_pin = 18 # pin for button to shutdown the pi
 button3_pin = 16 # pin for button to end the program, but not shutdown the pi
 
 total_pics = 3 # number of pics  to be taken
-capture_delay = 1 # delay between pics
-prep_delay = 2 # number of seconds at step 1 as users prep to have photo taken
+capture_delay = 2 # delay between pics
+prep_delay = 3 # number of seconds at step 1 as users prep to have photo taken
 gif_delay = 50 # How much time between frames in the animated gif
 
 test_server = 'www.google.com'
+real_path = os.path.dirname(os.path.realpath(__file__))
 
 # Setup the tumblr OAuth Client
 client = pytumblr.TumblrRestClient(
@@ -165,7 +166,7 @@ def start_photobooth():
 	camera = picamera.PiCamera()
 	camera.resolution = (640, 480) #use a smaller size to process faster, and tumblr will only take up to 500 pixels wide for animated gifs
 	camera.vflip = False
-	camera.hflip = True
+	camera.hflip = False
 	#camera.saturation = -100
 	camera.start_preview()
 
@@ -190,7 +191,7 @@ def start_photobooth():
 		camera.close()
 	########################### Begin Step 3 #################################
 	print "Creating an animated gif" 
-        show_image("cat.png")
+        show_image(real_path + "/cat.png")
 
 	GPIO.output(led3_pin,True) #turn on the LED
 	graphicsmagick = "gm convert -delay " + str(gif_delay) + " " + config.file_path + now + "*.jpg " + config.file_path + now + ".gif" 
@@ -222,8 +223,9 @@ def start_photobooth():
 	pygame.quit()
 	print "Done"
 	GPIO.output(led4_pin,False) #turn off the LED
-        show_image("finished.png");
+        show_image(real_path + "/finished.png");
         time.sleep(5)
+        show_image(real_path + "/intro.png");
 
 ####################
 ### Main Program ###
@@ -253,8 +255,9 @@ GPIO.output(led2_pin,False);
 GPIO.output(led3_pin,False);
 GPIO.output(led4_pin,False);
 
+show_image(real_path + "/intro.png");
+
 while True:
-        show_image("intro.png");
         GPIO.wait_for_edge(button1_pin, GPIO.FALLING)
-	time.sleep(0.5) #debounce
+	time.sleep(0.2) #debounce
 	start_photobooth()
