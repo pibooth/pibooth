@@ -26,17 +26,16 @@ btn_pin = 18 # pin for the start button
 
 total_pics = 4 # number of pics to be taken
 capture_delay = 1 # delay between pics
-prep_delay = 3 # number of seconds at step 1 as users prep to have photo taken
+prep_delay = 5 # number of seconds at step 1 as users prep to have photo taken
 gif_delay = 100 # How much time between frames in the animated gif
-restart_delay = 5 # how long to display finished message before beginning a new session
+restart_delay = 10 # how long to display finished message before beginning a new session
 test_server = 'www.google.com'
 
-# full frame of v1 camera is 2592,1944. Wide screen max is 2592,1555
+# full frame of v1 camera is 2592x1944. Wide screen max is 2592,1555
 # if you run into resource issues, try smaller, like 1920x1152. 
 # or increase memory http://picamera.readthedocs.io/en/release-1.12/fov.html#hardware-limits
-high_res_w = 1920 # width of high res image, if taken
-high_res_h = 1152 # height of high res image, if taken
-high_res_preview_w = 800 # a lower resolution width for the preview. The height is calculated
+high_res_w = 1296 # width of high res image, if taken
+high_res_h = 972 # height of high res image, if taken
 
 #############################
 ### Variables that Change ###
@@ -70,8 +69,7 @@ GPIO.output(led_pin,False) #for some reason the pin turns on at the beginning of
 
 # initialize pygame
 pygame.init()
-modes = pygame.display.list_modes()
-pygame.display.set_mode(max(modes))
+pygame.display.set_mode((config.monitor_w, config.monitor_h))
 screen = pygame.display.get_surface()
 pygame.display.set_caption('Photo Booth Pics')
 pygame.mouse.set_visible(False) #hide the mouse cursor
@@ -179,6 +177,11 @@ def show_image(image_path):
 	screen.blit(img,(offset_x,offset_y))
 	pygame.display.flip()
 
+# display a blank screen
+def clear_screen():
+	screen.fill( (0,0,0) )
+	pygame.display.flip()
+
 # display a group of images
 def display_pics(jpg_group):
     for i in range(0, replay_cycles): #show pics a few times
@@ -199,50 +202,65 @@ def start_photobooth():
 	sleep(prep_delay)
 	
 	# clear the screen
-	screen.fill( (0,0,0) )
-	pygame.display.update()
+	clear_screen()
 	
 	camera = picamera.PiCamera()  
 	camera.vflip = False
-	camera.hflip = True
+	camera.hflip = True # flip for preview, showing users a mirror image
 	camera.saturation = -100 # comment out this line if you want color images
+	camera.iso = config.camera_iso
 	
 	pixel_width = 0 # local variable declaration
 	pixel_height = 0 # local variable declaration
 	
 	if config.hi_res_pics:
-		pixel_width = high_res_w
-		pixel_height = high_res_h
-		camera.resolution = (pixel_width, pixel_height) # set camera resolution
-		preview_width = high_res_preview_w # change to lower res for preview
-		pixel_height = preview_width * pixel_height // pixel_width
-		pixel_width = preview_width # change value after calculating the height
+		camera.resolution = (high_res_w, high_res_h) # set camera resolution to high res
 	else:
 		pixel_width = 500 # maximum width of animated gif on tumblr
 		pixel_height = config.monitor_h * pixel_width // config.monitor_w
-		camera.resolution = (pixel_width, pixel_height) # set camera resolution
+		camera.resolution = (pixel_width, pixel_height) # set camera resolution to low res
 		
-	camera.start_preview(resolution=(pixel_width, pixel_height)) # start preview at low res but the right ratio
-	sleep(2) #warm up camera
-
 	################################# Begin Step 2 #################################
 	
 	print "Taking pics"
 	
 	now = time.strftime("%Y-%m-%d-%H-%M-%S") #get the current date and time for the start of the filename
 	
-	try: #take the photos
-		for i, filename in enumerate(camera.capture_continuous(config.file_path + now + '-' + '{counter:02d}.jpg')):
-			GPIO.output(led_pin,True) #turn on the LED
-			print(filename)
-			sleep(0.25) #pause the LED on for just a bit
-			GPIO.output(led_pin,False) #turn off the LED
-			sleep(capture_delay) # pause in-between shots
-			if i == total_pics-1:
-				break
-	finally:
-		camera.stop_preview()
-		camera.close()
+	if config.capture_count_pics:
+		try: # take the photos
+			for i in range(1,total_pics+1):
+				camera.hflip = True # preview a mirror image
+				camera.start_preview(resolution=(config.monitor_w, config.monitor_h)) # start preview at low res but the right ratio
+				time.sleep(2) #warm up camera
+				GPIO.output(led_pin,True) #turn on the LED
+				filename = config.file_path + now + '-0' + str(i) + '.jpg'
+				camera.hflip = False # flip back when taking photo
+				camera.capture(filename)
+				print(filename)
+				GPIO.output(led_pin,False) #turn off the LED
+				camera.stop_preview()
+				show_image(real_path + "/pose" + str(i) + ".png")
+				time.sleep(capture_delay) # pause in-between shots
+				clear_screen()
+				if i == total_pics+1:
+					break
+		finally:
+			camera.close()
+	else:
+		camera.start_preview(resolution=(config.monitor_w, config.monitor_h)) # start preview at low res but the right ratio
+		time.sleep(2) #warm up camera
+		
+		try: #take the photos
+			for i, filename in enumerate(camera.capture_continuous(config.file_path + now + '-' + '{counter:02d}.jpg')):
+				GPIO.output(led_pin,True) #turn on the LED
+				print(filename)
+				time.sleep(capture_delay) # pause in-between shots
+				GPIO.output(led_pin,False) #turn off the LED
+				if i == total_pics-1:
+					break
+		finally:
+			camera.stop_preview()
+			camera.close()
 		
 	########################### Begin Step 3 #################################
 	
@@ -255,34 +273,56 @@ def start_photobooth():
 	else:
 		show_image(real_path + "/processing.png")
 	
-	if config.hi_res_pics:
-		# first make a small version of each image. Tumblr's max animated gif's are 500 pixels wide.
-		for x in range(1, total_pics+1): #batch process all the images
-			graphicsmagick = "gm convert -size 500x500 " + config.file_path + now + "-0" + str(x) + ".jpg -thumbnail 500x500 " + config.file_path + now + "-0" + str(x) + "-sm.jpg"
-			os.system(graphicsmagick) #do the graphicsmagick action
+	if config.make_gifs: # make the gifs
+		if config.hi_res_pics:
+			# first make a small version of each image. Tumblr's max animated gif's are 500 pixels wide.
+			for x in range(1, total_pics+1): #batch process all the images
+				graphicsmagick = "gm convert -size 500x500 " + config.file_path + now + "-0" + str(x) + ".jpg -thumbnail 500x500 " + config.file_path + now + "-0" + str(x) + "-sm.jpg"
+				os.system(graphicsmagick) #do the graphicsmagick action
 
-		graphicsmagick = "gm convert -delay " + str(gif_delay) + " " + config.file_path + now + "*-sm.jpg " + config.file_path + now + ".gif" 
-		os.system(graphicsmagick) #make the .gif
-	else:
-		# make an animated gif with the low resolution images
-		graphicsmagick = "gm convert -delay " + str(gif_delay) + " " + config.file_path + now + "*.jpg " + config.file_path + now + ".gif" 
-		os.system(graphicsmagick) #make the .gif
+			graphicsmagick = "gm convert -delay " + str(gif_delay) + " " + config.file_path + now + "*-sm.jpg " + config.file_path + now + ".gif" 
+			os.system(graphicsmagick) #make the .gif
+		else:
+			# make an animated gif with the low resolution images
+			graphicsmagick = "gm convert -delay " + str(gif_delay) + " " + config.file_path + now + "*.jpg " + config.file_path + now + ".gif" 
+			os.system(graphicsmagick) #make the .gif
 
 	if config.post_online: # turn off posting pics online in config.py
 		connected = is_connected() #check to see if you have an internet connection
-		while connected: 
-			try:
-				file_to_upload = config.file_path + now + ".gif"
-				client.create_photo(config.tumblr_blog, state="published", tags=[config.tagsForTumblr], data=file_to_upload)
-				break
-			except ValueError:
-				print "Oops. No internect connection. Upload later."
-				try: #make a text file as a note to upload the .gif later
-					file = open(config.file_path + now + "-FILENOTUPLOADED.txt",'w')   # Trying to create a new file or open one
-					file.close()
-				except:
-					print('Something went wrong. Could not write file.')
-					sys.exit(0) # quit Python
+
+		if (connected==False):
+			print "bad internet connection"
+                    
+		while connected:
+			if config.make_gifs: 
+				try:
+					file_to_upload = config.file_path + now + ".gif"
+					client.create_photo(config.tumblr_blog, state="published", tags=[config.tagsForTumblr], data=file_to_upload)
+					break
+				except ValueError:
+					print "Oops. No internect connection. Upload later."
+					try: #make a text file as a note to upload the .gif later
+						file = open(config.file_path + now + "-FILENOTUPLOADED.txt",'w')   # Trying to create a new file or open one
+						file.close()
+					except:
+						print('Something went wrong. Could not write file.')
+						sys.exit(0) # quit Python
+			else: # upload jpgs instead
+				try:
+					# create an array and populate with file paths to our jpgs
+					myJpgs=[0 for i in range(4)]
+					for i in range(4):
+						myJpgs[i]=config.file_path + now + "-0" + str(i+1) + ".jpg"
+					client.create_photo(config.tumblr_blog, state="published", tags=[config.tagsForTumblr], format="markdown", data=myJpgs)
+					break
+				except ValueError:
+					print "Oops. No internect connection. Upload later."
+					try: #make a text file as a note to upload the .gif later
+						file = open(config.file_path + now + "-FILENOTUPLOADED.txt",'w')   # Trying to create a new file or open one
+						file.close()
+					except:
+						print('Something went wrong. Could not write file.')
+						sys.exit(0) # quit Python				
 	
 	########################### Begin Step 4 #################################
 	
@@ -325,7 +365,7 @@ show_image(real_path + "/intro.png");
 
 while True:
 	GPIO.output(led_pin,True); #turn on the light showing users they can push the button
-	input(pygame.event.get()) # check for input. Press escape to exit pygame. Then press ctrl-c to exit python.
+	input(pygame.event.get()) # press escape to exit pygame. Then press ctrl-c to exit python.
 	GPIO.wait_for_edge(btn_pin, GPIO.FALLING)
 	time.sleep(config.debounce) #debounce
 	start_photobooth()
