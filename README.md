@@ -1,9 +1,9 @@
-drumminhands_photobooth
+Rpi_photobooth
 =======================
 
-A DIY photo booth using a Raspberry Pi that automatically sends animated gifs to a Tumblr account. Great for events.
+A DIY photo booth using a Raspberry Pi 
 
-Updated to version 3.0
+Forked from version 3 of drumminghand_photobooth
 
 Find the full set of instructions here: http://www.drumminhands.com/2014/06/15/raspberry-pi-photo-booth/
 This requires:
@@ -25,3 +25,8 @@ Icons from the Noun Project
 -Hamster wheel by Dream Icons
 -Tap by Prerak Patel
 -Yoga poses by Claire Jones
+
+Other inspirations:
+  - http://www.instructables.com/lesson/Build-a-Photo-Booth/
+  - http://www.instructables.com/id/Raspberry-Pi-photo-booth-controller/
+  - http://www.instructables.com/id/Lininger-Rood-Photo-Booth/
