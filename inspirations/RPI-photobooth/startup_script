@@ -1,0 +1,5 @@
+#!/bin/sh
+sleep 6
+sudo python /home/pi/photobooth/button.py
+sleep 2
+sudo python /home/pi/photobooth/restart_button.py

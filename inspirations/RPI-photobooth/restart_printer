@@ -1,0 +1,6 @@
+#!/bin/bash
+cancel -a Canon_CP910
+cupsenable Canon_CP910
+sudo service cups restart
+sleep 6
+sudo rm /home/pi/photobooth/foto.jpg
