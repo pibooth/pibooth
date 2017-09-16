@@ -60,7 +60,7 @@ camera.vflip = False
 
 #define functions
 def write_the_shelve():
-	shelve_registry = shelve.open('/home/pi/GUI/PB_shelf', writeback=True)
+	shelve_registry = shelve.open('/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/PB_shelf', writeback=True)
 	global blog_check
 	global email_check
 	global print_check
@@ -77,7 +77,7 @@ def write_the_shelve():
 		shelve_registry.close()
 
 def read_the_shelve():
-	shelve_registry = shelve.open('/home/pi/GUI/PB_shelf')
+	shelve_registry = shelve.open('/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/PB_shelf')
 	
 	global blog_check
 	global email_check
@@ -109,7 +109,7 @@ def clean_house():
 	call ="mkdir "+newfolder
 	subprocess.Popen([call], shell=True)
 	wait_sec(1, "Moving image files")
-	movecall="mv /home/pi/GUI/Images/*.jpg "+newfolder
+	movecall="mv /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/Images/*.jpg "+newfolder
 	subprocess.Popen([movecall], shell=True)
 	wait_sec(1, "Moving picture files")
 	movecall="mv /home/pi/Pictures/*.jpg "+newfolder
@@ -150,7 +150,7 @@ def wait_sec(wait_time, message):
 	progress(0)
 
 def aboutPage():
-        subprocess.Popen(["x-www-browser file:///home/pi/GUI/About/About.htm"], shell=True)
+        subprocess.Popen(["x-www-browser file:///home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/About/About.htm"], shell=True)
 def editPrinter():
 	subprocess.Popen(["x-www-browser http://127.0.0.1:631"], shell=True)
 def editEmail():
@@ -177,7 +177,7 @@ def getready():
 
 	PoseBox.geometry('%dx%d+%d+%d' % (w, h, x, y))
 	PoseBox.title("Leave the Bride and Groom a Message!")
-	PosePic=PhotoImage(file="/home/pi/GUI/Example/bandg.gif")
+	PosePic=PhotoImage(file="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/bandg.gif")
 	imageFrame=ttk.Frame(PoseBox, padding="12 12 12 12", borderwidth=12)
 	imageFrame.grid(column=1, row=1)
 
@@ -185,18 +185,18 @@ def getready():
 	imagelabel.image=PosePic
 	imagelabel.grid(column=1, row=1)
 
-	newfile="/home/pi/GUI/Example/bandg.gif"
+	newfile="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/bandg.gif"
 	PosePic=PhotoImage(file=newfile)
 	imagelabel['image']=PosePic
 	imagelabel.image=PosePic
 
 	wait_sec(10,"")
 	for i in range(9, 0, -1):
-		newfile="/home/pi/GUI/Example/"+str(i+1)+".gif"
+		newfile="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/"+str(i+1)+".gif"
 		PosePic=PhotoImage(file=newfile)
 		imagelabel['image']=PosePic
 		imagelabel.image=PosePic
-		newfile="/home/pi/GUI/Example/"+str(i)+".gif"
+		newfile="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/"+str(i)+".gif"
 		PosePic=PhotoImage(file=newfile)
 		imagelabel['image']=PosePic
 		imagelabel.image=PosePic
@@ -221,7 +221,7 @@ def getready():
 	bandg_imgname = time.strftime("%Y%m%d%H%M%S")
 	camera.capture("/home/pi/Pictures/"+bandg_imgname+".jpg")
 	camera.stop_preview()
-	call = "montage -tile 1x3 -geometry +5+5 /home/pi/GUI/Example/header.jpg /home/pi/Pictures/"+bandg_imgname+".jpg /home/pi/GUI/Example/footer.jpg /home/pi/Pictures/"+bandg_imgname+".jpg"
+	call = "montage -tile 1x3 -geometry +5+5 /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/header.jpg /home/pi/Pictures/"+bandg_imgname+".jpg /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/footer.jpg /home/pi/Pictures/"+bandg_imgname+".jpg"
 	subprocess.call([call], shell=True)
 	wait_sec(3, "Finish camera processing.")
 	return bandg_imgname
@@ -230,7 +230,7 @@ def editPostDialog():
 
 	def savePostDialog():
 		ending_text = textbox.get("1.0","end-1c")
-		text_file = open("/home/pi/GUI/PostText.txt", "w")
+		text_file = open("/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/PostText.txt", "w")
 		text_file.write(ending_text)
 		text_file.close()
 		PostBox.destroy()
@@ -270,7 +270,7 @@ def editPostDialog():
 	DoneButton.grid(column=3, row=6, sticky=SW)
 	
 	
-	with open('/home/pi/GUI/PostText.txt', 'r') as input_file:
+	with open('/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/PostText.txt', 'r') as input_file:
 		my_text=input_file.read()
 		textbox.insert("end", my_text)
 
@@ -297,7 +297,7 @@ def TakePicture():
 
 	PoseBox.geometry('%dx%d+%d+%d' % (w, h, x, y))
 	PoseBox.title("Get Ready!")
-	PosePic=PhotoImage(file="/home/pi/GUI/Example/prop.gif")
+	PosePic=PhotoImage(file="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/prop.gif")
 	imageFrame=ttk.Frame(PoseBox, padding="12 12 12 12", borderwidth=12)
 	imageFrame.grid(column=1, row=1)
 
@@ -306,16 +306,16 @@ def TakePicture():
 	imagelabel.grid(column=1, row=1)
 	wait_sec(5,"Get a Prop")
 	for i in range(9, 0, -1):
-		newfile="/home/pi/GUI/Example/"+str(i+1)+".gif"
+		newfile="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/"+str(i+1)+".gif"
 		PosePic=PhotoImage(file=newfile)
 		imagelabel['image']=PosePic
 		imagelabel.image=PosePic
-		newfile="/home/pi/GUI/Example/"+str(i)+".gif"
+		newfile="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/"+str(i)+".gif"
 		PosePic=PhotoImage(file=newfile)
 		imagelabel['image']=PosePic
 		imagelabel.image=PosePic
 		wait_sec(2, "")
-	newfile="/home/pi/GUI/Example/pose.gif"
+	newfile="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/pose.gif"
 	PosePic=PhotoImage(file=newfile)
 	imagelabel['image']=PosePic
 	imagelabel.image=PosePic
@@ -335,16 +335,16 @@ def TakePicture():
 	call = "montage -tile 2x2 -geometry +5+5 *.jpg "+l_montageName+".jpg"
 	subprocess.call([call], shell=True)
 	wait_sec(5, "Adding a header and footer to the Montage")
-	call = "montage -tile 1x3 -geometry +5+5 /home/pi/GUI/Example/header.jpg "+l_montageName+".jpg /home/pi/GUI/Example/footer.jpg /home/pi/GUI/"+l_montageName+".jpg"
+	call = "montage -tile 1x3 -geometry +5+5 /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/header.jpg "+l_montageName+".jpg /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/footer.jpg /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/"+l_montageName+".jpg"
 	subprocess.call([call], shell=True)
 	wait_sec(5, "And finally, the left and right borders")
-	call = "montage -tile 3x1 -geometry +0+0 /home/pi/GUI/Example/RightBorder.gif /home/pi/GUI/"+l_montageName+".jpg /home/pi/GUI/Example/LeftBorder.gif /home/pi/Pictures/"+l_montageName+".jpg"
+	call = "montage -tile 3x1 -geometry +0+0 /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/RightBorder.gif /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/"+l_montageName+".jpg /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/LeftBorder.gif /home/pi/Pictures/"+l_montageName+".jpg"
 	subprocess.call([call], shell=True)
 	#clean house
-	call1="mv /home/pi/GUI/*.jpg /home/pi/GUI/Images/"
+	call1="mv /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/*.jpg /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/Images/"
 	subprocess.Popen([call1], shell=True)
 	wait_sec(4, "Making thumbnail photos")
-	imagecall2 = "convert -resize 30% /home/pi/Pictures/"+l_montageName+".jpg  /home/pi/GUI/Example/thumb.gif"
+	imagecall2 = "convert -resize 30% /home/pi/Pictures/"+l_montageName+".jpg  /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/thumb.gif"
 	subprocess.Popen([imagecall2], shell=True)
 	if bandg_check.get():
 		bandg_imgname = getready()	
@@ -386,10 +386,10 @@ def snaponePhoto(photoName, Timestamp):
                 time.sleep(.1)		
 	GPIO.output(POSE_LED, True)
 	play_sound("shutter")
-	camera.capture("/home/pi/GUI/"+Timestamp+".jpg")
+	camera.capture("/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/"+Timestamp+".jpg")
 	camera.stop_preview()
 	wait_sec(3, "Finish camera processing.")
-	imagecall="convert -resize 45% /home/pi/GUI/"+Timestamp+".jpg /home/pi/GUI/"+photoName+".gif"
+	imagecall="convert -resize 45% /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/"+Timestamp+".jpg /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/"+photoName+".gif"
 	subprocess.Popen([imagecall], shell=True)
 	wait_sec(3, "Resizing photos for thumbnails")
 
@@ -411,12 +411,12 @@ def send(l_name, l_email, l_photoName):
 
 	if email_check.get():
 		#send the photo to email
-		mutt =  "mutt -s '"+subject+"' "+l_email.get()+"  < /home/pi/GUI/PostText.txt -a /home/pi/Pictures/"+l_photoName+".jpg"
+		mutt =  "mutt -s '"+subject+"' "+l_email.get()+"  < /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/PostText.txt -a /home/pi/Pictures/"+l_photoName+".jpg"
 		ml = subprocess.Popen([mutt], shell = True)
 		ml.communicate()
 	if blog_check.get():
 		#post to the blog
-		mutt =  "mutt -s '"+subject+"' "+g_blog_email.get()+" < /home/pi/GUI/PostText.txt -a /home/pi/Pictures/"+l_photoName+".jpg"
+		mutt =  "mutt -s '"+subject+"' "+g_blog_email.get()+" < /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/PostText.txt -a /home/pi/Pictures/"+l_photoName+".jpg"
 		ml = subprocess.Popen([mutt], shell = True)
 		ml.communicate()
 	if print_check.get():
@@ -455,7 +455,7 @@ def sendorDelete(l_photoName):
 		msg.set("Deleted")
 
 	wait_sec(5, "Preparing your image to display")
-	thumb_image=PhotoImage(file="/home/pi/GUI/Example/thumb.gif")
+	thumb_image=PhotoImage(file="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/thumb.gif")
 	w = 900 # width for the Tk
 	h = 950 # height for the Tk
 	contactBox=Toplevel(root)
@@ -502,32 +502,32 @@ def sendorDelete(l_photoName):
 def SetUpEvent():
 	def write_newEvent_details():
 		date=time.strftime("%B %d, %Y")
-		call="convert -size 1600x  -font URW-Chancery-L-Medium-Italic -fill red -gravity center label:'"+g_event.get()+"' /home/pi/GUI/Example/header.jpg"
+		call="convert -size 1600x  -font URW-Chancery-L-Medium-Italic -fill red -gravity center label:'"+g_event.get()+"' /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/header.jpg"
 		subprocess.Popen([call], shell = True)
 		wait_sec(4, "Making the Event Header")
-		call1="convert -size 1600x176 -font URW-Chancery-L-Medium-Italic -pointsize 90 -fill red -gravity center label:'"+date+"'  /home/pi/GUI/Example/footer.jpg"
+		call1="convert -size 1600x176 -font URW-Chancery-L-Medium-Italic -pointsize 90 -fill red -gravity center label:'"+date+"'  /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/footer.jpg"
 		subprocess.Popen([call1], shell=True)
 		wait_sec(4, "Making the Event Footer")
-		call1="convert -size 2245x60 -font URW-Chancery-L-Medium-Italic -pointsize 50 -fill red -gravity Center label:'"+g_company.get()+"' /home/pi/GUI/Example/border.gif"
+		call1="convert -size 2245x60 -font URW-Chancery-L-Medium-Italic -pointsize 50 -fill red -gravity Center label:'"+g_company.get()+"' /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/border.gif"
 		subprocess.Popen([call1], shell=True)
 		wait_sec(4, "Making the Company Borders")
-		call="convert /home/pi/GUI/Example/border.gif -resize 450x25^ -gravity Center -crop 450x25+0+0 +repage /home/pi/GUI/Example/borderthumb.gif"
+		call="convert /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/border.gif -resize 450x25^ -gravity Center -crop 450x25+0+0 +repage /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/borderthumb.gif"
 		subprocess.Popen([call], shell=True)
-		call1="convert -rotate 90 /home/pi/GUI/Example/border.gif /home/pi/GUI/Example/RightBorder.gif"
+		call1="convert -rotate 90 /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/border.gif /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/RightBorder.gif"
 		subprocess.Popen([call1], shell=True)
-		call1="convert -rotate 270 /home/pi/GUI/Example/border.gif /home/pi/GUI/Example/LeftBorder.gif"
+		call1="convert -rotate 270 /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/border.gif /home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/LeftBorder.gif"
 		subprocess.Popen([call1], shell=True)
-		create_thumb("/home/pi/GUI/Example/header")
-		header_img=PhotoImage(file="/home/pi/GUI/Example/header.gif")
+		create_thumb("/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/header")
+		header_img=PhotoImage(file="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/header.gif")
 		time.sleep(.5)
 		headerlabel['image']=header_img
 		headerlabel.image=header_img
-		create_thumb("/home/pi/GUI/Example/footer")
-		footer_img=PhotoImage(file="/home/pi/GUI/Example/footer.gif")
+		create_thumb("/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/footer")
+		footer_img=PhotoImage(file="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/footer.gif")
 		time.sleep(.5)
 		footerlabel['image']=footer_img
 		footerlabel.image=footer_img	
-		border_img=PhotoImage(file="/home/pi/GUI/Example/borderthumb.gif")
+		border_img=PhotoImage(file="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/borderthumb.gif")
 		borderlabel['image']=border_img
 		borderlabel.image=border_img	
 	global g_event
@@ -554,15 +554,15 @@ def SetUpEvent():
 	ttk.Separator(EventFrame,orient=HORIZONTAL).grid(row=3, columnspan=4, sticky=[E,W])
 	LabelBox=ttk.Frame(EventFrame, padding="15 15 12 12", borderwidth=10, relief='sunken')
 	LabelBox.grid(column=1, row=5, columnspan=3)
-	header_img=PhotoImage(file="/home/pi/GUI/Example/header.gif")
+	header_img=PhotoImage(file="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/header.gif")
 	headerlabel=ttk.Label(LabelBox, image = header_img)
 	headerlabel.image=header_img
 	headerlabel.grid(column=1, row=2, columnspan=3)
-	footer_img=PhotoImage(file="/home/pi/GUI/Example/footer.gif")
+	footer_img=PhotoImage(file="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/footer.gif")
 	footerlabel=ttk.Label(LabelBox, image = footer_img)
 	footerlabel.image=footer_img
 	footerlabel.grid(column=1, row=3, columnspan=3)
-	border_img=PhotoImage(file="/home/pi/GUI/Example/borderthumb.gif")
+	border_img=PhotoImage(file="/home/pi/workspace/Rpi_photobooth/inspirations/LRP_photobooth/examples/borderthumb.gif")
 	borderlabel=ttk.Label(LabelBox, image = border_img)
 	borderlabel.image=border_img
 	borderlabel.grid(column=1, row=1, columnspan=3)
