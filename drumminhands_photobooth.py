@@ -93,7 +93,7 @@ def clear_pics(channel):
     for f in files:
         os.remove(f)
     # light the lights in series to show completed
-    print "Deleted previous pics"
+    print("Deleted previous pics")
     for x in range(0, 3):  # blink light
         GPIO.output(led_pin, True)
         sleep(0.25)
@@ -196,8 +196,8 @@ def start_photobooth():
 
     ################################# Begin Step 1 #################################
 
-    print "Get Ready"
-    GPIO.output(led_pin,False);
+    print("Get Ready")
+    GPIO.output(led_pin, False)
     show_image(real_path + "/instructions.png")
     sleep(prep_delay)
 
@@ -222,7 +222,7 @@ def start_photobooth():
 
     ################################# Begin Step 2 #################################
 
-    print "Taking pics"
+    print("Taking pics")
 
     now = time.strftime("%Y-%m-%d-%H-%M-%S")  # get the current date and time for the start of the filename
 
@@ -230,7 +230,8 @@ def start_photobooth():
         try:  # take the photos
             for i in range(1, total_pics + 1):
                 camera.hflip = True  # preview a mirror image
-                camera.start_preview(resolution=(config.monitor_w, config.monitor_h))  # start preview at low res but the right ratio
+                camera.start_preview(resolution=(config.monitor_w, config.monitor_h))
+                # start preview at low res but the right ratio
                 time.sleep(2)  # warm up camera
                 GPIO.output(led_pin, True)  # turn on the LED
                 filename = config.file_path + now + '-0' + str(i) + '.jpg'
@@ -247,7 +248,8 @@ def start_photobooth():
         finally:
             camera.close()
     else:
-        camera.start_preview(resolution=(config.monitor_w, config.monitor_h))  # start preview at low res but the right ratio
+        camera.start_preview(resolution=(config.monitor_w, config.monitor_h))
+        # start preview at low res but the right ratio
         time.sleep(2)  # warm up camera
 
         try:  # take the photos
@@ -287,40 +289,6 @@ def start_photobooth():
             graphicsmagick = "gm convert -delay " + str(gif_delay) + " " + config.file_path + now + "*.jpg " + config.file_path + now + ".gif"
             os.system(graphicsmagick)  # make the .gif
 
-    if config.post_online:  # turn off posting pics online in config.py
-        connected = is_connected()  # check to see if you have an internet connection
-
-        if connected is False:
-            print("bad internet connection")
-
-        while connected:
-            if config.make_gifs:
-                try:
-                    file_to_upload = config.file_path + now + ".gif"
-                    break
-                except ValueError:
-                    print "Oops. No internect connection. Upload later."
-                    try:  # make a text file as a note to upload the .gif later
-                        file = open(config.file_path + now + "-FILENOTUPLOADED.txt", 'w')   # Trying to create a new file or open one
-                        file.close()
-                    except:
-                        print('Something went wrong. Could not write file.')
-                        sys.exit(0)  # quit Python
-            else:  # upload jpgs instead
-                try:
-                    # create an array and populate with file paths to our jpgs
-                    myJpgs = [0 for i in range(4)]
-                    for i in range(4):
-                        myJpgs[i] = config.file_path + now + "-0" + str(i+1) + ".jpg"
-                    break
-                except ValueError:
-                    print "Oops. No internect connection. Upload later."
-                    try:  # make a text file as a note to upload the .gif later
-                        file = open(config.file_path + now + "-FILENOTUPLOADED.txt", 'w')   # Trying to create a new file or open one
-                        file.close()
-                    except:
-                        print('Something went wrong. Could not write file.')
-                        sys.exit(0)  # quit Python
 
     ########################### Begin Step 4 #################################
 
@@ -328,12 +296,12 @@ def start_photobooth():
 
     try:
         display_pics(now)
-    except Exception, e:
+    except Exception as e:
         tb = sys.exc_info()[2]
         traceback.print_exception(e.__class__, e, tb)
         pygame.quit()
 
-    print "Done"
+    print("Done")
 
     if config.post_online:
         show_image(real_path + "/finished.png")

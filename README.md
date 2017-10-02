@@ -9,7 +9,6 @@ Find the full set of instructions here: http://www.drumminhands.com/2014/06/15/r
 This requires:
   - PiCamera -- http://picamera.readthedocs.org/
   - GraphicsMagick -- http://www.graphicsmagick.org/
-  - pytumblr -- https://github.com/tumblr/pytumblr
 
 Be sure to add all of your own keys to config.py
 
