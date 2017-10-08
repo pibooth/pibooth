@@ -7,7 +7,7 @@ debounce = 0.3 # how long to debounce the button. Add more time if the button tr
 post_online = True # True to upload images. False to store locally only.
 capture_count_pics = True # if true, show a photo count between taking photos. If false, do not. False is faster.
 make_gifs = True   # True to make an animated gif. False to post 4 jpgs into one post.
-hi_res_pics = False  # True to save high res pics from camera.
+hi_res_pics = True  # True to save high res pics from camera.
                     # If also uploading, the program will also convert each image to a smaller image before making the gif.
                     # False to first capture low res pics. False is faster.
                     # Careful, each photo costs against your daily Tumblr upload max.
