@@ -1,6 +1,8 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 from PIL import Image, ImageDraw, ImageFont
+from photobooth import fonts
+
 
 def generate_photo(images, footer_texts, bg_color, text_color):
     """
@@ -8,9 +10,9 @@ def generate_photo(images, footer_texts, bg_color, text_color):
     """
     widths, heights = zip(*(i.size for i in images))
 
-    inter_width = max(heights)//20
-    new_width = max(widths)*2 + inter_width*3
-    new_height = max(heights)*2 + inter_width*6
+    inter_width = max(heights) // 20
+    new_width = max(widths) * 2 + inter_width * 3
+    new_height = max(heights) * 2 + inter_width * 6
 
     new_image = Image.new('RGB', (new_width, new_height), color=bg_color)
 
@@ -28,17 +30,18 @@ def generate_photo(images, footer_texts, bg_color, text_color):
     new_image.paste(images[3], (x_offset, y_offset))
 
     # Text part
-    x_offset = 11*inter_width
-    y_offset = y_offset + images[3].size[1]+ inter_width
+    x_offset = 11 * inter_width
+    y_offset = y_offset + images[3].size[1] + inter_width
     draw = ImageDraw.Draw(new_image)
 
-    name_font = ImageFont.truetype("fonts/Roboto-BoldItalic.ttf", inter_width)
-    date_font = ImageFont.truetype("fonts/Roboto-LightItalic.ttf", inter_width//2)
+    name_font = ImageFont.truetype(fonts.get_filename("Roboto-BoldItalic.ttf"), inter_width)
+    date_font = ImageFont.truetype(fonts.get_filename("Roboto-LightItalic.ttf"), inter_width // 2)
 
     draw.text((x_offset, y_offset), footer_texts[0], text_color, font=name_font)
-    draw.text((x_offset, y_offset+inter_width), footer_texts[1], text_color, font=date_font)
+    draw.text((x_offset, y_offset + inter_width), footer_texts[1], text_color, font=date_font)
 
     return new_image
+
 
 def generate_photo_from_files(image_files_list, output_file, footer_texts, bg_color=(255, 255, 255), text_color=(0, 0, 0)):
     """
