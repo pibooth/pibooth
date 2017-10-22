@@ -29,11 +29,11 @@ gif_delay = 100  # How much time between frames in the animated gif
 restart_delay = 10  # how long to display finished message before beginning a new session
 test_server = 'www.google.com'
 
-# full frame of v1 camera is 2592x1944. Wide screen max is 2592,1555
+# full frame of v2 camera is 3280x2464.
 # if you run into resource issues, try smaller, like 1920x1152.
-# or increase memory http://picamera.readthedocs.io/en/release-1.12/fov.html#hardware-limits
-high_res_w = 1296  # width of high res image, if taken
-high_res_h = 972  # height of high res image, if taken
+# or increase memory https://picamera.readthedocs.io/en/release-1.13/fov.html#hardware-limits
+high_res_w = 3280  # width of high res image, if taken
+high_res_h = 2464  # height of high res image, if taken
 
 #############################
 ### Variables that Change ###
