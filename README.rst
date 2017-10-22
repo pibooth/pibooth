@@ -1,7 +1,7 @@
 Rpi_photobooth
-=======================
+==============
 
-A DIY photo booth using a Raspberry Pi 
+A DIY photo booth using a Raspberry Pi
 
 Forked from version 3 of drumminghand_photobooth
 
