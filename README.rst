@@ -12,18 +12,18 @@ This requires:
 
 Be sure to add all of your own keys to config.py
 
-See also a companion projector to the photo booth.
--Code: https://github.com/drumminhands/drumminhands_projector
--Instructions: http://www.drumminhands.com/2016/09/02/raspberry-pi-photo-booth-projector/
+See also a companion projector to the photo booth:
+ - Code: https://github.com/drumminhands/drumminhands_projector
+ - Instructions: http://www.drumminhands.com/2016/09/02/raspberry-pi-photo-booth-projector/
 
 Credits:
 Icons from the Noun Project
--Button by Prerak Patel
--Disco pose by Moriah Rich
--Fireworks by Creative Stall
--Hamster wheel by Dream Icons
--Tap by Prerak Patel
--Yoga poses by Claire Jones
+ - Button by Prerak Patel
+ - Disco pose by Moriah Rich
+ - Fireworks by Creative Stall
+ - Hamster wheel by Dream Icons
+ - Tap by Prerak Patel
+ - Yoga poses by Claire Jones
 
 Other inspirations:
   - http://www.instructables.com/lesson/Build-a-Photo-Booth/
