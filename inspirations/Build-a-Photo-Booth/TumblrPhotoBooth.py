@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 from time import sleep
 import os
 import picamera
-import pytumblr
+#import pytumblr
 from fractions import Fraction
 
 #create variables to hold commands 
@@ -17,12 +17,12 @@ blueLed = 27
 button = 18
 
 # AuthenticateS via OAuth, copy from https://api.tumblr.com/console/calls/user/info
-client = pytumblr.TumblrRestClient(
-  'your_consumer_key',
-  'your_consumer_secret',
-  'your_token',
-  'your_token_secret'
-)
+#client = pytumblr.TumblrRestClient(
+##  'your_consumer_key',
+##  'your_consumer_secret',
+##  'your_token',
+##  'your_token_secret'
+##)
 
 #set up pins
 GPIO.setmode(GPIO.BCM)
@@ -39,7 +39,7 @@ camera.annotate_foreground = picamera.Color(y=0.2, u=0, v=0) #set color of annot
 try:
     #read button 
     while True:
-        input_state = GPIO.input(button)
+        input_state = True #.input(button)
         if input_state == True:
             print('Button Pressed')
             sleep(0.2)
@@ -79,11 +79,11 @@ try:
             print('uploading') #let us know photo is about to start uploading
 
             #upload photo to Tumblr
-            client.create_photo(
-		'your_username',	#update to your username
-		state="draft",
-		tags=["pi photobooth", "raspberry pi", "instructables"],
-		data="animation.gif")
+##            client.create_photo(
+##		'your_username',	#update to your username
+##		state="draft",
+##		tags=["pi photobooth", "raspberry pi", "instructables"],
+##		data="animation.gif")
             print("uploaded") #let us know GIF has been uploaded
             #turn on uploaded LED and play meow samples
             GPIO.output(blueLed, True)
