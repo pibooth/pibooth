@@ -59,6 +59,13 @@ class PtbWindow(object):
         self.surface.blit(pygame.image.fromstring(data, size, mode), (0, 0))
         pygame.display.update()
 
+    def show_image_from_file(self, image_file):
+        """
+        Show the merged file
+        """
+        self.surface.blit(pictures.get_image(image_file), (0, 0))
+        pygame.display.update()
+
     def clear(self):
         """Clear the window content.
         """

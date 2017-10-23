@@ -17,6 +17,7 @@ except ImportError:
     import ConfigParser as configparser
 from photobooth.window import PtbWindow
 from photobooth.controls.camera import PtbCamera
+from photobooth.pictures.concatenate_images import generate_photo_from_files
 
 
 class PtbConfigParser(configparser.ConfigParser):
@@ -126,6 +127,7 @@ class PtbApplication(object):
                         # Start a new capture sequence
                         self.window.show_instructions()
                         print("Start new pictures sequence")
+                        dirname = self.create_new_directory()
                         time.sleep(1)
 
                     if self.config.getboolean('WINDOW', 'capture_counter'):
@@ -135,21 +137,31 @@ class PtbApplication(object):
                     self.camera.preview()
                     time.sleep(self.config.getint('CAMERA', 'preview_delay'))
                     self.window.clear()
-                    captures.append(self.camera.capture())
+                    image_file_name = osp.join(dirname, "ptb{:03}.jpg".format(len(captures)))
+                    self.camera.capture(image_file_name)
+                    captures.append(image_file_name)
 
                 if len(captures) >= self.config.getint('CAMERA', 'captures'):
-                    self.window.show_wait()
+                    #self.window.show_wait()
                     # The generation is long => need optimisation (image compression)
-                    dirname = self.create_new_directory()
-                    for image in captures:
-                        filename = osp.join(dirname, 'ptb{:03}.png'.format(captures.index(image)))
-                        image.save(filename, "PNG")
-                        print("Picture saved in {}".format(filename))
+                    # dirname = self.create_new_directory()
+                    # for image in captures:
+                        # filename = osp.join(dirname, 'ptb{:03}.png'.format(captures.index(image)))
+                        # image.save(filename, "PNG")
+                        # print("Picture saved in {}".format(filename))
 
-                    print("Create animated gif")
+                    print("Creating merged image")
+                    merged_file = osp.join(dirname, "ptb_merged.jpg")
+                    footer_texts = [self.config.get('GENERAL', 'footer_text1', ''),
+                                    self.config.get('GENERAL', 'footer_text2', '')]
+                    bg_color = self.config.get('GENERAL', 'bg_color', (255, 255, 255))
+                    text_color = self.config.get('GENERAL', 'text_color', (0, 0, 0))
+                    generate_photo_from_files(captures, merged_file, footer_texts,
+                                              bg_color, text_color)
 
-                    print("Display the pictures")
-
+                    print("Display the picture")
+                    self.window.show_image_from_file(merged_file)
+                    time.sleep(5)
                     # Finish the sequence
                     self.window.show_finished()
                     time.sleep(1)
@@ -174,7 +186,7 @@ def main():
         os.makedirs(savedir)
 
     app = PtbApplication(config, savedir)
-    print("Starting Photo Boot application...")
+    print("Starting Photo Booth application...")
     app.main_loop()
 
 
