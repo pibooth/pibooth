@@ -19,7 +19,7 @@ class PtbCamera(object):
 
         if high_resolution:
             # Set camera resolution to high resolution
-            self._cam.resolution = (1296, 972)
+            self._cam.resolution = (3280, 2464)
         else:
             # Set camera resolution to low resolution
             pixel_width = 500
@@ -31,7 +31,7 @@ class PtbCamera(object):
         if flip:
             # Preview a mirror image
             self._cam.hflip = True
-        self._cam.start_preview()
+        self._cam.start_preview(resolution=(1440, 1080))
 
     def capture(self, filename=None):
         """
@@ -65,6 +65,6 @@ class PtbCamera(object):
             return Image.open(stream)
 
     def quit(self):
-        """Close the camera driver, it's definitif.
+        """Close the camera driver, it's definitive.
         """
         self._cam.close()
