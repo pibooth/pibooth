@@ -10,6 +10,7 @@ import time
 import shutil
 import pygame
 import os.path as osp
+from RPi import GPIO
 try:
     import configparser
 except ImportError:
@@ -18,6 +19,7 @@ except ImportError:
 from photobooth.window import PtbWindow
 from photobooth.controls.camera import PtbCamera
 from photobooth.pictures.concatenate_images import generate_photo_from_files
+from photobooth.controls.light import PtbLed
 
 
 class PtbConfigParser(configparser.ConfigParser):
@@ -66,6 +68,9 @@ class PtbApplication(object):
         self.config = config
         self.savedir = savedir
 
+        # Prepare GPIO
+        GPIO.setmode(GPIO.BOARD)
+
         # Prepare the pygame module for use
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
@@ -78,6 +83,9 @@ class PtbApplication(object):
         self.camera = PtbCamera((self.window.width, self.window.height),
                                 config.getint('CAMERA', 'camera_iso'),
                                 config.getboolean('CAMERA', 'high_resolution'))
+
+        # Setup the LED on pin 7 (BOARD number)
+        self.led = PtbLed(7)
 
     def create_new_directory(self):
         """Create a new directory to save pictures.
@@ -130,6 +138,7 @@ class PtbApplication(object):
                         dirname = self.create_new_directory()
                         time.sleep(1)
 
+                    self.led.blink()
                     if self.config.getboolean('WINDOW', 'capture_counter'):
                         self.window.show_counter(not captures)
                         time.sleep(0.5)
@@ -138,24 +147,20 @@ class PtbApplication(object):
                     time.sleep(self.config.getint('CAMERA', 'preview_delay'))
                     self.window.clear()
                     image_file_name = osp.join(dirname, "ptb{:03}.jpg".format(len(captures)))
+                    self.led.switch_on()
                     self.camera.capture(image_file_name)
+                    print("Picture saved in {}".format(image_file_name))
                     captures.append(image_file_name)
 
                 if len(captures) >= self.config.getint('CAMERA', 'captures'):
-                    #self.window.show_wait()
-                    # The generation is long => need optimisation (image compression)
-                    # dirname = self.create_new_directory()
-                    # for image in captures:
-                        # filename = osp.join(dirname, 'ptb{:03}.png'.format(captures.index(image)))
-                        # image.save(filename, "PNG")
-                        # print("Picture saved in {}".format(filename))
-
+                    self.window.show_wait()
+                    self.led.switch_off()
                     print("Creating merged image")
                     merged_file = osp.join(dirname, "ptb_merged.jpg")
                     footer_texts = [self.config.get('GENERAL', 'footer_text1', ''),
                                     self.config.get('GENERAL', 'footer_text2', '')]
-                    bg_color = self.config.get('GENERAL', 'bg_color', (255, 255, 255))
-                    text_color = self.config.get('GENERAL', 'text_color', (0, 0, 0))
+                    bg_color = self.config.gettyped('GENERAL', 'bg_color', (255, 255, 255))
+                    text_color = self.config.gettyped('GENERAL', 'text_color', (0, 0, 0))
                     generate_photo_from_files(captures, merged_file, footer_texts,
                                               bg_color, text_color)
 
@@ -166,9 +171,9 @@ class PtbApplication(object):
                     self.window.show_finished()
                     time.sleep(1)
                     captures = []
-                    self.window.clear()
 
         finally:
+            GPIO.cleanup()
             self.camera.quit()
             pygame.quit()
 

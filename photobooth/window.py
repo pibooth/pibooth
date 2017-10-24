@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import time
 import pygame
 from photobooth import pictures
 
