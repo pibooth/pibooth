@@ -16,10 +16,10 @@ try:
 except ImportError:
     # Python 2.x fallback
     import ConfigParser as configparser
-from photobooth.window import PtbWindow
-from photobooth.controls.camera import PtbCamera
-from photobooth.pictures.concatenate_images import generate_photo_from_files
-from photobooth.controls.light import PtbLed
+from pibooth.window import PtbWindow
+from pibooth.controls.camera import PtbCamera
+from pibooth.pictures.concatenate_images import generate_photo_from_files
+from pibooth.controls.light import PtbLed
 
 
 class PtbConfigParser(configparser.ConfigParser):
@@ -68,7 +68,7 @@ class PtbApplication(object):
         self.config = config
         self.savedir = savedir
 
-        # Prepare GPIO
+        # Prepare GPIO, physical pins mode
         GPIO.setmode(GPIO.BOARD)
 
         # Prepare the pygame module for use

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pygame
-from photobooth import pictures
+from pibooth import pictures
 
 
 class PtbWindow(object):

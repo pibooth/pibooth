@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PIL import Image, ImageDraw, ImageFont
-from photobooth import fonts
+from pibooth import fonts
 
 
 def generate_photo(images, footer_texts, bg_color, text_color):

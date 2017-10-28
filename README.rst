@@ -1,5 +1,11 @@
+.. image:: pibooth/pictures/pibooth.png
+   :align: center
+   :alt: pibooth
+
+------
+
 pibooth
-==============
+=======
 
 A DIY photo booth using a Raspberry Pi
 
