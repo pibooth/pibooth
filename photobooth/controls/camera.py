@@ -14,8 +14,8 @@ class PtbCamera(object):
         self._cam = picamera.PiCamera()
         self._cam.video_stabilization = True
         self._cam.vflip = False
-        self._cam.hflip = True  # flip for preview, showing users a mirror image
         self._cam.iso = camera_iso
+        self.size = size
 
         if high_resolution:
             # Set camera resolution to high resolution
@@ -28,10 +28,10 @@ class PtbCamera(object):
     def preview(self, flip=True):
         """Launch preview (flip if necessary).
         """
-        if flip:
-            # Preview a mirror image
-            self._cam.hflip = True
-        self._cam.start_preview(resolution=(1440, 1080))
+        # (x, y, width, height)
+        res = (self.size[0]*0.8, self.size[1]*0.8)
+        window = (self.size[0]*0.1, self.size[1]*0.1, res[0], res[1])
+        self._cam.start_preview(resolution=res, hflip=flip, fullscreen=False, window=window)
 
     def capture(self, filename=None):
         """
@@ -52,7 +52,6 @@ class PtbCamera(object):
         """
         # Stop preview before flip (avoid headache)
         self._cam.stop_preview()
-        self._cam.hflip = False
         if filename:
             self._cam.capture(filename)
             return filename
