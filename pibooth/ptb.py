@@ -1,71 +1,34 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Photo booth main module.
+"""Photobooth main module.
 """
 
 import os
-import ast
 import time
 import shutil
 import pygame
 import os.path as osp
 from RPi import GPIO
-try:
-    import configparser
-except ImportError:
-    # Python 2.x fallback
-    import ConfigParser as configparser
 from pibooth.window import PtbWindow
+from pibooth.config import PtbConfigParser
 from pibooth.controls.camera import PtbCamera
 from pibooth.pictures.concatenate_images import generate_photo_from_files
 from pibooth.controls.light import PtbLed
 
 
-class PtbConfigParser(configparser.ConfigParser):
-
-    """Enhenced configuration file parser.
-    """
-
-    def __init__(self, filename):
-        configparser.ConfigParser.__init__(self)
-        if not osp.isfile(filename):
-            raise ValueError("No sush configuration file: '%s'" % filename)
-        self.filename = filename
-        self.read(filename)
-
-    def get(self, section, option, default=None, **kwargs):
-        """
-        Override the default function of ConfigParser to add a
-        default value if section or option is not found.
-
-        :param default: default value if section or option is not found
-        :type default: str
-        """
-        if self.has_section(section) and self.has_option(section, option):
-            value = configparser.ConfigParser.get(self, section, option, **kwargs)
-            return value
-        return default
-
-    def gettyped(self, section, option, default=None):
-        """
-        Get a value from config and try to convert it in a native Python
-        type (using the :py:mod:`ast` module).
-
-        :param default: default value if section or option is not found
-        :type default: str
-        """
-        value = self.get(section, option, default)
-        try:
-            return ast.literal_eval(value)
-        except (ValueError, SyntaxError):
-            return value
-
-
 class PtbApplication(object):
 
-    def __init__(self, config, savedir):
+    def __init__(self, config):
         self.config = config
+
+        # Clean directory where pictures are saved
+        savedir = osp.expanduser(config.get('GENERAL', 'directory'))
+        if not osp.isdir(savedir):
+            os.makedirs(savedir)
+        if osp.isdir(savedir) and config.getboolean('GENERAL', 'clear_on_startup'):
+            shutil.rmtree(savedir)
+            os.makedirs(savedir)
         self.savedir = savedir
 
         # Prepare GPIO, physical pins mode
@@ -157,10 +120,10 @@ class PtbApplication(object):
                     self.led.switch_off()
                     print("Creating merged image")
                     merged_file = osp.join(dirname, "ptb_merged.jpg")
-                    footer_texts = [self.config.get('GENERAL', 'footer_text1', ''),
-                                    self.config.get('GENERAL', 'footer_text2', '')]
-                    bg_color = self.config.gettyped('GENERAL', 'bg_color', (255, 255, 255))
-                    text_color = self.config.gettyped('GENERAL', 'text_color', (0, 0, 0))
+                    footer_texts = [self.config.get('MERGED', 'footer_text1'),
+                                    self.config.get('MERGED', 'footer_text2')]
+                    bg_color = self.config.gettyped('MERGED', 'bg_color')
+                    text_color = self.config.gettyped('MERGED', 'text_color')
                     generate_photo_from_files(captures, merged_file, footer_texts,
                                               bg_color, text_color)
 
@@ -181,16 +144,10 @@ class PtbApplication(object):
 def main():
     """Application entry point.
     """
-    config = PtbConfigParser(osp.join(osp.dirname(osp.abspath(__file__)), "config.ini"))
+    config = PtbConfigParser("~/.config/pibooth/pibooth.cfg")
 
-    savedir = osp.expanduser(config.get('GENERAL', 'directory', '~'))
-    if not osp.isdir(savedir):
-        os.makedirs(savedir)
-    if osp.isdir(savedir) and config.getboolean('GENERAL', 'clear_on_startup'):
-        shutil.rmtree(savedir)
-        os.makedirs(savedir)
+    app = PtbApplication(config)
 
-    app = PtbApplication(config, savedir)
     print("Starting Photo Booth application...")
     app.main_loop()
 
