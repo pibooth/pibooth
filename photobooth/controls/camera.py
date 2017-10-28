@@ -29,8 +29,8 @@ class PtbCamera(object):
         """Launch preview (flip if necessary).
         """
         # (x, y, width, height)
-        res = (self.size[0]*0.8, self.size[1]*0.8)
-        window = (self.size[0]*0.1, self.size[1]*0.1, res[0], res[1])
+        res = (self.size[0]*80//100, self.size[1]*80//100)
+        window = (self.size[0]*10//100, self.size[1]*10//100, res[0], res[1])
         self._cam.start_preview(resolution=res, hflip=flip, fullscreen=False, window=window)
 
     def capture(self, filename=None):
