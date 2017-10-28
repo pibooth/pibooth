@@ -1,7 +1,11 @@
 
 .. image:: pibooth/pictures/pibooth.png
+<<<<<<< HEAD
    :height: 100px
    :width: 100 px
+=======
+   :scale: 50 %
+>>>>>>> 583ca70a313c9f6dc69fac9b72d3d3e30fbea2a6
    :align: center
    :alt: pibooth
 
@@ -12,6 +16,7 @@ pibooth
 
 The ``pibooth`` project attempts to provide a Photo Booth application *out-of-the-box*
 for Raspberry Pi.
+<<<<<<< HEAD
 
 Requirements
 ------------
@@ -54,6 +59,43 @@ which permits to configure the behavior of the application.
     #How long to debounce the button
     debounce_delay = 0.3
 
+=======
+
+Install
+-------
+
+The project will be available soon on Pypi.
+
+::
+
+    $ pip install pibooth
+
+A `wheel` archive can be generated using the setup in the repository.
+
+::
+
+    $ python setup.py bdist_wheel
+
+Run
+---
+
+    ::
+
+        $ pibooth
+
+Configuration
+-------------
+
+At the first run, a configuration file is generated in ``~/.config/pibooth/pibooth.cfg``
+which permits to configure the behavior of the application.
+
+::
+
+    [GENERAL]
+    #How long to debounce the button
+    debounce_delay = 0.3
+
+>>>>>>> 583ca70a313c9f6dc69fac9b72d3d3e30fbea2a6
     #Clear previously stored photos
     clear_on_startup = True
 
