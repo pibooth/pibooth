@@ -44,7 +44,7 @@ class PtbApplication(object):
                                  self.config.getint('WINDOW', 'height')))
 
         # Initialize the camera
-        self.camera = PtbCamera((self.window.width, self.window.height),
+        self.camera = PtbCamera(self.window.size,
                                 config.getint('CAMERA', 'camera_iso'),
                                 config.getboolean('CAMERA', 'high_resolution'))
 
@@ -88,6 +88,12 @@ class PtbApplication(object):
                 pygame.key.get_mods() & pygame.KMOD_CTRL) or \
             (event.type == BUTTON_DOWN and event.pin == self.button_print)
 
+    def is_resize_event(self, event):
+        """Return True if the window has been resized. This method ensure
+        to only process the last resize event (avoid refresh lag).
+        """
+        return event.type == pygame.VIDEORESIZE and not pygame.event.peek(pygame.VIDEORESIZE)
+
     def main_loop(self):
         """Run the main game loop.
         """
@@ -101,6 +107,9 @@ class PtbApplication(object):
 
                 if self.is_fullscreen_event(event):
                     self.window.toggle_fullscreen()
+
+                if self.is_resize_event(event):
+                    self.window.resize(event.size)
 
                 if not self.is_picture_event(event) and not captures:
                     self.window.show_intro()
@@ -139,6 +148,7 @@ class PtbApplication(object):
                                               bg_color, text_color)
 
                     print("Display the picture")
+                    self.window.clear()
                     self.window.show_image_from_file(merged_file)
                     time.sleep(5)
                     # Finish the sequence

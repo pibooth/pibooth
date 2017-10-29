@@ -10,22 +10,51 @@ class PtbWindow(object):
     """
 
     def __init__(self, size):
-        self.width, self.height = size
+        self.__size = size
+        # Save the desktop mode, shall be done before `setmode` (SDL 1.2.10, and pygame 1.8.0)
+        info = pygame.display.Info()
         pygame.display.set_caption('Pibooth')
-        self.surface = pygame.display.set_mode((self.width, self.height), pygame.RESIZABLE)
+        self.surface = pygame.display.set_mode(size, pygame.RESIZABLE)
+        self.display_size = (info.current_w, info.current_h)
         self.is_fullscreen = False
 
         self._counter = 0
         self._current_frame = None
+
+    def _centered_pos(self, image):
+        """
+        Return the position of the given image to be centered on window.
+        """
+        return image.get_rect(center=self.surface.get_rect().center)
 
     def _show_and_memorize(self, image_name):
         """Show image and memorize an image. If the image is the same
         as the current displayed, nothing is done.
         """
         if self._current_frame != image_name:
-            self.surface.blit(pictures.get_image(image_name), (0, 0))
+            image = pictures.get_image(image_name, self.size)
+            self.surface.blit(image, self._centered_pos(image))
             pygame.display.update()
             self._current_frame = image_name
+
+    @property
+    def size(self):
+        """Return the current window size.
+        """
+        if self.is_fullscreen:
+            return self.display_size
+        else:
+            return self.__size
+
+    def resize(self, size):
+        """Resize the window keeping aspect ratio.
+        """
+        self.__size = size
+        self.surface = pygame.display.set_mode(self.size, pygame.RESIZABLE)
+        if self._current_frame:
+            image = pictures.get_image(self._current_frame, self.size)
+            self.surface.blit(image, self._centered_pos(image))
+            pygame.display.update()
 
     def show_intro(self):
         """Show introduction view.
@@ -61,7 +90,8 @@ class PtbWindow(object):
         mode = pil_image.mode
         size = pil_image.size
         data = pil_image.tobytes()
-        self.surface.blit(pygame.image.fromstring(data, size, mode), (0, 0))
+        image = pygame.image.fromstring(data, size, mode)
+        self.surface.blit(image, self._centered_pos(image))
         pygame.display.update()
         self._current_frame = None
 
@@ -69,9 +99,10 @@ class PtbWindow(object):
         """
         Show the merged file
         """
-        self.surface.blit(pictures.get_image(image_file), (0, 0))
+        image = pictures.get_image(image_file, self.size)
+        self.surface.blit(image, self._centered_pos(image))
         pygame.display.update()
-        self._current_frame = None
+        self._current_frame = image_file
 
     def clear(self):
         """Clear the window content.
@@ -84,7 +115,13 @@ class PtbWindow(object):
         """Set window to full screen.
         """
         if self.is_fullscreen:
-            self.surface = pygame.display.set_mode((self.width, self.height), pygame.RESIZABLE)
+            self.is_fullscreen = False  # Set before get size
+            self.surface = pygame.display.set_mode(self.size, pygame.RESIZABLE)
         else:
-            self.surface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
-        self.is_fullscreen = not self.is_fullscreen
+            self.is_fullscreen = True  # Set before get size
+            self.surface = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
+
+        if self._current_frame:
+            image = pictures.get_image(self._current_frame, self.size)
+            self.surface.blit(image, self._centered_pos(image))
+            pygame.display.update()
