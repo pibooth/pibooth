@@ -1,15 +1,8 @@
 
-.. image:: templates/icon.png
-   :height: 256 px
-   :width: 256 px
-   :scale: 50 %
+.. image:: templates/pibooth.png
    :align: center
    :alt: pibooth
 
-------
-
-pibooth
-=======
 
 The ``pibooth`` project attempts to provide a Photo Booth application *out-of-the-box*
 for Raspberry Pi.
@@ -116,7 +109,7 @@ Circuit diagram
    :width: 1215 px
    :scale: 50 %
    :align: center
-   :alt: pibooth
+   :alt: electronic sketch
 
 Credits:
 --------
