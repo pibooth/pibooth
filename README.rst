@@ -1,7 +1,8 @@
 
-.. image:: pibooth/pictures/pibooth.png
-   :height: 100 px
-   :width: 100 px
+.. image:: templates/icon.png
+   :height: 256 px
+   :width: 256 px
+   :scale: 50 %
    :align: center
    :alt: pibooth
 
@@ -45,12 +46,12 @@ Run
 After the graphical interface is started, the following commands are available:
 
 ==================== ================ ================
-Action               Keyboard         Physical button
+Action               Keyboard key     Physical button
 ==================== ================ ================
-Toggle Full screen   Ctrl + F         -
+Toggle Full screen   Ctrl + F         \-
 Take pictures        P                Button 1
 Export Printer/Cloud Ctrl + E         Button 2
-Quit                 ESC              -
+Quit                 ESC              \-
 ==================== ================ ================
 
 Configuration
@@ -106,6 +107,16 @@ which permits to configure the behavior of the application.
 
     #Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max
     camera_iso = 100
+
+Circuit diagram
+---------------
+
+.. image:: templates/sketch.png
+   :height: 990 px
+   :width: 1215 px
+   :scale: 50 %
+   :align: center
+   :alt: pibooth
 
 Credits:
 --------
