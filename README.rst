@@ -1,6 +1,6 @@
 
 .. image:: pibooth/pictures/pibooth.png
-   :height: 100px
+   :height: 100 px
    :width: 100 px
    :align: center
    :alt: pibooth
@@ -42,6 +42,17 @@ Run
 
     $ pibooth
 
+After the graphical interface is started, the following commands are available:
+
+==================== ================ ================
+Action               Keyboard         Physical button
+==================== ================ ================
+Toggle Full screen   Ctrl + F         -
+Take pictures        P                Button 1
+Export Printer/Cloud Ctrl + E         Button 2
+Quit                 ESC              -
+==================== ================ ================
+
 Configuration
 -------------
 
@@ -51,24 +62,24 @@ which permits to configure the behavior of the application.
 .. code-block:: ini
 
     [GENERAL]
-    #How long to debounce the button
-    debounce_delay = 0.3
-
     #Clear previously stored photos
     clear_on_startup = True
 
     #Path to save images
     directory = ~/Pictures/pibooth
 
+    #How long to debounce the button in milliseconds
+    debounce_delay = 300
+
     [WINDOW]
+    #Width of the display monitor
+    width = 800
+
     #Height of the display monitor
     height = 480
 
     #Show a counter between taking photos
     capture_counter = True
-
-    #Width of the display monitor
-    width = 800
 
     [MERGED]
     #Background RGB color
@@ -87,11 +98,11 @@ which permits to configure the behavior of the application.
     #How long is the preview (in seconds)
     preview_delay = 3
 
-    #High resolution pictures from camera
-    high_resolution = True
-
     #How many pictures to take (max 4)
     captures = 4
+
+    #High resolution pictures from camera
+    high_resolution = True
 
     #Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max
     camera_iso = 100

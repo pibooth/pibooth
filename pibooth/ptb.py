@@ -15,6 +15,7 @@ from pibooth.config import PtbConfigParser
 from pibooth.controls.camera import PtbCamera
 from pibooth.pictures.concatenate_images import generate_photo_from_files
 from pibooth.controls.light import PtbLed
+from pibooth.controls.button import BUTTON_DOWN, PtbButton
 
 
 class PtbApplication(object):
@@ -47,8 +48,9 @@ class PtbApplication(object):
                                 config.getint('CAMERA', 'camera_iso'),
                                 config.getboolean('CAMERA', 'high_resolution'))
 
-        # Setup the LED on pin 7 (BOARD number)
         self.led = PtbLed(7)
+        self.button_picture = PtbButton(11, config.getint('GENERAL', 'debounce_delay'))
+        self.button_print = PtbButton(13, config.getint('GENERAL', 'debounce_delay'))
 
     def create_new_directory(self):
         """Create a new directory to save pictures.
@@ -73,9 +75,18 @@ class PtbApplication(object):
 
     def is_picture_event(self, event):
         """Return True if the application have to take the photo.
-        P pressed.
+        P or physical button pressed.
         """
-        return event.type == pygame.KEYDOWN and event.key == pygame.K_p
+        return (event.type == pygame.KEYDOWN and event.key == pygame.K_p) or \
+            (event.type == BUTTON_DOWN and event.pin == self.button_picture)
+
+    def is_print_event(self, event):
+        """Return True if the application have to print the photo.
+        Ctrl + E or physical button pressed.
+        """
+        return (event.type == pygame.KEYDOWN and event.key == pygame.K_e and
+                pygame.key.get_mods() & pygame.KMOD_CTRL) or \
+            (event.type == BUTTON_DOWN and event.pin == self.button_print)
 
     def main_loop(self):
         """Run the main game loop.
@@ -134,6 +145,9 @@ class PtbApplication(object):
                     self.window.show_finished()
                     time.sleep(1)
                     captures = []
+
+                if self.is_print_event(event):
+                    print("Send pictures to printer")
 
         finally:
             GPIO.cleanup()

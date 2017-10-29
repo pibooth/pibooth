@@ -18,7 +18,7 @@ DEFAULT = {
     "GENERAL": {
         "directory": ("~/Pictures/pibooth", "Path to save images"),
         "clear_on_startup": (True, "Clear previously stored photos"),
-        "debounce_delay": (0.3, "How long to debounce the button"),
+        "debounce_delay": (300, "How long to debounce the button in milliseconds"),
     },
     "MERGED": {
         "footer_text1": ("Footer 1", "First text displayed"),
