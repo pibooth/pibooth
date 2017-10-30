@@ -11,8 +11,10 @@ class PtbWindow(object):
 
     def __init__(self, size):
         self.__size = size
+
         # Save the desktop mode, shall be done before `setmode` (SDL 1.2.10, and pygame 1.8.0)
         info = pygame.display.Info()
+
         pygame.display.set_caption('Pibooth')
         self.surface = pygame.display.set_mode(size, pygame.RESIZABLE)
         self.display_size = (info.current_w, info.current_h)
@@ -28,8 +30,8 @@ class PtbWindow(object):
         return image.get_rect(center=self.surface.get_rect().center)
 
     def _show_and_memorize(self, image_name):
-        """Show image and memorize an image. If the image is the same
-        as the current displayed, nothing is done.
+        """Show image and memorize it. If the image is the same as the
+        current displayed, nothing is done.
         """
         if self._current_frame != image_name:
             image = pictures.get_image(image_name, self.size)

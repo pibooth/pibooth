@@ -1,7 +1,7 @@
 
 .. image:: templates/pibooth.png
    :align: center
-   :alt: pibooth
+   :alt: Pibooth
 
 
 The ``pibooth`` project attempts to provide a Photo Booth application *out-of-the-box*
@@ -22,12 +22,6 @@ The project will be available soon on Pypi.
 ::
 
     $ pip install pibooth
-
-A `wheel` archive can be generated using the setup in the repository.
-
-::
-
-    $ python setup.py bdist_wheel
 
 Run
 ---

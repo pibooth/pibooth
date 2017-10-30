@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""The ``pibooth`` package propose an implementation of a Photo Booth
-running on a Raspberry Pi.
+"""A Photo Booth application in pure Python for the Raspberry Pi.
 """
 
 __version__ = "0.0.1"

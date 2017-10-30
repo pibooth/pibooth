@@ -29,16 +29,16 @@ class PtbCamera(object):
         """Launch preview (flip if necessary).
         """
         # (x, y, width, height)
-        res = (self.size[0]*80//100, self.size[1]*80//100)
-        window = (self.size[0]*10//100, self.size[1]*10//100, res[0], res[1])
+        res = (self.size[0] * 80 // 100, self.size[1] * 80 // 100)
+        window = (self.size[0] * 10 // 100, self.size[1] * 10 // 100, res[0], res[1])
         self._cam.start_preview(resolution=res, hflip=flip, fullscreen=False, window=window)
 
-    def capture(self, filename=None):
+    def capture(self, filename=None, pil_format='png'):
         """
         Capture a picture in a file. If no filename given a PIL image
         is returned.
 
-        Possible formats are:
+        Possible PIL formats are:
             ‘jpeg‘ — Write a JPEG file
             ‘png‘ — Write a PNG file
             ‘gif‘ — Write a GIF file
@@ -58,7 +58,7 @@ class PtbCamera(object):
         else:
             # Create the in-memory stream
             stream = io.BytesIO()
-            self._cam.capture(stream, format='png')
+            self._cam.capture(stream, format=pil_format)
             # "Rewind" the stream to the beginning so we can read its content
             stream.seek(0)
             return Image.open(stream)

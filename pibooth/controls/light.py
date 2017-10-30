@@ -44,7 +44,8 @@ class PtbLed(object):
         GPIO.output(self.pin, GPIO.LOW)
 
     def blink(self, duration=None):
-        """Blink the LED.
+        """Blink the LED. This method is blocking if a duration (in seconds)
+        is given.
         """
         if not self._blinking_thread:
             self._blinking_thread = threading.Thread(target=self._blink)

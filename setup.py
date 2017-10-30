@@ -14,6 +14,9 @@ elif sys.version_info[0] == 3:
 else:
     raise ValueError('Unrecognized major version of Python')
 
+if "bdist_wheel" not in sys.argv:
+    raise ValueError('Please use the "wheel" format to generate a release')
+
 HERE = osp.abspath(osp.dirname(__file__))
 sys.path.insert(0, HERE)
 import pibooth
@@ -44,6 +47,7 @@ def main():
         ],
         author="Vincent Verdeil, Antoine Rousseaux",
         url="https://github.com/werdeil/pibooth",
+        download_url="https://github.com/werdeil/pibooth/archive/{}.tar.gz".format(pibooth.__version__),
         license='MIT license',
         platforms=['unix', 'linux'],
         keywords=[
@@ -61,7 +65,8 @@ def main():
         install_requires=[
             'RPi.GPIO',
             'picamera',
-            'Pillow'
+            'Pillow',
+            'pygame'
         ],
         extras_require={
             'doc':   ['sphinx'],
