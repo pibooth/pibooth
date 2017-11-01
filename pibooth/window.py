@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import time
 import pygame
 from pibooth import pictures
 
@@ -105,6 +106,16 @@ class PtbWindow(object):
         self.surface.blit(image, self._centered_pos(image))
         pygame.display.update()
         self._current_frame = image_file
+
+    def flash(self, count):
+        """Flash the window content.
+        """
+        for _ in range(count):
+            self.surface.fill((255, 255, 255))
+            pygame.display.update()
+            time.sleep(0.01)
+            self.clear()
+            time.sleep(0.01)
 
     def clear(self):
         """Clear the window content.

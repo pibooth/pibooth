@@ -114,23 +114,23 @@ class PtbApplication(object):
                 if not self.is_picture_event(event) and not captures:
                     self.window.show_intro()
                 else:
+                    self.led.blink()
                     if not captures:
-                        # Start a new capture sequence
-                        self.window.show_instructions()
                         print("Start new pictures sequence")
+                        self.window.show_instructions()
                         dirname = self.create_new_directory()
                         time.sleep(1)
 
-                    self.led.blink()
                     if self.config.getboolean('WINDOW', 'capture_counter'):
                         self.window.show_counter(not captures)
                         time.sleep(0.5)
 
                     self.camera.preview()
                     time.sleep(self.config.getint('CAMERA', 'preview_delay'))
-                    self.window.clear()
+
                     image_file_name = osp.join(dirname, "ptb{:03}.jpg".format(len(captures)))
                     self.led.switch_on()
+                    self.window.flash(2)
                     self.camera.capture(image_file_name)
                     print("Picture saved in {}".format(image_file_name))
                     captures.append(image_file_name)
@@ -152,6 +152,7 @@ class PtbApplication(object):
                     self.window.show_image_from_file(merged_file)
                     time.sleep(5)
                     # Finish the sequence
+                    self.window.clear()
                     self.window.show_finished()
                     time.sleep(1)
                     captures = []

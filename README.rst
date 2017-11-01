@@ -13,6 +13,7 @@ Requirements
 * RPi.GPIO
 * picamera
 * Pillow
+* pygame
 
 Install
 -------
