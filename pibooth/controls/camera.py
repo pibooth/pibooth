@@ -10,20 +10,18 @@ class PtbCamera(object):
     """Camera management
     """
 
-    def __init__(self, size, camera_iso=200, high_resolution=True):
+    def __init__(self, size, iso=200, resolution=(1920, 1080)):
         self._cam = picamera.PiCamera()
         self._cam.video_stabilization = True
         self._cam.vflip = False
-        self._cam.iso = camera_iso
+        self._cam.resolution = resolution
+        self._cam.iso = iso
         self.size = size
 
-        if high_resolution:
-            # Set camera resolution to high resolution
-            self._cam.resolution = (3280, 2464)
-        else:
-            # Set camera resolution to low resolution
-            pixel_width = 500
-            self._cam.resolution = (pixel_width, size[1] * size[0] // size[0])
+    def resize(self, size):
+        """Resize the preview.
+        """
+        self.size = size
 
     def preview(self, flip=True):
         """Launch preview (flip if necessary).

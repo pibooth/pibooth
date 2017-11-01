@@ -91,10 +91,10 @@ which permits to configure the behavior of the application.
     captures = 4
 
     #High resolution pictures from camera
-    high_resolution = True
+    resolution = (3280, 2464)
 
     #Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max
-    camera_iso = 100
+    iso = 100
 
 Circuit diagram
 ---------------

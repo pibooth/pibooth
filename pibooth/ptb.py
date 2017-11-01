@@ -40,13 +40,13 @@ class PtbApplication(object):
         pygame.init()
 
         # Create window of (width, height)
-        self.window = PtbWindow((self.config.getint('WINDOW', 'width'),
-                                 self.config.getint('WINDOW', 'height')))
+        self.window = PtbWindow((config.getint('WINDOW', 'width'),
+                                 config.getint('WINDOW', 'height')))
 
         # Initialize the camera
         self.camera = PtbCamera(self.window.size,
-                                config.getint('CAMERA', 'camera_iso'),
-                                config.getboolean('CAMERA', 'high_resolution'))
+                                config.getint('CAMERA', 'iso'),
+                                config.gettyped('CAMERA', 'resolution'))
 
         self.led = PtbLed(7)
         self.button_picture = PtbButton(11, config.getint('GENERAL', 'debounce_delay'))
@@ -110,6 +110,7 @@ class PtbApplication(object):
 
                 if self.is_resize_event(event):
                     self.window.resize(event.size)
+                    self.camera.resize(event.size)
 
                 if not self.is_picture_event(event) and not captures:
                     self.window.show_intro()

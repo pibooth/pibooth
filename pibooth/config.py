@@ -34,8 +34,8 @@ DEFAULT = {
     "CAMERA": {
         "preview_delay": (3, "How long is the preview (in seconds)"),
         "captures": (4, "How many pictures to take (max 4)"),
-        "camera_iso": (100, "Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max"),
-        "high_resolution": (True, "High resolution pictures from camera"),
+        "iso": (100, "Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max"),
+        "resolution": ((3280, 2464), "Resolution for camera captures (see picamera modes)"),
     }
 }
 
