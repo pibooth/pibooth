@@ -47,7 +47,7 @@ def generate_default_config(filename):
         for section, options in DEFAULT.items():
             fp.write("[{}]\n".format(section))
             for name, value in options.items():
-                fp.write("#{}\n{} = {}\n\n".format(value[1], name, value[0]))
+                fp.write("# {}\n{} = {}\n\n".format(value[1], name, value[0]))
 
 
 class PtbConfigParser(configparser.ConfigParser):

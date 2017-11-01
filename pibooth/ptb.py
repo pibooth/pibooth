@@ -38,14 +38,15 @@ class PtbApplication(object):
         # Prepare the pygame module for use
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
+        # Dont catch mouse motion to avoid filling the queue during long actions
+        pygame.event.set_blocked(pygame.MOUSEMOTION)
 
         # Create window of (width, height)
         self.window = PtbWindow((config.getint('WINDOW', 'width'),
                                  config.getint('WINDOW', 'height')))
 
         # Initialize the camera
-        self.camera = PtbCamera(self.window.size,
-                                config.getint('CAMERA', 'iso'),
+        self.camera = PtbCamera(config.getint('CAMERA', 'iso'),
                                 config.gettyped('CAMERA', 'resolution'))
 
         self.led = PtbLed(7)
@@ -110,7 +111,6 @@ class PtbApplication(object):
 
                 if self.is_resize_event(event):
                     self.window.resize(event.size)
-                    self.camera.resize(event.size)
 
                 if not self.is_picture_event(event) and not captures:
                     self.window.show_intro()
@@ -126,7 +126,7 @@ class PtbApplication(object):
                         self.window.show_counter(not captures)
                         time.sleep(0.5)
 
-                    self.camera.preview()
+                    self.camera.preview(self.window.get_rect())
                     time.sleep(self.config.getint('CAMERA', 'preview_delay'))
 
                     image_file_name = osp.join(dirname, "ptb{:03}.jpg".format(len(captures)))

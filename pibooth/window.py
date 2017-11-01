@@ -40,6 +40,13 @@ class PtbWindow(object):
             pygame.display.update()
             self._current_frame = image_name
 
+    def get_rect(self):
+        """Return a Rect object as defined in pygame. The position
+        represent the absolute position considering the window
+        centered on screen.
+        """
+        return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
+
     @property
     def size(self):
         """Return the current window size.
