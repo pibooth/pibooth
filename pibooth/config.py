@@ -7,6 +7,7 @@
 import ast
 import os
 import os.path as osp
+import subprocess
 try:
     import configparser
 except ImportError:
@@ -48,6 +49,13 @@ def generate_default_config(filename):
             fp.write("[{}]\n".format(section))
             for name, value in options.items():
                 fp.write("# {}\n{} = {}\n\n".format(value[1], name, value[0]))
+
+
+def edit_configuration(config):
+    """Open a text editor to edit the configuration file.
+    """
+    process = subprocess.Popen(['leafpad', config.filename])
+    process.communicate()
 
 
 class PtbConfigParser(configparser.ConfigParser):

@@ -10,10 +10,25 @@ for Raspberry Pi.
 Requirements
 ------------
 
-* RPi.GPIO
-* picamera
-* Pillow
-* pygame
+The requirements listed below are the one used for the development of ``pibooth``, but
+other configuration may work.
+
+Hardware:
+^^^^^^^^^
+
+* Raspberry Pi Model B+
+* Pi Camera v2.1 8 MP 1080p
+* 2 push buttons
+* 1 LED
+* 1 resistor of 100 Ohm
+
+Software:
+^^^^^^^^^
+
+* RPi.GPIO ``0.6.3``
+* picamera ``1.13``
+* Pillow ``4.0.0``
+* pygame ``1.9.3``
 
 Install
 -------
@@ -27,7 +42,7 @@ The project will be available soon on Pypi.
 Run
 ---
 
-::
+Start the Photo Booth application using the command::
 
     $ pibooth
 
@@ -46,7 +61,12 @@ Configuration
 -------------
 
 At the first run, a configuration file is generated in ``~/.config/pibooth/pibooth.cfg``
-which permits to configure the behavior of the application.
+which permits to configure the behavior of the application. The configuration can be
+easily editing using the command::
+
+    $ pibooth --config
+
+Below is the default configuration file.
 
 .. code-block:: ini
 

@@ -8,10 +8,12 @@ import os
 import time
 import shutil
 import pygame
+import argparse
 import os.path as osp
 from RPi import GPIO
+import pibooth
 from pibooth.window import PtbWindow
-from pibooth.config import PtbConfigParser
+from pibooth.config import PtbConfigParser, edit_configuration
 from pibooth.controls.camera import PtbCamera
 from pibooth.pictures.concatenate_images import generate_photo_from_files
 from pibooth.controls.light import PtbLed
@@ -50,8 +52,8 @@ class PtbApplication(object):
                                 config.gettyped('CAMERA', 'resolution'))
 
         self.led = PtbLed(7)
-        self.button_picture = PtbButton(11, config.getint('GENERAL', 'debounce_delay'))
         self.button_print = PtbButton(13, config.getint('GENERAL', 'debounce_delay'))
+        self.button_picture = PtbButton(11, config.getint('GENERAL', 'debounce_delay'))
 
     def create_new_directory(self):
         """Create a new directory to save pictures.
@@ -172,10 +174,24 @@ def main():
     """
     config = PtbConfigParser("~/.config/pibooth/pibooth.cfg")
 
-    app = PtbApplication(config)
+    parser = argparse.ArgumentParser(usage="%(prog)s [options]",
+                                     description=pibooth.__doc__)
 
-    print("Starting Photo Booth application...")
-    app.main_loop()
+    parser.add_argument('-v', '--version', action='version', version=pibooth.__version__,
+                        help=u"show program's version number and exit")
+
+    parser.add_argument("--config", action='store_true',
+                        help=u"edit the current configuration")
+
+    options, _args = parser.parse_known_args()
+
+    if options.config:
+        print("Editing the Photo Booth configuration...")
+        edit_configuration(config)
+    else:
+        print("Starting the Photo Booth application...")
+        app = PtbApplication(config)
+        app.main_loop()
 
 
 if __name__ == '__main__':
