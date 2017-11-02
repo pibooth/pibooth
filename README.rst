@@ -16,8 +16,8 @@ other configuration may work.
 Hardware:
 ^^^^^^^^^
 
-* Raspberry Pi Model B+
-* Pi Camera v2.1 8 MP 1080p
+* 1 Raspberry Pi Model B+
+* 1 Pi Camera v2.1 8 MP 1080p
 * 2 push buttons
 * 1 LED
 * 1 resistor of 100 Ohm
@@ -46,7 +46,7 @@ Start the Photo Booth application using the command::
 
     $ pibooth
 
-After the graphical interface is started, the following commands are available:
+After the graphical interface is started, the following actions are available:
 
 ==================== ================ ================
 Action               Keyboard key     Physical button
@@ -62,11 +62,11 @@ Configuration
 
 At the first run, a configuration file is generated in ``~/.config/pibooth/pibooth.cfg``
 which permits to configure the behavior of the application. The configuration can be
-easily editing using the command::
+easily edited using the command::
 
     $ pibooth --config
 
-Below is the default configuration file.
+Below is the default configuration file:
 
 .. code-block:: ini
 
@@ -77,8 +77,8 @@ Below is the default configuration file.
     # Clear previously stored photos
     clear_on_startup = True
 
-    # How long to debounce the button in milliseconds
-    debounce_delay = 300
+    # How long to debounce the button in seconds
+    debounce_delay = 0.3
 
     [WINDOW]
     # (Width, Height) of the display monitor
@@ -87,14 +87,14 @@ Below is the default configuration file.
     # Show a counter between taking photos
     capture_counter = True
 
-    # How long is the preview (in seconds)
+    # How long is the preview in seconds
     preview_delay = 3
 
     # Preview window position related to the main window
     preview_offset = (50, 60)
 
     [PICTURE]
-    # How many pictures to take (max 4)
+    # How many pictures to take (4 max)
     captures = 4
 
     # First text displayed
@@ -140,7 +140,6 @@ Icons from the Noun Project
 
 Other inspirations:
 
- - https://github.com/drumminhands/drumminhands_photobooth
  - http://www.instructables.com/lesson/Build-a-Photo-Booth/
  - http://www.instructables.com/id/Raspberry-Pi-photo-booth-controller/
  - http://www.instructables.com/id/Lininger-Rood-Photo-Booth/

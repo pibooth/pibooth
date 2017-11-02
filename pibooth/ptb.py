@@ -52,8 +52,8 @@ class PtbApplication(object):
                                 config.gettyped('CAMERA', 'resolution'))
 
         self.led = PtbLed(7)
-        self.button_print = PtbButton(13, config.getint('GENERAL', 'debounce_delay'))
-        self.button_picture = PtbButton(11, config.getint('GENERAL', 'debounce_delay'))
+        self.button_print = PtbButton(13, config.getfloat('GENERAL', 'debounce_delay'))
+        self.button_picture = PtbButton(11, config.getfloat('GENERAL', 'debounce_delay'))
 
     def create_new_directory(self):
         """Create a new directory to save pictures.

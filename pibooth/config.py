@@ -19,10 +19,10 @@ DEFAULT = {
     "GENERAL": {
         "directory": ("~/Pictures/pibooth", "Path to save images"),
         "clear_on_startup": (True, "Clear previously stored photos"),
-        "debounce_delay": (300, "How long to debounce the button in milliseconds"),
+        "debounce_delay": (0.3, "How long to debounce the button in seconds"),
     },
     "PICTURE": {
-        "captures": (4, "How many pictures to take (max 4)"),
+        "captures": (4, "How many pictures to take (4 max)"),
         "footer_text1": ("Footer 1", "First text displayed"),
         "footer_text2": ("Footer 2", "Second text displayed"),
         "bg_color": ((255, 255, 255), "Background RGB color"),
@@ -31,7 +31,7 @@ DEFAULT = {
     "WINDOW": {
         "size": ((800, 480), "(Width, Height) of the display monitor"),
         "capture_counter": (True, "Show a counter between taking photos"),
-        "preview_delay": (3, "How long is the preview (in seconds)"),
+        "preview_delay": (3, "How long is the preview in seconds"),
         "preview_offset": ((50, 60), "Preview window position related to the main window"),
     },
     "CAMERA": {

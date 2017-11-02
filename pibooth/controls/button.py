@@ -12,12 +12,14 @@ class PtbButton(object):
     """Physical button management
     """
 
-    def __init__(self, pin, bouncetime=100):
+    def __init__(self, pin, bouncetime=0.1):
         self.pin = pin
         # Use internal pull up/down resistors
         GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-        GPIO.add_event_detect(self.pin, GPIO.FALLING, callback=self.on_button_down, bouncetime=bouncetime)
+        GPIO.add_event_detect(self.pin, GPIO.FALLING,
+                              callback=self.on_button_down,
+                              bouncetime=int(bouncetime * 1000))
 
     def __eq__(self, other):
         """Can compare button with its pin.
