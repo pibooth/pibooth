@@ -42,11 +42,11 @@ class PtbApplication(object):
         pygame.event.set_blocked(pygame.MOUSEMOTION)
 
         # Create window of (width, height)
-        self.window = PtbWindow((config.getint('WINDOW', 'width'),
-                                 config.getint('WINDOW', 'height')))
+        self.window = PtbWindow(config.gettyped('WINDOW', 'size'))
 
         # Initialize the camera
-        self.camera = PtbCamera(config.getint('CAMERA', 'iso'),
+        self.camera = PtbCamera(config.gettyped('WINDOW', 'preview_offset'),
+                                config.getint('CAMERA', 'iso'),
                                 config.gettyped('CAMERA', 'resolution'))
 
         self.led = PtbLed(7)
@@ -127,7 +127,7 @@ class PtbApplication(object):
                         time.sleep(0.5)
 
                     self.camera.preview(self.window.get_rect())
-                    time.sleep(self.config.getint('CAMERA', 'preview_delay'))
+                    time.sleep(self.config.getint('WINDOW', 'preview_delay'))
 
                     image_file_name = osp.join(dirname, "ptb{:03}.jpg".format(len(captures)))
                     self.led.switch_on()
@@ -136,15 +136,15 @@ class PtbApplication(object):
                     print("Picture saved in {}".format(image_file_name))
                     captures.append(image_file_name)
 
-                if len(captures) >= self.config.getint('CAMERA', 'captures'):
+                if len(captures) >= self.config.getint('PICTURE', 'captures'):
                     self.window.show_wait()
                     self.led.switch_off()
                     print("Creating merged image")
                     merged_file = osp.join(dirname, "ptb_merged.jpg")
-                    footer_texts = [self.config.get('MERGED', 'footer_text1'),
-                                    self.config.get('MERGED', 'footer_text2')]
-                    bg_color = self.config.gettyped('MERGED', 'bg_color')
-                    text_color = self.config.gettyped('MERGED', 'text_color')
+                    footer_texts = [self.config.get('PICTURE', 'footer_text1'),
+                                    self.config.get('PICTURE', 'footer_text2')]
+                    bg_color = self.config.gettyped('PICTURE', 'bg_color')
+                    text_color = self.config.gettyped('PICTURE', 'text_color')
                     generate_photo_from_files(captures, merged_file, footer_texts,
                                               bg_color, text_color)
 

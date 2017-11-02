@@ -51,45 +51,45 @@ which permits to configure the behavior of the application.
 .. code-block:: ini
 
     [GENERAL]
-    # Clear previously stored photos
-    clear_on_startup = True
-
     # Path to save images
     directory = ~/Pictures/pibooth
+
+    # Clear previously stored photos
+    clear_on_startup = True
 
     # How long to debounce the button in milliseconds
     debounce_delay = 300
 
     [WINDOW]
-    # Width of the display monitor
-    width = 800
-
-    # Height of the display monitor
-    height = 480
+    # (Width, Height) of the display monitor
+    size = (800, 480)
 
     # Show a counter between taking photos
     capture_counter = True
 
-    [MERGED]
-    # Background RGB color
-    bg_color = (23, 45, 245)
+    # How long is the preview (in seconds)
+    preview_delay = 3
 
-    # Footer text RGB color
-    text_color = (0, 0, 0)
+    # Preview window position related to the main window
+    preview_offset = (50, 60)
 
-    # Second text displayed
-    footer_text2 = Footer 2
+    [PICTURE]
+    # How many pictures to take (max 4)
+    captures = 4
 
     # First text displayed
     footer_text1 = Footer 1
 
+    # Second text displayed
+    footer_text2 = Footer 2
+
+    # Footer text RGB color
+    text_color = (0, 0, 0)
+
+    # Background RGB color
+    bg_color = (255, 255, 255)
+
     [CAMERA]
-    # How long is the preview (in seconds)
-    preview_delay = 3
-
-    # How many pictures to take (max 4)
-    captures = 4
-
     # Resolution for camera captures (see picamera modes)
     resolution = (3280, 2464)
 

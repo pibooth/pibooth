@@ -10,7 +10,7 @@ class PtbCamera(object):
     """Camera management
     """
 
-    def __init__(self, iso=200, resolution=(1920, 1080)):
+    def __init__(self, preview_offset=(50, 60), iso=200, resolution=(1920, 1080)):
         self._cam = picamera.PiCamera()
         self._cam.video_stabilization = True
         self._cam.vflip = False
@@ -19,7 +19,7 @@ class PtbCamera(object):
 
         # For an obscure reason, the preview position need an offset to the pygame
         # window position (probably the display size is not evaluated in the same way)
-        self._pos_margin = 50
+        self._pos_offset = preview_offset
         self._border = 50
 
     def preview(self, rect, flip=True):
@@ -27,8 +27,10 @@ class PtbCamera(object):
         """
         # (x, y, width, height)
         res = (rect.width - 2 * self._border, rect.height - 2 * self._border)
-        window = (rect.left + self._pos_margin + self._border, rect.top + self._pos_margin + self._border,
-                  rect.width - 2 * self._border, rect.height - 2 * self._border)
+        window = (rect.left + self._pos_offset[0] + self._border,
+                  rect.top + self._pos_offset[1] + self._border,
+                  rect.width - 2 * self._border,
+                  rect.height - 2 * self._border)
         self._cam.start_preview(resolution=res, hflip=flip, fullscreen=False, window=window)
 
     def capture(self, filename=None, pil_format='png'):

@@ -20,20 +20,20 @@ DEFAULT = {
         "clear_on_startup": (True, "Clear previously stored photos"),
         "debounce_delay": (300, "How long to debounce the button in milliseconds"),
     },
-    "MERGED": {
+    "PICTURE": {
+        "captures": (4, "How many pictures to take (max 4)"),
         "footer_text1": ("Footer 1", "First text displayed"),
         "footer_text2": ("Footer 2", "Second text displayed"),
         "bg_color": ((255, 255, 255), "Background RGB color"),
         "text_color": ((0, 0, 0), "Footer text RGB color"),
     },
     "WINDOW": {
-        "width": (800, "Width of the display monitor"),
-        "height": (480, "Height of the display monitor"),
+        "size": ((800, 480), "(Width, Height) of the display monitor"),
         "capture_counter": (True, "Show a counter between taking photos"),
+        "preview_delay": (3, "How long is the preview (in seconds)"),
+        "preview_offset": ((50, 60), "Preview window position related to the main window"),
     },
     "CAMERA": {
-        "preview_delay": (3, "How long is the preview (in seconds)"),
-        "captures": (4, "How many pictures to take (max 4)"),
         "iso": (100, "Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max"),
         "resolution": ((3280, 2464), "Resolution for camera captures (see picamera modes)"),
     }
