@@ -11,7 +11,7 @@ Requirements
 ------------
 
 The requirements listed below are the one used for the development of ``pibooth``, but
-other configuration may work.
+other configuration may work fine. All hardware buttons and lights are optional.
 
 Hardware:
 ^^^^^^^^^
@@ -33,11 +33,14 @@ Software:
 Install
 -------
 
-The project will be available soon on Pypi.
+A brief description on how to set-up a Raspberry Pi to use this software.
 
-::
+1. Download latest Raspbian image and set-up an SD-card. You can follow
+these instructions https://www.raspberrypi.org/documentation/installation/installing-images/README.md .
 
-    $ pip install pibooth
+2. Install pibooth from the Pypi repository (available soon)::
+   
+       $ pip install pibooth
 
 Run
 ---
@@ -57,6 +60,9 @@ Export Printer/Cloud Ctrl + E         Button 2
 Quit                 ESC              \-
 ==================== ================ ================
 
+All pictures taken are stored in a subfolder of the one defined in the configuration,
+named **YYYY-mm-dd hh-mm-ss** which the time when first photo of the sequence was taken.
+
 Configuration
 -------------
 
@@ -64,7 +70,11 @@ At the first run, a configuration file is generated in ``~/.config/pibooth/piboo
 which permits to configure the behavior of the application. The configuration can be
 easily edited using the command::
 
-    $ pibooth --config
+    $ pibooth --config
+
+The default configuration can be restored with the command::
+
+    & pibooth --reset
 
 Below is the default configuration file:
 
@@ -138,7 +148,7 @@ Icons from the Noun Project
  - Tap by Prerak Patel
  - Yoga poses by Claire Jones
 
-Other inspirations:
+The code was developed from scratch but inspired by the following tutorials/projects:
 
  - http://www.instructables.com/lesson/Build-a-Photo-Booth/
  - http://www.instructables.com/id/Raspberry-Pi-photo-booth-controller/
