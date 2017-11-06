@@ -28,7 +28,7 @@ Software:
 * Python ``3.5.3``
 * RPi.GPIO ``0.6.3``
 * picamera ``1.13``
-* PIL ``1.1.7``
+* Pillow ``4.0.0``
 * pygame ``1.9.3``
 * gphoto2 ``1.8.0`` ( libgphoto2 ``2.5.15`` )
 
@@ -42,7 +42,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 2. Insert the SD-card into the Raspberry Pi and fire it up. Use the raspi-config tool that is shown
    automatically on the first boot to configure your system (e.g., expand partition, change hostname,
    password, enable SSH, configure to boot into GUI, etc.)
-3. Reboot and open a terminal. Install the latest firmware versions
+3. Reboot and open a terminal. Install the latest firmware version
 
    ::
 
