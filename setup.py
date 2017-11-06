@@ -66,7 +66,8 @@ def main():
             'RPi.GPIO',
             'picamera',
             'Pillow',
-            'pygame'
+            'pygame',
+            'gphoto2'
         ],
         extras_require={
             'doc':   ['sphinx'],

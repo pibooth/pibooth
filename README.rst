@@ -17,7 +17,7 @@ Hardware:
 ^^^^^^^^^
 
 * 1 Raspberry Pi Model B+
-* 1 Pi Camera v2.1 8 MP 1080p
+* 1 Camera (Pi Camera v2.1 8 MP 1080p or any Camera compatible with ``gphoto2``)
 * 2 push buttons
 * 1 LED
 * 1 resistor of 100 Ohm
@@ -25,10 +25,12 @@ Hardware:
 Software:
 ^^^^^^^^^
 
+* Python ``3.5.3``
 * RPi.GPIO ``0.6.3``
 * picamera ``1.13``
-* Pillow ``4.0.0``
+* PIL ``1.1.7``
 * pygame ``1.9.3``
+* gphoto2 ``1.8.0`` ( libgphoto2 ``2.5.15`` )
 
 Install
 -------
@@ -36,11 +38,33 @@ Install
 A brief description on how to set-up a Raspberry Pi to use this software.
 
 1. Download latest Raspbian image and set-up an SD-card. You can follow
-these instructions https://www.raspberrypi.org/documentation/installation/installing-images/README.md .
+   `these instructions <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_
+2. Insert the SD-card into the Raspberry Pi and fire it up. Use the raspi-config tool that is shown
+   automatically on the first boot to configure your system (e.g., expand partition, change hostname,
+   password, enable SSH, configure to boot into GUI, etc.)
+3. Reboot and open a terminal. Install the latest firmware versions
 
-2. Install pibooth from the Pypi repository (available soon)::
-   
-       $ pip install pibooth
+   ::
+
+        $ sudo rpi-update
+4. Upgrade all installed software
+
+   ::
+
+        $ sudo apt-get update
+        $ sudo apt-get upgrade
+5. Install ``gphoto2`` (required only for external Camera)
+
+   ::
+
+        $ sudo wget raw.github.com/gonzalo/gphoto2-updater/master/gphoto2-updater.sh
+        $ sudo chmod 755 gphoto2-updater.sh
+        $ sudo ./gphoto2-updater.sh
+6. Install ``pibooth`` from the pypi repository (available soon)
+
+   ::
+
+        $ sudo pip install pibooth
 
 Run
 ---
@@ -74,7 +98,7 @@ easily edited using the command::
 
 The default configuration can be restored with the command::
 
-    & pibooth --reset
+    $ pibooth --reset
 
 Below is the default configuration file:
 
@@ -150,6 +174,7 @@ Icons from the Noun Project
 
 The code was developed from scratch but inspired by the following tutorials/projects:
 
- - http://www.instructables.com/lesson/Build-a-Photo-Booth/
- - http://www.instructables.com/id/Raspberry-Pi-photo-booth-controller/
- - http://www.instructables.com/id/Lininger-Rood-Photo-Booth/
+ - https://github.com/reuterbal/photobooth
+ - http://www.instructables.com/lesson/Build-a-Photo-Booth
+ - http://www.instructables.com/id/Raspberry-Pi-photo-booth-controller
+ - http://www.instructables.com/id/Lininger-Rood-Photo-Booth

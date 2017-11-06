@@ -172,10 +172,7 @@ class PtbApplication(object):
 def main():
     """Application entry point.
     """
-    config = PtbConfigParser("~/.config/pibooth/pibooth.cfg")
-
-    parser = argparse.ArgumentParser(usage="%(prog)s [options]",
-                                     description=pibooth.__doc__)
+    parser = argparse.ArgumentParser(usage="%(prog)s [options]", description=pibooth.__doc__)
 
     parser.add_argument('-v', '--version', action='version', version=pibooth.__version__,
                         help=u"show program's version number and exit")
@@ -183,7 +180,12 @@ def main():
     parser.add_argument("--config", action='store_true',
                         help=u"edit the current configuration")
 
+    parser.add_argument("--reset", action='store_true',
+                        help=u"restore the default configuration")
+
     options, _args = parser.parse_known_args()
+
+    config = PtbConfigParser("~/.config/pibooth/pibooth.cfg", options.reset)
 
     if options.config:
         print("Editing the Photo Booth configuration...")
