@@ -17,7 +17,8 @@ Hardware:
 ^^^^^^^^^
 
 * 1 Raspberry Pi Model B+
-* 1 Camera (Pi Camera v2.1 8 MP 1080p or any Camera compatible with ``gphoto2``)
+* 1 Camera (Pi Camera v2.1 8 MP 1080p or any camera `compatible with gphoto2
+  <http://www.gphoto.org/proj/libgphoto2/support.php>`_)
 * 2 push buttons
 * 1 LED
 * 1 resistor of 100 Ohm

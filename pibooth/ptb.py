@@ -7,6 +7,7 @@
 import os
 import time
 import shutil
+import logging
 import pygame
 import argparse
 import os.path as osp
@@ -14,7 +15,7 @@ from RPi import GPIO
 import pibooth
 from pibooth.window import PtbWindow
 from pibooth.config import PtbConfigParser, edit_configuration
-from pibooth.controls.camera import PtbCamera
+from pibooth.controls import camera
 from pibooth.pictures.concatenate_images import generate_photo_from_files
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
@@ -47,9 +48,9 @@ class PtbApplication(object):
         self.window = PtbWindow(config.gettyped('WINDOW', 'size'))
 
         # Initialize the camera
-        self.camera = PtbCamera(config.gettyped('WINDOW', 'preview_offset'),
-                                config.getint('CAMERA', 'iso'),
-                                config.gettyped('CAMERA', 'resolution'))
+        self.camera = camera.get_camera(config.gettyped('WINDOW', 'preview_offset'),
+                                        config.getint('CAMERA', 'iso'),
+                                        config.gettyped('CAMERA', 'resolution'))
 
         self.led = PtbLed(7)
         self.button_print = PtbButton(13, config.getfloat('GENERAL', 'debounce_delay'))
@@ -182,6 +183,8 @@ def main():
 
     parser.add_argument("--reset", action='store_true',
                         help=u"restore the default configuration")
+
+    logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
 
     options, _args = parser.parse_known_args()
 

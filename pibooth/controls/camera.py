@@ -1,11 +1,47 @@
 # -*- coding: utf-8 -*-
 
+
 import io
+import subprocess
 import picamera
+import gphoto2 as gp
 from PIL import Image
+from pibooth import pictures
 
 
-class PtbCamera(object):
+def get_camera(*args, **kargs):
+    """
+    Select the camera in the following order:
+      - Found Pi Camera
+      - First found camera detected by gphoto2
+
+    If no camera found, a EnvironmentError is raised.
+    """
+    try:
+        process = subprocess.Popen(['vcgencmd', 'get_camera'],
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, _stderr = process.communicate()
+        if stdout and u'detected=1' in stdout.decode('utf-8'):
+            return RpiCamera(*args, **kargs)
+    except OSError:
+        pass
+
+    if hasattr(gp, 'gp_camera_autodetect'):
+        # gphoto2 version 2.5+
+        cameras = gp.check_result(gp.gp_camera_autodetect())
+    else:
+        port_info_list = gp.PortInfoList()
+        port_info_list.load()
+        abilities_list = gp.CameraAbilitiesList()
+        abilities_list.load()
+        cameras = abilities_list.detect(port_info_list)
+    if cameras:
+        return GpCamera(*args, **kargs)
+
+    raise EnvironmentError("Neither Pi Camera nor GPhoto2 cammera detected")
+
+
+class RpiCamera(object):
 
     """Camera management
     """
@@ -67,3 +103,30 @@ class PtbCamera(object):
         """Close the camera driver, it's definitive.
         """
         self._cam.close()
+
+
+class GpCamera(object):
+
+    """Gphoto2 camera management.
+    """
+
+    def __init__(self, preview_offset=(50, 60), iso=200, resolution=(1920, 1080)):
+        gp.check_result(gp.use_python_logging())
+        self._cam = gp.Camera()
+        self._cam.init()
+
+    def preview(self, rect, flip=True):
+        pass  # Is it possible?
+
+    def capture(self, filename=None, pil_format='png'):
+        camera_file = self._cam.capture_preview()
+        file_data = self._cam.file_get_data_and_size(camera_file)
+        image = Image.open(io.BytesIO(file_data))
+        if filename:
+            image.save(filename)
+            return filename
+        else:
+            return image
+
+    def quit(self):
+        self._cam.exit()

@@ -11,6 +11,34 @@ def get_filename(name):
     return osp.join(osp.dirname(osp.abspath(__file__)), name)
 
 
+def resize_keep_aspect_ratio(original_size, target_size):
+    """Return a new size included in the target one and
+    keeping the original image's aspect ratio.
+    """
+    ix, iy = original_size
+    if ix > iy:
+        # fit to width
+        scale_factor = target_size[0] / float(ix)
+        sy = scale_factor * iy
+        if sy > target_size[1]:
+            scale_factor = target_size[1] / float(iy)
+            sx = scale_factor * ix
+            sy = target_size[1]
+        else:
+            sx = target_size[0]
+    else:
+        # fit to height
+        scale_factor = target_size[1] / float(iy)
+        sx = scale_factor * ix
+        if sx > target_size[0]:
+            scale_factor = target_size[0] / float(ix)
+            sx = target_size[0]
+            sy = scale_factor * iy
+        else:
+            sy = target_size[1]
+    return (int(sx), int(sy))
+
+
 def get_image(name, size=None):
     """Return a Pygame image. If a size is given, the image is
     resized keeping the original image's aspect ratio.
@@ -19,26 +47,5 @@ def get_image(name, size=None):
         return pygame.image.load(get_filename(name)).convert()
 
     image = Image.open(get_filename(name))
-    ix, iy = image.size
-    if ix > iy:
-        # fit to width
-        scale_factor = size[0] / float(ix)
-        sy = scale_factor * iy
-        if sy > size[1]:
-            scale_factor = size[1] / float(iy)
-            sx = scale_factor * ix
-            sy = size[1]
-        else:
-            sx = size[0]
-    else:
-        # fit to height
-        scale_factor = size[1] / float(iy)
-        sx = scale_factor * ix
-        if sx > size[0]:
-            scale_factor = size[0] / float(ix)
-            sx = size[0]
-            sy = scale_factor * iy
-        else:
-            sy = size[1]
-    image = image.resize((int(sx), int(sy)), Image.ANTIALIAS)
+    image = image.resize(resize_keep_aspect_ratio(image.size, size), Image.ANTIALIAS)
     return pygame.image.fromstring(image.tobytes(), image.size, image.mode)
