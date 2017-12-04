@@ -2,6 +2,7 @@
 
 from PIL import Image, ImageDraw, ImageFont
 from pibooth import fonts
+from pibooth.pictures import resize_keep_aspect_ratio
 
 
 def generate_photo(images, footer_texts, bg_color, text_color):
@@ -10,37 +11,45 @@ def generate_photo(images, footer_texts, bg_color, text_color):
     """
     widths, heights = zip(*(i.size for i in images))
 
+    # starting here we consider that all the images have the same height and widths
     inter_width = max(heights) // 20
-    new_width = max(widths) * 2 + inter_width * 3
-    new_height = max(heights) * 2 + inter_width * 6
 
-    new_image = Image.new('RGB', (new_width, new_height), color=bg_color)
+    # consider that we have 4 images
+    new_width = max(widths) * 2 + inter_width * 3
+    new_height = max(heights) * 2 + inter_width * 3
+
+    matrix = Image.new('RGB', (new_width, new_height), color=bg_color)
 
     x_offset = inter_width
     y_offset = inter_width
 
     # Consider that the photo are correctly ordered
-    new_image.paste(images[0], (x_offset, y_offset))
+    matrix.paste(images[0], (x_offset, y_offset))
     x_offset = x_offset + images[0].size[0] + inter_width
-    new_image.paste(images[1], (x_offset, y_offset))
+    matrix.paste(images[1], (x_offset, y_offset))
     y_offset = y_offset + images[1].size[1] + inter_width
     x_offset = inter_width
-    new_image.paste(images[2], (x_offset, y_offset))
+    matrix.paste(images[2], (x_offset, y_offset))
     x_offset = x_offset + images[2].size[0] + inter_width
-    new_image.paste(images[3], (x_offset, y_offset))
+    matrix.paste(images[3], (x_offset, y_offset))
+
+    matrix = matrix.resize(resize_keep_aspect_ratio(matrix.size, (2400, 3000)), Image.ANTIALIAS)
+
+    final_image = Image.new('RGB', (2400, 3600), color=bg_color)
+    final_image.paste(matrix, ((2400-matrix.size[0])//2, (3000-matrix.size[1])//2))
 
     # Text part
-    x_offset = 11 * inter_width
-    y_offset = y_offset + images[3].size[1] + inter_width
-    draw = ImageDraw.Draw(new_image)
+    x_offset = 600
+    y_offset = 3100
+    draw = ImageDraw.Draw(final_image)
 
-    name_font = ImageFont.truetype(fonts.get_filename("Roboto-BoldItalic.ttf"), inter_width)
-    date_font = ImageFont.truetype(fonts.get_filename("Roboto-LightItalic.ttf"), inter_width // 2)
+    name_font = ImageFont.truetype(fonts.get_filename("Roboto-BoldItalic.ttf"), 200)
+    date_font = ImageFont.truetype(fonts.get_filename("Roboto-LightItalic.ttf"), 100)
 
     draw.text((x_offset, y_offset), footer_texts[0], text_color, font=name_font)
-    draw.text((x_offset, y_offset + inter_width), footer_texts[1], text_color, font=date_font)
+    draw.text((x_offset, y_offset + 200), footer_texts[1], text_color, font=date_font)
 
-    return new_image
+    return final_image
 
 
 def generate_photo_from_files(image_files_list, output_file, footer_texts, bg_color=(255, 255, 255), text_color=(0, 0, 0)):
@@ -50,8 +59,6 @@ def generate_photo_from_files(image_files_list, output_file, footer_texts, bg_co
     list_pil_images = []
     for img in image_files_list:
         image = Image.open(img)
-        if image.size[0] > image.size[1]:
-            image = image.rotate(-90, expand=True)
         list_pil_images.append(image)
 
     # LIST_PIL_IMAGES = [Image.open(img) for img in LIST_IMAGES]
