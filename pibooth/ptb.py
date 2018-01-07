@@ -129,9 +129,7 @@ class PtbApplication(object):
                     self.led_picture.blink()
                     if not captures:
                         print("Start new pictures sequence")
-                        self.window.show_instructions()
                         dirname = self.create_new_directory()
-                        time.sleep(1)
                         self.camera.preview(self.window.get_rect())
 
                     if self.config.getboolean('WINDOW', 'capture_counter'):

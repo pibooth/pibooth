@@ -164,11 +164,8 @@ Credits:
 Icons from the Noun Project
 
 - Button by Prerak Patel
-- Disco pose by Moriah Rich
 - Fireworks by Creative Stall
 - Hamster wheel by Dream Icons
-- Tap by Prerak Patel
-- Yoga poses by Claire Jones
 
 The code was developed from scratch but inspired by the following tutorials/projects:
 

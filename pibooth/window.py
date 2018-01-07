@@ -71,11 +71,6 @@ class PtbWindow(object):
         """
         self._show_and_memorize("intro.png")
 
-    def show_instructions(self):
-        """Show instructions view.
-        """
-        self._show_and_memorize("instructions.png")
-
     def show_counter(self, restart=False):
         """Show the next counter view.
         """
