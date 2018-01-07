@@ -69,6 +69,11 @@ class RpiCamera(object):
                   rect.height - 2 * self._border)
         self._cam.start_preview(resolution=res, hflip=flip, fullscreen=False, window=window)
 
+    def stop_preview(self):
+        """Stop the preview.
+        """
+        self._cam.stop_preview()
+
     def capture(self, filename=None, pil_format='png'):
         """
         Capture a picture in a file. If no filename given a PIL image
@@ -86,8 +91,6 @@ class RpiCamera(object):
             ‘bgra‘ — Write the raw image data to a file in 32-bit BGRA format
             ‘raw‘ — Deprecated option for raw captures; the format is taken from the
         """
-        # Stop preview before flip (avoid headache)
-        self._cam.stop_preview()
         if filename:
             self._cam.capture(filename)
             return filename
@@ -117,6 +120,9 @@ class GpCamera(object):
 
     def preview(self, rect, flip=True):
         pass  # Is it possible?
+
+    def stop_preview(self):
+        pass
 
     def capture(self, filename=None, pil_format='png'):
         camera_file = self._cam.capture_preview()

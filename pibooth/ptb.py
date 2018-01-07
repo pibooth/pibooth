@@ -132,12 +132,12 @@ class PtbApplication(object):
                         self.window.show_instructions()
                         dirname = self.create_new_directory()
                         time.sleep(1)
+                        self.camera.preview(self.window.get_rect())
 
                     if self.config.getboolean('WINDOW', 'capture_counter'):
                         self.window.show_counter(not captures)
                         time.sleep(0.5)
 
-                    self.camera.preview(self.window.get_rect())
                     time.sleep(self.config.getint('WINDOW', 'preview_delay'))
 
                     image_file_name = osp.join(dirname, "ptb{:03}.jpg".format(len(captures)))
@@ -148,6 +148,7 @@ class PtbApplication(object):
                     captures.append(image_file_name)
 
                 if len(captures) >= self.config.getint('PICTURE', 'captures'):
+                    self.camera.stop_preview()
                     self.window.show_wait()
                     self.led_picture.switch_off()
                     print("Creating merged image")
