@@ -50,7 +50,7 @@ def main():
         license='MIT license',
         platforms=['unix', 'linux'],
         keywords=[
-            'raspberrypi',
+            'Raspberry Pi',
             'camera',
             'photobooth'
         ],
@@ -65,7 +65,7 @@ def main():
             'RPi.GPIO',
             'picamera',
             'Pillow',
-            'pygame',
+            'Pygame',
             'gphoto2'
         ],
         zip_safe=False,  # Don't install the lib as an .egg zipfile

@@ -155,11 +155,8 @@ Circuit diagram
 ---------------
 
 .. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/sketch.png
-   :height: 990 px
-   :width: 1215 px
-   :scale: 50 %
    :align: center
-   :alt: electronic sketch
+   :alt: Electronic sketch
 
 Credits:
 --------

@@ -27,13 +27,12 @@ class PtbApplication(object):
         self.config = config
 
         # Clean directory where pictures are saved
-        savedir = osp.expanduser(config.get('GENERAL', 'directory'))
-        if not osp.isdir(savedir):
-            os.makedirs(savedir)
-        if osp.isdir(savedir) and config.getboolean('GENERAL', 'clear_on_startup'):
-            shutil.rmtree(savedir)
-            os.makedirs(savedir)
-        self.savedir = savedir
+        self.savedir = osp.expanduser(config.get('GENERAL', 'directory'))
+        if not osp.isdir(self.savedir):
+            os.makedirs(self.savedir)
+        if osp.isdir(self.savedir) and config.getboolean('GENERAL', 'clear_on_startup'):
+            shutil.rmtree(self.savedir)
+            os.makedirs(self.savedir)
 
         # Prepare GPIO, physical pins mode
         GPIO.setmode(GPIO.BOARD)
@@ -48,13 +47,22 @@ class PtbApplication(object):
         self.window = PtbWindow(config.gettyped('WINDOW', 'size'))
 
         # Initialize the camera
-        self.camera = camera.get_camera(config.gettyped('WINDOW', 'preview_offset'),
-                                        config.getint('CAMERA', 'iso'),
-                                        config.gettyped('CAMERA', 'resolution'))
+        if camera.rpi_camera_connected():
+            cam_class = camera.RpiCamera
+        elif camera.gp_camera_commected():
+            cam_class = camera.GpCamera
+        else:
+            raise EnvironmentError("Neither Pi Camera nor GPhoto2 camera detected")
 
-        self.led = PtbLed(7)
-        self.button_print = PtbButton(13, config.getfloat('GENERAL', 'debounce_delay'))
+        self.camera = cam_class(config.gettyped('WINDOW', 'preview_offset'),
+                                config.getint('CAMERA', 'iso'),
+                                config.gettyped('CAMERA', 'resolution'))
+
+        self.led_picture = PtbLed(7)
         self.button_picture = PtbButton(11, config.getfloat('GENERAL', 'debounce_delay'))
+
+        self.led_print = PtbLed(15)
+        self.button_print = PtbButton(13, config.getfloat('GENERAL', 'debounce_delay'))
 
     def create_new_directory(self):
         """Create a new directory to save pictures.
@@ -118,7 +126,7 @@ class PtbApplication(object):
                 if not self.is_picture_event(event) and not captures:
                     self.window.show_intro()
                 else:
-                    self.led.blink()
+                    self.led_picture.blink()
                     if not captures:
                         print("Start new pictures sequence")
                         self.window.show_instructions()
@@ -133,7 +141,7 @@ class PtbApplication(object):
                     time.sleep(self.config.getint('WINDOW', 'preview_delay'))
 
                     image_file_name = osp.join(dirname, "ptb{:03}.jpg".format(len(captures)))
-                    self.led.switch_on()
+                    self.led_picture.switch_on()
                     self.window.flash(2)
                     self.camera.capture(image_file_name)
                     print("Picture saved in {}".format(image_file_name))
@@ -141,7 +149,7 @@ class PtbApplication(object):
 
                 if len(captures) >= self.config.getint('PICTURE', 'captures'):
                     self.window.show_wait()
-                    self.led.switch_off()
+                    self.led_picture.switch_off()
                     print("Creating merged image")
                     merged_file = osp.join(dirname, "ptb_merged.jpg")
                     footer_texts = [self.config.get('PICTURE', 'footer_text1'),

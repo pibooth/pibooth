@@ -9,23 +9,23 @@ from PIL import Image
 from pibooth import pictures
 
 
-def get_camera(*args, **kargs):
-    """
-    Select the camera in the following order:
-      - Found Pi Camera
-      - First found camera detected by gphoto2
-
-    If no camera found, a EnvironmentError is raised.
+def rpi_camera_connected():
+    """Return True if a RPi camera is found.
     """
     try:
         process = subprocess.Popen(['vcgencmd', 'get_camera'],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, _stderr = process.communicate()
         if stdout and u'detected=1' in stdout.decode('utf-8'):
-            return RpiCamera(*args, **kargs)
+            return True
     except OSError:
         pass
+    return False
 
+
+def gp_camera_commected():
+    """Return True if a camera compatible with gphoto2 is found.
+    """
     if hasattr(gp, 'gp_camera_autodetect'):
         # gphoto2 version 2.5+
         cameras = gp.check_result(gp.gp_camera_autodetect())
@@ -36,9 +36,9 @@ def get_camera(*args, **kargs):
         abilities_list.load()
         cameras = abilities_list.detect(port_info_list)
     if cameras:
-        return GpCamera(*args, **kargs)
+        return True
 
-    raise EnvironmentError("Neither Pi Camera nor GPhoto2 cammera detected")
+    return False
 
 
 class RpiCamera(object):
