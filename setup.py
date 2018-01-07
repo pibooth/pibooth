@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from io import open
 import os.path as osp
 from setuptools import setup, find_packages
 
@@ -14,8 +15,6 @@ elif sys.version_info[0] == 3:
 else:
     raise ValueError('Unrecognized major version of Python')
 
-if "bdist_wheel" not in sys.argv:
-    raise ValueError('Please use the "wheel" format to generate a release')
 
 HERE = osp.abspath(osp.dirname(__file__))
 sys.path.insert(0, HERE)
@@ -27,7 +26,7 @@ def main():
         name=pibooth.__name__,
         version=pibooth.__version__,
         description=pibooth.__doc__,
-        long_description=open(osp.join(HERE, 'README.rst')).read(),
+        long_description=open(osp.join(HERE, 'README.rst'), encoding='utf-8').read(),
         classifiers=[
             # How mature is this project? Common values are
             #   3 - Alpha
@@ -69,10 +68,6 @@ def main():
             'pygame',
             'gphoto2'
         ],
-        extras_require={
-            'doc':   ['sphinx'],
-            'test':  ['coverage', 'pytest'],
-        },
         zip_safe=False,  # Don't install the lib as an .egg zipfile
         entry_points={'console_scripts': ["pibooth = pibooth.ptb:main"]},
     )

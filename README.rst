@@ -1,5 +1,5 @@
 
-.. image:: templates/pibooth.png
+.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/pibooth.png
    :align: center
    :alt: Pibooth
 
@@ -39,7 +39,7 @@ Install
 A brief description on how to set-up a Raspberry Pi to use this software.
 
 1. Download latest Raspbian image and set-up an SD-card. You can follow
-   `these instructions <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_
+   `these instructions <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_ .
 2. Insert the SD-card into the Raspberry Pi and fire it up. Use the raspi-config tool that is shown
    automatically on the first boot to configure your system (e.g., expand partition, change hostname,
    password, enable SSH, configure to boot into GUI, etc.)
@@ -61,7 +61,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo wget raw.github.com/gonzalo/gphoto2-updater/master/gphoto2-updater.sh
         $ sudo chmod 755 gphoto2-updater.sh
         $ sudo ./gphoto2-updater.sh
-6. Install ``pibooth`` from the pypi repository (available soon)
+6. Install ``pibooth`` from the pypi repository
 
    ::
 
@@ -154,7 +154,7 @@ Below is the default configuration file:
 Circuit diagram
 ---------------
 
-.. image:: templates/sketch.png
+.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/sketch.png
    :height: 990 px
    :width: 1215 px
    :scale: 50 %
@@ -166,16 +166,16 @@ Credits:
 
 Icons from the Noun Project
 
- - Button by Prerak Patel
- - Disco pose by Moriah Rich
- - Fireworks by Creative Stall
- - Hamster wheel by Dream Icons
- - Tap by Prerak Patel
- - Yoga poses by Claire Jones
+- Button by Prerak Patel
+- Disco pose by Moriah Rich
+- Fireworks by Creative Stall
+- Hamster wheel by Dream Icons
+- Tap by Prerak Patel
+- Yoga poses by Claire Jones
 
 The code was developed from scratch but inspired by the following tutorials/projects:
 
- - https://github.com/reuterbal/photobooth
- - http://www.instructables.com/lesson/Build-a-Photo-Booth
- - http://www.instructables.com/id/Raspberry-Pi-photo-booth-controller
- - http://www.instructables.com/id/Lininger-Rood-Photo-Booth
+- https://github.com/reuterbal/photobooth
+- http://www.instructables.com/lesson/Build-a-Photo-Booth
+- http://www.instructables.com/id/Raspberry-Pi-photo-booth-controller
+- http://www.instructables.com/id/Lininger-Rood-Photo-Booth
