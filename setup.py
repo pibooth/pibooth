@@ -68,6 +68,10 @@ def main():
             'Pygame',
             'gphoto2'
         ],
+        options={
+            'bdist_wheel':
+                {'universal': True}
+        },
         zip_safe=False,  # Don't install the lib as an .egg zipfile
         entry_points={'console_scripts': ["pibooth = pibooth.ptb:main"]},
     )
