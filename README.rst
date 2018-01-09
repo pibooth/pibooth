@@ -125,9 +125,6 @@ Below is the default configuration file:
     # How long is the preview in seconds
     preview_delay = 3
 
-    # Preview window position related to the main window
-    preview_offset = (50, 60)
-
     [PICTURE]
     # How many pictures to take (4 max)
     captures = 4
@@ -146,7 +143,7 @@ Below is the default configuration file:
 
     [CAMERA]
     # Resolution for camera captures (see picamera modes)
-    resolution = (3280, 2464)
+    resolution = (1920, 1080)
 
     # Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max
     iso = 100

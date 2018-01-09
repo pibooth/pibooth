@@ -32,11 +32,10 @@ DEFAULT = {
         "size": ((800, 480), "(Width, Height) of the display monitor"),
         "capture_counter": (True, "Show a counter between taking photos"),
         "preview_delay": (3, "How long is the preview in seconds"),
-        "preview_offset": ((50, 60), "Preview window position related to the main window"),
     },
     "CAMERA": {
         "iso": (100, "Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max"),
-        "resolution": ((3280, 2464), "Resolution for camera captures (see picamera modes)"),
+        "resolution": ((1920, 1080), "Resolution for camera captures (see picamera modes)"),
     }
 }
 

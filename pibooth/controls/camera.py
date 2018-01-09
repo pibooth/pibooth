@@ -46,16 +46,14 @@ class RpiCamera(object):
     """Camera management
     """
 
-    def __init__(self, preview_offset=(50, 60), iso=200, resolution=(1920, 1080)):
+    def __init__(self, iso=200, resolution=(1920, 1080)):
         self._cam = picamera.PiCamera()
+        self._cam.framerate = 15  # Slower is necessary for high-resolution
         self._cam.video_stabilization = True
         self._cam.vflip = False
         self._cam.resolution = resolution
         self._cam.iso = iso
 
-        # For an obscure reason, the preview position need an offset to the pygame
-        # window position (probably the display size is not evaluated in the same way)
-        self._pos_offset = preview_offset
         self._border = 50
 
     def preview(self, rect, flip=True):
@@ -63,8 +61,8 @@ class RpiCamera(object):
         """
         # (x, y, width, height)
         res = (rect.width - 2 * self._border, rect.height - 2 * self._border)
-        window = (rect.left + self._pos_offset[0] + self._border,
-                  rect.top + self._pos_offset[1] + self._border,
+        window = (rect.left + self._border,
+                  rect.top + self._border,
                   rect.width - 2 * self._border,
                   rect.height - 2 * self._border)
         self._cam.start_preview(resolution=res, hflip=flip, fullscreen=False, window=window)
@@ -113,7 +111,7 @@ class GpCamera(object):
     """Gphoto2 camera management.
     """
 
-    def __init__(self, preview_offset=(50, 60), iso=200, resolution=(1920, 1080)):
+    def __init__(self, iso=200, resolution=(1920, 1080)):
         gp.check_result(gp.use_python_logging())
         self._cam = gp.Camera()
         self._cam.init()
