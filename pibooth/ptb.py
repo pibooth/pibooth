@@ -132,6 +132,8 @@ class PtbApplication(object):
                         dirname = self.create_new_directory()
                         self.camera.preview(self.window.get_rect())
 
+                    self.window.set_picture_number(len(captures) + 1)
+
                     if self.config.getboolean('WINDOW', 'preview_countdown'):
                         self.window.show_countdown(self.config.getint('WINDOW', 'preview_delay'))
                     else:

@@ -3,6 +3,7 @@
 import os
 import time
 import pygame
+from pygame import gfxdraw
 from pibooth import pictures
 from PIL import Image
 
@@ -24,6 +25,7 @@ class PtbWindow(object):
         self.is_fullscreen = False
 
         self._current_frame = None
+        self._picture_number = 0
 
     def _centered_pos(self, image):
         """
@@ -41,6 +43,19 @@ class PtbWindow(object):
             self.surface.blit(image, self._centered_pos(image))
             pygame.display.update()
             self._current_frame = image_name
+
+    def _update_picture_number(self):
+        """Update the pictures counter displayed.
+        """
+        center = self.surface.get_rect().center
+        radius = 10
+        border = 20
+        x = center[0] - (2 * radius * self._picture_number) // 2
+        for nbr in range(self._picture_number):
+            gfxdraw.filled_circle(self.surface, x, self.size[1] - radius - border, radius, (130, 0, 0))
+            x += (2 * radius + border)
+
+        pygame.display.update()
 
     def get_rect(self):
         """Return a Rect object as defined in pygame. The position
@@ -85,7 +100,7 @@ class PtbWindow(object):
             self.clear()
             image = font.render(str(timeout), True, (255, 255, 255))
             self.surface.blit(image, self._centered_pos(image))
-            pygame.display.update()
+            self._update_picture_number()
             time.sleep(1)
             timeout -= 1
 
@@ -97,6 +112,7 @@ class PtbWindow(object):
     def show_finished(self):
         """Show finished view.
         """
+        self._picture_number = 0
         self._show_and_memorize("finished.png")
 
     def show_pil_image(self, image):
@@ -125,6 +141,13 @@ class PtbWindow(object):
             time.sleep(0.01)
             self.clear()
             time.sleep(0.01)
+        self._update_picture_number()
+
+    def set_picture_number(self, number):
+        """Set the current number of pictures taken.
+        """
+        self._picture_number = number
+        self._update_picture_number()
 
     def clear(self):
         """Clear the window content.
