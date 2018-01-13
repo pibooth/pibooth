@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import os
 import time
 import pygame
 from pibooth import pictures
+from PIL import Image
 
 
 class PtbWindow(object):
@@ -36,6 +38,7 @@ class PtbWindow(object):
         """
         if self._current_frame != image_name:
             image = pictures.get_image(image_name, self.size)
+            self.clear()
             self.surface.blit(image, self._centered_pos(image))
             pygame.display.update()
             self._current_frame = image_name
@@ -89,25 +92,22 @@ class PtbWindow(object):
         """
         self._show_and_memorize("finished.png")
 
-    def show_image(self, pil_image):
+    def show_pil_image(self, image):
         """Show a PIL image.
         """
-        mode = pil_image.mode
-        size = pil_image.size
-        data = pil_image.tobytes()
-        image = pygame.image.fromstring(data, size, mode)
+        image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.size), Image.ANTIALIAS)
+        image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+
+        self.clear()
         self.surface.blit(image, self._centered_pos(image))
         pygame.display.update()
         self._current_frame = None
 
-    def show_image_from_file(self, image_file):
+    def show_file_image(self, image_file):
         """
         Show the merged file
         """
-        image = pictures.get_image(image_file, self.size)
-        self.surface.blit(image, self._centered_pos(image))
-        pygame.display.update()
-        self._current_frame = image_file
+        self._show_and_memorize(os.path.abspath(image_file))
 
     def flash(self, count):
         """Flash the window content.

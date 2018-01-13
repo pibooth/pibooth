@@ -5,7 +5,7 @@ from pibooth import fonts
 from pibooth.pictures import resize_keep_aspect_ratio
 
 
-def generate_photo(images, footer_texts, bg_color, text_color):
+def concatenate_pictures(images, footer_texts, bg_color, text_color):
     """
     Appends 4 PIL images in photobooth mode and retrun concatenated image as a new PIL image object.
     """
@@ -36,7 +36,7 @@ def generate_photo(images, footer_texts, bg_color, text_color):
     matrix = matrix.resize(resize_keep_aspect_ratio(matrix.size, (2400, 3000)), Image.ANTIALIAS)
 
     final_image = Image.new('RGB', (2400, 3600), color=bg_color)
-    final_image.paste(matrix, ((2400-matrix.size[0])//2, (3000-matrix.size[1])//2))
+    final_image.paste(matrix, ((2400 - matrix.size[0]) // 2, (3000 - matrix.size[1]) // 2))
 
     # Text part
     x_offset = 600
@@ -52,16 +52,10 @@ def generate_photo(images, footer_texts, bg_color, text_color):
     return final_image
 
 
-def generate_photo_from_files(image_files_list, output_file, footer_texts, bg_color=(255, 255, 255), text_color=(0, 0, 0)):
+def generate_picture_from_files(image_files_list, footer_texts, bg_color=(255, 255, 255), text_color=(0, 0, 0)):
     """
-    Generate the output_file by concatenating the image in the image_files_list
+    Generate a picture by concatenating the images in the image_files_list
     """
-    list_pil_images = []
-    for img in image_files_list:
-        image = Image.open(img)
-        list_pil_images.append(image)
+    list_pil_images = [Image.open(img) for img in image_files_list]
 
-    # LIST_PIL_IMAGES = [Image.open(img) for img in LIST_IMAGES]
-    new_image = generate_photo(list_pil_images, footer_texts,
-                               bg_color=bg_color, text_color=text_color)
-    new_image.save(output_file)
+    return concatenate_pictures(list_pil_images, footer_texts, bg_color=bg_color, text_color=text_color)

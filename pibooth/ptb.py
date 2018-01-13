@@ -13,10 +13,11 @@ import argparse
 import os.path as osp
 from RPi import GPIO
 import pibooth
+from pibooth.utils import timeit
 from pibooth.window import PtbWindow
 from pibooth.config import PtbConfigParser, edit_configuration
 from pibooth.controls import camera
-from pibooth.pictures.concatenate_images import generate_photo_from_files
+from pibooth.pictures.concatenate import generate_picture_from_files
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
 
@@ -137,32 +138,35 @@ class PtbApplication(object):
 
                     time.sleep(self.config.getint('WINDOW', 'preview_delay'))
 
-                    image_file_name = osp.join(dirname, "ptb{:03}.jpg".format(len(captures)))
                     self.led_picture.switch_on()
                     self.window.flash(2)
-                    self.camera.capture(image_file_name)
-                    print("Picture saved in {}".format(image_file_name))
-                    captures.append(image_file_name)
+
+                    image_file_name = osp.join(dirname, "ptb{:03}.jpg".format(len(captures)))
+                    with timeit("Take picture and save it in {}".format(image_file_name)):
+                        self.camera.capture(image_file_name)
+                        captures.append(image_file_name)
 
                 if len(captures) >= self.config.getint('PICTURE', 'captures'):
                     self.camera.stop_preview()
                     self.window.show_wait()
                     self.led_picture.switch_off()
-                    print("Creating merged image")
-                    merged_file = osp.join(dirname, "ptb_merged.jpg")
-                    footer_texts = [self.config.get('PICTURE', 'footer_text1'),
-                                    self.config.get('PICTURE', 'footer_text2')]
-                    bg_color = self.config.gettyped('PICTURE', 'bg_color')
-                    text_color = self.config.gettyped('PICTURE', 'text_color')
-                    generate_photo_from_files(captures, merged_file, footer_texts,
-                                              bg_color, text_color)
 
-                    print("Display the picture")
-                    self.window.clear()
-                    self.window.show_image_from_file(merged_file)
+                    with timeit("Creating merged picture"):
+                        footer_texts = [self.config.get('PICTURE', 'footer_text1'),
+                                        self.config.get('PICTURE', 'footer_text2')]
+                        bg_color = self.config.gettyped('PICTURE', 'bg_color')
+                        text_color = self.config.gettyped('PICTURE', 'text_color')
+                        picture = generate_picture_from_files(captures, footer_texts, bg_color, text_color)
+
+                    merged_picture = osp.join(dirname, "ptb_merged.jpg")
+                    with timeit("Save the merged picture in {}".format(merged_picture)):
+                        picture.save(merged_picture)
+
+                    with timeit("Display the merged picture"):
+                        self.window.show_pil_image(picture)
+
                     time.sleep(5)
                     # Finish the sequence
-                    self.window.clear()
                     self.window.show_finished()
                     time.sleep(1)
                     captures = []
