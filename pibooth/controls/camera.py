@@ -50,6 +50,7 @@ class RpiCamera(object):
         self._cam = picamera.PiCamera()
         self._cam.framerate = 15  # Slower is necessary for high-resolution
         self._cam.video_stabilization = True
+        self._cam.preview_alpha = 251  # Necessary to show countdown by transparency
         self._cam.vflip = False
         self._cam.resolution = resolution
         self._cam.iso = iso

@@ -119,11 +119,14 @@ Below is the default configuration file:
     # (Width, Height) of the display monitor
     size = (800, 480)
 
-    # Show a counter between taking photos
-    capture_counter = True
+    # Blinking background when picture is taken
+    flash = True
 
     # How long is the preview in seconds
     preview_delay = 3
+
+    # Show a countdown timer during the preview
+    preview_countdown = True
 
     [PICTURE]
     # How many pictures to take (4 max)

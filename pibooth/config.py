@@ -30,7 +30,8 @@ DEFAULT = {
     },
     "WINDOW": {
         "size": ((800, 480), "(Width, Height) of the display monitor"),
-        "capture_counter": (True, "Show a counter between taking photos"),
+        "flash": (True, "Blinking background when picture is taken"),
+        "preview_countdown": (True, "Show a countdown timer during the preview"),
         "preview_delay": (3, "How long is the preview in seconds"),
     },
     "CAMERA": {

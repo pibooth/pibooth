@@ -23,7 +23,6 @@ class PtbWindow(object):
         self.display_size = (info.current_w, info.current_h)
         self.is_fullscreen = False
 
-        self._counter = 0
         self._current_frame = None
 
     def _centered_pos(self, image):
@@ -74,13 +73,21 @@ class PtbWindow(object):
         """
         self._show_and_memorize("intro.png")
 
-    def show_counter(self, restart=False):
-        """Show the next counter view.
+    def show_countdown(self, timeout):
+        """Show a countdown of `timeout` seconds.
         """
-        if restart or self._counter > 4:  # Max 4 view
-            self._counter = 0
-        self._counter += 1
-        self._show_and_memorize("pose{}.png".format(self._counter))
+        timeout = int(timeout)
+        if timeout < 1:
+            raise ValueError("Start time shall be greater than 0")
+
+        font = pygame.font.SysFont('Consolas', 400)
+        while timeout > 0:
+            self.clear()
+            image = font.render(str(timeout), True, (255, 255, 255))
+            self.surface.blit(image, self._centered_pos(image))
+            pygame.display.update()
+            time.sleep(1)
+            timeout -= 1
 
     def show_wait(self):
         """Show wait view.

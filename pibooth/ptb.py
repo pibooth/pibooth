@@ -132,14 +132,14 @@ class PtbApplication(object):
                         dirname = self.create_new_directory()
                         self.camera.preview(self.window.get_rect())
 
-                    if self.config.getboolean('WINDOW', 'capture_counter'):
-                        self.window.show_counter(not captures)
-                        time.sleep(0.5)
-
-                    time.sleep(self.config.getint('WINDOW', 'preview_delay'))
+                    if self.config.getboolean('WINDOW', 'preview_countdown'):
+                        self.window.show_countdown(self.config.getint('WINDOW', 'preview_delay'))
+                    else:
+                        time.sleep(self.config.getint('WINDOW', 'preview_delay'))
 
                     self.led_picture.switch_on()
-                    self.window.flash(2)
+                    if self.config.getboolean('WINDOW', 'flash'):
+                        self.window.flash(2)
 
                     image_file_name = osp.join(dirname, "ptb{:03}.jpg".format(len(captures)))
                     with timeit("Take picture and save it in {}".format(image_file_name)):
@@ -203,7 +203,7 @@ def main():
     if options.config:
         print("Editing the Photo Booth configuration...")
         edit_configuration(config)
-    else:
+    elif not options.reset:
         print("Starting the Photo Booth application...")
         app = PtbApplication(config)
         app.main_loop()
