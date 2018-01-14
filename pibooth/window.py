@@ -56,6 +56,7 @@ class PtbWindow(object):
         for nbr in range(self._picture_number[1]):
             gfxdraw.aacircle(self.surface, x, y, radius, color)
             if self._picture_number[0] > nbr:
+                gfxdraw.aacircle(self.surface, x, y, radius - 3, color)  # Because anti-aliased filled circle doesn't exist
                 gfxdraw.filled_circle(self.surface, x, y, radius - 3, color)
             x += (2 * radius + border)
 
