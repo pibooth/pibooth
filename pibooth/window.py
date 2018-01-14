@@ -25,7 +25,7 @@ class PtbWindow(object):
         self.is_fullscreen = False
 
         self._current_frame = None
-        self._picture_number = 0
+        self._picture_number = (0, 4)  # current / max
 
     def _centered_pos(self, image):
         """
@@ -50,9 +50,13 @@ class PtbWindow(object):
         center = self.surface.get_rect().center
         radius = 10
         border = 20
-        x = center[0] - (2 * radius * self._picture_number) // 2
-        for nbr in range(self._picture_number):
-            gfxdraw.filled_circle(self.surface, x, self.size[1] - radius - border, radius, (130, 0, 0))
+        color = (160, 0, 0)
+        x = center[0] - (2 * radius * self._picture_number[1] + border * (self._picture_number[1] - 1)) // 2
+        y = self.size[1] - radius - border
+        for nbr in range(self._picture_number[1]):
+            gfxdraw.aacircle(self.surface, x, y, radius, color)
+            if self._picture_number[0] > nbr:
+                gfxdraw.filled_circle(self.surface, x, y, radius - 3, color)
             x += (2 * radius + border)
 
         pygame.display.update()
@@ -112,7 +116,7 @@ class PtbWindow(object):
     def show_finished(self):
         """Show finished view.
         """
-        self._picture_number = 0
+        self._picture_number = (0, self._picture_number[1])
         self._show_and_memorize("finished.png")
 
     def show_pil_image(self, image):
@@ -143,10 +147,13 @@ class PtbWindow(object):
             time.sleep(0.01)
         self._update_picture_number()
 
-    def set_picture_number(self, number):
+    def set_picture_number(self, current_nbr, total_nbr):
         """Set the current number of pictures taken.
         """
-        self._picture_number = number
+        if total_nbr < 1:
+            raise ValueError("Total number of captures shall be greater than 0")
+
+        self._picture_number = (current_nbr, total_nbr)
         self._update_picture_number()
 
     def clear(self):
