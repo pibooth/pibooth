@@ -3,12 +3,12 @@
 import cups
 import threading
 import collections
+from xml.etree import ElementTree
 try:
     from http.server import HTTPServer, BaseHTTPRequestHandler
 except ImportError:
     # Python 2.x fallback
     from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
-from xml.etree import ElementTree
 
 
 class NotificationHandler(BaseHTTPRequestHandler):

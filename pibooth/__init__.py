@@ -2,4 +2,4 @@
 
 """A Photo Booth application in pure Python for the Raspberry Pi."""
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"

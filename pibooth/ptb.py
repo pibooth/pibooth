@@ -13,7 +13,7 @@ import argparse
 import os.path as osp
 from RPi import GPIO
 import pibooth
-from pibooth.utils import timeit
+from pibooth.utils import timeit, PoolingTimer
 from pibooth.window import PtbWindow
 from pibooth.config import PtbConfigParser, edit_configuration
 from pibooth.controls import camera
@@ -114,6 +114,8 @@ class PtbApplication(object):
         """
         try:
             captures = []
+            last_merged_picture = None
+            printing_timer = None
             while True:
                 event = pygame.event.poll()    # Take one event
 
@@ -126,12 +128,14 @@ class PtbApplication(object):
                 if self.is_resize_event(event):
                     self.window.resize(event.size)
 
-                if not self.is_picture_event(event) and not captures:
+                if not self.is_picture_event(event) and not captures and not printing_timer:
                     self.window.show_intro()
-                else:
+                elif not printing_timer:
+                    self.led_print.switch_off()
                     self.led_picture.blink()
                     if not captures:
                         print("Start new pictures sequence")
+                        last_merged_picture = None  # Print button will do nothing
                         dirname = self.create_new_directory()
                         self.camera.preview(self.window.get_rect())
 
@@ -163,23 +167,33 @@ class PtbApplication(object):
                         text_color = self.config.gettyped('PICTURE', 'text_color')
                         picture = generate_picture_from_files(captures, footer_texts, bg_color, text_color)
 
-                    merged_picture = osp.join(dirname, "ptb_merged.jpg")
-                    with timeit("Save the merged picture in {}".format(merged_picture)):
-                        picture.save(merged_picture)
+                    last_merged_picture = osp.join(dirname, "ptb_merged.jpg")
+                    with timeit("Save the merged picture in {}".format(last_merged_picture)):
+                        picture.save(last_merged_picture)
 
                     with timeit("Display the merged picture"):
                         self.window.show_pil_image(picture)
 
-                    time.sleep(5)
-                    # Finish the sequence
-                    self.window.show_finished()
-                    time.sleep(1)
+                    printing_timer = PoolingTimer(5)
+                    self.led_print.switch_on()
                     captures = []
 
-                if self.is_print_event(event):
+                if self.is_print_event(event) and last_merged_picture:
                     print("Send pictures to printer")
+                    self.led_print.blink()
+                    self.printer.print_file(last_merged_picture)
+                    time.sleep(0.5)
+                    self.led_print.switch_on()
+
+                if printing_timer and printing_timer.is_timeout():
+                    # Finish the sequence
+                    self.window.show_finished()
+                    time.sleep(0.5)
+                    printing_timer = None
 
         finally:
+            self.led_picture.switch_off()
+            self.led_print.switch_off()
             GPIO.cleanup()
             self.camera.quit()
             self.printer.quit()
