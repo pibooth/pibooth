@@ -32,6 +32,7 @@ Software:
 * Pillow ``4.0.0``
 * pygame ``1.9.3``
 * gphoto2 ``1.8.0`` ( libgphoto2 ``2.5.15`` )
+* pycups ``1.9.73``
 
 Install
 -------

@@ -49,6 +49,7 @@ class PtbLed(object):
         """
         if not self._blinking_thread:
             self._blinking_thread = threading.Thread(target=self._blink)
+            self._blinking_thread.daemon = True
             self._blinking_thread.start()
 
         if duration:

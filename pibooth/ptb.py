@@ -20,6 +20,7 @@ from pibooth.controls import camera
 from pibooth.pictures.concatenate import generate_picture_from_files
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
+from pibooth.controls.printer import PtbPrinter
 
 
 class PtbApplication(object):
@@ -63,6 +64,8 @@ class PtbApplication(object):
 
         self.led_print = PtbLed(15)
         self.button_print = PtbButton(13, config.getfloat('GENERAL', 'debounce_delay'))
+
+        self.printer = PtbPrinter()
 
     def create_new_directory(self):
         """Create a new directory to save pictures.
@@ -179,6 +182,7 @@ class PtbApplication(object):
         finally:
             GPIO.cleanup()
             self.camera.quit()
+            self.printer.quit()
             pygame.quit()
 
 
