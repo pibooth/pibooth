@@ -62,8 +62,8 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo wget raw.github.com/gonzalo/gphoto2-updater/master/gphoto2-updater.sh
         $ sudo chmod 755 gphoto2-updater.sh
         $ sudo ./gphoto2-updater.sh
-6. Install ``CUPS`` to handle printers. You can install a new printer by following
-   `these instructions <https://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer>`_ .
+6. Install ``CUPS`` to handle printers. More instruction to add a new printer can be found
+   `here <https://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer>`_ .
 
    ::
 
