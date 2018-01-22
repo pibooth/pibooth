@@ -113,14 +113,17 @@ Below is the default configuration file:
 .. code-block:: ini
 
     [GENERAL]
-    # Path to save images
+    # Path to save pictures
     directory = ~/Pictures/pibooth
 
-    # Clear previously stored photos
+    # Cleanup the 'directory' before start
     clear_on_startup = True
 
     # How long to debounce the button in seconds
     debounce_delay = 0.3
+
+    # Name of the printer to send the pictures
+    printer_name = default
 
     [WINDOW]
     # (Width, Height) of the display monitor

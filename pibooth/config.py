@@ -17,9 +17,10 @@ except ImportError:
 
 DEFAULT = {
     "GENERAL": {
-        "directory": ("~/Pictures/pibooth", "Path to save images"),
-        "clear_on_startup": (True, "Clear previously stored photos"),
+        "directory": ("~/Pictures/pibooth", "Path to save pictures"),
+        "clear_on_startup": (True, "Cleanup the 'directory' before start"),
         "debounce_delay": (0.3, "How long to debounce the button in seconds"),
+        "printer_name": ("default", "Name of the printer to send the pictures"),
     },
     "PICTURE": {
         "captures": (4, "How many pictures to take (4 max)"),

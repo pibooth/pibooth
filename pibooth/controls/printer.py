@@ -3,6 +3,7 @@
 import cups
 import threading
 import collections
+import os.path as osp
 from xml.etree import ElementTree
 try:
     from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -13,7 +14,7 @@ except ImportError:
 
 class NotificationHandler(BaseHTTPRequestHandler):
 
-    _last_notif = collections.deque(maxlen=1000)
+    _last_notif = collections.deque(maxlen=500)
 
     def get_chunk_size(self):
         size_str = self.rfile.read(2)
@@ -27,7 +28,7 @@ class NotificationHandler(BaseHTTPRequestHandler):
         return data
 
     def log_request(self, code='-', size='-'):
-        """Dont print requests.
+        """Don't print requests.
         """
         pass
 
@@ -67,7 +68,6 @@ class NotificationServer(HTTPServer):
         HTTPServer.__init__(self, ('localhost', 9988), NotificationHandler)
         self._thread = None
         self._conn = cups_conn
-        self._id = None
         self.notif_uri = 'rss://{}:{}'.format(self.server_address[0],
                                               self.server_address[1])
 
@@ -80,24 +80,17 @@ class NotificationServer(HTTPServer):
         self._thread.daemon = True
         self._thread.start()
 
-        # Remove all existing subscribtions (may exists due to previous crashes)
-        try:
-            for sub in self._conn.getSubscriptions(self.notif_uri):
-                self._conn.cancelSubscription(sub['notify-subscription-id'])
-        except cups.IPPError:
-            pass
+        self.cancel_subscriptions()
 
         # Renew notifications subscription
         cups_uri = "ipp://localhost:{}".format(cups.getPort())
-        self._id = self._conn.createSubscription(cups_uri, recipient_uri=self.notif_uri,
-                                                 events=['job-completed',
-                                                         'job-created',
-                                                         'job-state-changed',
-                                                         'job-stopped',
-                                                         'printer-restarted',
-                                                         'printer-shutdown',
-                                                         'printer-state-changed',
-                                                         'printer-stopped'])
+        self._conn.createSubscription(cups_uri, recipient_uri=self.notif_uri,
+                                      events=['job-completed',
+                                              'job-created',
+                                              'job-stopped',
+                                              'printer-restarted',
+                                              'printer-shutdown',
+                                              'printer-stopped'])
 
     def is_running(self):
         """Return True if the notification server is started.
@@ -106,12 +99,20 @@ class NotificationServer(HTTPServer):
             return self._thread.is_alive()
         return False
 
+    def cancel_subscriptions(self):
+        """Cancel all subscriptions related to the notification URI.
+        """
+        try:
+            for sub in self._conn.getSubscriptions(self.notif_uri):
+                self._conn.cancelSubscription(sub['notify-subscription-id'])
+        except cups.IPPError:
+            pass
+
     def shutdown(self):
         """Stop the notification server.
         """
         if self.is_running():
-            if self._id:
-                self._conn.cancelSubscription(self._id)
+            self.cancel_subscriptions()
             HTTPServer.shutdown(self)
             self._thread.join()
             self._thread = None
@@ -120,23 +121,32 @@ class NotificationServer(HTTPServer):
 
 class PtbPrinter(object):
 
-    def __init__(self):
+    def __init__(self, name='default'):
         self._conn = cups.Connection()
         self._notif_server = NotificationServer(self._conn)
+        self.name = None
+        if not name or name.lower() == 'default':
+            self.name = self._conn.getDefault()
+            if not self.name and self._conn.getPrinters():
+                self.name = list(self._conn.getPrinters().keys())[0]  # Take first one
+        elif name in self._conn.getPrinters():
+            self.name = name
 
     def print_file(self, filename):
         """Send a file to the CUPS server to the default printer.
         """
         if not self._notif_server.is_running():
             self._notif_server.start()
-        if not self._conn.getDefault():
-            raise EnvironmentError("Default printer not found")
-        self._conn.printFile(self._conn.getDefault(), filename, 'pibooth', {})
+        if not self.name:
+            raise EnvironmentError("No printer found (check config file or CUPS config)")
+        self._conn.printFile(self.name, filename, osp.basename(filename), {})
 
     def cancel_all_tasks(self):
         """Cancel all tasks in the queue.
         """
-        self._conn.cancelAllJobs(self._conn.getDefault())
+        if not self.name:
+            raise EnvironmentError("No printer found (check config file or CUPS config)")
+        self._conn.cancelAllJobs(self.name)
 
     def quit(self):
         """Do cleanup actions.

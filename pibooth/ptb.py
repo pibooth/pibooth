@@ -65,7 +65,7 @@ class PtbApplication(object):
         self.led_print = PtbLed(15)
         self.button_print = PtbButton(13, config.getfloat('GENERAL', 'debounce_delay'))
 
-        self.printer = PtbPrinter()
+        self.printer = PtbPrinter(config.get('GENERAL', 'printer_name'))
 
     def create_new_directory(self):
         """Create a new directory to save pictures.
@@ -167,7 +167,7 @@ class PtbApplication(object):
                         text_color = self.config.gettyped('PICTURE', 'text_color')
                         picture = generate_picture_from_files(captures, footer_texts, bg_color, text_color)
 
-                    last_merged_picture = osp.join(dirname, "ptb_merged.jpg")
+                    last_merged_picture = osp.join(dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
                     with timeit("Save the merged picture in {}".format(last_merged_picture)):
                         picture.save(last_merged_picture)
 
