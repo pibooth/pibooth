@@ -41,20 +41,24 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
 1. Download latest Raspbian image and set-up an SD-card. You can follow
    `these instructions <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_ .
+
 2. Insert the SD-card into the Raspberry Pi and fire it up. Use the raspi-config tool that is shown
    automatically on the first boot to configure your system (e.g., expand partition, change hostname,
    password, enable SSH, configure to boot into GUI, etc.)
+
 3. Reboot and open a terminal. Install the latest firmware version
 
    ::
 
         $ sudo rpi-update
+
 4. Upgrade all installed software
 
    ::
 
         $ sudo apt-get update
         $ sudo apt-get upgrade
+
 5. Install ``gphoto2`` (required only for external Camera)
 
    ::
@@ -62,12 +66,14 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo wget raw.github.com/gonzalo/gphoto2-updater/master/gphoto2-updater.sh
         $ sudo chmod 755 gphoto2-updater.sh
         $ sudo ./gphoto2-updater.sh
+
 6. Install ``CUPS`` to handle printers. More instruction to add a new printer can be found
    `here <https://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer>`_ .
 
    ::
 
         $ sudo apt-get install cups libcups2-dev
+
 7. Install ``pibooth`` from the pypi repository
 
    ::
