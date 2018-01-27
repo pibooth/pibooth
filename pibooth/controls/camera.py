@@ -23,7 +23,7 @@ def rpi_camera_connected():
     return False
 
 
-def gp_camera_commected():
+def gp_camera_connected():
     """Return True if a camera compatible with gphoto2 is found.
     """
     if hasattr(gp, 'gp_camera_autodetect'):

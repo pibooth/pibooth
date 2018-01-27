@@ -51,7 +51,7 @@ class PtbApplication(object):
         # Initialize the camera
         if camera.rpi_camera_connected():
             cam_class = camera.RpiCamera
-        elif camera.gp_camera_commected():
+        elif camera.gp_camera_connected():
             cam_class = camera.GpCamera
         else:
             raise EnvironmentError("Neither Pi Camera nor GPhoto2 camera detected")
