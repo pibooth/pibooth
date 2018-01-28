@@ -57,7 +57,8 @@ class PtbApplication(object):
             raise EnvironmentError("Neither Pi Camera nor GPhoto2 camera detected")
 
         self.camera = cam_class(config.getint('CAMERA', 'iso'),
-                                config.gettyped('CAMERA', 'resolution'))
+                                config.gettyped('CAMERA', 'resolution'),
+                                config.getint('CAMERA', 'rotation'))
 
         self.led_picture = PtbLed(7)
         self.button_picture = PtbButton(11, config.getfloat('GENERAL', 'debounce_delay'))

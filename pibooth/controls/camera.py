@@ -46,7 +46,7 @@ class RpiCamera(object):
     """Camera management
     """
 
-    def __init__(self, iso=200, resolution=(1920, 1080)):
+    def __init__(self, iso=200, resolution=(1920, 1080), rotation=0):
         self._cam = picamera.PiCamera()
         self._cam.framerate = 15  # Slower is necessary for high-resolution
         self._cam.video_stabilization = True
@@ -54,6 +54,7 @@ class RpiCamera(object):
         self._cam.vflip = False
         self._cam.resolution = resolution
         self._cam.iso = iso
+        self._cam.rotation = rotation
 
         self._border = 50
 
@@ -112,7 +113,7 @@ class GpCamera(object):
     """Gphoto2 camera management.
     """
 
-    def __init__(self, iso=200, resolution=(1920, 1080)):
+    def __init__(self, iso=200, resolution=(1920, 1080), rotation=0):
         gp.check_result(gp.use_python_logging())
         self._cam = gp.Camera()
         self._cam.init()
