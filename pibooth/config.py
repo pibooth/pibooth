@@ -21,6 +21,7 @@ DEFAULT = {
         "clear_on_startup": (True, "Cleanup the 'directory' before start"),
         "debounce_delay": (0.3, "How long to debounce the button in seconds"),
         "printer_name": ("default", "Name of the printer to send the pictures"),
+        "language": ("en", "language of the texts")
     },
     "PICTURE": {
         "captures": (4, "How many pictures to take (4 max)"),

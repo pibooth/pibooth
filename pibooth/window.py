@@ -33,6 +33,12 @@ class PtbWindow(object):
         """
         return image.get_rect(center=self.surface.get_rect().center)
 
+    def _left_pos(self, image):
+        """
+        Return the position of the given image to be put on the left of the screen
+        """
+        return image.get_rect(center=(self.surface.get_rect().centerx//2, self.surface.get_rect().centery))
+
     def _show_and_memorize(self, image_name):
         """Show image and memorize it. If the image is the same as the
         current displayed, nothing is done.
@@ -50,7 +56,7 @@ class PtbWindow(object):
         center = self.surface.get_rect().center
         radius = 10
         border = 20
-        color = (160, 0, 0)
+        color = (255, 255, 255)
         x = center[0] - (2 * radius * self._picture_number[1] + border * (self._picture_number[1] - 1)) // 2
         y = self.size[1] - radius - border
         for nbr in range(self._picture_number[1]):
@@ -93,6 +99,11 @@ class PtbWindow(object):
         """
         self._show_and_memorize("intro.png")
 
+    def show_choice(self):
+        """Show the choice view.
+        """
+        self._show_and_memorize("choice.png")
+
     def show_countdown(self, timeout):
         """Show a countdown of `timeout` seconds.
         """
@@ -121,13 +132,14 @@ class PtbWindow(object):
         self._show_and_memorize("finished.png")
 
     def show_pil_image(self, image):
-        """Show a PIL image.
+        """Show a PIL image on the print font
         """
         image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.size), Image.ANTIALIAS)
         image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
 
         self.clear()
-        self.surface.blit(image, self._centered_pos(image))
+        self._show_and_memorize("print.png")
+        self.surface.blit(image, self._left_pos(image))
         pygame.display.update()
         self._current_frame = None
 

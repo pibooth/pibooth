@@ -129,9 +129,15 @@ class PtbApplication(object):
                 if self.is_resize_event(event):
                     self.window.resize(event.size)
 
+                # Waiting for any action
                 if not self.is_picture_event(event) and not captures and not printing_timer:
                     self.window.show_intro()
+
+                # Loop when taking pictures
                 elif not printing_timer:
+                    if not captures:
+                        self.window.show_choice()
+                        time.sleep(5)
                     self.led_print.switch_off()
                     self.led_picture.blink()
                     if not captures:
@@ -156,6 +162,7 @@ class PtbApplication(object):
                         self.camera.capture(image_file_name)
                         captures.append(image_file_name)
 
+                # Case of all pictures taken
                 if len(captures) >= self.config.getint('PICTURE', 'captures'):
                     self.camera.stop_preview()
                     self.window.show_wait()
