@@ -44,25 +44,24 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
 2. Insert the SD-card into the Raspberry Pi and fire it up. Use the raspi-config tool that is shown
    automatically on the first boot to configure your system (e.g., expand partition, change hostname,
-   password, enable SSH, configure to boot into GUI, etc.)
+   password, enable SSH, configure to boot into GUI, etc.).
 
-   Don't forget to enable the camera:
-   On raspi-config, choose in the menu to enable the pi camera. A reboot is needed after this.
-   
-3. Reboot and open a terminal. Install the latest firmware version
+   .. hint:: Don't forget to enable the camera in raspi-config. A reboot is needed after this.
+
+3. Reboot and open a terminal. Install the latest firmware version:
 
    ::
 
         $ sudo rpi-update
 
-4. Upgrade all installed software
+4. Upgrade all installed software:
 
    ::
 
         $ sudo apt-get update
         $ sudo apt-get upgrade
 
-5. Install ``gphoto2`` (required only for external Camera)
+5. Install ``gphoto2`` (required only for external camera):
 
    ::
 
@@ -70,14 +69,14 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo chmod 755 gphoto2-updater.sh
         $ sudo ./gphoto2-updater.sh
 
-6. Install ``CUPS`` to handle printers. More instruction to add a new printer can be found
-   `here <https://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer>`_ .
+6. Install ``CUPS`` to handle printers (more instruction to add a new printer can be found
+   `here <https://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer>`_):
 
    ::
 
         $ sudo apt-get install cups libcups2-dev
 
-7. Install ``pibooth`` from the pypi repository
+7. Install ``pibooth`` from the pypi repository:
 
    ::
 
@@ -122,6 +121,9 @@ Below is the default configuration file:
 .. code-block:: ini
 
     [GENERAL]
+    # User interface language (fallback to English if not found)
+    language = en
+
     # Path to save pictures
     directory = ~/Pictures/pibooth
 

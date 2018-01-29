@@ -9,10 +9,10 @@ import os
 import os.path as osp
 import subprocess
 try:
-    import configparser
+    from configparser import ConfigParser
 except ImportError:
     # Python 2.x fallback
-    import ConfigParser as configparser
+    from ConfigParser import ConfigParser
 
 
 DEFAULT = {
@@ -21,7 +21,7 @@ DEFAULT = {
         "clear_on_startup": (True, "Cleanup the 'directory' before start"),
         "debounce_delay": (0.3, "How long to debounce the button in seconds"),
         "printer_name": ("default", "Name of the printer to send the pictures"),
-        "language": ("en", "language of the texts")
+        "language": ("en", "User interface language (fallback to English if not found)")
     },
     "PICTURE": {
         "captures": (4, "How many pictures to take (4 max)"),
@@ -61,13 +61,13 @@ def edit_configuration(config):
     process.communicate()
 
 
-class PtbConfigParser(configparser.ConfigParser):
+class PtbConfigParser(ConfigParser):
 
     """Enhenced configuration file parser.
     """
 
     def __init__(self, filename, clear=False):
-        configparser.ConfigParser.__init__(self)
+        ConfigParser.__init__(self)
         self.filename = osp.abspath(osp.expanduser(filename))
 
         if not osp.isfile(self.filename) or clear:
@@ -85,7 +85,7 @@ class PtbConfigParser(configparser.ConfigParser):
         default value if section or option is not found.
         """
         if self.has_section(section) and self.has_option(section, option):
-            return configparser.ConfigParser.get(self, section, option, **kwargs)
+            return ConfigParser.get(self, section, option, **kwargs)
         return str(DEFAULT[section][option][0])
 
     def gettyped(self, section, option):
