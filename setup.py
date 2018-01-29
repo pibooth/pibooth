@@ -49,7 +49,7 @@ def main():
         package_data={
             'pibooth': ['*.ini'],
             'pibooth.fonts': ['*.ttf'],
-            'pibooth.pictures': ['*.png'],
+            'pibooth.pictures': ['*/*.png'],
         },
         include_package_data=True,
         install_requires=[
