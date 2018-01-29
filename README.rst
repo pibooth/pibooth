@@ -172,6 +172,9 @@ Below is the default configuration file:
     # Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max
     iso = 100
 
+    # Rotation of the camera
+    "rotation": 0
+
 Circuit diagram
 ---------------
 
