@@ -173,7 +173,7 @@ Below is the default configuration file:
     iso = 100
 
     # Rotation of the camera
-    "rotation": 0
+    rotation = 0
 
 Circuit diagram
 ---------------
@@ -190,3 +190,4 @@ Icons from the Noun Project
 - Button by Prerak Patel
 - Fireworks by Creative Stall
 - Hamster wheel by Dream Icons
+- Polaroid by icon 54
