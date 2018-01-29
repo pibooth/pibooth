@@ -8,6 +8,8 @@ import ast
 import os
 import os.path as osp
 import subprocess
+from pibooth.utils import LOGGER
+
 try:
     from configparser import ConfigParser
 except ImportError:
@@ -71,7 +73,7 @@ class PtbConfigParser(ConfigParser):
         self.filename = osp.abspath(osp.expanduser(filename))
 
         if not osp.isfile(self.filename) or clear:
-            print("Generate the configuration file in '{}'".format(self.filename))
+            LOGGER.info("Generate the configuration file in '%s'", self.filename)
             dirname = osp.dirname(self.filename)
             if not osp.isdir(dirname):
                 os.makedirs(dirname)

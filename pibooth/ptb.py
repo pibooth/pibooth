@@ -13,7 +13,7 @@ import argparse
 import os.path as osp
 from RPi import GPIO
 import pibooth
-from pibooth.utils import timeit, PoolingTimer
+from pibooth.utils import LOGGER, timeit, PoolingTimer
 from pibooth.window import PtbWindow
 from pibooth.config import PtbConfigParser, edit_configuration
 from pibooth.controls import camera
@@ -141,7 +141,7 @@ class PtbApplication(object):
                     self.led_print.switch_off()
                     self.led_picture.blink()
                     if not captures:
-                        print("Start new pictures sequence")
+                        LOGGER.info("Start new pictures sequence")
                         last_merged_picture = None  # Print button will do nothing
                         dirname = self.create_new_directory()
                         self.camera.preview(self.window.get_rect())
@@ -187,7 +187,7 @@ class PtbApplication(object):
                     captures = []
 
                 if self.is_print_event(event) and last_merged_picture:
-                    print("Send pictures to printer")
+                    LOGGER.info("Send pictures to printer")
                     self.led_print.blink()
                     self.printer.print_file(last_merged_picture)
                     time.sleep(0.5)
@@ -213,7 +213,7 @@ def main():
     """
     parser = argparse.ArgumentParser(usage="%(prog)s [options]", description=pibooth.__doc__)
 
-    parser.add_argument('-v', '--version', action='version', version=pibooth.__version__,
+    parser.add_argument('--version', action='version', version=pibooth.__version__,
                         help=u"show program's version number and exit")
 
     parser.add_argument("--config", action='store_true',
@@ -222,17 +222,23 @@ def main():
     parser.add_argument("--reset", action='store_true',
                         help=u"restore the default configuration")
 
-    logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-v", "--verbose", dest='logging', action='store_const', const=logging.DEBUG, default=logging.INFO,
+                       help=u"report more information about operations")
+    group.add_argument("-q", "--quiet", dest='logging', action='store_const', const=logging.WARNING,
+                       help=u"report only errors and warnings")
 
     options, _args = parser.parse_known_args()
+
+    logging.basicConfig(format='[ %(levelname)-8s] %(name)-18s: %(message)s', level=options.logging)
 
     config = PtbConfigParser("~/.config/pibooth/pibooth.cfg", options.reset)
 
     if options.config:
-        print("Editing the Photo Booth configuration...")
+        LOGGER.info("Editing the Photo Booth configuration...")
         edit_configuration(config)
     elif not options.reset:
-        print("Starting the Photo Booth application...")
+        LOGGER.info("Starting the Photo Booth application...")
         app = PtbApplication(config)
         app.main_loop()
 

@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import time
+import logging
 import contextlib
+
+LOGGER = logging.getLogger("pibooth")
 
 
 @contextlib.contextmanager
 def timeit(description):
-    print(description)
+    LOGGER.info(description)
     start = time.time()
     try:
         yield
     finally:
-        print("    -> took {} seconds.".format(time.time() - start))
+        LOGGER.debug("    -> took %s seconds.", time.time() - start)
 
 
 class PoolingTimer(object):

@@ -10,6 +10,7 @@ try:
 except ImportError:
     # Python 2.x fallback
     from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+from pibooth.utils import LOGGER
 
 
 class NotificationHandler(BaseHTTPRequestHandler):
@@ -46,7 +47,7 @@ class NotificationHandler(BaseHTTPRequestHandler):
         """
         chunk_size = self.get_chunk_size()
         if chunk_size == 0:
-            print("Notification without data received")
+            LOGGER.warning("Notification without data received")
         else:
             chunk_data = self.get_chunk_data(chunk_size)
             root = ElementTree.fromstring(chunk_data.decode('utf-8'))
@@ -55,7 +56,7 @@ class NotificationHandler(BaseHTTPRequestHandler):
                     txt = ElementTree.tostring(item, encoding='utf8')
                     if txt not in NotificationHandler._last_notif:
                         # Print only the new notifications
-                        print("{} - {}".format(item.findtext('pubDate'), item.findtext('title')))
+                        LOGGER.info("%s - %s", item.findtext('pubDate'), item.findtext('title'))
                         NotificationHandler._last_notif.append(txt)
 
         self.send_response(200)
