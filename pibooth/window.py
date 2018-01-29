@@ -27,18 +27,6 @@ class PtbWindow(object):
         self._current_frame = None
         self._picture_number = (0, 4)  # current / max
 
-    def _centered_pos(self, image):
-        """
-        Return the position of the given image to be centered on window.
-        """
-        return image.get_rect(center=self.surface.get_rect().center)
-
-    def _left_pos(self, image):
-        """
-        Return the position of the given image to be put on the left of the screen
-        """
-        return image.get_rect(center=(self.surface.get_rect().centerx//2, self.surface.get_rect().centery))
-
     def _show_and_memorize(self, image_name):
         """Show image and memorize it. If the image is the same as the
         current displayed, nothing is done.
@@ -68,12 +56,23 @@ class PtbWindow(object):
 
         pygame.display.update()
 
-    def get_rect(self):
-        """Return a Rect object as defined in pygame. The position
-        represent the absolute position considering the window
-        centered on screen.
+    def _centered_pos(self, image):
         """
-        return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
+        Return the position of the given image to be centered on window.
+        """
+        return image.get_rect(center=self.surface.get_rect().center)
+
+    def _left_pos(self, image):
+        """
+        Return the position of the given image to be put on the left of the screen
+        """
+        return image.get_rect(center=(self.surface.get_rect().centerx // 2, self.surface.get_rect().centery))
+
+    def _right_pos(self, image):
+        """
+        Return the position of the given image to be put on the right of the screen
+        """
+        return image.get_rect(center=(self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery))
 
     @property
     def size(self):
@@ -83,6 +82,12 @@ class PtbWindow(object):
             return self.display_size
         else:
             return self.__size
+
+    def get_rect(self):
+        """Return a Rect object (as defined in pygame) for this window. The position represent
+        the absolute position considering the window centered on screen.
+        """
+        return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
 
     def resize(self, size):
         """Resize the window keeping aspect ratio.
@@ -94,10 +99,15 @@ class PtbWindow(object):
             self.surface.blit(image, self._centered_pos(image))
             pygame.display.update()
 
-    def show_intro(self):
-        """Show introduction view.
+    def show_intro(self, image=None):
+        """Show intro view.
         """
         self._show_and_memorize("intro.png")
+        if image:
+            image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.size), Image.ANTIALIAS)
+            image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+            self.surface.blit(image, self._right_pos(image))
+        pygame.display.update()
 
     def show_choice(self):
         """Show the choice view.
@@ -131,23 +141,15 @@ class PtbWindow(object):
         self._picture_number = (0, self._picture_number[1])
         self._show_and_memorize("finished.png")
 
-    def show_pil_image(self, image):
-        """Show a PIL image on the print font
+    def show_print(self, image=None):
+        """Show print view.
         """
-        image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.size), Image.ANTIALIAS)
-        image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
-
-        self.clear()
         self._show_and_memorize("print.png")
-        self.surface.blit(image, self._left_pos(image))
+        if image:
+            image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.size), Image.ANTIALIAS)
+            image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+            self.surface.blit(image, self._left_pos(image))
         pygame.display.update()
-        self._current_frame = None
-
-    def show_file_image(self, image_file):
-        """
-        Show the merged file
-        """
-        self._show_and_memorize(os.path.abspath(image_file))
 
     def flash(self, count):
         """Flash the window content.
@@ -166,6 +168,7 @@ class PtbWindow(object):
         if total_nbr < 1:
             raise ValueError("Total number of captures shall be greater than 0")
 
+        self.clear()
         self._picture_number = (current_nbr, total_nbr)
         self._update_picture_number()
 

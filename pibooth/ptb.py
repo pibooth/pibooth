@@ -115,8 +115,10 @@ class PtbApplication(object):
         """
         try:
             captures = []
-            last_merged_picture = None
             printing_timer = None
+            last_merged_picture = None
+            last_merged_picture_file = None
+
             while True:
                 event = pygame.event.poll()    # Take one event
 
@@ -131,18 +133,19 @@ class PtbApplication(object):
 
                 # Waiting for any action
                 if not self.is_picture_event(event) and not captures and not printing_timer:
-                    self.window.show_intro()
+                    self.window.show_intro(last_merged_picture)
 
                 # Loop when taking pictures
                 elif not printing_timer:
+                    self.led_print.switch_off()
                     if not captures:
                         self.window.show_choice()
                         time.sleep(5)
-                    self.led_print.switch_off()
                     self.led_picture.blink()
                     if not captures:
                         LOGGER.info("Start new pictures sequence")
                         last_merged_picture = None  # Print button will do nothing
+                        last_merged_picture_file = None
                         dirname = self.create_new_directory()
                         self.camera.preview(self.window.get_rect())
 
@@ -173,23 +176,23 @@ class PtbApplication(object):
                                         self.config.get('PICTURE', 'footer_text2')]
                         bg_color = self.config.gettyped('PICTURE', 'bg_color')
                         text_color = self.config.gettyped('PICTURE', 'text_color')
-                        picture = generate_picture_from_files(captures, footer_texts, bg_color, text_color)
+                        last_merged_picture = generate_picture_from_files(captures, footer_texts, bg_color, text_color)
 
-                    last_merged_picture = osp.join(dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
-                    with timeit("Save the merged picture in {}".format(last_merged_picture)):
-                        picture.save(last_merged_picture)
+                    last_merged_picture_file = osp.join(dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
+                    with timeit("Save the merged picture in {}".format(last_merged_picture_file)):
+                        last_merged_picture.save(last_merged_picture_file)
 
                     with timeit("Display the merged picture"):
-                        self.window.show_pil_image(picture)
+                        self.window.show_print(last_merged_picture)
 
                     printing_timer = PoolingTimer(5)
                     self.led_print.switch_on()
                     captures = []
 
-                if self.is_print_event(event) and last_merged_picture:
+                if self.is_print_event(event) and last_merged_picture_file:
                     LOGGER.info("Send pictures to printer")
                     self.led_print.blink()
-                    self.printer.print_file(last_merged_picture)
+                    self.printer.print_file(last_merged_picture_file)
                     time.sleep(0.5)
                     self.led_print.switch_on()
 
@@ -223,10 +226,10 @@ def main():
                         help=u"restore the default configuration")
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-v", "--verbose", dest='logging', action='store_const', const=logging.DEBUG, default=logging.INFO,
-                       help=u"report more information about operations")
+    group.add_argument("-v", "--verbose", dest='logging', action='store_const', const=logging.DEBUG,
+                       help=u"report more information about operations", default=logging.INFO)
     group.add_argument("-q", "--quiet", dest='logging', action='store_const', const=logging.WARNING,
-                       help=u"report only errors and warnings")
+                       help=u"report only errors and warnings", default=logging.INFO)
 
     options, _args = parser.parse_known_args()
 
