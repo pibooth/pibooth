@@ -43,8 +43,8 @@ def concatenate_pictures(images, footer_texts, bg_color, text_color):
     y_offset = 3100
     draw = ImageDraw.Draw(final_image)
 
-    name_font = ImageFont.truetype(fonts.get_filename("Roboto-BoldItalic.ttf"), 200)
-    date_font = ImageFont.truetype(fonts.get_filename("Roboto-LightItalic.ttf"), 100)
+    name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), 200)
+    date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), 100)
 
     draw.text((x_offset, y_offset), footer_texts[0], text_color, font=name_font)
     draw.text((x_offset, y_offset + 200), footer_texts[1], text_color, font=date_font)
