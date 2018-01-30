@@ -24,6 +24,7 @@ class PtbWindow(object):
         self.is_fullscreen = False
 
         self._current_background = None
+        self._current_foreground = None
         self._picture_number = (0, 4)  # current / max
 
     def _clear(self):
@@ -31,20 +32,20 @@ class PtbWindow(object):
         """
         self.surface.fill((0, 0, 0))
         self._current_background = None
+        self._current_foreground = None
 
-    def _show_and_memorize(self, image_name):
+    def _show_and_memorize(self, image_name, update=True):
         """Show image and memorize it. If the image is the same as the
         current displayed, nothing is done.
         """
-        changed = False
         if self._current_background != image_name:
             image = pictures.get_image(image_name, self.size)
             self._clear()
             self.surface.blit(image, self._centered_pos(image))
             self._current_background = image_name
             self._update_picture_number()
-            changed = True
-        return changed
+            if update:
+                pygame.display.update()
 
     def _update_picture_number(self):
         """Update the pictures counter displayed.
@@ -111,18 +112,18 @@ class PtbWindow(object):
     def show_intro(self, image=None):
         """Show introduction view.
         """
-        self._show_and_memorize("intro.png")
-        if image:
+        self._show_and_memorize("intro.png", image is None)
+        if image and image != self._current_foreground:
             image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.size), Image.ANTIALIAS)
             image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
             self.surface.blit(image, self._right_pos(image))
-        pygame.display.update()
+            pygame.display.update()
+        self._current_foreground = image
 
     def show_choice(self):
         """Show the choice view.
         """
         self._show_and_memorize("choice.png")
-        pygame.display.update()
 
     def show_countdown(self, timeout):
         """Show a countdown of `timeout` seconds. Returns when the countdown
@@ -148,25 +149,24 @@ class PtbWindow(object):
         """
         self._picture_number = (0, self._picture_number[1])
         self._show_and_memorize("processing.png")
-        pygame.display.update()
 
     def show_print(self, image=None):
         """Show print view.
         """
         self._picture_number = (0, self._picture_number[1])
-        self._show_and_memorize("print.png")
-        if image:
+        self._show_and_memorize("print.png", image is None)
+        if image and image != self._current_foreground:
             image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.size), Image.ANTIALIAS)
             image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
             self.surface.blit(image, self._left_pos(image))
-        pygame.display.update()
+            pygame.display.update()
+        self._current_foreground = image
 
     def show_finished(self):
         """Show finished view.
         """
         self._picture_number = (0, self._picture_number[1])
         self._show_and_memorize("finished.png")
-        pygame.display.update()
 
     def flash(self, count):
         """Flash the window content.
