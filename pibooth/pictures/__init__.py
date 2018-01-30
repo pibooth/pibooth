@@ -3,15 +3,13 @@
 import os.path as osp
 from PIL import Image
 import pygame
+from pibooth.config import PtbConfigParser
 
 
 def get_filename(name):
     """Return absolute path to a picture located in the current package.
     """
-    from pibooth.config import PtbConfigParser
-    config = PtbConfigParser("~/.config/pibooth/pibooth.cfg")
-    lang = config.get('GENERAL', 'language')
-    return osp.join(osp.dirname(osp.abspath(__file__)), lang, name)
+    return osp.join(osp.dirname(osp.abspath(__file__)), PtbConfigParser.language, name)
 
 
 def resize_keep_aspect_ratio(original_size, target_size):

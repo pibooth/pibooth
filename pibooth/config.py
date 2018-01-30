@@ -68,6 +68,8 @@ class PtbConfigParser(ConfigParser):
     """Enhenced configuration file parser.
     """
 
+    language = None
+
     def __init__(self, filename, clear=False):
         ConfigParser.__init__(self)
         self.filename = osp.abspath(osp.expanduser(filename))
@@ -80,6 +82,16 @@ class PtbConfigParser(ConfigParser):
             generate_default_config(self.filename)
 
         self.read(self.filename)
+
+        # Handle the language configuration, save it as a class attribute for easy access
+        path = osp.join(osp.dirname(osp.abspath(__file__)), 'pictures')
+        possibles = [name for name in os.listdir(path) if osp.isdir(osp.join(path, name))]
+        language = self.get('GENERAL', 'language')
+        if language not in possibles:
+            LOGGER.warning("Unsupported language '%s', fallback to English", language)
+            PtbConfigParser.language = 'en'
+        else:
+            PtbConfigParser.language = language
 
     def get(self, section, option, **kwargs):
         """
