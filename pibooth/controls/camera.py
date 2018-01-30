@@ -61,12 +61,16 @@ class RpiCamera(object):
     def preview(self, rect, flip=True):
         """Display a preview on the given Rect (flip if necessary).
         """
+        res = pictures.resize_keep_aspect_ratio(self._cam.resolution,
+                                                (rect.width - 2 * self._border, rect.height - 2 * self._border))
+
         # (x, y, width, height)
-        res = (rect.width - 2 * self._border, rect.height - 2 * self._border)
-        window = (rect.left + self._border,
-                  rect.top + self._border,
-                  rect.width - 2 * self._border,
-                  rect.height - 2 * self._border)
+        window = (rect.centerx - res[0]//2,
+                  rect.centery - res[1]//2,
+                  res[0], res[1])
+
+
+
         self._cam.start_preview(resolution=res, hflip=flip, fullscreen=False, window=window)
 
     def stop_preview(self):
