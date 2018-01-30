@@ -105,10 +105,9 @@ class PtbApplication(object):
             (event.type == BUTTON_DOWN and event.pin == self.button_print)
 
     def is_resize_event(self, event):
-        """Return True if the window has been resized. This method ensure
-        to only process the last resize event (avoid refresh lag).
+        """Return True if the window has been resized.
         """
-        return event.type == pygame.VIDEORESIZE and not pygame.event.peek(pygame.VIDEORESIZE)
+        return event.type == pygame.VIDEORESIZE
 
     def main_loop(self):
         """Run the main game loop.
@@ -129,6 +128,8 @@ class PtbApplication(object):
                     self.window.toggle_fullscreen()
 
                 if self.is_resize_event(event):
+                    while pygame.event.peek(pygame.VIDEORESIZE):
+                        event = pygame.event.poll()  # keep only last resize event
                     self.window.resize(event.size)
 
                 # Waiting for any action
