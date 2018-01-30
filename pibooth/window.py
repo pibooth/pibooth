@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import time
 import pygame
 from pygame import gfxdraw
@@ -24,23 +23,34 @@ class PtbWindow(object):
         self.display_size = (info.current_w, info.current_h)
         self.is_fullscreen = False
 
-        self._current_frame = None
+        self._current_background = None
         self._picture_number = (0, 4)  # current / max
+
+    def _clear(self):
+        """Clear the window content.
+        """
+        self.surface.fill((0, 0, 0))
+        self._current_background = None
 
     def _show_and_memorize(self, image_name):
         """Show image and memorize it. If the image is the same as the
         current displayed, nothing is done.
         """
-        if self._current_frame != image_name:
+        changed = False
+        if self._current_background != image_name:
             image = pictures.get_image(image_name, self.size)
-            self.clear()
+            self._clear()
             self.surface.blit(image, self._centered_pos(image))
-            pygame.display.update()
-            self._current_frame = image_name
+            self._current_background = image_name
+            self._update_picture_number()
+            changed = True
+        return changed
 
     def _update_picture_number(self):
         """Update the pictures counter displayed.
         """
+        if self._picture_number[0] == 0:
+            return  # Dont show cunter: no picture taken
         center = self.surface.get_rect().center
         radius = 10
         border = 20
@@ -53,8 +63,6 @@ class PtbWindow(object):
                 gfxdraw.aacircle(self.surface, x, y, radius - 3, color)  # Because anti-aliased filled circle doesn't exist
                 gfxdraw.filled_circle(self.surface, x, y, radius - 3, color)
             x += (2 * radius + border)
-
-        pygame.display.update()
 
     def _centered_pos(self, image):
         """
@@ -94,13 +102,14 @@ class PtbWindow(object):
         """
         self.__size = size
         self.surface = pygame.display.set_mode(self.size, pygame.RESIZABLE)
-        if self._current_frame:
-            image = pictures.get_image(self._current_frame, self.size)
+        if self._current_background:
+            image = pictures.get_image(self._current_background, self.size)
             self.surface.blit(image, self._centered_pos(image))
-            pygame.display.update()
+        self._update_picture_number()
+        pygame.display.update()
 
     def show_intro(self, image=None):
-        """Show intro view.
+        """Show introduction view.
         """
         self._show_and_memorize("intro.png")
         if image:
@@ -113,9 +122,11 @@ class PtbWindow(object):
         """Show the choice view.
         """
         self._show_and_memorize("choice.png")
+        pygame.display.update()
 
     def show_countdown(self, timeout):
-        """Show a countdown of `timeout` seconds.
+        """Show a countdown of `timeout` seconds. Returns when the countdown
+        is finished.
         """
         timeout = int(timeout)
         if timeout < 1:
@@ -123,32 +134,37 @@ class PtbWindow(object):
 
         font = pygame.font.SysFont('Consolas', 400)
         while timeout > 0:
-            self.clear()
+            self._clear()
             image = font.render(str(timeout), True, (255, 255, 255))
             self.surface.blit(image, self._centered_pos(image))
             self._update_picture_number()
+            pygame.display.update()
             time.sleep(1)
             timeout -= 1
 
     def show_wait(self):
         """Show wait view.
         """
+        self._picture_number = (0, self._picture_number[1])
         self._show_and_memorize("processing.png")
+        pygame.display.update()
+
+    def show_print(self, image=None):
+        """Show print view.
+        """
+        self._picture_number = (0, self._picture_number[1])
+        self._show_and_memorize("print.png")
+        if image:
+            image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.size), Image.ANTIALIAS)
+            image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+            self.surface.blit(image, self._left_pos(image))
+        pygame.display.update()
 
     def show_finished(self):
         """Show finished view.
         """
         self._picture_number = (0, self._picture_number[1])
         self._show_and_memorize("finished.png")
-
-    def show_print(self, image=None):
-        """Show print view.
-        """
-        self._show_and_memorize("print.png")
-        if image:
-            image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.size), Image.ANTIALIAS)
-            image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
-            self.surface.blit(image, self._left_pos(image))
         pygame.display.update()
 
     def flash(self, count):
@@ -158,9 +174,10 @@ class PtbWindow(object):
             self.surface.fill((255, 255, 255))
             pygame.display.update()
             time.sleep(0.01)
-            self.clear()
+            self._clear()
             time.sleep(0.01)
         self._update_picture_number()
+        pygame.display.update()
 
     def set_picture_number(self, current_nbr, total_nbr):
         """Set the current number of pictures taken.
@@ -168,16 +185,10 @@ class PtbWindow(object):
         if total_nbr < 1:
             raise ValueError("Total number of captures shall be greater than 0")
 
-        self.clear()
+        self._clear()
         self._picture_number = (current_nbr, total_nbr)
         self._update_picture_number()
-
-    def clear(self):
-        """Clear the window content.
-        """
-        self.surface.fill((0, 0, 0))
         pygame.display.update()
-        self._current_frame = None
 
     def toggle_fullscreen(self):
         """Set window to full screen.
@@ -189,7 +200,9 @@ class PtbWindow(object):
             self.is_fullscreen = True  # Set before get size
             self.surface = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
 
-        if self._current_frame:
-            image = pictures.get_image(self._current_frame, self.size)
+        if self._current_background:
+            image = pictures.get_image(self._current_background, self.size)
             self.surface.blit(image, self._centered_pos(image))
-            pygame.display.update()
+
+        self._update_picture_number()
+        pygame.display.update()
