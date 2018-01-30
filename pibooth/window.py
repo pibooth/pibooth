@@ -3,7 +3,7 @@
 import time
 import pygame
 from pygame import gfxdraw
-from pibooth import pictures
+from pibooth import pictures, fonts
 from PIL import Image
 
 
@@ -132,11 +132,12 @@ class PtbWindow(object):
         if timeout < 1:
             raise ValueError("Start time shall be greater than 0")
 
-        font = pygame.font.SysFont('Consolas', 400)
+        font = pygame.font.Font(fonts.get_filename("Amatic-Bold.ttf"), 360)
         while timeout > 0:
             self._clear()
             image = font.render(str(timeout), True, (255, 255, 255))
-            self.surface.blit(image, self._centered_pos(image))
+            pos = self._centered_pos(image)
+            self.surface.blit(image, (pos[0], pos[1] - 50))  # Margin due to picture counter position
             self._update_picture_number()
             pygame.display.update()
             time.sleep(1)
