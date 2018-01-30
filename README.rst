@@ -187,7 +187,6 @@ Credits:
 
 Icons from the Noun Project
 
-- Button by Prerak Patel
-- Fireworks by Creative Stall
-- Hamster wheel by Dream Icons
+- Thumb up by Symbolon
 - Polaroid by icon 54
+- Cat by Внталий Плут
