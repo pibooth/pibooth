@@ -39,15 +39,15 @@ def concatenate_pictures(images, footer_texts, bg_color, text_color):
     final_image.paste(matrix, ((2400 - matrix.size[0]) // 2, (3000 - matrix.size[1]) // 2))
 
     # Text part
-    x_offset = 600
-    y_offset = 3100
+    x_offset = 300
+    y_offset = 2900
     draw = ImageDraw.Draw(final_image)
 
-    name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), 200)
-    date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), 100)
+    name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), 400)
+    date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), 200)
 
     draw.text((x_offset, y_offset), footer_texts[0], text_color, font=name_font)
-    draw.text((x_offset, y_offset + 200), footer_texts[1], text_color, font=date_font)
+    draw.text((x_offset, y_offset + 400), footer_texts[1], text_color, font=date_font)
 
     return final_image
 
