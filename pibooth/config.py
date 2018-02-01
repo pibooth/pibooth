@@ -41,7 +41,7 @@ DEFAULT = {
     "CAMERA": {
         "iso": (100, "Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max"),
         "resolution": ((1920, 1080), "Resolution for camera captures (see picamera modes)"),
-        "rotation": (0, "Rotation of the camera")
+        "rotation": (0, "Rotation of the camera (valid values are 0, 90, 180, and 270)")
     }
 }
 
