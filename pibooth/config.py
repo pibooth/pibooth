@@ -23,10 +23,10 @@ DEFAULT = {
         "clear_on_startup": (True, "Cleanup the 'directory' before start"),
         "debounce_delay": (0.3, "How long to debounce the button in seconds"),
         "printer_name": ("default", "Name of the printer to send the pictures"),
-        "language": ("en", "User interface language (fallback to English if not found)")
+        "language": ("en", "User interface language (fallback to English if not found)"),
     },
     "PICTURE": {
-        "captures": (4, "How many pictures to take (4 max)"),
+        "captures": (4, "How many pictures to take by default (4 max)"),
         "footer_text1": ("Footer 1", "First text displayed"),
         "footer_text2": ("Footer 2", "Second text displayed"),
         "bg_color": ((255, 255, 255), "Background RGB color"),
@@ -35,13 +35,13 @@ DEFAULT = {
     "WINDOW": {
         "size": ((800, 480), "(Width, Height) of the display monitor"),
         "flash": (True, "Blinking background when picture is taken"),
-        "preview_countdown": (True, "Show a countdown timer during the preview"),
         "preview_delay": (3, "How long is the preview in seconds"),
+        "preview_countdown": (True, "Show a countdown timer during the preview"),
     },
     "CAMERA": {
         "iso": (100, "Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max"),
+        "rotation": (0, "Rotation of the camera (valid values are 0, 90, 180, and 270)"),
         "resolution": ((1920, 1080), "Resolution for camera captures (see picamera modes)"),
-        "rotation": (0, "Rotation of the camera (valid values are 0, 90, 180, and 270)")
     }
 }
 

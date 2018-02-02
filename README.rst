@@ -150,7 +150,7 @@ Below is the default configuration file:
     preview_countdown = True
 
     [PICTURE]
-    # How many pictures to take (4 max)
+    # How many pictures to take by default (4 max)
     captures = 4
 
     # First text displayed
@@ -169,7 +169,7 @@ Below is the default configuration file:
     # Resolution for camera captures (see picamera modes)
     resolution = (1920, 1080)
 
-    # Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max
+    # Adjust for lighting issues (normal is 100 or 200. Dark is 800 max)
     iso = 100
 
     # Rotation of the camera (valid values are 0, 90, 180, and 270)
