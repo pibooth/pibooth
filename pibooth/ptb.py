@@ -14,13 +14,145 @@ import os.path as osp
 from RPi import GPIO
 import pibooth
 from pibooth.utils import LOGGER, timeit, PoolingTimer
-from pibooth.window import PtbWindow
+from pibooth.states import StateMachine, State
+from pibooth.view import PtbWindow
 from pibooth.config import PtbConfigParser, edit_configuration
 from pibooth.controls import camera
 from pibooth.pictures.concatenate import generate_picture_from_files
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
 from pibooth.controls.printer import PtbPrinter
+
+
+class StateWait(State):
+
+    def __init__(self):
+        State.__init__(self, 'wait', 'choose')
+
+    def entry_actions(self):
+        self.app.window.show_intro(self.app.previous_picture)
+
+    def do_actions(self, events):
+        if self.app.find_print_event(events) and self.app.previous_picture_file:
+            LOGGER.info("Send pictures to printer")
+            self.app.led_print.blink()
+            self.app.printer.print_file(self.app.previous_picture_file)
+            time.sleep(0.5)
+            self.app.led_print.switch_on()
+
+    def exit_actions(self):
+        self.app.led_print.switch_off()
+
+    def validate_transition(self, events):
+        if self.app.find_picture_event(events):
+            return self.next_name
+
+
+class StateChoose(State):
+
+    def __init__(self):
+        State.__init__(self, 'choose', 'capture')
+        self.timer = PoolingTimer(5)
+
+    def entry_actions(self):
+        self.app.window.show_choice()
+        self.timer.start()
+
+    def validate_transition(self, events):
+        if self.timer.is_timeout():
+            return self.next_name
+
+
+class StateCapture(State):
+
+    def __init__(self):
+        State.__init__(self, 'capture', 'print')
+        self.dirname = None
+        self.captures = []
+
+    def entry_actions(self):
+        self.app.led_picture.blink()
+        LOGGER.info("Start new pictures sequence")
+        self.app.previous_picture = None
+        self.app.previous_picture_file = None
+        self.dirname = osp.join(self.app.savedir, time.strftime("%Y-%m-%d-%H-%M-%S"))
+        os.makedirs(self.dirname)
+        self.app.camera.preview(self.app.window.get_rect())
+
+    def do_actions(self, events):
+        self.app.window.set_picture_number(len(self.captures) + 1, self.app.config.getint('PICTURE', 'captures'))
+
+        if self.app.config.getboolean('WINDOW', 'preview_countdown'):
+            self.app.window.show_countdown(self.app.config.getint('WINDOW', 'preview_delay'))
+        else:
+            time.sleep(self.app.config.getint('WINDOW', 'preview_delay'))
+
+        self.app.led_picture.switch_on()
+        if self.app.config.getboolean('WINDOW', 'flash'):
+            self.app.window.flash(2)
+
+        image_file_name = osp.join(self.dirname, "ptb{:03}.jpg".format(len(self.captures)))
+        with timeit("Take picture and save it in {}".format(image_file_name)):
+            self.app.camera.capture(image_file_name)
+            self.captures.append(image_file_name)
+
+    def exit_actions(self):
+        self.app.camera.stop_preview()
+        self.app.window.show_wait()
+        self.app.led_picture.switch_off()
+
+        with timeit("Creating merged picture"):
+            footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
+                            self.app.config.get('PICTURE', 'footer_text2')]
+            bg_color = self.app.config.gettyped('PICTURE', 'bg_color')
+            text_color = self.app.config.gettyped('PICTURE', 'text_color')
+            self.app.previous_picture = generate_picture_from_files(self.captures, footer_texts, bg_color, text_color)
+
+        self.app.previous_picture_file = osp.join(self.dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
+        with timeit("Save the merged picture in {}".format(self.app.previous_picture_file)):
+            self.app.previous_picture.save(self.app.previous_picture_file)
+        self.captures = []
+
+    def validate_transition(self, events):
+        if len(self.captures) >= self.app.config.getint('PICTURE', 'captures'):
+            return self.next_name
+
+
+class StatePrint(State):
+
+    def __init__(self):
+        State.__init__(self, 'print', 'finish')
+        self.timer = PoolingTimer(5)
+        self.printed = False
+
+    def entry_actions(self):
+        with timeit("Display the merged picture"):
+            self.app.window.show_print(self.app.previous_picture)
+        self.app.led_print.switch_on()
+        self.timer.start()
+
+    def do_actions(self, events):
+        if self.app.find_print_event(events) and self.app.previous_picture_file:
+            LOGGER.info("Send pictures to printer")
+            self.app.led_print.blink()
+            self.app.printer.print_file(self.app.previous_picture_file)
+            time.sleep(0.5)
+            self.app.led_print.switch_on()
+            self.printed = True
+
+    def validate_transition(self, events):
+        if self.timer.is_timeout() or self.printed:
+            return self.next_name
+
+
+class StateFinish(State):
+
+    def __init__(self):
+        State.__init__(self, 'finish', 'wait')
+
+    def entry_actions(self):
+        self.app.window.show_finished()
+        time.sleep(0.5)
 
 
 class PtbApplication(object):
@@ -48,6 +180,13 @@ class PtbApplication(object):
         # Create window of (width, height)
         self.window = PtbWindow(config.gettyped('WINDOW', 'size'))
 
+        self.state_machine = StateMachine(self)
+        self.state_machine.add_state(StateWait())
+        self.state_machine.add_state(StateChoose())
+        self.state_machine.add_state(StateCapture())
+        self.state_machine.add_state(StatePrint())
+        self.state_machine.add_state(StateFinish())
+
         # Initialize the camera
         if camera.rpi_camera_connected():
             cam_class = camera.RpiCamera
@@ -68,138 +207,70 @@ class PtbApplication(object):
 
         self.printer = PtbPrinter(config.get('GENERAL', 'printer_name'))
 
-    def create_new_directory(self):
-        """Create a new directory to save pictures.
-        """
-        name = osp.join(self.savedir, time.strftime("%Y-%m-%d-%H-%M-%S"))
-        os.makedirs(name)
-        return name
+        # Keep previous picture
+        self.previous_picture = None
+        self.previous_picture_file = None
 
-    def is_quit_event(self, event):
-        """Return True if the application have to quite.
-        Close button clicked or ESC pressed.
+    def find_quit_event(self, events):
+        """Return the event if found in the list.
         """
-        return event.type == pygame.QUIT or\
-            (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE)
+        for event in events:
+            if event.type == pygame.QUIT or\
+                    (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                return event
 
-    def is_fullscreen_event(self, event):
-        """Return True if the application have to toogle fullscreen.
-        CTRL + F pressed.
+    def find_fullscreen_event(self, events):
+        """Return the event if found in the list.
         """
-        return event.type == pygame.KEYDOWN and\
-            event.key == pygame.K_f and pygame.key.get_mods() & pygame.KMOD_CTRL
+        for event in events:
+            if  event.type == pygame.KEYDOWN and\
+                    event.key == pygame.K_f and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                return event
 
-    def is_picture_event(self, event):
-        """Return True if the application have to take the photo.
-        P or physical button pressed.
+    def find_picture_event(self, events):
+        """Return the event if found in the list.
         """
-        return (event.type == pygame.KEYDOWN and event.key == pygame.K_p) or \
-            (event.type == BUTTON_DOWN and event.pin == self.button_picture)
+        for event in events:
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_p) or \
+                    (event.type == BUTTON_DOWN and event.pin == self.button_picture):
+                return event
 
-    def is_print_event(self, event):
-        """Return True if the application have to print the photo.
-        Ctrl + E or physical button pressed.
+    def find_print_event(self, events):
+        """Return the event if found in the list.
         """
-        return (event.type == pygame.KEYDOWN and event.key == pygame.K_e and
-                pygame.key.get_mods() & pygame.KMOD_CTRL) or \
-            (event.type == BUTTON_DOWN and event.pin == self.button_print)
+        for event in events:
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_e and
+                    pygame.key.get_mods() & pygame.KMOD_CTRL) or \
+                    (event.type == BUTTON_DOWN and event.pin == self.button_print):
+                return event
 
-    def is_resize_event(self, event):
-        """Return True if the window has been resized.
+    def find_resize_event(self, events):
+        """Return the event if found in the list.
         """
-        return event.type == pygame.VIDEORESIZE and not pygame.event.peek(pygame.VIDEORESIZE)
+        for event in events:
+            if event.type == pygame.VIDEORESIZE:
+                return event
 
     def main_loop(self):
         """Run the main game loop.
         """
         try:
-            captures = []
-            printing_timer = None
-            last_merged_picture = None
-            last_merged_picture_file = None
+            self.state_machine.set_state('wait')
 
             while True:
-                event = pygame.event.poll()    # Take one event
+                events = list(reversed(pygame.event.get()))  # Take all events, most recent first
 
-                if self.is_quit_event(event):
+                if self.find_quit_event(events):
                     break
 
-                if self.is_fullscreen_event(event):
+                if self.find_fullscreen_event(events):
                     self.window.toggle_fullscreen()
 
-                if self.is_resize_event(event):
+                event = self.find_resize_event(events)
+                if event:
                     self.window.resize(event.size)
 
-                # Waiting for any action
-                if not self.is_picture_event(event) and not captures and not printing_timer:
-                    self.window.show_intro(last_merged_picture)
-
-                # Loop when taking pictures
-                elif not printing_timer:
-                    self.led_print.switch_off()
-                    if not captures:
-                        self.window.show_choice()
-                        time.sleep(5)
-                    self.led_picture.blink()
-                    if not captures:
-                        LOGGER.info("Start new pictures sequence")
-                        last_merged_picture = None  # Print button will do nothing
-                        last_merged_picture_file = None
-                        dirname = self.create_new_directory()
-                        self.camera.preview(self.window.get_rect())
-
-                    self.window.set_picture_number(len(captures) + 1, self.config.getint('PICTURE', 'captures'))
-
-                    if self.config.getboolean('WINDOW', 'preview_countdown'):
-                        self.window.show_countdown(self.config.getint('WINDOW', 'preview_delay'))
-                    else:
-                        time.sleep(self.config.getint('WINDOW', 'preview_delay'))
-
-                    self.led_picture.switch_on()
-                    if self.config.getboolean('WINDOW', 'flash'):
-                        self.window.flash(2)
-
-                    image_file_name = osp.join(dirname, "ptb{:03}.jpg".format(len(captures)))
-                    with timeit("Take picture and save it in {}".format(image_file_name)):
-                        self.camera.capture(image_file_name)
-                        captures.append(image_file_name)
-
-                # Case of all pictures taken
-                if len(captures) >= self.config.getint('PICTURE', 'captures'):
-                    self.camera.stop_preview()
-                    self.window.show_wait()
-                    self.led_picture.switch_off()
-
-                    with timeit("Creating merged picture"):
-                        footer_texts = [self.config.get('PICTURE', 'footer_text1'),
-                                        self.config.get('PICTURE', 'footer_text2')]
-                        bg_color = self.config.gettyped('PICTURE', 'bg_color')
-                        text_color = self.config.gettyped('PICTURE', 'text_color')
-                        last_merged_picture = generate_picture_from_files(captures, footer_texts, bg_color, text_color)
-
-                    last_merged_picture_file = osp.join(dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
-                    with timeit("Save the merged picture in {}".format(last_merged_picture_file)):
-                        last_merged_picture.save(last_merged_picture_file)
-
-                    with timeit("Display the merged picture"):
-                        self.window.show_print(last_merged_picture)
-
-                    printing_timer = PoolingTimer(5)
-                    self.led_print.switch_on()
-                    captures = []
-
-                if self.is_print_event(event) and last_merged_picture_file:
-                    LOGGER.info("Send pictures to printer")
-                    self.led_print.blink()
-                    self.printer.print_file(last_merged_picture_file)
-                    time.sleep(0.5)
-                    self.led_print.switch_on()
-
-                if printing_timer and printing_timer.is_timeout():
-                    # Finish the sequence
-                    self.window.show_finished()
-                    time.sleep(0.5)
-                    printing_timer = None
+                self.state_machine.process(events)
 
         finally:
             self.led_picture.switch_off()

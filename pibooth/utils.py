@@ -54,7 +54,7 @@ class PoolingTimer(object):
         if self.time is None:
             remain = float(self.timeout)
         else:
-            remain = (self.timeout - (time.time() - self.time))
+            remain = self.timeout - (time.time() - self.time)
             if remain < 0.0:
                 remain = 0.0
         return remain
@@ -73,4 +73,4 @@ class PoolingTimer(object):
         if self.time is None:
             raise RuntimeError("PoolingTimer has never been started")
         else:
-            return ((time.time() - self.time) > self.timeout)
+            return (time.time() - self.time) > self.timeout
