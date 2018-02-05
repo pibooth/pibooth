@@ -52,11 +52,18 @@ class StateChoose(State):
 
     def __init__(self):
         State.__init__(self, 'choose', 'capture')
-        self.timer = PoolingTimer(5)
+        self.timer = PoolingTimer(8)
 
     def entry_actions(self):
-        self.app.window.show_choice()
+        self.app.max_captures = self.app.config.getint('PICTURE', 'captures')
+        self.app.window.show_choice(self.app.max_captures)
         self.timer.start()
+
+    def do_actions(self, events):
+        event = self.app.find_choice_event(events)
+        if event:
+            self.app.max_captures = event.choice
+            self.app.window.show_choice(self.app.max_captures)
 
     def validate_transition(self, events):
         if self.timer.is_timeout():
@@ -66,56 +73,64 @@ class StateChoose(State):
 class StateCapture(State):
 
     def __init__(self):
-        State.__init__(self, 'capture', 'print')
-        self.dirname = None
-        self.captures = []
+        State.__init__(self, 'capture', 'processing')
 
     def entry_actions(self):
-        self.app.led_picture.blink()
         LOGGER.info("Start new pictures sequence")
         self.app.previous_picture = None
         self.app.previous_picture_file = None
-        self.dirname = osp.join(self.app.savedir, time.strftime("%Y-%m-%d-%H-%M-%S"))
-        os.makedirs(self.dirname)
+        self.app.dirname = osp.join(self.app.savedir, time.strftime("%Y-%m-%d-%H-%M-%S"))
+        os.makedirs(self.app.dirname)
         self.app.camera.preview(self.app.window.get_rect())
 
     def do_actions(self, events):
-        self.app.window.set_picture_number(len(self.captures) + 1, self.app.config.getint('PICTURE', 'captures'))
+        self.app.led_picture.blink()
+        self.app.window.set_picture_number(len(self.app.captures) + 1, self.app.max_captures)
 
         if self.app.config.getboolean('WINDOW', 'preview_countdown'):
             self.app.window.show_countdown(self.app.config.getint('WINDOW', 'preview_delay'))
         else:
             time.sleep(self.app.config.getint('WINDOW', 'preview_delay'))
 
-        self.app.led_picture.switch_on()
         if self.app.config.getboolean('WINDOW', 'flash'):
+            self.app.led_picture.switch_on()
             self.app.window.flash(2)
 
-        image_file_name = osp.join(self.dirname, "ptb{:03}.jpg".format(len(self.captures)))
+        image_file_name = osp.join(self.app.dirname, "ptb{:03}.jpg".format(len(self.app.captures)))
         with timeit("Take picture and save it in {}".format(image_file_name)):
             self.app.camera.capture(image_file_name)
-            self.captures.append(image_file_name)
+            self.app.captures.append(image_file_name)
 
     def exit_actions(self):
         self.app.camera.stop_preview()
-        self.app.window.show_wait()
         self.app.led_picture.switch_off()
+
+    def validate_transition(self, events):
+        if len(self.app.captures) >= self.app.max_captures:
+            return self.next_name
+
+
+class StateProcessing(State):
+
+    def __init__(self):
+        State.__init__(self, 'processing', 'print')
+
+    def entry_actions(self):
+        self.app.window.show_wait()
 
         with timeit("Creating merged picture"):
             footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
                             self.app.config.get('PICTURE', 'footer_text2')]
             bg_color = self.app.config.gettyped('PICTURE', 'bg_color')
             text_color = self.app.config.gettyped('PICTURE', 'text_color')
-            self.app.previous_picture = generate_picture_from_files(self.captures, footer_texts, bg_color, text_color)
+            self.app.previous_picture = generate_picture_from_files(self.app.captures, footer_texts, bg_color, text_color)
 
-        self.app.previous_picture_file = osp.join(self.dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
+        self.app.previous_picture_file = osp.join(self.app.dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
         with timeit("Save the merged picture in {}".format(self.app.previous_picture_file)):
             self.app.previous_picture.save(self.app.previous_picture_file)
-        self.captures = []
 
-    def validate_transition(self, events):
-        if len(self.captures) >= self.app.config.getint('PICTURE', 'captures'):
-            return self.next_name
+    def exit_actions(self):
+        self.app.captures = []
 
 
 class StatePrint(State):
@@ -133,9 +148,9 @@ class StatePrint(State):
 
     def do_actions(self, events):
         if self.app.find_print_event(events) and self.app.previous_picture_file:
-            LOGGER.info("Send pictures to printer")
-            self.app.led_print.blink()
-            self.app.printer.print_file(self.app.previous_picture_file)
+            with timeit("Send pictures to printer"):
+                self.app.led_print.blink()
+                self.app.printer.print_file(self.app.previous_picture_file)
             time.sleep(0.5)
             self.app.led_print.switch_on()
             self.printed = True
@@ -184,6 +199,7 @@ class PtbApplication(object):
         self.state_machine.add_state(StateWait())
         self.state_machine.add_state(StateChoose())
         self.state_machine.add_state(StateCapture())
+        self.state_machine.add_state(StateProcessing())
         self.state_machine.add_state(StatePrint())
         self.state_machine.add_state(StateFinish())
 
@@ -207,7 +223,10 @@ class PtbApplication(object):
 
         self.printer = PtbPrinter(config.get('GENERAL', 'printer_name'))
 
-        # Keep previous picture
+        # Variables shared between states
+        self.dirname = None
+        self.captures = []
+        self.max_captures = None
         self.previous_picture = None
         self.previous_picture_file = None
 
@@ -249,6 +268,19 @@ class PtbApplication(object):
         """
         for event in events:
             if event.type == pygame.VIDEORESIZE:
+                return event
+
+    def find_choice_event(self, events):
+        """Return the event if found in the list.
+        """
+        for event in events:
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT) or \
+                    (event.type == BUTTON_DOWN and event.pin == self.button_picture):
+                event.choice = 1
+                return event
+            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT) or \
+                    (event.type == BUTTON_DOWN and event.pin == self.button_print):
+                event.choice = 4
                 return event
 
     def main_loop(self):

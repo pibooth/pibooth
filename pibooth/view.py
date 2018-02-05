@@ -120,10 +120,10 @@ class PtbWindow(object):
             pygame.display.update()
         self._current_foreground = image
 
-    def show_choice(self):
+    def show_choice(self, number):
         """Show the choice view.
         """
-        self._show_and_memorize("choice.png")
+        self._show_and_memorize("choice{}.png".format(number))
 
     def show_countdown(self, timeout):
         """Show a countdown of `timeout` seconds. Returns when the countdown
