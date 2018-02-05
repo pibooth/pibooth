@@ -61,7 +61,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo apt-get update
         $ sudo apt-get upgrade
 
-5. Install ``gphoto2`` (required only for external camera):
+5. Optionally install ``gphoto2`` (required only for external camera):
 
    ::
 
@@ -69,7 +69,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo chmod 755 gphoto2-updater.sh
         $ sudo ./gphoto2-updater.sh
 
-6. Install ``CUPS`` to handle printers (more instruction to add a new printer can be found
+6. Optionally install ``CUPS`` to handle printers (more instruction to add a new printer can be found
    `here <https://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer>`_):
 
    ::
@@ -81,6 +81,9 @@ A brief description on how to set-up a Raspberry Pi to use this software.
    ::
 
         $ sudo pip install pibooth
+
+   .. hint:: If you don't have *gphoto2* or *CUPS* installed use the ``--no-deps`` options
+             to avoid installation failures (you may need to install dependencies by yourself)
 
 Run
 ---
