@@ -65,13 +65,8 @@ class RpiCamera(object):
                                                 (rect.width - 2 * self._border, rect.height - 2 * self._border))
 
         # (x, y, width, height)
-        window = (rect.centerx - res[0]//2,
-                  rect.centery - res[1]//2,
-                  res[0], res[1])
-
-
-
-        self._cam.start_preview(resolution=res, hflip=flip, fullscreen=False, window=window)
+        win = (rect.centerx - res[0] // 2, rect.centery - res[1] // 2, res[0], res[1])
+        self._cam.start_preview(resolution=res, hflip=flip, fullscreen=False, window=win)
 
     def stop_preview(self):
         """Stop the preview.
