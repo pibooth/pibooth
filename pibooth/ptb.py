@@ -34,9 +34,9 @@ class StateWait(State):
 
     def do_actions(self, events):
         if self.app.find_print_event(events) and self.app.previous_picture_file:
-            LOGGER.info("Send pictures to printer")
-            self.app.led_print.blink()
-            self.app.printer.print_file(self.app.previous_picture_file)
+            with timeit("Send final picture to printer"):
+                self.app.led_print.blink()
+                self.app.printer.print_file(self.app.previous_picture_file)
             time.sleep(0.5)
             self.app.led_print.switch_on()
 
@@ -55,15 +55,18 @@ class StateChoose(State):
         self.timer = PoolingTimer(8)
 
     def entry_actions(self):
+        self.app.led_picture.switch_on()
         self.app.max_captures = self.app.config.getint('PICTURE', 'captures')
         self.app.window.show_choice(self.app.max_captures)
         self.timer.start()
 
     def do_actions(self, events):
         event = self.app.find_choice_event(events)
-        if event:
-            self.app.max_captures = event.choice
-            self.app.window.show_choice(self.app.max_captures)
+        if event and self.app.max_captures != 1:
+            self.app.max_captures = 1
+        elif event and self.app.max_captures != 4:
+            self.app.max_captures = 4
+        self.app.window.show_choice(self.app.max_captures)
 
     def validate_transition(self, events):
         if self.timer.is_timeout():
@@ -92,8 +95,8 @@ class StateCapture(State):
         else:
             time.sleep(self.app.config.getint('WINDOW', 'preview_delay'))
 
+        self.app.led_picture.switch_on()
         if self.app.config.getboolean('WINDOW', 'flash'):
-            self.app.led_picture.switch_on()
             self.app.window.flash(2)
 
         image_file_name = osp.join(self.app.dirname, "ptb{:03}.jpg".format(len(self.app.captures)))
@@ -148,7 +151,7 @@ class StatePrint(State):
 
     def do_actions(self, events):
         if self.app.find_print_event(events) and self.app.previous_picture_file:
-            with timeit("Send pictures to printer"):
+            with timeit("Send final picture to printer"):
                 self.app.led_print.blink()
                 self.app.printer.print_file(self.app.previous_picture_file)
             time.sleep(0.5)
@@ -274,13 +277,8 @@ class PtbApplication(object):
         """Return the event if found in the list.
         """
         for event in events:
-            if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT) or \
+            if (event.type == pygame.KEYDOWN and event.key in (pygame.K_LEFT, pygame.K_RIGHT)) or \
                     (event.type == BUTTON_DOWN and event.pin == self.button_picture):
-                event.choice = 1
-                return event
-            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT) or \
-                    (event.type == BUTTON_DOWN and event.pin == self.button_print):
-                event.choice = 4
                 return event
 
     def main_loop(self):

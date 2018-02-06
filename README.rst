@@ -98,6 +98,7 @@ After the graphical interface is started, the following actions are available:
 Action               Keyboard key     Physical button
 ==================== ================ ================
 Toggle Full screen   Ctrl + F         \-
+Choose pictures      LEFT or RIGHT    Button 1
 Take pictures        P                Button 1
 Export Printer/Cloud Ctrl + E         Button 2
 Quit                 ESC              \-
