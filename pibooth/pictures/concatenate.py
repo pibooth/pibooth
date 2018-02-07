@@ -7,18 +7,17 @@ from pibooth.pictures import resize_keep_aspect_ratio
 
 def concatenate_pictures(pictures, footer_texts, bg_color, text_color):
     """
-    Appends up to 4 PIL images in photobooth mode and retrun concatenated image
-    as a new PIL image object. Configuration of final picture depends on the
-    number of pictues::
+    Merge up to 4 PIL images and retrun concatenated image as a new PIL image object.
+    Configuration of the final picture depends on the number of given pictues::
 
       +---------+     +---------+     +---+-+---+     +---------+
       |         |     |   +-+   |     |   |1|   |     | +-+ +-+ |
       |         |     |   |1|   |     |   +-+   |     | |1| |2| |
       |   +-+   |     |   +-+   |     |   +-+   |     | +-+ +-+ |
-      |   |1|   |     |   +-+   |     |   |2|   |     | +-+ +-+ |
-      |   +-+   |     |   |2|   |     |   +-+   |     | |3| |4| |
-      |         |     |   +-+   |     |   +-+   |     | +-+ +-+ |
-      |         |     |         |     |   |3|   |     |         |
+      |   |1|   |     |         |     |   |2|   |     |         |
+      |   +-+   |     |   +-+   |     |   +-+   |     | +-+ +-+ |
+      |         |     |   |2|   |     |   +-+   |     | |3| |4| |
+      |         |     |   +-+   |     |   |3|   |     | +-+ +-+ |
       +---------+     +---------+     +---+-+---+     +---------+
     """
     widths, heights = zip(*(i.size for i in pictures))
@@ -77,10 +76,10 @@ def concatenate_pictures(pictures, footer_texts, bg_color, text_color):
     draw = ImageDraw.Draw(final_image)
 
     name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), 400)
-    date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), 200)
-
     name_width, _ = draw.textsize(footer_texts[0], font=name_font)
     draw.text(((final_width - name_width) // 2, y_offset), footer_texts[0], text_color, font=name_font)
+
+    date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), 200)
     date_width, _ = draw.textsize(footer_texts[1], font=date_font)
     draw.text(((final_width - date_width) // 2, y_offset + 400), footer_texts[1], text_color, font=date_font)
 
