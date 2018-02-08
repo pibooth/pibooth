@@ -82,8 +82,9 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
         $ sudo pip install pibooth
 
-   .. hint:: If you don't have *gphoto2* or *CUPS* installed (steps 5. and 6. skipped), use the ``--no-deps``
-             option to avoid installation failures (you may need to install dependencies by yourself)
+   .. hint:: If you don't have *gphoto2* and/oror *CUPS* installed (steps 5. and/or 6. skipped), use
+             the ``--no-deps`` option to avoid installation failures (you may need to install Python
+             dependencies yourself)
 
 Run
 ---

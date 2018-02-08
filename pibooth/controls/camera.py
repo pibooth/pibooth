@@ -4,7 +4,10 @@
 import io
 import subprocess
 import picamera
-import gphoto2 as gp
+try:
+    import gphoto2 as gp
+except ImportError:
+    gp = None  # gphoto2 is optional
 from PIL import Image
 from pibooth import pictures
 
@@ -26,6 +29,8 @@ def rpi_camera_connected():
 def gp_camera_connected():
     """Return True if a camera compatible with gphoto2 is found.
     """
+    if not gp:
+        return False  # gphoto2 is not installed
     if hasattr(gp, 'gp_camera_autodetect'):
         # gphoto2 version 2.5+
         cameras = gp.check_result(gp.gp_camera_autodetect())

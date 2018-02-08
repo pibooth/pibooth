@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import cups
+try:
+    import cups
+except ImportError:
+    cups = None  # CUPS is optional
 import threading
 import collections
 import os.path as osp
@@ -123,15 +126,22 @@ class NotificationServer(HTTPServer):
 class PtbPrinter(object):
 
     def __init__(self, name='default'):
-        self._conn = cups.Connection()
+        self._conn = cups.Connection() if cups else None
         self._notif_server = NotificationServer(self._conn)
         self.name = None
-        if not name or name.lower() == 'default':
+        if not cups:
+            return  # CUPS is not installed
+        elif not name or name.lower() == 'default':
             self.name = self._conn.getDefault()
             if not self.name and self._conn.getPrinters():
                 self.name = list(self._conn.getPrinters().keys())[0]  # Take first one
         elif name in self._conn.getPrinters():
             self.name = name
+
+    def is_installed(self):
+        """Return True if the CUPS server is available for printing.
+        """
+        return cups is not None
 
     def print_file(self, filename):
         """Send a file to the CUPS server to the default printer.

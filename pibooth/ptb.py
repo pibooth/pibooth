@@ -33,7 +33,7 @@ class StateWait(State):
         self.app.window.show_intro(self.app.previous_picture)
 
     def do_actions(self, events):
-        if self.app.find_print_event(events) and self.app.previous_picture_file:
+        if self.app.find_print_event(events) and self.app.previous_picture_file and self.app.printer.is_installed():
             with timeit("Send final picture to printer"):
                 self.app.led_print.blink()
                 self.app.printer.print_file(self.app.previous_picture_file)
@@ -134,6 +134,12 @@ class StateProcessing(State):
 
     def exit_actions(self):
         self.app.captures = []
+
+    def validate_transition(self, events):
+        if self.app.printer.is_installed():
+            return self.next_name
+        else:
+            return 'finish'  # Can not print
 
 
 class StatePrint(State):
