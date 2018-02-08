@@ -50,9 +50,9 @@ class StateWait(State):
 
 class StateChoose(State):
 
-    def __init__(self):
+    def __init__(self, timeout):
         State.__init__(self, 'choose', 'capture')
-        self.timer = PoolingTimer(8)
+        self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
         self.app.led_picture.switch_on()
@@ -66,7 +66,10 @@ class StateChoose(State):
             self.app.max_captures = 1
         elif event and self.app.max_captures != 4:
             self.app.max_captures = 4
-        self.app.window.show_choice(self.app.max_captures)
+
+        if event:
+            with timeit("Choose {} picture(s) mode".format(self.app.max_captures)):
+                self.app.window.show_choice(self.app.max_captures)
 
     def validate_transition(self, events):
         if self.timer.is_timeout():
@@ -144,9 +147,9 @@ class StateProcessing(State):
 
 class StatePrint(State):
 
-    def __init__(self):
+    def __init__(self, timeout):
         State.__init__(self, 'print', 'finish')
-        self.timer = PoolingTimer(5)
+        self.timer = PoolingTimer(timeout)
         self.printed = False
 
     def entry_actions(self):
@@ -206,10 +209,10 @@ class PtbApplication(object):
 
         self.state_machine = StateMachine(self)
         self.state_machine.add_state(StateWait())
-        self.state_machine.add_state(StateChoose())
+        self.state_machine.add_state(StateChoose(8))  # 8s before next state
         self.state_machine.add_state(StateCapture())
         self.state_machine.add_state(StateProcessing())
-        self.state_machine.add_state(StatePrint())
+        self.state_machine.add_state(StatePrint(5))  # 5s before next state
         self.state_machine.add_state(StateFinish())
 
         # Initialize the camera

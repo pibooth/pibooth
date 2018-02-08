@@ -40,7 +40,7 @@ def resize_keep_aspect_ratio(original_size, target_size):
     return (int(sx), int(sy))
 
 
-def get_image(name, size=None):
+def get_image(name, size=None, antialiasing=True):
     """Return a Pygame image. If a size is given, the image is
     resized keeping the original image's aspect ratio.
     """
@@ -48,5 +48,6 @@ def get_image(name, size=None):
         return pygame.image.load(get_filename(name)).convert()
 
     image = Image.open(get_filename(name))
-    image = image.resize(resize_keep_aspect_ratio(image.size, size), Image.ANTIALIAS)
+    image = image.resize(resize_keep_aspect_ratio(image.size, size),
+                         Image.ANTIALIAS if antialiasing else Image.NEAREST)
     return pygame.image.fromstring(image.tobytes(), image.size, image.mode)

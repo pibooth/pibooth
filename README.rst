@@ -46,7 +46,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
    automatically on the first boot to configure your system (e.g., expand partition, change hostname,
    password, enable SSH, configure to boot into GUI, etc.).
 
-   .. hint:: Don't forget to enable the camera in raspi-config. A reboot is needed after this.
+   .. hint:: Don't forget to enable the camera in raspi-config.
 
 3. Reboot and open a terminal. Install the latest firmware version:
 
