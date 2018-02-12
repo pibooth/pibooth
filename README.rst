@@ -82,7 +82,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
         $ sudo pip install pibooth
 
-   .. hint:: If you don't have *gphoto2* and/oror *CUPS* installed (steps 5. and/or 6. skipped), use
+   .. hint:: If you don't have *gphoto2* and/or *CUPS* installed (steps 5. and/or 6. skipped), use
              the ``--no-deps`` option to avoid installation failures (you may need to install Python
              dependencies yourself)
 
@@ -142,7 +142,7 @@ Below is the default configuration file:
     printer_name = default
 
     [WINDOW]
-    # (Width, Height) of the display monitor
+    # (width, height) of the display monitor
     size = (800, 480)
 
     # Blinking background when picture is taken
@@ -153,6 +153,9 @@ Below is the default configuration file:
 
     # Show a countdown timer during the preview
     preview_countdown = True
+
+    # Keep background images in a buffer (best performances but more memory used)
+    bufferize = True
 
     [PICTURE]
     # How many pictures to take by default (4 max)

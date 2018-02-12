@@ -46,8 +46,8 @@ def get_image(name, size=None, antialiasing=True):
     """
     if not size:
         return pygame.image.load(get_filename(name)).convert()
-
-    image = Image.open(get_filename(name))
-    image = image.resize(resize_keep_aspect_ratio(image.size, size),
-                         Image.ANTIALIAS if antialiasing else Image.NEAREST)
-    return pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+    else:
+        image = Image.open(get_filename(name))
+        image = image.resize(resize_keep_aspect_ratio(image.size, size),
+                             Image.ANTIALIAS if antialiasing else Image.NEAREST)
+        return pygame.image.fromstring(image.tobytes(), image.size, image.mode)

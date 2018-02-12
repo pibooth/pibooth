@@ -14,7 +14,7 @@ def timeit(description):
     try:
         yield
     finally:
-        LOGGER.debug("    -> took %s seconds.", time.time() - start)
+        LOGGER.debug("    -> took %0.3f seconds.", time.time() - start)
 
 
 class PoolingTimer(object):

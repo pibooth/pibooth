@@ -12,7 +12,7 @@ class PtbWindow(object):
     """Manage the window.
     """
 
-    def __init__(self, size):
+    def __init__(self, size, bufferize):
         self.__size = size
 
         # Save the desktop mode, shall be done before `setmode` (SDL 1.2.10, and pygame 1.8.0)
@@ -23,9 +23,11 @@ class PtbWindow(object):
         self.display_size = (info.current_w, info.current_h)
         self.is_fullscreen = False
 
+        self._bufferize = bufferize
+        self._bufferized_background = {}
         self._current_background = None
         self._current_foreground = None
-        self._picture_number = (0, 4)  # current / max
+        self._picture_number = (0, 4)  # (current, max)
 
     def _clear(self):
         """Clear the window content.
@@ -34,16 +36,22 @@ class PtbWindow(object):
         self._current_background = None
         self._current_foreground = None
 
-    def _show_and_memorize(self, image_name, update=True):
+    def _update_background(self, image_name, update=True):
         """Show image and memorize it. If the image is the same as the
         current displayed, nothing is done.
         """
         if self._current_background != image_name:
-            image = pictures.get_image(image_name, self.size)
+            buff_size, buff_image = self._bufferized_background.get(image_name, (None, None))
+            if buff_image and self.size == buff_size:
+                image = buff_image
+            else:
+                image = pictures.get_image(image_name, self.size)
             self._clear()
             self.surface.blit(image, self._centered_pos(image))
             self._current_background = image_name
             self._update_picture_number()
+            if self._bufferize and self.size != buff_size:
+                self._bufferized_background[image_name] = (self.size, image)
             if update:
                 pygame.display.update()
 
@@ -112,7 +120,7 @@ class PtbWindow(object):
     def show_intro(self, image=None):
         """Show introduction view.
         """
-        self._show_and_memorize("intro.png", image is None)
+        self._update_background("intro.png", image is None)
         if image and image != self._current_foreground:
             image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.size), Image.ANTIALIAS)
             image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
@@ -123,7 +131,7 @@ class PtbWindow(object):
     def show_choice(self, number):
         """Show the choice view.
         """
-        self._show_and_memorize("choice{}.png".format(number))
+        self._update_background("choice{}.png".format(number))
 
     def show_countdown(self, timeout):
         """Show a countdown of `timeout` seconds. Returns when the countdown
@@ -144,17 +152,17 @@ class PtbWindow(object):
             time.sleep(1)
             timeout -= 1
 
-    def show_wait(self):
+    def show_work_in_progress(self):
         """Show wait view.
         """
         self._picture_number = (0, self._picture_number[1])
-        self._show_and_memorize("processing.png")
+        self._update_background("processing.png")
 
     def show_print(self, image=None):
         """Show print view.
         """
         self._picture_number = (0, self._picture_number[1])
-        self._show_and_memorize("print.png", image is None)
+        self._update_background("print.png", image is None)
         if image and image != self._current_foreground:
             image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.size), Image.ANTIALIAS)
             image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
@@ -166,7 +174,7 @@ class PtbWindow(object):
         """Show finished view.
         """
         self._picture_number = (0, self._picture_number[1])
-        self._show_and_memorize("finished.png")
+        self._update_background("finished.png")
 
     def flash(self, count):
         """Flash the window content.
@@ -192,7 +200,7 @@ class PtbWindow(object):
         pygame.display.update()
 
     def toggle_fullscreen(self):
-        """Set window to full screen.
+        """Set window to full screen or initial size.
         """
         if self.is_fullscreen:
             self.is_fullscreen = False  # Set before get size

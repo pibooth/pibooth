@@ -57,7 +57,8 @@ class StateChoose(State):
     def entry_actions(self):
         self.app.led_picture.switch_on()
         self.app.max_captures = self.app.config.getint('PICTURE', 'captures')
-        self.app.window.show_choice(self.app.max_captures)
+        with timeit("Set default {} picture(s) mode".format(self.app.max_captures)):
+            self.app.window.show_choice(self.app.max_captures)
         self.timer.start()
 
     def do_actions(self, events):
@@ -68,7 +69,7 @@ class StateChoose(State):
             self.app.max_captures = 4
 
         if event:
-            with timeit("Choose {} picture(s) mode".format(self.app.max_captures)):
+            with timeit("Set {} picture(s) mode".format(self.app.max_captures)):
                 self.app.window.show_choice(self.app.max_captures)
 
     def validate_transition(self, events):
@@ -122,7 +123,7 @@ class StateProcessing(State):
         State.__init__(self, 'processing', 'print')
 
     def entry_actions(self):
-        self.app.window.show_wait()
+        self.app.window.show_work_in_progress()
 
         with timeit("Creating merged picture"):
             footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
@@ -205,7 +206,7 @@ class PtbApplication(object):
         pygame.event.set_blocked(pygame.MOUSEMOTION)
 
         # Create window of (width, height)
-        self.window = PtbWindow(config.gettyped('WINDOW', 'size'))
+        self.window = PtbWindow(config.gettyped('WINDOW', 'size'), config.getboolean('WINDOW', 'bufferize'))
 
         self.state_machine = StateMachine(self)
         self.state_machine.add_state(StateWait())
