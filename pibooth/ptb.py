@@ -154,6 +154,7 @@ class StatePrint(State):
         self.printed = False
 
     def entry_actions(self):
+        self.printed = False
         with timeit("Display the merged picture"):
             self.app.window.show_print(self.app.previous_picture)
         self.app.led_print.switch_on()
