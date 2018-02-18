@@ -3,7 +3,7 @@
 import time
 import pygame
 from pygame import gfxdraw
-from pibooth import pictures, fonts
+from pibooth import pictures
 from PIL import Image
 
 
@@ -39,8 +39,7 @@ class PtbWindow(object):
         self.surface.fill((0, 0, 0))
 
     def _update_foreground(self, pil_image, pos='center'):
-        """Show a PIL image on the foreground. If the image is the same as the one
-        currently displayed, nothing is done.
+        """Show a PIL image on the foreground.
         """
         image_name = id(pil_image)
         if pil_image:
@@ -52,27 +51,25 @@ class PtbWindow(object):
                 image = pygame.image.fromstring(pil_image.tobytes(), pil_image.size, pil_image.mode)
                 if self.bufferize:
                     self._bufferized_images.pop(self._current_foreground, None)
-                    self._current_foreground = image_name
                     self._bufferized_images[image_name] = (self.size, image)
+                self._current_foreground = image_name
 
             self.surface.blit(image, self._pos_map[pos](image))
 
     def _update_background(self, image_name):
-        """Show image on the background. If the image is the same as the one
-        currently displayed, nothing is done.
+        """Show image on the background.
         """
-        if self._current_background != image_name:
-            buff_size, buff_image = self._bufferized_images.get(image_name, (None, None))
-            if buff_image and self.size == buff_size:
-                image = buff_image
-            else:
-                image = pictures.get_image(image_name, self.size)
-            self._clear()
-            self.surface.blit(image, self._centered_pos(image))
-            self._update_picture_number()
-            if self.bufferize and self.size != buff_size:
-                self._current_background = image_name
-                self._bufferized_images[image_name] = (self.size, image)
+        buff_size, buff_image = self._bufferized_images.get(image_name, (None, None))
+        if buff_image and self.size == buff_size:
+            image = buff_image
+        else:
+            image = pictures.get_image(image_name, self.size)
+        self._clear()
+        self.surface.blit(image, self._centered_pos(image))
+        self._update_picture_number()
+        if self.bufferize and self.size != buff_size:
+            self._bufferized_images[image_name] = (self.size, image)
+        self._current_background = image_name
 
     def _update_picture_number(self):
         """Update the pictures counter displayed.
@@ -134,10 +131,7 @@ class PtbWindow(object):
         self.__size = size
         self.surface = pygame.display.set_mode(self.size, pygame.RESIZABLE)
         if self._current_background:
-            bkg = self._current_background
-            self._current_background = None  # Force update background
-            self._update_background(bkg)
-
+            self._update_background(self._current_background)
         pygame.display.update()
 
     def show_intro(self, image=None):
@@ -152,25 +146,6 @@ class PtbWindow(object):
         """
         self._update_background("choice{}.png".format(number))
         pygame.display.update()
-
-    def show_countdown(self, timeout):
-        """Show a countdown of `timeout` seconds. Returns when the countdown
-        is finished.
-        """
-        timeout = int(timeout)
-        if timeout < 1:
-            raise ValueError("Start time shall be greater than 0")
-
-        font = pygame.font.Font(fonts.get_filename("Amatic-Bold.ttf"), self.size[1] - 150)
-        while timeout > 0:
-            self._clear()
-            image = font.render(str(timeout), True, (255, 255, 255))
-            pos = self._centered_pos(image)
-            self.surface.blit(image, (pos[0], pos[1] - 60))  # Margin due to picture counter position
-            self._update_picture_number()
-            pygame.display.update()
-            time.sleep(1)
-            timeout -= 1
 
     def show_work_in_progress(self):
         """Show wait view.
@@ -228,9 +203,7 @@ class PtbWindow(object):
             self.surface = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
 
         if self._current_background:
-            bkg = self._current_background
-            self._current_background = None  # Force update background
-            self._update_background(bkg)
+            self._update_background(self._current_background)
         else:
             self._update_picture_number()
 

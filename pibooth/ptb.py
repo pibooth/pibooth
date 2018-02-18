@@ -88,14 +88,14 @@ class StateCapture(State):
         self.app.previous_picture_file = None
         self.app.dirname = osp.join(self.app.savedir, time.strftime("%Y-%m-%d-%H-%M-%S"))
         os.makedirs(self.app.dirname)
-        self.app.camera.preview(self.app.window.get_rect())
+        self.app.camera.preview(self.app.window)
 
     def do_actions(self, events):
         self.app.led_picture.blink()
         self.app.window.set_picture_number(len(self.app.captures) + 1, self.app.max_captures)
 
         if self.app.config.getboolean('WINDOW', 'preview_countdown'):
-            self.app.window.show_countdown(self.app.config.getint('WINDOW', 'preview_delay'))
+            self.app.camera.preview_countdown(self.app.config.getint('WINDOW', 'preview_delay'))
         else:
             time.sleep(self.app.config.getint('WINDOW', 'preview_delay'))
 
