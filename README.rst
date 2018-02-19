@@ -155,7 +155,7 @@ Below is the default configuration file:
     preview_countdown = True
 
     # Keep background images in a buffer (best performances but more memory used)
-    bufferize = True
+    buffer = True
 
     [PICTURE]
     # How many pictures to take by default (4 max)

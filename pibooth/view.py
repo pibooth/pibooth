@@ -12,19 +12,19 @@ class PtbWindow(object):
     """Manage the window.
     """
 
-    def __init__(self, size, bufferize):
+    def __init__(self, title, size, use_buffer):
         self.__size = size
 
         # Save the desktop mode, shall be done before `setmode` (SDL 1.2.10, and pygame 1.8.0)
         info = pygame.display.Info()
 
-        pygame.display.set_caption('Pibooth')
+        pygame.display.set_caption(title)
         self.surface = pygame.display.set_mode(size, pygame.RESIZABLE)
         self.display_size = (info.current_w, info.current_h)
         self.is_fullscreen = False
-        self.bufferize = bufferize
+        self.use_buffer = use_buffer
 
-        self._bufferized_images = {}
+        self._buffered_images = {}
         self._current_background = None
         self._current_foreground = None
         self._picture_number = (0, 4)  # (current, max)
@@ -43,15 +43,15 @@ class PtbWindow(object):
         """
         image_name = id(pil_image)
         if pil_image:
-            buff_size, buff_image = self._bufferized_images.get(image_name, (None, None))
+            buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
             if buff_image and self.size == buff_size:
                 image = buff_image
             else:
                 pil_image = pil_image.resize(pictures.resize_keep_aspect_ratio(pil_image.size, self.size), Image.ANTIALIAS)
                 image = pygame.image.fromstring(pil_image.tobytes(), pil_image.size, pil_image.mode)
-                if self.bufferize:
-                    self._bufferized_images.pop(self._current_foreground, None)
-                    self._bufferized_images[image_name] = (self.size, image)
+                if self.use_buffer:
+                    self._buffered_images.pop(self._current_foreground, None)
+                    self._buffered_images[image_name] = (self.size, image)
                 self._current_foreground = image_name
 
             self.surface.blit(image, self._pos_map[pos](image))
@@ -59,7 +59,7 @@ class PtbWindow(object):
     def _update_background(self, image_name):
         """Show image on the background.
         """
-        buff_size, buff_image = self._bufferized_images.get(image_name, (None, None))
+        buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and self.size == buff_size:
             image = buff_image
         else:
@@ -67,8 +67,8 @@ class PtbWindow(object):
         self._clear()
         self.surface.blit(image, self._centered_pos(image))
         self._update_picture_number()
-        if self.bufferize and self.size != buff_size:
-            self._bufferized_images[image_name] = (self.size, image)
+        if self.use_buffer and self.size != buff_size:
+            self._buffered_images[image_name] = (self.size, image)
         self._current_background = image_name
 
     def _update_picture_number(self):
