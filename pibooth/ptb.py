@@ -214,7 +214,7 @@ class PtbApplication(object):
         self.state_machine.add_state(StateChoose(8))  # 8s before next state
         self.state_machine.add_state(StateCapture())
         self.state_machine.add_state(StateProcessing())
-        self.state_machine.add_state(StatePrint(5))  # 5s before next state
+        self.state_machine.add_state(StatePrint(10))  # 10s before next state
         self.state_machine.add_state(StateFinish())
 
         # Initialize the camera
