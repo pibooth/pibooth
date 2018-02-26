@@ -22,7 +22,6 @@ DEFAULT = {
         "directory": ("~/Pictures/pibooth", "Path to save pictures"),
         "clear_on_startup": (True, "Cleanup the 'directory' before start"),
         "debounce_delay": (0.3, "How long to debounce the button in seconds"),
-        "printer_name": ("default", "Name of the printer to send the pictures"),
         "language": ("en", "User interface language (fallback to English if not found)"),
     },
     "PICTURE": {
@@ -43,7 +42,11 @@ DEFAULT = {
         "iso": (100, "Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max"),
         "rotation": (0, "Rotation of the camera (valid values are 0, 90, 180, and 270)"),
         "resolution": ((1920, 1080), "Resolution for camera captures (see picamera modes)"),
-    }
+    },
+    "PRINTER": {
+        "printer_name": ("default", "Name of the printer to send the pictures"),
+        "printer_delay": (10, "How long is the print view in seconds (0 to skip it)"),
+    },
 }
 
 

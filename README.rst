@@ -138,9 +138,6 @@ Below is the default configuration file:
     # How long to debounce the button in seconds
     debounce_delay = 0.3
 
-    # Name of the printer to send the pictures
-    printer_name = default
-
     [WINDOW]
     # (width, height) of the display monitor
     size = (800, 480)
@@ -182,6 +179,14 @@ Below is the default configuration file:
 
     # Rotation of the camera (valid values are 0, 90, 180, and 270)
     rotation = 0
+
+    [PRINTER]
+
+    # Name of the printer to send the pictures
+    printer_name = default
+
+    # How long is the print view in seconds (0 to skip it)
+    printer_delay = 10
 
 Circuit diagram
 ---------------

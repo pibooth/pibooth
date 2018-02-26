@@ -52,6 +52,7 @@ class StateChoose(State):
 
     def __init__(self, timeout):
         State.__init__(self, 'choose', 'capture')
+        self.init_timeout = timeout
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
@@ -59,6 +60,8 @@ class StateChoose(State):
         self.app.max_captures = self.app.config.getint('PICTURE', 'captures')
         with timeit("Set default {} picture(s) mode".format(self.app.max_captures)):
             self.app.window.show_choice(self.app.max_captures)
+
+        self.timer.timeout = self.init_timeout
         self.timer.start()
 
     def do_actions(self, events):
@@ -71,6 +74,8 @@ class StateChoose(State):
         if event:
             with timeit("Set {} picture(s) mode".format(self.app.max_captures)):
                 self.app.window.show_choice(self.app.max_captures)
+            self.timer.timeout = 2  # Let's 2s more to change the mode
+            self.timer.start()
 
     def validate_transition(self, events):
         if self.timer.is_timeout():
@@ -155,12 +160,18 @@ class StatePrint(State):
 
     def entry_actions(self):
         self.printed = False
+        if self.timer.timeout == 0:
+            return  # Don't show print state
+
         with timeit("Display the merged picture"):
             self.app.window.show_print(self.app.previous_picture)
         self.app.led_print.switch_on()
         self.timer.start()
 
     def do_actions(self, events):
+        if self.timer.timeout == 0:
+            return  # Don't show print state
+
         if self.app.find_print_event(events) and self.app.previous_picture_file:
             with timeit("Send final picture to printer"):
                 self.app.led_print.blink()
@@ -214,7 +225,7 @@ class PtbApplication(object):
         self.state_machine.add_state(StateChoose(8))  # 8s before next state
         self.state_machine.add_state(StateCapture())
         self.state_machine.add_state(StateProcessing())
-        self.state_machine.add_state(StatePrint(10))  # 10s before next state
+        self.state_machine.add_state(StatePrint(config.getfloat('PRINTER', 'printer_delay')))
         self.state_machine.add_state(StateFinish())
 
         # Initialize the camera
@@ -235,7 +246,7 @@ class PtbApplication(object):
         self.led_print = PtbLed(15)
         self.button_print = PtbButton(13, config.getfloat('GENERAL', 'debounce_delay'))
 
-        self.printer = PtbPrinter(config.get('GENERAL', 'printer_name'))
+        self.printer = PtbPrinter(config.get('PRINTER', 'printer_name'))
 
         # Variables shared between states
         self.dirname = None
