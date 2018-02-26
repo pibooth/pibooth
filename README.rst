@@ -205,6 +205,22 @@ To run ``pibooth`` in fullscreen at the boot of the raspberry pi follow these in
    Exec=pibooth
    Type=application
 
+Printer configuration
+---------------------
+
+Here is the default configuration used in CUPS, this may depend on the printer used:
+
+================ =============================
+Options          Value
+================ =============================
+Media Size       10cm x 15cm
+Color Model      CMYK
+Media Type       Glossy Photo Paper
+Resolution       Automatic
+2-Sided Printing Off
+Shrink page ...  Shrink (print the whole page)
+================ =============================
+
 Circuit diagram
 ---------------
 
