@@ -13,16 +13,21 @@ class PtbWindow(object):
     """
 
     def __init__(self, title, size, use_buffer):
-        self.__size = size
+        if isinstance(size, str) and size.lower() == 'fullscreen':
+            self.__size = (800, 480)
+        elif isinstance(size, (tuple, list)):
+            self.__size = size
+        else:
+            raise TypeError("Invalid size '{}' ({})".format(size, type(size)))
 
         # Save the desktop mode, shall be done before `setmode` (SDL 1.2.10, and pygame 1.8.0)
         info = pygame.display.Info()
 
         pygame.display.set_caption(title)
-        self.surface = pygame.display.set_mode(size, pygame.RESIZABLE)
-        self.display_size = (info.current_w, info.current_h)
         self.is_fullscreen = False
         self.use_buffer = use_buffer
+        self.display_size = (info.current_w, info.current_h)
+        self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
 
         self._buffered_images = {}
         self._current_background = None
@@ -32,6 +37,9 @@ class PtbWindow(object):
         self._pos_map = {'center': self._centered_pos,
                          'right': self._right_pos,
                          'left': self._left_pos}
+
+        if isinstance(size, str) and size.lower() == 'fullscreen':
+            self.toggle_fullscreen()
 
     def _clear(self):
         """Clear the window content.

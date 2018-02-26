@@ -32,7 +32,7 @@ DEFAULT = {
         "text_color": ((0, 0, 0), "Footer text RGB color"),
     },
     "WINDOW": {
-        "size": ((800, 480), "(Width, Height) of the display monitor"),
+        "size": ((800, 480), "(Width, Height) of the display monitor or 'fullscreen'"),
         "flash": (True, "Blinking background when picture is taken"),
         "preview_delay": (3, "How long is the preview in seconds"),
         "preview_countdown": (True, "Show a countdown timer during the preview"),

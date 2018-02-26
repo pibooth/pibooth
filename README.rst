@@ -16,12 +16,12 @@ other configuration may work fine. All hardware buttons and lights are optional.
 Hardware:
 ^^^^^^^^^
 
-* 1 Raspberry Pi Model B+
+* 1 Raspberry Pi 2 Model B (or higher)
 * 1 Camera (Pi Camera v2.1 8 MP 1080p or any camera `compatible with gphoto2
   <http://www.gphoto.org/proj/libgphoto2/support.php>`_)
 * 2 push buttons
-* 2 LED
-* 2 resistor of 100 Ohm
+* 2 LEDs
+* 2 resistors of 100 Ohm
 
 Software:
 ^^^^^^^^^
@@ -139,7 +139,7 @@ Below is the default configuration file:
     debounce_delay = 0.3
 
     [WINDOW]
-    # (width, height) of the display monitor
+    # (width, height) of the display monitor or 'fullscreen'
     size = (800, 480)
 
     # Blinking background when picture is taken
