@@ -11,6 +11,7 @@ except ImportError:
     gp = None  # gphoto2 is optional
 from PIL import Image, ImageFont, ImageDraw
 from pibooth import pictures, fonts
+from pibooth.utils import LOGGER
 
 
 def rpi_camera_connected():
@@ -139,12 +140,30 @@ class GpCamera(object):
         gp.check_result(gp.use_python_logging())
         self._cam = gp.Camera()
         self._cam.init()
+        self._config = self._cam.get_config()
 
         self._window = None  # Window where the preview is displayed
 
+        self._set_config_value('imgsettings', 'iso', iso)
+
+    def _set_config_value(self, section, option, value):
+        for child in self._config.get_children():
+            if child.get_name() == section:
+                for subchild in child.get_children():
+                    if subchild.get_name() == option:
+                        LOGGER.debug('Set %s (%s/%s) to %s', subchild.get_label(),
+                                     child.get_name(), subchild.get_name(), value)
+                        subchild.set_value(value)
+                        return
+        raise ValueError('Unsupported setting {}/{}'.format(section, option))
+
     def preview(self, window, flip=True):
         self._window = window
-        # Is it possible?
+        LOGGER.debug('Capturing new preview image')
+        camera_file = self._cam.capture_preview()
+        file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
+        data = memoryview(file_data)
+        image = Image.open(io.BytesIO(file_data))
 
     def preview_countdown(self, timeout, alpha=60):
         pass
