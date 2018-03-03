@@ -13,6 +13,10 @@ class PtbWindow(object):
     """Manage the window.
     """
 
+    CENTER = 'center'
+    RIGHT = 'right'
+    LEFT = 'left'
+
     def __init__(self, title, size, use_buffer):
         if isinstance(size, str) and size.lower() == 'fullscreen':
             self.__size = (800, 480)
@@ -35,9 +39,9 @@ class PtbWindow(object):
         self._current_foreground = None
         self._picture_number = (0, 4)  # (current, max)
 
-        self._pos_map = {'center': self._centered_pos,
-                         'right': self._right_pos,
-                         'left': self._left_pos}
+        self._pos_map = {self.CENTER: self._center_pos,
+                         self.RIGHT: self._right_pos,
+                         self.LEFT: self._left_pos}
 
         if isinstance(size, str) and size.lower() == 'fullscreen':
             self.toggle_fullscreen()
@@ -47,8 +51,9 @@ class PtbWindow(object):
         """
         self.surface.fill((0, 0, 0))
 
-    def _update_foreground(self, pil_image, pos='center'):
+    def _update_foreground(self, pil_image, pos=CENTER):
         """Show a PIL image on the foreground.
+        Only once is bufferized to avoid memory leak.
         """
         image_name = id(pil_image)
 
@@ -59,16 +64,16 @@ class PtbWindow(object):
         else:
             image = pil_image.resize(pictures.resize_keep_aspect_ratio(pil_image.size, self.size), Image.ANTIALIAS)
             image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+            if self._current_foreground:
+                self._buffered_images.pop(id(self._current_foreground[0]), None)
             if self.use_buffer:
-                if self._current_foreground:
-                    self._buffered_images.pop(id(self._current_foreground[0]), None)
                 LOGGER.debug("Add to buffer the image '%s'", image_name)
                 self._buffered_images[image_name] = (self.size, image)
 
         self._current_foreground = (pil_image, pos)
         self.surface.blit(image, self._pos_map[pos](image))
 
-    def _update_background(self, image_name, pos='center'):
+    def _update_background(self, image_name, pos=CENTER):
         """Show image on the background.
         """
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
@@ -103,7 +108,7 @@ class PtbWindow(object):
                 gfxdraw.filled_circle(self.surface, x, y, radius - 3, color)
             x += (2 * radius + border)
 
-    def _centered_pos(self, image):
+    def _center_pos(self, image):
         """
         Return the position of the given image to be centered on window.
         """
@@ -155,13 +160,24 @@ class PtbWindow(object):
         """
         self._update_background("intro.png")
         if pil_image:
-            self._update_foreground(pil_image, 'right')
+            self._update_foreground(pil_image, self.RIGHT)
         pygame.display.update()
 
     def show_choice(self, number):
         """Show the choice view.
         """
         self._update_background("choice{}.png".format(number))
+        self._current_foreground = None  # New sequence of pictures will be taken
+        pygame.display.update()
+
+    def show_image(self, pil_image, pos=CENTER):
+        """Show PIL image as it (no resize thus require force buffer).
+        """
+        image = pygame.image.fromstring(pil_image.tobytes(), pil_image.size, pil_image.mode)
+        self._buffered_images[id(pil_image)] = (self.size, image)
+        self._current_foreground = (pil_image, pos)
+
+        self.surface.blit(image, self._pos_map[pos](image))
         pygame.display.update()
 
     def show_work_in_progress(self):
@@ -177,7 +193,7 @@ class PtbWindow(object):
         self._picture_number = (0, self._picture_number[1])
         self._update_background("print.png")
         if pil_image:
-            self._update_foreground(pil_image, 'left')
+            self._update_foreground(pil_image, self.LEFT)
         pygame.display.update()
 
     def show_finished(self):
@@ -192,10 +208,14 @@ class PtbWindow(object):
         """
         for _ in range(count):
             self.surface.fill((255, 255, 255))
+            if self._current_foreground:
+                self._update_foreground(*self._current_foreground)
             pygame.display.update()
-            time.sleep(0.01)
+            time.sleep(0.02)
             self._clear()
-            time.sleep(0.01)
+            if self._current_foreground:
+                self._update_foreground(*self._current_foreground)
+            time.sleep(0.02)
         self._update_picture_number()
         pygame.display.update()
 

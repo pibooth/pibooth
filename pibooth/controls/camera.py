@@ -11,7 +11,7 @@ except ImportError:
     gp = None  # gphoto2 is optional
 from PIL import Image, ImageFont, ImageDraw
 from pibooth import pictures, fonts
-from pibooth.utils import LOGGER
+from pibooth.utils import LOGGER, PoolingTimer
 
 
 def rpi_camera_connected():
@@ -104,14 +104,19 @@ class RpiCamera(object):
             timeout -= 1
             self._cam.remove_overlay(overlay)
 
+    def preview_wait(self, timeout):
+        """Wait the given time.
+        """
+        time.sleep(timeout)
+
     def stop_preview(self):
         """Stop the preview.
         """
         self._cam.stop_preview()
+        self._preview_window = None
 
     def capture(self, filename=None, pil_format='png'):
-        """
-        Capture a picture in a file. If no filename given a PIL image
+        """Capture a picture in a file. If no filename given a PIL image
         is returned.
         """
         if filename:
@@ -141,8 +146,11 @@ class GpCamera(object):
         self._cam = gp.Camera()
         self._cam.init()
         self._config = self._cam.get_config()
+        self._resolution = resolution
 
         self._window = None  # Window where the preview is displayed
+        self._vflip = False
+        self._border = 50
 
         self._set_config_value('imgsettings', 'iso', iso)
 
@@ -153,28 +161,80 @@ class GpCamera(object):
                     if subchild.get_name() == option:
                         LOGGER.debug('Set %s (%s/%s) to %s', subchild.get_label(),
                                      child.get_name(), subchild.get_name(), value)
-                        subchild.set_value(value)
+                        subchild.set_value(str(value))
                         return
         raise ValueError('Unsupported setting {}/{}'.format(section, option))
 
-    def preview(self, window, flip=True):
-        self._window = window
-        LOGGER.debug('Capturing new preview image')
+    def _get_preview_image(self):
         camera_file = self._cam.capture_preview()
         file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
-        data = memoryview(file_data)
-        image = Image.open(io.BytesIO(file_data))
+        image = Image.open(io.BytesIO(memoryview(file_data)))
+        if self._vflip:
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
+        return image.resize(self.get_rect())
+
+    def get_rect(self):
+        """Return the available surface to display image.
+        """
+        rect = self._window.get_rect()
+        return pictures.resize_keep_aspect_ratio(self._resolution,
+                                                 (rect.width - 2 * self._border, rect.height - 2 * self._border))
+
+    def preview(self, window, flip=True):
+        self._window = window
+        self._vflip = flip
+        LOGGER.debug('Capturing new preview image')
+        self._window.show_image(self._get_preview_image())
 
     def preview_countdown(self, timeout, alpha=60):
-        pass
+        """Show a countdown of `timeout` seconds on the preview.
+        Returns when the countdown is finished.
+        """
+        timeout = int(timeout)
+        if timeout < 1:
+            raise ValueError("Start time shall be greater than 0")
+
+        size = self.get_rect()
+        font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), size[1] * 8 // 10)
+
+        timer = PoolingTimer(timeout)
+        while not timer.is_timeout():
+            txt = str(int(timer.remaining() + 1))
+            image = self._get_preview_image()
+            overlay = Image.new('RGBA', image.size)
+            draw = ImageDraw.Draw(overlay)
+            txt_width, txt_height = draw.textsize(txt, font=font)
+            position = ((size[0] - txt_width) // 2, (size[1] - txt_height) // 2 - size[1] // 10)
+            draw.text(position, txt, (255, 255, 255, alpha), font=font)
+            image.paste(overlay, (0, 0), overlay)
+            self._window.show_image(image)
+
+    def preview_wait(self, timeout):
+        """Wait the given time and refresh the preview.
+        """
+        timeout = int(timeout)
+        if timeout < 1:
+            raise ValueError("Start time shall be greater than 0")
+
+        timer = PoolingTimer(timeout)
+        while not timer.is_timeout():
+            self._window.show_image(self._get_preview_image())
 
     def stop_preview(self):
+        """Stop the preview.
+        """
         self._window = None
 
     def capture(self, filename=None, pil_format='png'):
+        """Capture a picture in a file. If no filename given a PIL image
+        is returned.
+        """
         camera_file = self._cam.capture_preview()
-        file_data = self._cam.file_get_data_and_size(camera_file)
-        image = Image.open(io.BytesIO(file_data))
+        file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
+        image = Image.open(io.BytesIO(memoryview(file_data)))
+
+        self._window.show_image(image.resize(self.get_rect()))
         if filename:
             image.save(filename)
             return filename
@@ -182,4 +242,6 @@ class GpCamera(object):
             return image
 
     def quit(self):
+        """Close the camera driver, it's definitive.
+        """
         self._cam.exit()

@@ -102,7 +102,7 @@ class StateCapture(State):
         if self.app.config.getboolean('WINDOW', 'preview_countdown'):
             self.app.camera.preview_countdown(self.app.config.getint('WINDOW', 'preview_delay'))
         else:
-            time.sleep(self.app.config.getint('WINDOW', 'preview_delay'))
+            self.app.camera.preview_wait(self.app.config.getint('WINDOW', 'preview_delay'))
 
         self.app.led_picture.switch_on()
         if self.app.config.getboolean('WINDOW', 'flash'):
