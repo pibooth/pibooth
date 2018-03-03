@@ -153,9 +153,9 @@ class StateProcessing(State):
 
 class StatePrint(State):
 
-    def __init__(self, timeout):
+    def __init__(self):
         State.__init__(self, 'print', 'finish')
-        self.timer = PoolingTimer(timeout)
+        self.timer = PoolingTimer(self.app.config.getfloat('PRINTER', 'printer_delay'))
         self.printed = False
 
     def entry_actions(self):
@@ -225,7 +225,7 @@ class PtbApplication(object):
         self.state_machine.add_state(StateChoose(8))  # 8s before next state
         self.state_machine.add_state(StateCapture())
         self.state_machine.add_state(StateProcessing())
-        self.state_machine.add_state(StatePrint(config.getfloat('PRINTER', 'printer_delay')))
+        self.state_machine.add_state(StatePrint())
         self.state_machine.add_state(StateFinish())
 
         # Initialize the camera

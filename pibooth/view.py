@@ -5,6 +5,7 @@ import pygame
 from pygame import gfxdraw
 from pibooth import pictures
 from PIL import Image
+from pibooth.utils import LOGGER
 
 
 class PtbWindow(object):
@@ -50,34 +51,39 @@ class PtbWindow(object):
         """Show a PIL image on the foreground.
         """
         image_name = id(pil_image)
-        if pil_image:
-            buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
-            if buff_image and self.size == buff_size:
-                image = buff_image
-            else:
-                pil_image = pil_image.resize(pictures.resize_keep_aspect_ratio(pil_image.size, self.size), Image.ANTIALIAS)
-                image = pygame.image.fromstring(pil_image.tobytes(), pil_image.size, pil_image.mode)
-                if self.use_buffer:
-                    self._buffered_images.pop(self._current_foreground, None)
-                    self._buffered_images[image_name] = (self.size, image)
-                self._current_foreground = image_name
 
-            self.surface.blit(image, self._pos_map[pos](image))
+        buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
+        if buff_image and self.size == buff_size:
+            image = buff_image
+            LOGGER.debug("Use buffered image '%s'", image_name)
+        else:
+            image = pil_image.resize(pictures.resize_keep_aspect_ratio(pil_image.size, self.size), Image.ANTIALIAS)
+            image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+            if self.use_buffer:
+                if self._current_foreground:
+                    self._buffered_images.pop(id(self._current_foreground[0]), None)
+                LOGGER.debug("Add to buffer the image '%s'", image_name)
+                self._buffered_images[image_name] = (self.size, image)
 
-    def _update_background(self, image_name):
+        self._current_foreground = (pil_image, pos)
+        self.surface.blit(image, self._pos_map[pos](image))
+
+    def _update_background(self, image_name, pos='center'):
         """Show image on the background.
         """
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and self.size == buff_size:
             image = buff_image
+            LOGGER.debug("Use buffered image '%s'", image_name)
         else:
             image = pictures.get_image(image_name, self.size)
         self._clear()
-        self.surface.blit(image, self._centered_pos(image))
+        self.surface.blit(image, self._pos_map[pos](image))
         self._update_picture_number()
         if self.use_buffer and self.size != buff_size:
+            LOGGER.debug("Add to buffer the image '%s'", image_name)
             self._buffered_images[image_name] = (self.size, image)
-        self._current_background = image_name
+        self._current_background = (image_name, pos)
 
     def _update_picture_number(self):
         """Update the pictures counter displayed.
@@ -139,14 +145,17 @@ class PtbWindow(object):
         self.__size = size
         self.surface = pygame.display.set_mode(self.size, pygame.RESIZABLE)
         if self._current_background:
-            self._update_background(self._current_background)
+            self._update_background(*self._current_background)
+        if self._current_foreground:
+            self._update_foreground(*self._current_foreground)
         pygame.display.update()
 
-    def show_intro(self, image=None):
+    def show_intro(self, pil_image=None):
         """Show introduction view.
         """
         self._update_background("intro.png")
-        self._update_foreground(image, 'right')
+        if pil_image:
+            self._update_foreground(pil_image, 'right')
         pygame.display.update()
 
     def show_choice(self, number):
@@ -162,12 +171,13 @@ class PtbWindow(object):
         self._update_background("processing.png")
         pygame.display.update()
 
-    def show_print(self, image=None):
+    def show_print(self, pil_image=None):
         """Show print view.
         """
         self._picture_number = (0, self._picture_number[1])
         self._update_background("print.png")
-        self._update_foreground(image, 'left')
+        if pil_image:
+            self._update_foreground(pil_image, 'left')
         pygame.display.update()
 
     def show_finished(self):
@@ -213,8 +223,11 @@ class PtbWindow(object):
             self.surface = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
 
         if self._current_background:
-            self._update_background(self._current_background)
+            self._update_background(*self._current_background)
         else:
             self._update_picture_number()
+
+        if self._current_foreground:
+            self._update_foreground(*self._current_foreground)
 
         pygame.display.update()
