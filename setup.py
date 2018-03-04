@@ -19,20 +19,17 @@ def main():
         description=pibooth.__doc__,
         long_description=open(osp.join(HERE, 'README.rst'), encoding='utf-8').read(),
         classifiers=[
-            # How mature is this project? Common values are
-            #   3 - Alpha
-            #   4 - Beta
-            #   5 - Production/Stable
-            'Development Status :: 3 - Alpha',
-            'Environment :: Console',
+            'Development Status :: 4 - Beta',
+            'Environment :: Other Environment',
             'Intended Audience :: Developers',
+            'Intended Audience :: End Users/Desktop',
             'License :: OSI Approved :: MIT License',
             'Operating System :: POSIX :: Linux',
             'Programming Language :: Python :: 2.7',
-            'Programming Language :: Python :: 3.2',
-            'Programming Language :: Python :: 3.3',
             'Programming Language :: Python :: 3.4',
             'Programming Language :: Python :: 3.5',
+            'Natural Language :: English',
+            'Natural Language :: French',
             'Topic :: Multimedia :: Graphics :: Capture :: Digital Camera',
         ],
         author="Vincent Verdeil, Antoine Rousseaux",
