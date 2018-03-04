@@ -152,8 +152,15 @@ class PtbWindow(object):
         """
         self.__size = size
         self.surface = pygame.display.set_mode(self.size, pygame.RESIZABLE)
+        self.update()
+
+    def update(self):
+        """Re-paint the window with currently displayed images.
+        """
         if self._current_background:
             self._update_background(*self._current_background)
+        else:
+            self._update_picture_number()
         if self._current_foreground:
             self._update_foreground(*self._current_foreground)
         pygame.display.update()
@@ -211,9 +218,7 @@ class PtbWindow(object):
                 self._update_foreground(*self._current_foreground)
             pygame.display.update()
             time.sleep(0.02)
-            self._clear()
-            if self._current_foreground:
-                self._update_foreground(*self._current_foreground)
+            self.update()
             time.sleep(0.02)
         self._update_picture_number()
         pygame.display.update()
@@ -226,7 +231,7 @@ class PtbWindow(object):
 
         self._clear()
         self._picture_number = (current_nbr, total_nbr)
-        self._update_picture_number()
+        self._update_background("capture.png")
         pygame.display.update()
 
     def toggle_fullscreen(self):
@@ -241,12 +246,4 @@ class PtbWindow(object):
             pygame.mouse.set_visible(False)
             self.surface = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
 
-        if self._current_background:
-            self._update_background(*self._current_background)
-        else:
-            self._update_picture_number()
-
-        if self._current_foreground:
-            self._update_foreground(*self._current_foreground)
-
-        pygame.display.update()
+        self.update()
