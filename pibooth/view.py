@@ -51,7 +51,7 @@ class PtbWindow(object):
         """
         self.surface.fill((0, 0, 0))
 
-    def _update_foreground(self, pil_image, pos=CENTER):
+    def _update_foreground(self, pil_image, pos=CENTER, resize=True):
         """Show a PIL image on the foreground.
         Only once is bufferized to avoid memory leak.
         """
@@ -62,7 +62,10 @@ class PtbWindow(object):
             image = buff_image
             LOGGER.debug("Use buffered image '%s'", image_name)
         else:
-            image = pil_image.resize(pictures.resize_keep_aspect_ratio(pil_image.size, self.size), Image.ANTIALIAS)
+            if resize:
+                image = pil_image.resize(pictures.resize_keep_aspect_ratio(pil_image.size, self.size), Image.ANTIALIAS)
+            else:
+                image = pil_image
             image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
             if self._current_foreground:
                 self._buffered_images.pop(id(self._current_foreground[0]), None)
@@ -70,7 +73,7 @@ class PtbWindow(object):
                 LOGGER.debug("Add to buffer the image '%s'", image_name)
                 self._buffered_images[image_name] = (self.size, image)
 
-        self._current_foreground = (pil_image, pos)
+        self._current_foreground = (pil_image, pos, resize)
         self.surface.blit(image, self._pos_map[pos](image))
 
     def _update_background(self, image_name, pos=CENTER):
@@ -171,13 +174,9 @@ class PtbWindow(object):
         pygame.display.update()
 
     def show_image(self, pil_image, pos=CENTER):
-        """Show PIL image as it (no resize thus require force buffer).
+        """Show PIL image as it (no resize).
         """
-        image = pygame.image.fromstring(pil_image.tobytes(), pil_image.size, pil_image.mode)
-        self._buffered_images[id(pil_image)] = (self.size, image)
-        self._current_foreground = (pil_image, pos)
-
-        self.surface.blit(image, self._pos_map[pos](image))
+        self._update_foreground(pil_image, pos, False)
         pygame.display.update()
 
     def show_work_in_progress(self):
