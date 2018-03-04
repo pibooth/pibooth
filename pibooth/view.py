@@ -177,7 +177,9 @@ class PtbWindow(object):
         """Show the choice view.
         """
         self._update_background("choice{}.png".format(number))
-        self._current_foreground = None  # New sequence of pictures will be taken
+        if self._current_foreground:  # New sequence of pictures will be taken
+            self._buffered_images.pop(id(self._current_foreground[0]), None)
+            self._current_foreground = None
         pygame.display.update()
 
     def show_image(self, pil_image, pos=CENTER):
@@ -220,8 +222,6 @@ class PtbWindow(object):
             time.sleep(0.02)
             self.update()
             time.sleep(0.02)
-        self._update_picture_number()
-        pygame.display.update()
 
     def set_picture_number(self, current_nbr, total_nbr):
         """Set the current number of pictures taken.
@@ -229,9 +229,10 @@ class PtbWindow(object):
         if total_nbr < 1:
             raise ValueError("Total number of captures shall be greater than 0")
 
-        self._clear()
         self._picture_number = (current_nbr, total_nbr)
         self._update_background("capture.png")
+        if self._current_foreground:
+            self._update_foreground(*self._current_foreground)
         pygame.display.update()
 
     def toggle_fullscreen(self):

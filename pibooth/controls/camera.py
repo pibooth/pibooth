@@ -234,7 +234,10 @@ class GpCamera(object):
         file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
         image = Image.open(io.BytesIO(memoryview(file_data)))
 
-        self._window.show_image(image.resize(self.get_rect()))
+        if self._vflip:
+            self._window.show_image(image.transpose(Image.FLIP_LEFT_RIGHT).resize(self.get_rect()))
+        else:
+            self._window.show_image(image.resize(self.get_rect()))
         if filename:
             image.save(filename)
             return filename
