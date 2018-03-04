@@ -4,54 +4,88 @@ import threading
 from RPi import GPIO
 
 
+class BlinkingThread(threading.Thread):
+
+    """Thread which manage blinking LEDs synchronously.
+    """
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.daemon = True
+
+        self._tick = 0.3
+        self._stop_event = threading.Event()
+        self._leds = []
+        self.start()
+
+    def register(self, led):
+        """Add a new LED to manage.
+        """
+        self._leds.append(led)
+
+    def run(self):
+        """Cyclic call to the method :py:meth:`PtbLed.toggle_state`
+        of the registered LED.
+        """
+        while not self._stop_event.is_set():
+            for led in list(self._leds):  # new list for thread safe
+                led.toggle_state()
+            if self._stop_event.wait(self._tick):
+                break  # Stop requested
+
+    def stop(self):
+        """Stop the thread.
+        """
+        self._stop_event.set()
+
+
 class PtbLed(object):
 
-    """LED management
+    """LED management.
     """
+
+    _blinking_thread = BlinkingThread()
 
     def __init__(self, pin):
         self.pin = pin
         GPIO.setup(pin, GPIO.OUT)
-        self._stop = threading.Event()
-        self._blinking_thread = None
+        self._blink = False
+        self._state = GPIO.LOW
 
-    def _blink_start(self, ton=0.3, toff=0.3):
-        while not self._stop.is_set():
-            GPIO.output(self.pin, GPIO.HIGH)
-            if self._stop.wait(ton):
-                break  # Stop requested
-            GPIO.output(self.pin, GPIO.LOW)
-            if self._stop.wait(toff):
-                break  # Stop requested
+        self._blinking_thread.register(self)
 
-    def _blink_stop(self):
-        if self._blinking_thread:
-            self._stop.set()
-            self._blinking_thread.join()
-            self._blinking_thread = None
-            self._stop.clear()
+    def toggle_state(self):
+        """Toogle the LED state.
+        """
+        if self._blink:
+            if self._state == GPIO.LOW:
+                GPIO.output(self.pin, GPIO.HIGH)
+                self._state = GPIO.HIGH
+            else:
+                GPIO.output(self.pin, GPIO.LOW)
+                self._state = GPIO.LOW
 
     def switch_on(self):
         """Switch on the LED.
         """
-        self._blink_stop()
+        self._blink = False
         GPIO.output(self.pin, GPIO.HIGH)
+        self._state = GPIO.HIGH
 
     def switch_off(self):
         """Switch off the LED.
         """
-        self._blink_stop()
+        self._blink = False
         GPIO.output(self.pin, GPIO.LOW)
+        self._state = GPIO.LOW
 
-    def blink(self, duration=None):
+    def blink(self):
         """Blink the LED.
-        This method is blocking if a duration (in seconds) is given.
         """
-        if not self._blinking_thread:
-            self._blinking_thread = threading.Thread(target=self._blink_start)
-            self._blinking_thread.daemon = True
-            self._blinking_thread.start()
+        self._blink = True
 
-        if duration:
-            self._blinking_thread.join(duration)
-            self._blink_stop()
+    def quit(self):
+        """Stop the blinking thread.
+        """
+        self._blinking_thread.stop()
+        self._blinking_thread.join()

@@ -38,6 +38,7 @@ class StateMachine(object):
         self.states = {}
         self.active_state = None
 
+        # Share the application to manage between states
         State.app = application
 
     def add_state(self, state):

@@ -57,7 +57,6 @@ class StateChoose(State):
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
-        self.app.led_picture.blink()
         self.app.max_captures = self.app.config.getint('PICTURE', 'captures')
         with timeit("Set default {} picture(s) mode".format(self.app.max_captures)):
             self.app.window.show_choice(self.app.max_captures)
@@ -75,7 +74,7 @@ class StateChoose(State):
         if event:
             with timeit("Set {} picture(s) mode".format(self.app.max_captures)):
                 self.app.window.show_choice(self.app.max_captures)
-            self.timer.timeout = 2  # Let's 2s more to change the mode
+            self.timer.timeout = 2  # Let's 2s more to change the layout
             self.timer.start()
 
     def exit_actions(self):
@@ -327,8 +326,8 @@ class PtbApplication(object):
                 self.state_machine.process(events)
 
         finally:
-            self.led_picture.switch_off()
-            self.led_print.switch_off()
+            self.led_picture.quit()
+            self.led_print.quit()
             GPIO.cleanup()
             self.camera.quit()
             self.printer.quit()
