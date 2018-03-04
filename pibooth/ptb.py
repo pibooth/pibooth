@@ -31,14 +31,15 @@ class StateWait(State):
 
     def entry_actions(self):
         self.app.window.show_intro(self.app.previous_picture)
+        self.app.led_picture.blink()
 
     def do_actions(self, events):
         if self.app.find_print_event(events) and self.app.previous_picture_file and self.app.printer.is_installed():
             with timeit("Send final picture to printer"):
-                self.app.led_print.blink()
+                self.app.led_print.switch_on()
                 self.app.printer.print_file(self.app.previous_picture_file)
             time.sleep(0.5)
-            self.app.led_print.switch_on()
+            self.app.led_print.blink()
 
     def exit_actions(self):
         self.app.led_print.switch_off()
@@ -56,7 +57,7 @@ class StateChoose(State):
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
-        self.app.led_picture.switch_on()
+        self.app.led_picture.blink()
         self.app.max_captures = self.app.config.getint('PICTURE', 'captures')
         with timeit("Set default {} picture(s) mode".format(self.app.max_captures)):
             self.app.window.show_choice(self.app.max_captures)
@@ -77,6 +78,9 @@ class StateChoose(State):
             self.timer.timeout = 2  # Let's 2s more to change the mode
             self.timer.start()
 
+    def exit_actions(self):
+        self.app.led_picture.switch_on()
+
     def validate_transition(self, events):
         if self.timer.is_timeout():
             return self.next_name
@@ -96,7 +100,6 @@ class StateCapture(State):
         self.app.camera.preview(self.app.window)
 
     def do_actions(self, events):
-        self.app.led_picture.blink()
         self.app.window.set_picture_number(len(self.app.captures) + 1, self.app.max_captures)
 
         if self.app.config.getboolean('WINDOW', 'preview_countdown'):
@@ -104,7 +107,6 @@ class StateCapture(State):
         else:
             self.app.camera.preview_wait(self.app.config.getint('WINDOW', 'preview_delay'))
 
-        self.app.led_picture.switch_on()
         if self.app.config.getboolean('WINDOW', 'flash'):
             self.app.window.flash(2)
 
@@ -165,7 +167,7 @@ class StatePrint(State):
 
         with timeit("Display the merged picture"):
             self.app.window.show_print(self.app.previous_picture)
-        self.app.led_print.switch_on()
+        self.app.led_print.blink()
         self.timer.start()
 
     def do_actions(self, events):
@@ -174,10 +176,10 @@ class StatePrint(State):
 
         if self.app.find_print_event(events) and self.app.previous_picture_file:
             with timeit("Send final picture to printer"):
-                self.app.led_print.blink()
+                self.app.led_print.switch_on()
                 self.app.printer.print_file(self.app.previous_picture_file)
             time.sleep(0.5)
-            self.app.led_print.switch_on()
+            self.app.led_print.blink()
             self.printed = True
 
     def validate_transition(self, events):
