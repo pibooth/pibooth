@@ -61,17 +61,24 @@ class StateChoose(State):
         with timeit("Set default {} picture(s) mode".format(self.app.max_captures)):
             self.app.window.show_choice(self.app.max_captures)
 
+        self.app.led_picture.blink()
+        self.app.led_print.blink()
+
         self.timer.timeout = self.init_timeout
         self.timer.start()
 
     def do_actions(self, events):
         event = self.app.find_choice_event(events)
-        if event and self.app.max_captures != 1:
-            self.app.max_captures = 1
-        elif event and self.app.max_captures != 4:
-            self.app.max_captures = 4
-
         if event:
+            if event.type == BUTTON_DOWN and self.app.max_captures != 1:
+                self.app.max_captures = 1
+            elif event.type == BUTTON_DOWN and self.app.max_captures != 4:
+                self.app.max_captures = 4
+
+            elif event.pin == self.app.button_picture:
+                self.app.max_captures = 4
+            elif event.pin == self.app.button_print:
+                self.app.max_captures = 1
             with timeit("Set {} picture(s) mode".format(self.app.max_captures)):
                 self.app.window.show_choice(self.app.max_captures)
             self.timer.timeout = 2  # Let's 2s more to change the layout
@@ -79,6 +86,7 @@ class StateChoose(State):
 
     def exit_actions(self):
         self.app.led_picture.switch_on()
+        self.app.led_print.switch_off()
 
     def validate_transition(self, events):
         if self.timer.is_timeout():
@@ -301,7 +309,8 @@ class PtbApplication(object):
         """
         for event in events:
             if (event.type == pygame.KEYDOWN and event.key in (pygame.K_LEFT, pygame.K_RIGHT)) or \
-                    (event.type == BUTTON_DOWN and event.pin == self.button_picture):
+                    (event.type == BUTTON_DOWN and event.pin == self.button_picture) or \
+                    (event.type == BUTTON_DOWN and event.pin == self.button_print):
                 return event
 
     def main_loop(self):
