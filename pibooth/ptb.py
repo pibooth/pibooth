@@ -70,9 +70,9 @@ class StateChoose(State):
     def do_actions(self, events):
         event = self.app.find_choice_event(events)
         if event:
-            if event.type == BUTTON_DOWN and self.app.max_captures != 1:
+            if event.type == pygame.KEYDOWN and self.app.max_captures != 1:
                 self.app.max_captures = 1
-            elif event.type == BUTTON_DOWN and self.app.max_captures != 4:
+            elif event.type == pygame.KEYDOWN and self.app.max_captures != 4:
                 self.app.max_captures = 4
 
             elif event.pin == self.app.button_picture:
