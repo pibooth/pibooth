@@ -173,7 +173,7 @@ class PtbWindow(object):
             self._update_foreground(pil_image, self.RIGHT)
         pygame.display.update()
 
-    def show_choice(self, number):
+    def show_choice(self, number=0):
         """Show the choice view.
         """
         self._update_background("choice{}.png".format(number))

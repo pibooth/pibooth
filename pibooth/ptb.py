@@ -52,14 +52,14 @@ class StateWait(State):
 class StateChoose(State):
 
     def __init__(self, timeout):
-        State.__init__(self, 'choose', 'capture')
+        State.__init__(self, 'choose', 'chosen')
         self.init_timeout = timeout
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
-        self.app.max_captures = self.app.config.getint('PICTURE', 'captures')
-        with timeit("Set default {} picture(s) mode".format(self.app.max_captures)):
-            self.app.window.show_choice(self.app.max_captures)
+        with timeit("Show picture choice (no default set)"):
+            self.app.window.show_choice()
+        self.app.max_captures = None
 
         self.app.led_picture.blink()
         self.app.led_print.blink()
@@ -70,22 +70,47 @@ class StateChoose(State):
     def do_actions(self, events):
         event = self.app.find_choice_event(events)
         if event:
-            if event.type == pygame.KEYDOWN and self.app.max_captures != 1:
-                self.app.max_captures = 1
-            elif event.type == pygame.KEYDOWN and self.app.max_captures != 4:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
                 self.app.max_captures = 4
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                self.app.max_captures = 1
 
             elif event.pin == self.app.button_picture:
                 self.app.max_captures = 4
             elif event.pin == self.app.button_print:
                 self.app.max_captures = 1
-            with timeit("Set {} picture(s) mode".format(self.app.max_captures)):
-                self.app.window.show_choice(self.app.max_captures)
-            self.timer.timeout = 2  # Let's 2s more to change the layout
-            self.timer.start()
 
     def exit_actions(self):
-        self.app.led_picture.switch_on()
+        if self.app.max_captures == 4:
+            self.app.led_picture.switch_on()
+            self.app.led_print.switch_off()
+        elif self.app.max_captures == 1:
+            self.app.led_print.switch_on()
+            self.app.led_picture.switch_off()
+
+    def validate_transition(self, events):
+        if self.app.max_captures:
+            return self.next_name
+        elif self.timer.is_timeout():
+            return "wait"
+
+class StateChosen(State):
+
+    def __init__(self, timeout):
+        State.__init__(self, 'chosen', 'capture')
+        self.init_timeout = timeout
+        self.timer = PoolingTimer(timeout)
+
+    def entry_actions(self):
+
+        with timeit("Set {} picture(s) mode".format(self.app.max_captures)):
+            self.app.window.show_choice(self.app.max_captures)
+
+        self.timer.timeout = self.init_timeout
+        self.timer.start()
+
+    def exit_actions(self):
+        self.app.led_picture.switch_off()
         self.app.led_print.switch_off()
 
     def validate_transition(self, events):
@@ -231,7 +256,8 @@ class PtbApplication(object):
 
         self.state_machine = StateMachine(self)
         self.state_machine.add_state(StateWait())
-        self.state_machine.add_state(StateChoose(8))  # 8s before next state
+        self.state_machine.add_state(StateChoose(30))  # 30s before going back to the start
+        self.state_machine.add_state(StateChosen(4))
         self.state_machine.add_state(StateCapture())
         self.state_machine.add_state(StateProcessing())
         self.state_machine.add_state(StatePrint())
