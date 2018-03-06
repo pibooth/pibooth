@@ -155,7 +155,7 @@ class PtbWindow(object):
         self.update()
 
     def update(self):
-        """Re-paint the window with currently displayed images.
+        """Repaint the window with currently displayed images.
         """
         if self._current_background:
             self._update_background(*self._current_background)

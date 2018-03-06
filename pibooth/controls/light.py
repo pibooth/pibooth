@@ -83,7 +83,8 @@ class PtbLed(object):
         self._blinking_thread.register(self)
 
     def quit(self):
-        """Stop the blinking thread.
+        """Switch off and stop the blinking thread.
         """
+        self.switch_off()
         self._blinking_thread.stop()
         self._blinking_thread.join()

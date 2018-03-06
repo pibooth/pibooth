@@ -38,7 +38,7 @@ class StateWait(State):
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
                 self.app.printer.print_file(self.app.previous_picture_file)
-            time.sleep(0.5)
+            time.sleep(1)
             self.app.led_print.blink()
 
     def exit_actions(self):
@@ -74,7 +74,6 @@ class StateChoose(State):
                 self.app.max_captures = 4
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                 self.app.max_captures = 1
-
             elif event.pin == self.app.button_picture:
                 self.app.max_captures = 4
             elif event.pin == self.app.button_print:
@@ -93,6 +92,7 @@ class StateChoose(State):
             return self.next_name
         elif self.timer.is_timeout():
             return "wait"
+
 
 class StateChosen(State):
 
@@ -149,7 +149,6 @@ class StateCapture(State):
 
     def exit_actions(self):
         self.app.camera.stop_preview()
-        self.app.led_picture.switch_off()
 
     def validate_transition(self, events):
         if len(self.app.captures) >= self.app.max_captures:
@@ -210,7 +209,7 @@ class StatePrint(State):
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
                 self.app.printer.print_file(self.app.previous_picture_file)
-            time.sleep(0.5)
+            time.sleep(1)
             self.app.led_print.blink()
             self.printed = True
 
