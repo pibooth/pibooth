@@ -32,6 +32,8 @@ class StateWait(State):
     def entry_actions(self):
         self.app.window.show_intro(self.app.previous_picture)
         self.app.led_picture.blink()
+        if self.app.previous_picture_file and self.app.printer.is_installed():
+            self.app.led_print.blink()
 
     def do_actions(self, events):
         if self.app.find_print_event(events) and self.app.previous_picture_file and self.app.printer.is_installed():
@@ -85,6 +87,9 @@ class StateChoose(State):
             self.app.led_print.switch_off()
         elif self.app.max_captures == 1:
             self.app.led_print.switch_on()
+            self.app.led_picture.switch_off()
+        else:
+            self.app.led_print.switch_off()
             self.app.led_picture.switch_off()
 
     def validate_transition(self, events):
