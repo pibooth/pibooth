@@ -236,3 +236,4 @@ Icons from the Noun Project
 - Thumb up by Symbolon
 - Polaroid by icon 54
 - Cat by Внталий Плут
+- Up hand drawn arrow by Kid A
