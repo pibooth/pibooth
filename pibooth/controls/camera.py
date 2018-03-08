@@ -18,7 +18,6 @@ from pibooth.utils import LOGGER, PoolingTimer, timeit
 def rpi_camera_connected():
     """Return True if a RPi camera is found.
     """
-    return False
     try:
         process = subprocess.Popen(['vcgencmd', 'get_camera'],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
