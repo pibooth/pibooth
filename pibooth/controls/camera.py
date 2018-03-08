@@ -18,6 +18,7 @@ from pibooth.utils import LOGGER, PoolingTimer, timeit
 def rpi_camera_connected():
     """Return True if a RPi camera is found.
     """
+    return False
     try:
         process = subprocess.Popen(['vcgencmd', 'get_camera'],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -135,17 +136,19 @@ class RpiCamera(BaseCamera):
         self._cam.stop_preview()
         self._window = None
 
-    def capture(self, filename=None, pil_format='png'):
+    def capture(self, filename=None, flip=True):
         """Capture a picture in a file. If no filename given a PIL image
         is returned.
         """
+        if self._cam.hflip != flip:
+            self._cam.hflip = flip
         if filename:
             self._cam.capture(filename)
             return filename
         else:
             # Create the in-memory stream
             stream = io.BytesIO()
-            self._cam.capture(stream, format=pil_format)
+            self._cam.capture(stream)
             # "Rewind" the stream to the beginning so we can read its content
             stream.seek(0)
             return Image.open(stream)
@@ -168,7 +171,7 @@ class GpCamera(BaseCamera):
         self._cam.init()
         self._config = self._cam.get_config()
 
-        self._vflip = False
+        self._preview_hflip = False
         self._rotation = rotation
         self._set_config_value('imgsettings', 'iso', iso)
         self._cam.set_config(self._config)
@@ -196,11 +199,11 @@ class GpCamera(BaseCamera):
             camera_file = self._cam.capture_preview()
             file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
             image = Image.open(io.BytesIO(memoryview(file_data)))
-            if self._vflip:
+            if self._preview_hflip:
                 image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
             image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.resolution, 'outer'))
-            image = image.crop(pictures.crop_to_size(image.size, self.resolution))
+            image = image.crop(pictures.resize_by_croping(image.size, self.resolution))
 
         # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
         rect = self.get_rect()
@@ -210,7 +213,7 @@ class GpCamera(BaseCamera):
         """Setup the preview.
         """
         self._window = window
-        self._vflip = flip
+        self._preview_hflip = flip
         self._window.show_image(self._get_preview_image())
 
     def preview_countdown(self, timeout, alpha=60):
@@ -249,7 +252,7 @@ class GpCamera(BaseCamera):
         """
         self._window = None
 
-    def capture(self, filename=None, pil_format='png'):
+    def capture(self, filename=None, flip=True):
         """Capture a picture in a file. If no filename given a PIL image
         is returned.
         """
@@ -257,16 +260,19 @@ class GpCamera(BaseCamera):
         file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
         image = Image.open(io.BytesIO(memoryview(file_data)))
         image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
-        image = image.crop(pictures.crop_to_size(image.size, self.resolution))
+        image = image.crop(pictures.resize_by_croping(image.size, self.resolution))
 
         # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
         rect = self.get_rect()
         size = pictures.resize_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
 
-        if self._vflip:
+        if self._preview_hflip:
             self._window.show_image(image.transpose(Image.FLIP_LEFT_RIGHT).resize(size))
         else:
             self._window.show_image(image.resize(size))
+
+        if flip:
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
         if filename:
             image.save(filename)
             return filename

@@ -55,34 +55,30 @@ class StateChoose(State):
 
     def __init__(self, timeout):
         State.__init__(self, 'choose', 'chosen')
-        self.init_timeout = timeout
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
         with timeit("Show picture choice (no default set)"):
             self.app.window.show_choice()
         self.app.max_captures = None
-
         self.app.led_picture.blink()
         self.app.led_print.blink()
-
-        self.timer.timeout = self.init_timeout
         self.timer.start()
 
     def do_actions(self, events):
         event = self.app.find_choice_event(events)
         if event:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                self.app.max_captures = 4
+                self.app.max_captures = self.app.config.getint('PICTURE', 'captures')
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                 self.app.max_captures = 1
             elif event.pin == self.app.button_picture:
-                self.app.max_captures = 4
+                self.app.max_captures = self.app.config.getint('PICTURE', 'captures')
             elif event.pin == self.app.button_print:
                 self.app.max_captures = 1
 
     def exit_actions(self):
-        if self.app.max_captures == 4:
+        if self.app.max_captures == self.app.config.getint('PICTURE', 'captures'):
             self.app.led_picture.switch_on()
             self.app.led_print.switch_off()
         elif self.app.max_captures == 1:
@@ -103,15 +99,11 @@ class StateChosen(State):
 
     def __init__(self, timeout):
         State.__init__(self, 'chosen', 'capture')
-        self.init_timeout = timeout
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
-
         with timeit("Set {} picture(s) mode".format(self.app.max_captures)):
             self.app.window.show_choice(self.app.max_captures)
-
-        self.timer.timeout = self.init_timeout
         self.timer.start()
 
     def exit_actions(self):
@@ -149,7 +141,7 @@ class StateCapture(State):
 
         image_file_name = osp.join(self.app.dirname, "ptb{:03}.jpg".format(len(self.app.captures)))
         with timeit("Take picture and save it in {}".format(image_file_name)):
-            self.app.camera.capture(image_file_name)
+            self.app.camera.capture(image_file_name, self.app.config.getboolean('PICTURE', 'flip'))
             self.app.captures.append(image_file_name)
 
     def exit_actions(self):
@@ -273,7 +265,7 @@ class PtbApplication(object):
         elif camera.gp_camera_connected():
             cam_class = camera.GpCamera
         else:
-            raise EnvironmentError("Neither Pi Camera nor GPhoto2 camera detected")
+            raise EnvironmentError("Neither PiCamera nor GPhoto2 camera detected")
 
         self.camera = cam_class(config.getint('CAMERA', 'iso'),
                                 config.gettyped('CAMERA', 'resolution'),

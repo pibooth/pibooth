@@ -156,7 +156,10 @@ Below is the default configuration file:
     buffer = True
 
     [PICTURE]
-    # How many pictures to take by default (4 max)
+    # Flip horizontally the captured picture
+    flip = False
+
+    # Number pictures in case of multiple captures (4 max)
     captures = 4
 
     # First text displayed
@@ -172,17 +175,16 @@ Below is the default configuration file:
     bg_color = (255, 255, 255)
 
     [CAMERA]
-    # Resolution for camera captures (see picamera modes)
-    resolution = (1920, 1080)
-
     # Adjust for lighting issues (normal is 100 or 200. Dark is 800 max)
     iso = 100
 
     # Rotation of the camera (valid values are 0, 90, 180, and 270)
     rotation = 0
 
-    [PRINTER]
+    # Resolution for camera captures (preview will have same aspect ratio)
+    resolution = (1920, 1080)
 
+    [PRINTER]
     # Name of the printer to send the pictures
     printer_name = default
 

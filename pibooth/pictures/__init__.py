@@ -13,43 +13,52 @@ def get_filename(name):
 
 
 def resize_keep_aspect_ratio(original_size, target_size, resize_type='inner'):
-    """Return a new size included (if 'inner') or excluded (if 'outer') in the
-    targeted one by resizing and keeping the original image's aspect ratio.
+    """Return a new size included (if resize_type='inner') or excluded (if resize_type='outer')
+    in the targeted one by resizing and keeping the original image's aspect ratio.
     """
     # Get current and desired ratio for the images
     img_ratio = original_size[0] / float(original_size[1])
     ratio = target_size[0] / float(target_size[1])
 
-    ix, iy = original_size
+    ox, oy = original_size
+    tx, ty = target_size
+
     if ratio > img_ratio:
         # fit to width
-        scale_factor = target_size[0] / float(ix)
-        sy = scale_factor * iy
-        if sy > target_size[1] and resize_type == 'inner':
-            scale_factor = target_size[1] / float(iy)
-            sx = scale_factor * ix
-            sy = target_size[1]
-        else:
-            sx = target_size[0]
+        scale_factor = target_size[0] / float(ox)
+        ty = scale_factor * oy
+        if ty > target_size[1] and resize_type == 'inner':
+            scale_factor = target_size[1] / float(oy)
+            tx = scale_factor * ox
+            ty = target_size[1]
     elif ratio < img_ratio:
         # fit to height
-        scale_factor = target_size[1] / float(iy)
-        sx = scale_factor * ix
-        if sx > target_size[0] and resize_type == 'inner':
-            scale_factor = target_size[0] / float(ix)
-            sx = target_size[0]
-            sy = scale_factor * iy
-        else:
-            sy = target_size[1]
-    else:
-        return target_size
-    return (int(sx), int(sy))
+        scale_factor = target_size[1] / float(oy)
+        tx = scale_factor * ox
+        if tx > target_size[0] and resize_type == 'inner':
+            scale_factor = target_size[0] / float(ox)
+            tx = target_size[0]
+            ty = scale_factor * oy
+    return (int(tx), int(ty))
 
 
-def crop_to_size(original_size, target_size, crop_type='middle'):
-    """Return a new size included in the target one by croping and
-    keeping the original image's aspect ratio.
+def resize_by_croping(original_size, target_size, crop_type='middle'):
+    """Return a tuple representing a rectangle (x, y, width, height) coresponding
+    to a crop of the original size. The position of the rectangle can be defined
+    by the crop_type paramater:
+
+       * top-left
+       * top-middle
+       * top-right
+       * middle-left
+       * middle
+       * middle-right
+       * bottom-left
+       * bottom-middle
+       * bottom-right
     """
+    x, y = 0, 0
+
     if crop_type.endswith('left'):
         x = 0
     elif crop_type.endswith('middle'):
