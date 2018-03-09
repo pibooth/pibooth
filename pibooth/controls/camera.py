@@ -84,12 +84,13 @@ class RpiCamera(BaseCamera):
     """Camera management
     """
 
-    def __init__(self, iso=200, resolution=(1920, 1080), rotation=0):
+    def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False):
         BaseCamera.__init__(self, resolution)
         self._cam = picamera.PiCamera()
         self._cam.framerate = 15  # Slower is necessary for high-resolution
         self._cam.video_stabilization = True
         self._cam.vflip = False
+        self._cam.hflip = flip
         self._cam.resolution = resolution
         self._cam.iso = iso
         self._cam.rotation = rotation
@@ -99,6 +100,13 @@ class RpiCamera(BaseCamera):
         """
         self._window = window
         rect = self.get_rect()
+        if self._cam.hflip:
+            if flip:
+                 # Don't flip again, already done at init
+                flip = False
+            else:
+                # Flip again because flipped once at init
+                flip = True
         self._cam.start_preview(resolution=(rect.width, rect.height), hflip=flip,
                                 fullscreen=False, window=tuple(rect))
 
@@ -135,12 +143,10 @@ class RpiCamera(BaseCamera):
         self._cam.stop_preview()
         self._window = None
 
-    def capture(self, filename=None, flip=True):
+    def capture(self, filename=None):
         """Capture a picture in a file. If no filename given a PIL image
         is returned.
         """
-        if self._cam.hflip != flip:
-            self._cam.hflip = flip
         if filename:
             self._cam.capture(filename)
             return filename
@@ -163,7 +169,7 @@ class GpCamera(BaseCamera):
     """Gphoto2 camera management.
     """
 
-    def __init__(self, iso=200, resolution=(1920, 1080), rotation=0):
+    def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False):
         BaseCamera.__init__(self, resolution)
         gp.check_result(gp.use_python_logging())
         self._cam = gp.Camera()
@@ -171,6 +177,7 @@ class GpCamera(BaseCamera):
         self._config = self._cam.get_config()
 
         self._preview_hflip = False
+        self._capture_hflip = flip
         self._rotation = rotation
         self._set_config_value('imgsettings', 'iso', iso)
         self._cam.set_config(self._config)
@@ -251,7 +258,7 @@ class GpCamera(BaseCamera):
         """
         self._window = None
 
-    def capture(self, filename=None, flip=True):
+    def capture(self, filename=None):
         """Capture a picture in a file. If no filename given a PIL image
         is returned.
         """
@@ -270,7 +277,7 @@ class GpCamera(BaseCamera):
         else:
             self._window.show_image(image.resize(size))
 
-        if flip:
+        if self._capture_hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
         if filename:
             image.save(filename)

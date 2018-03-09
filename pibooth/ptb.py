@@ -141,7 +141,7 @@ class StateCapture(State):
 
         image_file_name = osp.join(self.app.dirname, "ptb{:03}.jpg".format(len(self.app.captures)))
         with timeit("Take picture and save it in {}".format(image_file_name)):
-            self.app.camera.capture(image_file_name, self.app.config.getboolean('PICTURE', 'flip'))
+            self.app.camera.capture(image_file_name)
             self.app.captures.append(image_file_name)
 
     def exit_actions(self):
@@ -269,7 +269,8 @@ class PtbApplication(object):
 
         self.camera = cam_class(config.getint('CAMERA', 'iso'),
                                 config.gettyped('CAMERA', 'resolution'),
-                                config.getint('CAMERA', 'rotation'))
+                                config.getint('CAMERA', 'rotation'),
+                                config.getboolean('CAMERA', 'flip'))
 
         self.led_picture = PtbLed(7)
         self.button_picture = PtbButton(11, config.getfloat('GENERAL', 'debounce_delay'))

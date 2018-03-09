@@ -25,7 +25,6 @@ DEFAULT = {
         "language": ("en", "User interface language (fallback to English if not found)"),
     },
     "PICTURE": {
-        "flip": (False, "Flip horizontally the captured picture"),
         "captures": (4, "Number pictures in case of multiple captures (4 max)"),
         "footer_text1": ("Footer 1", "First text displayed"),
         "footer_text2": ("Footer 2", "Second text displayed"),
@@ -41,6 +40,7 @@ DEFAULT = {
     },
     "CAMERA": {
         "iso": (100, "Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max"),
+        "flip": (False, "Flip horizontally the captured picture"),
         "rotation": (0, "Rotation of the camera (valid values are 0, 90, 180, and 270)"),
         "resolution": ((1920, 1080), "Resolution for camera captures (preview will have same aspect ratio)"),
     },

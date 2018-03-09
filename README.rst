@@ -11,7 +11,7 @@ Requirements
 ------------
 
 The requirements listed below are the one used for the development of ``pibooth``, but
-other configuration may work fine. All hardware buttons and lights are optional.
+other configuration may work fine. **All hardware buttons, lights and printer are optional**.
 
 Hardware:
 ^^^^^^^^^
@@ -22,7 +22,7 @@ Hardware:
 * 2 push buttons
 * 2 LEDs
 * 2 resistors of 100 Ohm
-* 1 printer (optional)
+* 1 printer
 
 Software:
 ^^^^^^^^^
@@ -118,7 +118,8 @@ easily edited using the command::
 
     $ pibooth --config
 
-The default configuration can be restored with the command::
+The default configuration can be restored with the command (strongly recommended when
+upgrading ``pibooth``)::
 
     $ pibooth --reset
 
@@ -156,9 +157,6 @@ Below is the default configuration file:
     buffer = True
 
     [PICTURE]
-    # Flip horizontally the captured picture
-    flip = False
-
     # Number pictures in case of multiple captures (4 max)
     captures = 4
 
@@ -177,6 +175,9 @@ Below is the default configuration file:
     [CAMERA]
     # Adjust for lighting issues (normal is 100 or 200. Dark is 800 max)
     iso = 100
+
+    # Flip horizontally the captured picture
+    flip = False
 
     # Rotation of the camera (valid values are 0, 90, 180, and 270)
     rotation = 0
