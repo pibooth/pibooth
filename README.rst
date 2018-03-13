@@ -240,3 +240,5 @@ Icons from the Noun Project
 - Polaroid by icon 54
 - Cat by Внталий Плут
 - Up hand drawn arrow by Kid A
+- Friends by Moriah Rich
+- Cameraman by Gan Khoon Lay
