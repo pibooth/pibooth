@@ -169,10 +169,16 @@ class PtbWindow(object):
             self._update_background("intro.png")
         pygame.display.update()
 
-    def show_choice(self, number=0):
+    def show_choice(self, selected=False, multiple=False):
         """Show the choice view.
         """
-        self._update_background("choice{}.png".format(number))
+        if not selected:
+            self._update_background("choice_none.png")
+        elif not multiple:
+            self._update_background("choice_one.png")
+        else:
+            self._update_background("choice_some.png")
+
         if self._current_foreground:  # New sequence of pictures will be taken
             self._buffered_images.pop(id(self._current_foreground[0]), None)
             self._current_foreground = None
@@ -213,6 +219,7 @@ class PtbWindow(object):
         for _ in range(count):
             self.surface.fill((255, 255, 255))
             if self._current_foreground:
+                # Flash only the background, keep forground at the top
                 self._update_foreground(*self._current_foreground)
             pygame.display.update()
             time.sleep(0.02)

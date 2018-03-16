@@ -103,7 +103,7 @@ class StateChosen(State):
 
     def entry_actions(self):
         with timeit("Set {} picture(s) mode".format(self.app.max_captures)):
-            self.app.window.show_choice(self.app.max_captures)
+            self.app.window.show_choice(selected=True, multiple=self.app.max_captures > 1)
         self.timer.start()
 
     def exit_actions(self):
