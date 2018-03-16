@@ -12,7 +12,7 @@ def get_filename(name):
     return osp.join(osp.dirname(osp.abspath(__file__)), PtbConfigParser.language, name)
 
 
-def resize_keep_aspect_ratio(original_size, target_size, resize_type='inner'):
+def new_size_keep_aspect_ratio(original_size, target_size, resize_type='inner'):
     """Return a new size included (if resize_type='inner') or excluded (if resize_type='outer')
     in the targeted one by resizing and keeping the original image's aspect ratio.
     """
@@ -42,7 +42,7 @@ def resize_keep_aspect_ratio(original_size, target_size, resize_type='inner'):
     return (int(tx), int(ty))
 
 
-def resize_by_croping(original_size, target_size, crop_type='middle'):
+def new_size_by_croping(original_size, target_size, crop_type='middle'):
     """Return a tuple representing a rectangle (x, y, width, height) coresponding
     to a crop of the original size. The position of the rectangle can be defined
     by the crop_type paramater:
@@ -86,6 +86,6 @@ def get_image(name, size=None, antialiasing=True):
         return pygame.image.load(get_filename(name)).convert()
     else:
         image = Image.open(get_filename(name))
-        image = image.resize(resize_keep_aspect_ratio(image.size, size),
+        image = image.resize(new_size_keep_aspect_ratio(image.size, size),
                              Image.ANTIALIAS if antialiasing else Image.NEAREST)
         return pygame.image.fromstring(image.tobytes(), image.size, image.mode)

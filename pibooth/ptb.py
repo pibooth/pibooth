@@ -260,10 +260,12 @@ class PtbApplication(object):
         self.state_machine.add_state(StateFinish())
 
         # Initialize the camera
-        if camera.rpi_camera_connected():
-            cam_class = camera.RpiCamera
+        if camera.gp_camera_connected() and camera.rpi_camera_connected():
+            cam_class = camera.HybridCamera
         elif camera.gp_camera_connected():
             cam_class = camera.GpCamera
+        elif camera.rpi_camera_connected():
+            cam_class = camera.RpiCamera
         else:
             raise EnvironmentError("Neither PiCamera nor GPhoto2 camera detected")
 

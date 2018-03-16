@@ -2,7 +2,7 @@
 
 from PIL import Image, ImageDraw, ImageFont
 from pibooth import fonts
-from pibooth.pictures import resize_keep_aspect_ratio
+from pibooth.pictures import new_size_keep_aspect_ratio
 
 
 def concatenate_pictures(pictures, footer_texts, bg_color, text_color):
@@ -64,7 +64,7 @@ def concatenate_pictures(pictures, footer_texts, bg_color, text_color):
         x_offset += (pictures[2].size[0] + inter_width)
         matrix.paste(pictures[3], (x_offset, y_offset))
 
-    matrix = matrix.resize(resize_keep_aspect_ratio(matrix.size, (2400, 3000)), Image.ANTIALIAS)
+    matrix = matrix.resize(new_size_keep_aspect_ratio(matrix.size, (2400, 3000)), Image.ANTIALIAS)
 
     final_width, final_height = 2400, 3600
     final_image = Image.new('RGB', (final_width, final_height), color=bg_color)

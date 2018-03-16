@@ -57,7 +57,7 @@ class PtbWindow(object):
             LOGGER.debug("Use buffered image '%s'", image_name)
         else:
             if resize:
-                image = pil_image.resize(pictures.resize_keep_aspect_ratio(pil_image.size, self.size), Image.ANTIALIAS)
+                image = pil_image.resize(pictures.new_size_keep_aspect_ratio(pil_image.size, self.size), Image.ANTIALIAS)
             else:
                 image = pil_image
             image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)

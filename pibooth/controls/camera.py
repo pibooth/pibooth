@@ -62,8 +62,8 @@ class BaseCamera(object):
         in order to fit to the defined window.
         """
         rect = self._window.get_rect()
-        res = pictures.resize_keep_aspect_ratio(self.resolution,
-                                                (rect.width - 2 * self._border, rect.height - 2 * self._border))
+        res = pictures.new_size_keep_aspect_ratio(self.resolution,
+                                                  (rect.width - 2 * self._border, rect.height - 2 * self._border))
         return pygame.Rect(rect.centerx - res[0] // 2, rect.centery - res[1] // 2, res[0], res[1])
 
     def get_overlay(self, size, text, alpha):
@@ -208,12 +208,12 @@ class GpCamera(BaseCamera):
             if self._preview_hflip:
                 image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
-            image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.resolution, 'outer'))
-            image = image.crop(pictures.resize_by_croping(image.size, self.resolution))
+            image = image.resize(pictures.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
+            image = image.crop(pictures.new_size_by_croping(image.size, self.resolution))
 
         # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
         rect = self.get_rect()
-        return image.resize(pictures.resize_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer'))
+        return image.resize(pictures.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer'))
 
     def preview(self, window, flip=True):
         """Setup the preview.
@@ -265,15 +265,14 @@ class GpCamera(BaseCamera):
         file_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
         camera_file = gp.check_result(gp.gp_camera_file_get(
             self._cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
-        file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
 
-        image = Image.open(io.BytesIO(memoryview(file_data)))
-        image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
-        image = image.crop(pictures.resize_by_croping(image.size, self.resolution))
+        image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
+        image = image.resize(pictures.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
+        image = image.crop(pictures.new_size_by_croping(image.size, self.resolution))
 
         # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
         rect = self.get_rect()
-        size = pictures.resize_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
+        size = pictures.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
 
         if self._preview_hflip:
             self._window.show_image(image.transpose(Image.FLIP_LEFT_RIGHT).resize(size))
@@ -292,3 +291,37 @@ class GpCamera(BaseCamera):
         """Close the camera driver, it's definitive.
         """
         self._cam.exit()
+
+
+class HybridCamera(RpiCamera):
+
+    """Camera management using the Raspberry Pi camera for the preview (better
+    video rendering) and a Gphoto2 compatible camera for the capture (higher
+    resolution)
+    """
+
+    def __init__(self, *args, **kwargs):
+        RpiCamera.__init__(self, *args, **kwargs)
+
+        self._gp_cam = gp.Camera()
+        self._gp_cam.init()
+
+    def capture(self, filename=None):
+        """Capture a picture in a file. If no filename given a PIL image
+        is returned.
+        """
+        file_path = self._gp_cam.capture(gp.GP_CAPTURE_IMAGE)
+        camera_file = gp.check_result(gp.gp_camera_file_get(
+            self._gp_cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
+
+        image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
+        image = image.resize(pictures.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
+        image = image.crop(pictures.new_size_by_croping(image.size, self.resolution))
+        if self._cam.hlip:
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
+        if filename:
+            image.save(filename)
+            return filename
+        else:
+            return image
