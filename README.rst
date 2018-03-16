@@ -183,7 +183,7 @@ Below is the default configuration file:
     rotation = 0
 
     # Resolution for camera captures (preview will have same aspect ratio)
-    resolution = (1920, 1080)
+    resolution = (1934, 2464)
 
     [PRINTER]
     # Name of the printer to send the pictures
