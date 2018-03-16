@@ -36,7 +36,6 @@ DEFAULT = {
         "flash": (True, "Blinking background when picture is taken"),
         "preview_delay": (3, "How long is the preview in seconds"),
         "preview_countdown": (True, "Show a countdown timer during the preview"),
-        "buffer": (True, "Keep background images in a buffer (best performances but more memory used)"),
     },
     "CAMERA": {
         "iso": (100, "Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max"),

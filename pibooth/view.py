@@ -17,7 +17,7 @@ class PtbWindow(object):
     RIGHT = 'right'
     LEFT = 'left'
 
-    def __init__(self, title, size, use_buffer):
+    def __init__(self, title, size):
         if isinstance(size, str) and size.lower() == 'fullscreen':
             self.__size = (800, 480)
         elif isinstance(size, (tuple, list)):
@@ -30,7 +30,6 @@ class PtbWindow(object):
 
         pygame.display.set_caption(title)
         self.is_fullscreen = False
-        self.use_buffer = use_buffer
         self.display_size = (info.current_w, info.current_h)
         self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
 
@@ -45,11 +44,6 @@ class PtbWindow(object):
 
         if isinstance(size, str) and size.lower() == 'fullscreen':
             self.toggle_fullscreen()
-
-    def _clear(self):
-        """Clear the window content.
-        """
-        self.surface.fill((0, 0, 0))
 
     def _update_foreground(self, pil_image, pos=CENTER, resize=True):
         """Show a PIL image on the foreground.
@@ -69,9 +63,8 @@ class PtbWindow(object):
             image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
             if self._current_foreground:
                 self._buffered_images.pop(id(self._current_foreground[0]), None)
-            if self.use_buffer:
-                LOGGER.debug("Add to buffer the image '%s'", image_name)
-                self._buffered_images[image_name] = (self.size, image)
+            LOGGER.debug("Add to buffer the image '%s'", image_name)
+            self._buffered_images[image_name] = (self.size, image)
 
         self._current_foreground = (pil_image, pos, resize)
         self.surface.blit(image, self._pos_map[pos](image))
@@ -85,10 +78,11 @@ class PtbWindow(object):
             LOGGER.debug("Use buffered image '%s'", image_name)
         else:
             image = pictures.get_image(image_name, self.size)
-        self._clear()
+
+        self.surface.fill((0, 0, 0))  # Clear background
         self.surface.blit(image, self._pos_map[pos](image))
         self._update_picture_number()
-        if self.use_buffer and self.size != buff_size:
+        if self.size != buff_size:
             LOGGER.debug("Add to buffer the image '%s'", image_name)
             self._buffered_images[image_name] = (self.size, image)
         self._current_background = (image_name, pos)

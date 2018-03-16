@@ -183,9 +183,9 @@ class GpCamera(BaseCamera):
         self._cam.set_config(self._config)
 
     def _set_config_value(self, section, option, value):
-        """Set camera configuration. This method dont send the updated
+        """Set camera configuration. This method don't send the updated
         configuration to the camera (avoid connection flooding if several
-        values to be changed)
+        values have to be changed)
         """
         try:
             LOGGER.debug('Setting option %s/%s=%s', section, option, value)

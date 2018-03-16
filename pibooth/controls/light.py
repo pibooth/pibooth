@@ -50,6 +50,7 @@ class BlinkingThread(threading.Thread):
         """Stop the thread.
         """
         self._stop_event.set()
+        self.join()
 
 
 class PtbLed(object):
@@ -87,4 +88,3 @@ class PtbLed(object):
         """
         self.switch_off()
         self._blinking_thread.stop()
-        self._blinking_thread.join()

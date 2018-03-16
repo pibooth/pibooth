@@ -10,8 +10,9 @@ for Raspberry Pi.
 Requirements
 ------------
 
-The requirements listed below are the one used for the development of ``pibooth``, but
-other configuration may work fine. **All hardware buttons, lights and printer are optional**.
+The requirements listed below are the one used for the development of ``pibooth``, but other
+configuration may work fine. **All hardware buttons, lights and printer are optional**,
+the application can be entirely controlled using a standard keyboard.
 
 Hardware:
 ^^^^^^^^^
@@ -96,15 +97,15 @@ Start the Photo Booth application using the command::
 
 After the graphical interface is started, the following actions are available:
 
-==================== ================ ================
+==================== ================ =====================
 Action               Keyboard key     Physical button
-==================== ================ ================
+==================== ================ =====================
 Toggle Full screen   Ctrl + F         \-
-Choose pictures      LEFT or RIGHT    Button 1
+Choose layout        LEFT or RIGHT    Button 1 or Button 2
 Take pictures        P                Button 1
 Export Printer/Cloud Ctrl + E         Button 2
 Quit                 ESC              \-
-==================== ================ ================
+==================== ================ =====================
 
 All pictures taken are stored in a subfolder of the one defined in the configuration,
 named **YYYY-mm-dd hh-mm-ss** which the time when first photo of the sequence was taken.
@@ -152,9 +153,6 @@ Below is the default configuration file:
 
     # Show a countdown timer during the preview
     preview_countdown = True
-
-    # Keep background images in a buffer (best performances but more memory used)
-    buffer = True
 
     [PICTURE]
     # Number pictures in case of multiple captures (4 max)

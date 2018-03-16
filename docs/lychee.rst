@@ -73,6 +73,7 @@ Lychee configuration
         }
 
 10. Enable the site:
+
     ::
 
         $ sudo ln -s /etc/nginx/sites-available/lychee /etc/nginx/sites-enabled/lychee
@@ -95,7 +96,7 @@ Lychee configuration
 
         $ sudo mysql -u root -p          # Type [ENTER] when asking for password
 
-        MariaDB [(none)]> CREATE USER 'lychee'@'localhost' IDENTIFIED BY 'mypassword';
+        MariaDB [(none)]> CREATE USER 'lychee'@'localhost' IDENTIFIED BY 'pibooth';
         MariaDB [(none)]> GRANT ALL PRIVILEGES ON * . * TO 'lychee'@'localhost';
         MariaDB [(none)]> FLUSH PRIVILEGES;
         MariaDB [(none)]> quit

@@ -248,7 +248,7 @@ class PtbApplication(object):
         pygame.event.set_blocked(pygame.MOUSEMOTION)
 
         # Create window of (width, height)
-        self.window = PtbWindow('Pibooth', config.gettyped('WINDOW', 'size'), config.getboolean('WINDOW', 'buffer'))
+        self.window = PtbWindow('Pibooth', config.gettyped('WINDOW', 'size'))
 
         self.state_machine = StateMachine(self)
         self.state_machine.add_state(StateWait())
