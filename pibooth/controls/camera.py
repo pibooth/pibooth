@@ -262,8 +262,11 @@ class GpCamera(BaseCamera):
         """Capture a picture in a file. If no filename given a PIL image
         is returned.
         """
-        camera_file = self._cam.capture_preview()
+        file_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
+        camera_file = gp.check_result(gp.gp_camera_file_get(
+            self._cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
         file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
+
         image = Image.open(io.BytesIO(memoryview(file_data)))
         image = image.resize(pictures.resize_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
         image = image.crop(pictures.resize_by_croping(image.size, self.resolution))
