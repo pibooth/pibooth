@@ -2,7 +2,7 @@
 
 from PIL import Image, ImageDraw, ImageFont
 from pibooth import fonts
-from pibooth.pictures import new_size_keep_aspect_ratio
+from pibooth.pictures import sizing
 
 
 def concatenate_pictures(pictures, footer_texts, bg_color, text_color, orientation="portrait"):
@@ -95,14 +95,13 @@ def concatenate_pictures(pictures, footer_texts, bg_color, text_color, orientati
         matrix.paste(pictures[3], (x_offset, y_offset))
 
     if orientation == "portrait":
-        matrix = matrix.resize(new_size_keep_aspect_ratio(matrix.size, (2400, 3000)), Image.ANTIALIAS)
+        matrix = matrix.resize(sizing.new_size_keep_aspect_ratio(matrix.size, (2400, 3000)), Image.ANTIALIAS)
         final_width, final_height = 2400, 3600
         footer_size = 600
     else:
-        matrix = matrix.resize(new_size_keep_aspect_ratio(matrix.size, (3600, 2100)), Image.ANTIALIAS)
+        matrix = matrix.resize(sizing.new_size_keep_aspect_ratio(matrix.size, (3600, 2100)), Image.ANTIALIAS)
         final_width, final_height = 3600, 2400
         footer_size = 300
-
 
     final_image = Image.new('RGB', (final_width, final_height), color=bg_color)
     final_image.paste(matrix, ((final_width - matrix.size[0]) // 2, (final_height - footer_size - matrix.size[1]) // 2))
@@ -111,7 +110,7 @@ def concatenate_pictures(pictures, footer_texts, bg_color, text_color, orientati
     draw = ImageDraw.Draw(final_image)
 
     # Footer 1
-    name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), int(2/3*footer_size))
+    name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), int(2 / 3 * footer_size))
     name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
     if orientation == "portrait":
         footer_x = (final_width - name_width) // 2
@@ -122,7 +121,7 @@ def concatenate_pictures(pictures, footer_texts, bg_color, text_color, orientati
     draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
 
     # Footer 2
-    date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), int(1/3*footer_size))
+    date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), int(1 / 3 * footer_size))
     date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
     if orientation == "portrait":
         footer_x = (final_width - date_width) // 2
@@ -133,12 +132,3 @@ def concatenate_pictures(pictures, footer_texts, bg_color, text_color, orientati
     draw.text((footer_x, footer_y), footer_texts[1], text_color, font=date_font)
 
     return final_image
-
-
-def generate_picture_from_files(image_files_list, footer_texts, bg_color=(255, 255, 255), text_color=(0, 0, 0)):
-    """
-    Generate a picture by concatenating the images in the image_files_list
-    """
-    list_pil_images = [Image.open(img) for img in image_files_list]
-
-    return concatenate_pictures(list_pil_images, footer_texts, bg_color=bg_color, text_color=text_color)

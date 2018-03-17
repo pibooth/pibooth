@@ -12,13 +12,14 @@ import pygame
 import argparse
 import os.path as osp
 from RPi import GPIO
+from PIL import Image
 import pibooth
 from pibooth.utils import LOGGER, timeit, PoolingTimer
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
 from pibooth.config import PtbConfigParser, edit_configuration
 from pibooth.controls import camera
-from pibooth.pictures.concatenate import generate_picture_from_files
+from pibooth.pictures.concatenate import concatenate_pictures
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
 from pibooth.controls.printer import PtbPrinter
@@ -165,7 +166,9 @@ class StateProcessing(State):
                             self.app.config.get('PICTURE', 'footer_text2')]
             bg_color = self.app.config.gettyped('PICTURE', 'bg_color')
             text_color = self.app.config.gettyped('PICTURE', 'text_color')
-            self.app.previous_picture = generate_picture_from_files(self.app.captures, footer_texts, bg_color, text_color)
+
+            pil_captures = [Image.open(img) for img in self.app.captures]
+            self.app.previous_picture = concatenate_pictures(pil_captures, footer_texts, bg_color, text_color)
 
         self.app.previous_picture_file = osp.join(self.app.dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
         with timeit("Save the merged picture in {}".format(self.app.previous_picture_file)):

@@ -4,6 +4,7 @@ import time
 import pygame
 from pygame import gfxdraw
 from pibooth import pictures
+from pibooth.pictures import sizing
 from PIL import Image
 from pibooth.utils import LOGGER
 
@@ -57,7 +58,7 @@ class PtbWindow(object):
             LOGGER.debug("Use buffered image '%s'", image_name)
         else:
             if resize:
-                image = pil_image.resize(pictures.new_size_keep_aspect_ratio(pil_image.size, self.size), Image.ANTIALIAS)
+                image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, self.size), Image.ANTIALIAS)
             else:
                 image = pil_image
             image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)

@@ -11,7 +11,8 @@ try:
 except ImportError:
     gp = None  # gphoto2 is optional
 from PIL import Image, ImageFont, ImageDraw
-from pibooth import pictures, fonts
+from pibooth import fonts
+from pibooth.pictures import sizing
 from pibooth.utils import LOGGER, PoolingTimer, timeit
 
 
@@ -62,8 +63,8 @@ class BaseCamera(object):
         in order to fit to the defined window.
         """
         rect = self._window.get_rect()
-        res = pictures.new_size_keep_aspect_ratio(self.resolution,
-                                                  (rect.width - 2 * self._border, rect.height - 2 * self._border))
+        res = sizing.new_size_keep_aspect_ratio(self.resolution,
+                                                (rect.width - 2 * self._border, rect.height - 2 * self._border))
         return pygame.Rect(rect.centerx - res[0] // 2, rect.centery - res[1] // 2, res[0], res[1])
 
     def get_overlay(self, size, text, alpha):
@@ -208,12 +209,12 @@ class GpCamera(BaseCamera):
             if self._preview_hflip:
                 image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
-            image = image.resize(pictures.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
-            image = image.crop(pictures.new_size_by_croping(image.size, self.resolution))
+            image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
+            image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
 
         # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
         rect = self.get_rect()
-        return image.resize(pictures.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer'))
+        return image.resize(sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer'))
 
     def preview(self, window, flip=True):
         """Setup the preview.
@@ -267,12 +268,12 @@ class GpCamera(BaseCamera):
             self._cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
 
         image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
-        image = image.resize(pictures.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
-        image = image.crop(pictures.new_size_by_croping(image.size, self.resolution))
+        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
+        image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
 
         # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
         rect = self.get_rect()
-        size = pictures.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
+        size = sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
 
         if self._preview_hflip:
             self._window.show_image(image.transpose(Image.FLIP_LEFT_RIGHT).resize(size))
@@ -315,8 +316,8 @@ class HybridCamera(RpiCamera):
             self._gp_cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
 
         image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
-        image = image.resize(pictures.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
-        image = image.crop(pictures.new_size_by_croping(image.size, self.resolution))
+        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
+        image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
         if self._cam.hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
