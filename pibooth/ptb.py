@@ -127,6 +127,7 @@ class StateCapture(State):
         self.app.previous_picture_file = None
         self.app.dirname = osp.join(self.app.savedir, time.strftime("%Y-%m-%d-%H-%M-%S"))
         os.makedirs(self.app.dirname)
+        self.app.led_preview.switch_on()
         self.app.camera.preview(self.app.window)
 
     def do_actions(self, events):
@@ -147,6 +148,7 @@ class StateCapture(State):
 
     def exit_actions(self):
         self.app.camera.stop_preview()
+        self.app.led_preview.switch_off()
 
     def validate_transition(self, events):
         if len(self.app.captures) >= self.app.max_captures:
@@ -277,11 +279,14 @@ class PtbApplication(object):
                                 config.getint('CAMERA', 'rotation'),
                                 config.getboolean('CAMERA', 'flip'))
 
-        self.led_picture = PtbLed(7)
+        self.led_picture = PtbLed(7)  # LED 1 (see sketch)
         self.button_picture = PtbButton(11, config.getfloat('GENERAL', 'debounce_delay'))
 
-        self.led_print = PtbLed(15)
+        self.led_print = PtbLed(15)  # LED 2 (see sketch)
         self.button_print = PtbButton(13, config.getfloat('GENERAL', 'debounce_delay'))
+
+        self.led_startup = PtbLed(29)  # LED 3 (see sketch)
+        self.led_preview = PtbLed(31)  # LED 4 (see sketch)
 
         self.printer = PtbPrinter(config.get('PRINTER', 'printer_name'))
 
@@ -345,6 +350,7 @@ class PtbApplication(object):
         """Run the main game loop.
         """
         try:
+            self.led_startup.switch_on()
             self.state_machine.set_state('wait')
 
             while True:
@@ -363,6 +369,8 @@ class PtbApplication(object):
                 self.state_machine.process(events)
 
         finally:
+            self.led_startup.quit()
+            self.led_preview.quit()
             self.led_picture.quit()
             self.led_print.quit()
             GPIO.cleanup()

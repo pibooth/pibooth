@@ -95,6 +95,12 @@ Start the Photo Booth application using the command::
 
     $ pibooth
 
+All pictures taken are stored in a subfolder of the one defined in the configuration,
+named **YYYY-mm-dd hh-mm-ss** which the time when first photo of the sequence was taken.
+
+Commands
+^^^^^^^^
+
 After the graphical interface is started, the following actions are available:
 
 ==================== ================ =====================
@@ -107,8 +113,14 @@ Export Printer/Cloud Ctrl + E         Button 2
 Quit                 ESC              \-
 ==================== ================ =====================
 
-All pictures taken are stored in a subfolder of the one defined in the configuration,
-named **YYYY-mm-dd hh-mm-ss** which the time when first photo of the sequence was taken.
+States and lights management
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Here below is the state sequence of the application and the related lights states.
+
+.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/state_sequence.png
+   :align: center
+   :alt: State sequence
 
 Configuration
 -------------
