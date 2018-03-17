@@ -317,7 +317,7 @@ class HybridCamera(RpiCamera):
         image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
         image = image.resize(pictures.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
         image = image.crop(pictures.new_size_by_croping(image.size, self.resolution))
-        if self._cam.hlip:
+        if self._cam.hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
         if filename:
