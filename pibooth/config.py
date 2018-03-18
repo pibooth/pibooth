@@ -26,6 +26,7 @@ DEFAULT = {
     },
     "PICTURE": {
         "captures": (4, "Number pictures in case of multiple captures (4 max)"),
+        "orientation": ("portrait", "Orientation of the final image (portrait or landscape")
         "footer_text1": ("Footer 1", "First text displayed"),
         "footer_text2": ("Footer 2", "Second text displayed"),
         "bg_color": ((255, 255, 255), "Background RGB color"),

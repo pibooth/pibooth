@@ -168,9 +168,10 @@ class StateProcessing(State):
                             self.app.config.get('PICTURE', 'footer_text2')]
             bg_color = self.app.config.gettyped('PICTURE', 'bg_color')
             text_color = self.app.config.gettyped('PICTURE', 'text_color')
+            orientation = self.app.config.get('PICTURE', 'orientation')
 
             pil_captures = [Image.open(img) for img in self.app.captures]
-            self.app.previous_picture = concatenate_pictures(pil_captures, footer_texts, bg_color, text_color)
+            self.app.previous_picture = concatenate_pictures(pil_captures, footer_texts, bg_color, text_color, orientation=orientation)
 
         self.app.previous_picture_file = osp.join(self.app.dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
         with timeit("Save the merged picture in {}".format(self.app.previous_picture_file)):
