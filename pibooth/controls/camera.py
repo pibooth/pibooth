@@ -307,6 +307,14 @@ class HybridCamera(RpiCamera):
         self._gp_cam = gp.Camera()
         self._gp_cam.init()
 
+        self._preview_hflip = False
+
+    def preview(self, window, flip=True):
+        """Setup the preview.
+        """
+        self._preview_hflip = flip
+        RpiCamera.preview(self, window, flip)
+
     def capture(self, filename=None):
         """Capture a picture in a file. If no filename given a PIL image
         is returned.
@@ -324,7 +332,7 @@ class HybridCamera(RpiCamera):
         size = sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
 
         self._cam.stop_preview()
-        if self._cam.hflip:
+        if self._preview_hflip:
             self._window.show_image(image.transpose(Image.FLIP_LEFT_RIGHT).resize(size))
         else:
             self._window.show_image(image.resize(size))
