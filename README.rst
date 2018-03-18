@@ -170,7 +170,7 @@ Below is the default configuration file:
     # Number pictures in case of multiple captures (4 max)
     captures = 4
 
-    # Orientation of the final image (portrait or landscape
+    # Orientation of the final image (portrait or landscape)
     orientation =  portrait
 
     # First text displayed
