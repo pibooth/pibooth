@@ -318,6 +318,19 @@ class HybridCamera(RpiCamera):
         image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
         image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
         image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
+
+        # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
+        rect = self.get_rect()
+        size = sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
+
+        self._cam.stop_preview()
+        if self._cam.hflip:
+            self._window.show_image(image.transpose(Image.FLIP_LEFT_RIGHT).resize(size))
+        else:
+            self._window.show_image(image.resize(size))
+        time.sleep(2)
+        self.preview(self._window)
+
         if self._cam.hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
