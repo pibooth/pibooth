@@ -212,7 +212,7 @@ class StatePrint(State):
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
                 self.app.printer.print_file(self.app.previous_picture_file)
-            time.sleep(1)
+            time.sleep(2)
             self.app.led_print.blink()
             self.printed = True
 
