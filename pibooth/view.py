@@ -52,20 +52,22 @@ class PtbWindow(object):
         """
         image_name = id(pil_image)
 
+        image_size_max = (2*self.size[1]//3, self.size[1])
+
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
-        if buff_image and self.size == buff_size:
+        if buff_image and image_size_max == buff_size:
             image = buff_image
             LOGGER.debug("Use buffered image '%s'", image_name)
         else:
             if resize:
-                image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, self.size), Image.ANTIALIAS)
+                image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, image_size_max), Image.ANTIALIAS)
             else:
                 image = pil_image
             image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
             if self._current_foreground:
                 self._buffered_images.pop(id(self._current_foreground[0]), None)
             LOGGER.debug("Add to buffer the image '%s'", image_name)
-            self._buffered_images[image_name] = (self.size, image)
+            self._buffered_images[image_name] = (image_size_max, image)
 
         self._current_foreground = (pil_image, pos, resize)
         self.surface.blit(image, self._pos_map[pos](image))
