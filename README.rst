@@ -116,11 +116,15 @@ Quit                 ESC              \-
 States and lights management
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Here below is the state sequence of the application and the related lights states.
+The application follows the states sequence defined in the diagram below:
 
 .. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/state_sequence.png
    :align: center
    :alt: State sequence
+
+The states of the **LED 1** and **LED 2** are modified depending on the actions available
+for the user. The **LED 3** is switched on when the application starts and the **LED 4**
+is switched on during the preview and photo capture.
 
 Configuration
 -------------
