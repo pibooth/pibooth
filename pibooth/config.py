@@ -104,7 +104,7 @@ class PtbConfigParser(ConfigParser):
             if not osp.isdir(dirname):
                 os.makedirs(dirname)
 
-            LOGGER.info("Generate the auto-startup file in '%s'", filename)
+            LOGGER.info("Generate the auto-startup file in '%s'", dirname)
             with open(filename, 'w') as fp:
                 fp.write("[Desktop Entry]\n")
                 fp.write("Name=pibooth\n")
@@ -112,7 +112,7 @@ class PtbConfigParser(ConfigParser):
                 fp.write("Type=application\n")
 
         elif not enable and osp.isfile(filename):
-            LOGGER.info("Remove the auto-startup file in '%s'", filename)
+            LOGGER.info("Remove the auto-startup file in '%s'", dirname)
             os.remove(filename)
 
     def editor(self):

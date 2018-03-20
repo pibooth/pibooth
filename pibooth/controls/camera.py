@@ -208,6 +208,8 @@ class GpCamera(BaseCamera):
             image = Image.open(io.BytesIO(memoryview(file_data)))
             if self._preview_hflip:
                 image = image.transpose(Image.FLIP_LEFT_RIGHT)
+            if self._rotation:
+                image = image.rotate(self._rotation)
 
             image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
             image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
@@ -274,6 +276,9 @@ class GpCamera(BaseCamera):
         # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
         rect = self.get_rect()
         size = sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
+
+        if self._rotation:
+            image = image.rotate(self._rotation)
 
         if self._preview_hflip:
             self._window.show_image(image.transpose(Image.FLIP_LEFT_RIGHT).resize(size))
