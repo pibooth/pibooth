@@ -5,6 +5,19 @@ from pibooth import fonts
 from pibooth.pictures import sizing
 
 
+def new_image_with_background(width, height, background):
+    """Create a new image with the given background. The background can be
+    a RGB color tuple ora PIL image.
+    """
+    if isinstance(background, (tuple, list)):
+        # Path to a background image
+        return Image.new('RGB', (width, height), color=background)
+    else:
+        image = Image.new('RGB', (width, height))
+        image.paste(background.resize(sizing.new_size_keep_aspect_ratio(background.size, image.size, 'outer')))
+        return image
+
+
 def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color):
     """
     Merge up to 4 PIL images in portrait orientation.
@@ -39,7 +52,7 @@ def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color):
     else:
         raise ValueError("List of max 4 pictures expected, got {}".format(len(pictures)))
 
-    matrix = Image.new('RGB', (new_width, new_height), color=bg_color)
+    matrix = Image.new('RGBA', (new_width, new_height))
 
     x_offset = inter_width
     y_offset = inter_width
@@ -67,8 +80,8 @@ def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color):
     final_width, final_height = 2400, 3600
     footer_size = 600
 
-    final_image = Image.new('RGB', (final_width, final_height), color=bg_color)
-    final_image.paste(matrix, ((final_width - matrix.size[0]) // 2, (final_height - footer_size - matrix.size[1]) // 2))
+    final_image = new_image_with_background(final_width, final_height, bg_color)
+    final_image.paste(matrix, ((final_width - matrix.size[0]) // 2, (final_height - footer_size - matrix.size[1]) // 2), mask=matrix)
 
     # Text part
     draw = ImageDraw.Draw(final_image)
@@ -94,15 +107,14 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color)
     """
     Merge up to 4 PIL images in landscape orientation.
 
-      +---------+     +----------+     +-------------+     +---------+
-      |         |     |          |     |             |     | +-+ +-+ |
-      |         |     |          |     |             |     | |1| |2| |
-      |   +-+   |     | +-+  +-+ |     | +-+ +-+ +-+ |     | +-+ +-+ |
-      |   |1|   |     | |1|  |2| |     | |1| |2| |3| |     |         |
-      |   +-+   |     | +-+  +-+ |     | +-+ +-+ +-+ |     | +-+ +-+ |
-      |         |     |          |     |             |     | |3| |4| |
-      |         |     |          |     |             |     | +-+ +-+ |
-      +---------+     +----------+     +-------------+     +---------+
+      +-------------+     +-------------+     +-------------+     +-------------+
+      |             |     |             |     |             |     |   +-+ +-+   |
+      |             |     |             |     |             |     |   |1| |2|   |
+      |     +-+     |     |   +-+  +-+  |     | +-+ +-+ +-+ |     |   +-+ +-+   |
+      |     |1|     |     |   |1|  |2|  |     | |1| |2| |3| |     |   +-+ +-+   |
+      |     +-+     |     |   +-+  +-+  |     | +-+ +-+ +-+ |     |   |3| |4|   |
+      |             |     |             |     |             |     |   +-+ +-+   |
+      +-------------+     +-------------+     +-------------+     +-------------+
     """
     widths, heights = zip(*(i.size for i in pictures))
 
@@ -124,7 +136,7 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color)
     else:
         raise ValueError("List of max 4 pictures expected, got {}".format(len(pictures)))
 
-    matrix = Image.new('RGB', (new_width, new_height), color=bg_color)
+    matrix = Image.new('RGBA', (new_width, new_height))
 
     x_offset = inter_width
     y_offset = inter_width
@@ -152,8 +164,8 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color)
     final_width, final_height = 3600, 2400
     footer_size = 300
 
-    final_image = Image.new('RGB', (final_width, final_height), color=bg_color)
-    final_image.paste(matrix, ((final_width - matrix.size[0]) // 2, (final_height - footer_size - matrix.size[1]) // 2))
+    final_image = new_image_with_background(final_width, final_height, bg_color)
+    final_image.paste(matrix, ((final_width - matrix.size[0]) // 2, (final_height - footer_size - matrix.size[1]) // 2), mask=matrix)
 
     # Text part
     draw = ImageDraw.Draw(final_image)

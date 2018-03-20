@@ -82,7 +82,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
    ::
 
-        $ sudo pip install pibooth
+        $ sudo pip3 install pibooth
 
    .. hint:: If you don't have *gphoto2* and/or *CUPS* installed (steps 5. and/or 6. skipped), use
              the ``--no-deps`` option to avoid installation failures (you may need to install Python
@@ -201,7 +201,7 @@ Below is the default configuration file:
     # Footer text RGB color
     text_color = (0, 0, 0)
 
-    # Background RGB color
+    # Background RGB color or path to a background image
     bg_color = (255, 255, 255)
 
     [CAMERA]

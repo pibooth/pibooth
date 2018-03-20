@@ -29,7 +29,7 @@ DEFAULT = {
         "orientation": ("auto", "Orientation of the final image ('auto', 'portrait' or 'landscape')"),
         "footer_text1": ("Footer 1", "First text displayed"),
         "footer_text2": ("Footer 2", "Second text displayed"),
-        "bg_color": ((255, 255, 255), "Background RGB color"),
+        "bg_color": ((255, 255, 255), "Background RGB color or path to a background image"),
         "text_color": ((0, 0, 0), "Footer text RGB color"),
     },
     "WINDOW": {
@@ -117,3 +117,14 @@ class PtbConfigParser(ConfigParser):
             return ast.literal_eval(value)
         except (ValueError, SyntaxError):
             return value
+
+    def getpath(self, section, option):
+        """
+        Get a path from config, evaluate the absolute path from configuration
+        file path.
+        """
+        path = self.get(section, option)
+        path = osp.expanduser(path)
+        if not osp.isabs(path):
+            path = osp.join(osp.relpath(osp.dirname(self.filename), '.'), path)
+        return path

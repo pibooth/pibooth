@@ -167,11 +167,14 @@ class StateProcessing(State):
             footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
                             self.app.config.get('PICTURE', 'footer_text2')]
             bg_color = self.app.config.gettyped('PICTURE', 'bg_color')
+            if not isinstance(bg_color, (tuple, list)):
+                # Path to a background image
+                bg_color = Image.open(self.app.config.getpath('PICTURE', 'bg_color'))
             text_color = self.app.config.gettyped('PICTURE', 'text_color')
             orientation = self.app.config.get('PICTURE', 'orientation')
 
             pil_captures = [Image.open(img) for img in self.app.captures]
-            self.app.previous_picture = concatenate_pictures(pil_captures, footer_texts, bg_color, text_color, orientation=orientation)
+            self.app.previous_picture = concatenate_pictures(pil_captures, footer_texts, bg_color, text_color, orientation)
 
         self.app.previous_picture_file = osp.join(self.app.dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
         with timeit("Save the merged picture in {}".format(self.app.previous_picture_file)):
@@ -237,7 +240,7 @@ class PtbApplication(object):
         self.config = config
 
         # Clean directory where pictures are saved
-        self.savedir = osp.expanduser(config.get('GENERAL', 'directory'))
+        self.savedir = config.getpath('GENERAL', 'directory')
         if not osp.isdir(self.savedir):
             os.makedirs(self.savedir)
         if osp.isdir(self.savedir) and config.getboolean('GENERAL', 'clear_on_startup'):
