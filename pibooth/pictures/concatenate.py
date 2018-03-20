@@ -110,7 +110,7 @@ def concatenate_pictures(pictures, footer_texts, bg_color, text_color, orientati
     draw = ImageDraw.Draw(final_image)
 
     # Footer 1
-    name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), int(2 / 3 * footer_size))
+    name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), int(2 / 3. * footer_size))
     name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
     if orientation == "portrait":
         footer_x = (final_width - name_width) // 2
@@ -121,7 +121,7 @@ def concatenate_pictures(pictures, footer_texts, bg_color, text_color, orientati
     draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
 
     # Footer 2
-    date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), int(1 / 3 * footer_size))
+    date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), int(1 / 3. * footer_size))
     date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
     if orientation == "portrait":
         footer_x = (final_width - date_width) // 2
