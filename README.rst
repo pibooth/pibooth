@@ -172,6 +172,9 @@ Below is the default configuration file:
     # How long to debounce the button in seconds
     debounce_delay = 0.3
 
+    # Start pibooth at Raspberry Pi startup
+    autostart = False
+
     [WINDOW]
     # (width, height) of the display monitor or 'fullscreen'
     size = (800, 480)
@@ -223,22 +226,6 @@ Below is the default configuration file:
 
     # How long is the print view in seconds (0 to skip it)
     printer_delay = 10
-
-Run pibooth at startup
-----------------------
-
-To run ``pibooth`` in fullscreen at the boot of the raspberry pi follow these instructions:
-
-1. Create a ``pibooth.desktop`` file in the ``~/.config/autostart/`` folder
-
-2. Fill the following info in the file:
-
-.. code-block:: ini
-
-   [Desktop Entry]
-   Name=pibooth
-   Exec=pibooth
-   Type=application
 
 Printer configuration
 ---------------------

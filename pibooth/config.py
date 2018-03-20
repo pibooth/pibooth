@@ -23,6 +23,7 @@ DEFAULT = {
         "clear_on_startup": (True, "Cleanup the 'directory' before start"),
         "debounce_delay": (0.3, "How long to debounce the button in seconds"),
         "language": ("en", "User interface language (fallback to English if not found)"),
+        "autostart": (False, "Start pibooth at Raspberry Pi startup"),
     },
     "PICTURE": {
         "captures": (4, "Number pictures in case of multiple captures (4 max)"),
@@ -90,6 +91,29 @@ class PtbConfigParser(ConfigParser):
             PtbConfigParser.language = 'en'
         else:
             PtbConfigParser.language = language
+
+        # Handle autostart of the application
+        self.enable_autostart(self.getboolean('GENERAL', 'autostart'))
+
+    def enable_autostart(self, enable=True):
+        """Auto-start pibooth at the Raspberry Pi startup.
+        """
+        filename = osp.expanduser('~/.config/autostart/pibooth.desktop')
+        if enable and not osp.isfile(filename):
+            dirname = osp.dirname(filename)
+            if not osp.isdir(dirname):
+                os.makedirs(dirname)
+
+            LOGGER.info("Generate the auto-startup file in '%s'", filename)
+            with open(filename, 'w') as fp:
+                fp.write("[Desktop Entry]\n")
+                fp.write("Name=pibooth\n")
+                fp.write("Exec=pibooth\n")
+                fp.write("Type=application\n")
+
+        elif not enable and osp.isfile(filename):
+            LOGGER.info("Remove the auto-startup file in '%s'", filename)
+            os.remove(filename)
 
     def editor(self):
         """Open a text editor to edit the configuration file.
