@@ -10,7 +10,6 @@ def new_image_with_background(width, height, background):
     a RGB color tuple ora PIL image.
     """
     if isinstance(background, (tuple, list)):
-        # Path to a background image
         return Image.new('RGB', (width, height), color=background)
     else:
         image = Image.new('RGB', (width, height))

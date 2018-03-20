@@ -129,7 +129,7 @@ is switched on during the preview and photo capture.
 Final picture rendering
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The `pibooth` application  handle the rendering of the final picture using 2 variables defined in
+The ``pibooth`` application  handle the rendering of the final picture using 2 variables defined in
 the configuration (see paragraph below):
 
 * ``[CAMERA][resolution]`` is the format of the captured photo. As explained in the

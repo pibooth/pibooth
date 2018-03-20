@@ -61,13 +61,6 @@ def generate_default_config(filename):
                 fp.write("# {}\n{} = {}\n\n".format(value[1], name, value[0]))
 
 
-def edit_configuration(config):
-    """Open a text editor to edit the configuration file.
-    """
-    process = subprocess.Popen(['leafpad', config.filename])
-    process.communicate()
-
-
 class PtbConfigParser(ConfigParser):
 
     """Enhenced configuration file parser.
@@ -98,9 +91,14 @@ class PtbConfigParser(ConfigParser):
         else:
             PtbConfigParser.language = language
 
-    def get(self, section, option, **kwargs):
+    def editor(self):
+        """Open a text editor to edit the configuration file.
         """
-        Override the default function of ConfigParser to add a
+        process = subprocess.Popen(['leafpad', self.filename])
+        process.communicate()
+
+    def get(self, section, option, **kwargs):
+        """Override the default function of ConfigParser to add a
         default value if section or option is not found.
         """
         if self.has_section(section) and self.has_option(section, option):
@@ -108,8 +106,7 @@ class PtbConfigParser(ConfigParser):
         return str(DEFAULT[section][option][0])
 
     def gettyped(self, section, option):
-        """
-        Get a value from config and try to convert it in a native Python
+        """Get a value from config and try to convert it in a native Python
         type (using the :py:mod:`ast` module).
         """
         value = self.get(section, option)
@@ -119,8 +116,7 @@ class PtbConfigParser(ConfigParser):
             return value
 
     def getpath(self, section, option):
-        """
-        Get a path from config, evaluate the absolute path from configuration
+        """Get a path from config, evaluate the absolute path from configuration
         file path.
         """
         path = self.get(section, option)

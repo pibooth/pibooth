@@ -17,7 +17,7 @@ import pibooth
 from pibooth.utils import LOGGER, timeit, PoolingTimer
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
-from pibooth.config import PtbConfigParser, edit_configuration
+from pibooth.config import PtbConfigParser
 from pibooth.controls import camera
 from pibooth.pictures.concatenate import concatenate_pictures
 from pibooth.controls.light import PtbLed
@@ -199,7 +199,7 @@ class StatePrint(State):
 
     def entry_actions(self):
         self.printed = False
-        if self.timer.timeout == 0:
+        if self.timer.timeout == 0 or not self.app.printer.is_installed():
             return  # Don't show print state
 
         with timeit("Display the merged picture"):
@@ -208,7 +208,7 @@ class StatePrint(State):
         self.timer.start()
 
     def do_actions(self, events):
-        if self.timer.timeout == 0:
+        if self.timer.timeout == 0 or not self.app.printer.is_installed():
             return  # Don't show print state
 
         if self.app.find_print_event(events) and self.app.previous_picture_file:
@@ -411,7 +411,7 @@ def main():
 
     if options.config:
         LOGGER.info("Editing the Photo Booth configuration...")
-        edit_configuration(config)
+        config.editor()
     elif not options.reset:
         LOGGER.info("Starting the Photo Booth application...")
         app = PtbApplication(config)
