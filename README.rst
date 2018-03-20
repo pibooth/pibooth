@@ -21,8 +21,8 @@ Hardware:
 * 1 Camera (Pi Camera v2.1 8 MP 1080p or any camera `compatible with gphoto2
   <http://www.gphoto.org/proj/libgphoto2/support.php>`_)
 * 2 push buttons
-* 2 LEDs
-* 2 resistors of 100 Ohm
+* 4 LEDs
+* 4 resistors of 100 Ohm
 * 1 printer
 
 Software:
@@ -126,6 +126,21 @@ The states of the **LED 1** and **LED 2** are modified depending on the actions 
 for the user. The **LED 3** is switched on when the application starts and the **LED 4**
 is switched on during the preview and photo capture.
 
+Final picture rendering
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The `pibooth` application  handle the rendering of the final picture using 2 variables defined in
+the configuration (see paragraph below):
+
+* ``[CAMERA][resolution]`` is the format of the captured photo. As explained in the
+  configuration file, the preview size is directly dependent from this parameter.
+* ``[CAMERA][orientation]`` is the format of the final picture after concatenation. If
+  the value is **auto**, the orientation is selected depending on the resolution.
+
+.. note:: the resolution is an important parameter, because it is responsible for the quality of
+          the final picture. Have a look to picamera possible resolutions:
+          http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes
+
 Configuration
 -------------
 
@@ -174,8 +189,8 @@ Below is the default configuration file:
     # Number pictures in case of multiple captures (4 max)
     captures = 4
 
-    # Orientation of the final image (portrait or landscape)
-    orientation =  portrait
+    # Orientation of the final image ('auto', 'portrait' or 'landscape')
+    orientation =  auto
 
     # First text displayed
     footer_text1 = Footer 1
