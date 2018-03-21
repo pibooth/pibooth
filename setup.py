@@ -19,7 +19,7 @@ def main():
         description=pibooth.__doc__,
         long_description=open(osp.join(HERE, 'README.rst'), encoding='utf-8').read(),
         classifiers=[
-            'Development Status :: 4 - Beta',
+            'Development Status :: 5 - Production/Stable',
             'Environment :: Other Environment',
             'Intended Audience :: Developers',
             'Intended Audience :: End Users/Desktop',

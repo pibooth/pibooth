@@ -80,6 +80,11 @@ class PtbConfigParser(ConfigParser):
                 os.makedirs(dirname)
             generate_default_config(self.filename)
 
+        self.reload()
+
+    def reload(self):
+        """Reload current configuration file.
+        """
         self.read(self.filename)
 
         # Handle the language configuration, save it as a class attribute for easy access
@@ -99,8 +104,9 @@ class PtbConfigParser(ConfigParser):
         """Auto-start pibooth at the Raspberry Pi startup.
         """
         filename = osp.expanduser('~/.config/autostart/pibooth.desktop')
+        dirname = osp.dirname(filename)
         if enable and not osp.isfile(filename):
-            dirname = osp.dirname(filename)
+
             if not osp.isdir(dirname):
                 os.makedirs(dirname)
 

@@ -412,6 +412,7 @@ def main():
     if options.config:
         LOGGER.info("Editing the Photo Booth configuration...")
         config.editor()
+        config.reload()
     elif not options.reset:
         LOGGER.info("Starting the Photo Booth application...")
         app = PtbApplication(config)
