@@ -162,8 +162,8 @@ class PtbWindow(object):
             self._update_foreground(*self._current_foreground)
         pygame.display.update()
 
-    def show_failsafe(self):
-        """Show fail safe view in case of exception.
+    def show_oops(self):
+        """Show failure view in case of exception.
         """
         self._update_background("oops.png")
         pygame.display.update()

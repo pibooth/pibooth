@@ -31,7 +31,7 @@ class StateFailSafe(State):
         State.__init__(self, 'failsafe', 'wait')
 
     def entry_actions(self):
-        self.app.window.show_failsafe()
+        self.app.window.show_oops()
         time.sleep(2)
 
 
