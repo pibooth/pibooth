@@ -25,6 +25,16 @@ from pibooth.controls.button import BUTTON_DOWN, PtbButton
 from pibooth.controls.printer import PtbPrinter
 
 
+class StateFailSafe(State):
+
+    def __init__(self):
+        State.__init__(self, 'failsafe', 'wait')
+
+    def entry_actions(self):
+        self.app.window.show_failsafe()
+        time.sleep(2)
+
+
 class StateWait(State):
 
     def __init__(self):
@@ -199,7 +209,7 @@ class StatePrint(State):
 
     def entry_actions(self):
         self.printed = False
-        if self.timer.timeout == 0 or not self.app.printer.is_installed():
+        if self.timer.timeout == 0:
             return  # Don't show print state
 
         with timeit("Display the merged picture"):
@@ -208,7 +218,7 @@ class StatePrint(State):
         self.timer.start()
 
     def do_actions(self, events):
-        if self.timer.timeout == 0 or not self.app.printer.is_installed():
+        if self.timer.timeout == 0:
             return  # Don't show print state
 
         if self.app.find_print_event(events) and self.app.previous_picture_file:
@@ -267,6 +277,7 @@ class PtbApplication(object):
         self.state_machine.add_state(StateProcessing())
         self.state_machine.add_state(StatePrint())
         self.state_machine.add_state(StateFinish())
+        self.state_machine.add_failsafe_state(StateFailSafe())
 
         # Initialize the camera
         if camera.gp_camera_connected() and camera.rpi_camera_connected():
@@ -412,7 +423,6 @@ def main():
     if options.config:
         LOGGER.info("Editing the Photo Booth configuration...")
         config.editor()
-        config.reload()
     elif not options.reset:
         LOGGER.info("Starting the Photo Booth application...")
         app = PtbApplication(config)

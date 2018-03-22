@@ -52,7 +52,7 @@ class PtbWindow(object):
         """
         image_name = id(pil_image)
 
-        image_size_max = (2*self.size[1]//3, self.size[1])
+        image_size_max = (2 * self.size[1] // 3, self.size[1])
 
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
@@ -160,6 +160,12 @@ class PtbWindow(object):
             self._update_picture_number()
         if self._current_foreground:
             self._update_foreground(*self._current_foreground)
+        pygame.display.update()
+
+    def show_failsafe(self):
+        """Show fail safe view in case of exception.
+        """
+        self._update_background("oops.png")
         pygame.display.update()
 
     def show_intro(self, pil_image=None):

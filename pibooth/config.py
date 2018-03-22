@@ -126,6 +126,7 @@ class PtbConfigParser(ConfigParser):
         """
         process = subprocess.Popen(['leafpad', self.filename])
         process.communicate()
+        self.reload()
 
     def get(self, section, option, **kwargs):
         """Override the default function of ConfigParser to add a

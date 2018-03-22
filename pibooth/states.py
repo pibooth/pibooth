@@ -1,6 +1,30 @@
 # -*- coding: utf-8 -*-
 
+import logging
+import traceback
+from functools import wraps
 from pibooth.utils import LOGGER
+
+
+def failsafe(func):
+    """Ensure fail safe mode.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        machine = args[0]
+        if not machine.failsafe_state or machine.failsafe_state == machine.active_state:
+            return func(*args, **kwargs)
+        else:
+            try:
+                return func(*args, **kwargs)
+            except Exception as ex:
+                LOGGER.error(str(ex))
+                if LOGGER.getEffectiveLevel() < logging.INFO and machine.failsafe_state != machine.active_state:
+                    traceback.print_exc()
+            machine.active_state = machine.failsafe_state
+            machine.active_state.entry_actions()
+
+    return wrapper
 
 
 class State(object):
@@ -36,6 +60,7 @@ class StateMachine(object):
 
     def __init__(self, application):
         self.states = {}
+        self.failsafe_state = None
         self.active_state = None
 
         # Share the application to manage between states
@@ -46,6 +71,13 @@ class StateMachine(object):
         """
         self.states[state.name] = state
 
+    def add_failsafe_state(self, state):
+        """Add a state that will be call in case of exception.
+        """
+        self.failsafe_state = state
+        self.states[state.name] = state
+
+    @failsafe
     def process(self, events):
         """Let the current state do it's thing
         """
@@ -61,6 +93,7 @@ class StateMachine(object):
         if new_state_name is not None:
             self.set_state(new_state_name)
 
+    @failsafe
     def set_state(self, state_name):
         """Change state machine's active state
         """
