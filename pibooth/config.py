@@ -24,6 +24,7 @@ DEFAULT = {
         "debounce_delay": (0.3, "How long to debounce the button in seconds"),
         "language": ("en", "User interface language (fallback to English if not found)"),
         "autostart": (False, "Start pibooth at Raspberry Pi startup"),
+        "failsafe": (True, "Show fail message and go back to wait state in case of exception"),
     },
     "PICTURE": {
         "captures": (4, "Number pictures in case of multiple captures (4 max)"),

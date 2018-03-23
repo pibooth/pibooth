@@ -31,7 +31,9 @@ class StateFailSafe(State):
         State.__init__(self, 'failsafe', 'wait')
 
     def entry_actions(self):
+        self.app.dirname = None
         self.app.captures = []
+        self.app.max_captures = None
         self.app.window.show_oops()
         time.sleep(2)
 
@@ -278,7 +280,8 @@ class PtbApplication(object):
         self.state_machine.add_state(StateProcessing())
         self.state_machine.add_state(StatePrint())
         self.state_machine.add_state(StateFinish())
-        self.state_machine.add_failsafe_state(StateFailSafe())
+        if config.getboolean('GENERAL', 'failsafe'):
+            self.state_machine.add_failsafe_state(StateFailSafe())
 
         # Initialize the camera
         if camera.gp_camera_connected() and camera.rpi_camera_connected():

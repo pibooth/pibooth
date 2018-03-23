@@ -175,6 +175,9 @@ Below is the default configuration file:
     # Start pibooth at Raspberry Pi startup
     autostart = False
 
+    # Show fail message and go back to wait state in case of exception
+    failsafe = True
+
     [WINDOW]
     # (width, height) of the display monitor or 'fullscreen'
     size = (800, 480)
