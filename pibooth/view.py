@@ -165,6 +165,7 @@ class PtbWindow(object):
     def show_oops(self):
         """Show failure view in case of exception.
         """
+        self._picture_number = (0, self._picture_number[1])
         self._update_background("oops.png")
         pygame.display.update()
 

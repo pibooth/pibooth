@@ -21,6 +21,8 @@ def failsafe(func):
                 LOGGER.error(str(ex))
                 if LOGGER.getEffectiveLevel() < logging.INFO and machine.failsafe_state != machine.active_state:
                     traceback.print_exc()
+            if machine.active_state is not None:
+                machine.active_state.exit_actions()
             machine.active_state = machine.failsafe_state
             machine.active_state.entry_actions()
 
