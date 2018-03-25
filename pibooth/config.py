@@ -27,7 +27,7 @@ DEFAULT = {
         "failsafe": (True, "Show fail message and go back to wait state in case of exception"),
     },
     "PICTURE": {
-        "captures": (4, "Number pictures in case of multiple captures (4 max)"),
+        "captures": ((4, 1), "Possible choice(s) of captures numbers (numbers between 1 to 4 max)"),
         "orientation": ("auto", "Orientation of the final image ('auto', 'portrait' or 'landscape')"),
         "footer_text1": ("Footer 1", "First text displayed"),
         "footer_text2": ("Footer 2", "Second text displayed"),

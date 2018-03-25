@@ -192,8 +192,8 @@ Below is the default configuration file:
     preview_countdown = True
 
     [PICTURE]
-    # Number pictures in case of multiple captures (4 max)
-    captures = 4
+    # Possible choice(s) of captures numbers (numbers between 1 to 4 max)
+    captures = (4, 1)
 
     # Orientation of the final image ('auto', 'portrait' or 'landscape')
     orientation =  auto

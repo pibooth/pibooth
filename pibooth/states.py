@@ -2,7 +2,6 @@
 
 import logging
 import traceback
-from functools import wraps
 from pibooth.utils import LOGGER
 
 

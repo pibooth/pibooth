@@ -33,7 +33,7 @@ class StateFailSafe(State):
     def entry_actions(self):
         self.app.dirname = None
         self.app.captures = []
-        self.app.max_captures = None
+        self.app.nbr_captures = None
         self.app.window.show_oops()
         time.sleep(2)
 
@@ -58,11 +58,19 @@ class StateWait(State):
             self.app.led_print.blink()
 
     def exit_actions(self):
+        self.app.led_picture.switch_off()
         self.app.led_print.switch_off()
+
+        # Clear currently displayed image
+        self.app.window.show_image(None)
 
     def validate_transition(self, events):
         if self.app.find_picture_event(events):
-            return self.next_name
+            if len(self.app.capt_choices) > 1:
+                return self.next_name
+            else:
+                self.app.nbr_captures = self.app.capt_choices[0]
+                return 'capture'
 
 
 class StateChoose(State):
@@ -74,7 +82,7 @@ class StateChoose(State):
     def entry_actions(self):
         with timeit("Show picture choice (no default set)"):
             self.app.window.show_choice()
-        self.app.max_captures = None
+        self.app.nbr_captures = None
         self.app.led_picture.blink()
         self.app.led_print.blink()
         self.timer.start()
@@ -82,20 +90,18 @@ class StateChoose(State):
     def do_actions(self, events):
         event = self.app.find_choice_event(events)
         if event:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                self.app.max_captures = self.app.config.getint('PICTURE', 'captures')
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                self.app.max_captures = 1
-            elif event.pin == self.app.button_picture:
-                self.app.max_captures = self.app.config.getint('PICTURE', 'captures')
-            elif event.pin == self.app.button_print:
-                self.app.max_captures = 1
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT) \
+                    or (event.type == BUTTON_DOWN and event.pin == self.app.button_picture):
+                self.app.nbr_captures = self.app.capt_choices[0]
+            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT) \
+                    or (event.type == BUTTON_DOWN and event.pin == self.app.button_print):
+                self.app.nbr_captures = self.app.capt_choices[1]
 
     def exit_actions(self):
-        if self.app.max_captures == self.app.config.getint('PICTURE', 'captures'):
+        if self.app.nbr_captures == self.app.capt_choices[0]:
             self.app.led_picture.switch_on()
             self.app.led_print.switch_off()
-        elif self.app.max_captures == 1:
+        elif self.app.nbr_captures == self.app.capt_choices[1]:
             self.app.led_print.switch_on()
             self.app.led_picture.switch_off()
         else:
@@ -103,7 +109,7 @@ class StateChoose(State):
             self.app.led_picture.switch_off()
 
     def validate_transition(self, events):
-        if self.app.max_captures:
+        if self.app.nbr_captures:
             return self.next_name
         elif self.timer.is_timeout():
             return "wait"
@@ -116,8 +122,8 @@ class StateChosen(State):
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
-        with timeit("Set {} picture(s) mode".format(self.app.max_captures)):
-            self.app.window.show_choice(selected=True, multiple=self.app.max_captures > 1)
+        with timeit("Set {} picture(s) mode".format(self.app.nbr_captures)):
+            self.app.window.show_choice(selected=True, multiple=self.app.nbr_captures > 1)
         self.timer.start()
 
     def exit_actions(self):
@@ -144,7 +150,7 @@ class StateCapture(State):
         self.app.camera.preview(self.app.window)
 
     def do_actions(self, events):
-        self.app.window.set_picture_number(len(self.app.captures) + 1, self.app.max_captures)
+        self.app.window.set_picture_number(len(self.app.captures) + 1, self.app.nbr_captures)
 
         if self.app.config.getboolean('WINDOW', 'preview_countdown'):
             self.app.camera.preview_countdown(self.app.config.getint('WINDOW', 'preview_delay'))
@@ -164,7 +170,7 @@ class StateCapture(State):
         self.app.led_preview.switch_off()
 
     def validate_transition(self, events):
-        if len(self.app.captures) >= self.app.max_captures:
+        if len(self.app.captures) >= self.app.nbr_captures:
             return self.next_name
 
 
@@ -197,7 +203,7 @@ class StateProcessing(State):
         self.app.captures = []
 
     def validate_transition(self, events):
-        if self.app.printer.is_installed():
+        if self.app.printer.is_installed() and self.app.config.getfloat('PRINTER', 'printer_delay') > 0:
             return self.next_name
         else:
             return 'finish'  # Can not print
@@ -212,18 +218,12 @@ class StatePrint(State):
 
     def entry_actions(self):
         self.printed = False
-        if self.timer.timeout == 0:
-            return  # Don't show print state
-
         with timeit("Display the merged picture"):
             self.app.window.show_print(self.app.previous_picture)
         self.app.led_print.blink()
         self.timer.start()
 
     def do_actions(self, events):
-        if self.timer.timeout == 0:
-            return  # Don't show print state
-
         if self.app.find_print_event(events) and self.app.previous_picture_file:
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
@@ -312,9 +312,16 @@ class PtbApplication(object):
         # Variables shared between states
         self.dirname = None
         self.captures = []
-        self.max_captures = None
+        self.nbr_captures = None
         self.previous_picture = None
         self.previous_picture_file = None
+
+        self.capt_choices = config.gettyped('PICTURE', 'captures')
+        if isinstance(self.capt_choices, int):
+            self.capt_choices = (self.capt_choices,)
+        for chx in self.capt_choices:
+            if chx not in [1, 2, 3, 4]:
+                raise ValueError("Invalid captures number '{}'".format(chx))
 
     def find_quit_event(self, events):
         """Return the event if found in the list.

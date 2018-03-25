@@ -188,16 +188,18 @@ class PtbWindow(object):
             self._update_background("choice_one.png")
         else:
             self._update_background("choice_some.png")
-
-        if self._current_foreground:  # New sequence of pictures will be taken
-            self._buffered_images.pop(id(self._current_foreground[0]), None)
-            self._current_foreground = None
         pygame.display.update()
 
-    def show_image(self, pil_image, pos=CENTER):
+    def show_image(self, pil_image=None, pos=CENTER):
         """Show PIL image as it (no resize).
         """
-        self._update_foreground(pil_image, pos, False)
+        if not pil_image:
+            # Clear the currently displayed image
+            if self._current_foreground:
+                self._buffered_images.pop(id(self._current_foreground[0]), None)
+                self._current_foreground = None
+        else:
+            self._update_foreground(pil_image, pos, False)
         pygame.display.update()
 
     def show_work_in_progress(self):
