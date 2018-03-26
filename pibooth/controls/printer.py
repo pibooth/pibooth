@@ -130,6 +130,7 @@ class PtbPrinter(object):
         self._notif_server = NotificationServer(self._conn)
         self.name = None
         if not cups:
+            LOGGER.warning("No printer found (pycups not installed)")
             return  # CUPS is not installed
         elif not name or name.lower() == 'default':
             self.name = self._conn.getDefault()
@@ -138,10 +139,13 @@ class PtbPrinter(object):
         elif name in self._conn.getPrinters():
             self.name = name
 
+        if not self.name:
+            LOGGER.warning("No printer found (nothing defined in CUPS)")
+
     def is_installed(self):
         """Return True if the CUPS server is available for printing.
         """
-        return cups is not None
+        return cups is not None and self.name
 
     def print_file(self, filename):
         """Send a file to the CUPS server to the default printer.

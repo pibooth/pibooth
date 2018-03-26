@@ -44,7 +44,7 @@ class StateWait(State):
         State.__init__(self, 'wait', 'choose')
 
     def entry_actions(self):
-        self.app.window.show_intro(self.app.previous_picture)
+        self.app.window.show_intro(self.app.previous_picture, self.app.printer.is_installed())
         self.app.led_picture.blink()
         if self.app.previous_picture_file and self.app.printer.is_installed():
             self.app.led_print.blink()
@@ -80,7 +80,7 @@ class StateChoose(State):
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
-        with timeit("Show picture choice (no default set)"):
+        with timeit("Show picture choice (nothing selected)"):
             self.app.window.show_choice()
         self.app.nbr_captures = None
         self.app.led_picture.blink()
@@ -122,7 +122,7 @@ class StateChosen(State):
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
-        with timeit("Set {} picture(s) mode".format(self.app.nbr_captures)):
+        with timeit("Show picture choice ({} pictures selected)".format(self.app.nbr_captures)):
             self.app.window.show_choice(selected=True, multiple=self.app.nbr_captures > 1)
         self.timer.start()
 
@@ -228,7 +228,7 @@ class StatePrint(State):
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
                 self.app.printer.print_file(self.app.previous_picture_file)
-            time.sleep(2)
+            time.sleep(2)  # Just to let the LED switched on
             self.app.led_print.blink()
             self.printed = True
 

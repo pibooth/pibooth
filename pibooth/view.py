@@ -169,19 +169,23 @@ class PtbWindow(object):
         self._update_background("oops.png")
         pygame.display.update()
 
-    def show_intro(self, pil_image=None):
+    def show_intro(self, pil_image=None, with_print=True):
         """Show introduction view.
         """
-        if pil_image:
+        self._picture_number = (0, self._picture_number[1])
+        if with_print and pil_image:
             self._update_background("intro_with_print.png")
-            self._update_foreground(pil_image, self.RIGHT)
         else:
             self._update_background("intro.png")
+
+        if pil_image:
+            self._update_foreground(pil_image, self.RIGHT)
         pygame.display.update()
 
     def show_choice(self, selected=False, multiple=False):
         """Show the choice view.
         """
+        self._picture_number = (0, self._picture_number[1])
         if not selected:
             self._update_background("choice_none.png")
         elif not multiple:
