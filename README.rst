@@ -132,14 +132,14 @@ Final picture rendering
 The ``pibooth`` application  handle the rendering of the final picture using 2 variables defined in
 the configuration (see paragraph below):
 
-* ``[CAMERA][resolution]`` is the format of the captured photo. As explained in the
-  configuration file, the preview size is directly dependent from this parameter.
-* ``[CAMERA][orientation]`` is the format of the final picture after concatenation. If
-  the value is **auto**, the orientation is selected depending on the resolution.
+* ``[CAMERA][resolution] =`` **(width, height)** is the resolution of the captured photo in pixels.
+  As explained in the configuration file, the preview size is directly dependent from this parameter.
+* ``[PICTURE][orientation] =`` **auto/landscape/portrait** is the orientation of the final picture
+  (after concatenation if several captures). If the value is **auto**, the orientation is automatically
+  chosen depending on the resolution.
 
-.. note:: the resolution is an important parameter, because it is responsible for the quality of
-          the final picture. Have a look to picamera possible resolutions:
-          http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes
+.. note:: The resolution is an important parameter, it is responsible for the quality of the final
+          picture. Have a look to `picamera possible resolutions <http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes>`_ .
 
 Configuration
 -------------
