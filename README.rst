@@ -132,10 +132,10 @@ Final picture rendering
 The ``pibooth`` application  handle the rendering of the final picture using 2 variables defined in
 the configuration (see paragraph below):
 
-* ``[CAMERA][resolution] =`` **(width, height)** is the resolution of the captured photo in pixels.
+* ``[CAMERA][resolution] = (width, height)`` is the resolution of the captured photo in pixels.
   As explained in the configuration file, the preview size is directly dependent from this parameter.
-* ``[PICTURE][orientation] =`` **auto/landscape/portrait** is the orientation of the final picture
-  (after concatenation if several captures). If the value is **auto**, the orientation is automatically
+* ``[PICTURE][orientation] = auto/landscape/portrait`` is the orientation of the final picture
+  (after concatenation of all captures). If the value is **auto**, the orientation is automatically
   chosen depending on the resolution.
 
 .. note:: The resolution is an important parameter, it is responsible for the quality of the final
@@ -245,6 +245,11 @@ Resolution       Automatic
 2-Sided Printing Off
 Shrink page ...  Shrink (print the whole page)
 ================ =============================
+
+.. note:: The print button (see `Commands`_) and print states are automatically deactivated if:
+
+            * `pycups <https://pypi.python.org/pypi/pycups>`_ is not installed
+            * no printer configured in ``CUPS``
 
 Circuit diagram
 ---------------
