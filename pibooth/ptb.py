@@ -14,7 +14,7 @@ import os.path as osp
 from RPi import GPIO
 from PIL import Image
 import pibooth
-from pibooth.utils import LOGGER, timeit, PoolingTimer
+from pibooth.utils import LOGGER, timeit, PoolingTimer, configure_logging
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
 from pibooth.config import PtbConfigParser
@@ -427,7 +427,7 @@ def main():
 
     options, _args = parser.parse_known_args()
 
-    logging.basicConfig(format='[ %(levelname)-8s] %(name)-18s: %(message)s', level=options.logging)
+    configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s')
 
     config = PtbConfigParser("~/.config/pibooth/pibooth.cfg", options.reset)
 
