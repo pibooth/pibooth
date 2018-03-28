@@ -19,25 +19,24 @@ class BlockConsoleHandler(logging.StreamHandler):
     def emit(self, record):
         cls = self.__class__
         record.msg = '{}{}'.format(cls.current_indent, record.msg)
+        logging.StreamHandler.emit(self, record)
+
         if cls.current_indent.endswith(cls.pattern_indent):
             cls.current_indent = (cls.current_indent[:-len(cls.pattern_indent)] + cls.pattern_blocks)
         elif cls.current_indent.endswith(cls.pattern_dedent):
             cls.current_indent = cls.current_indent[:-len(cls.pattern_dedent)]
-        logging.StreamHandler.emit(self, record)
 
     @classmethod
     def indent(cls):
-        """Begin a new log block (works only if level is DEBUG).
+        """Begin a new log block.
         """
-        if logging.getLogger().getEffectiveLevel() < logging.INFO:
-            cls.current_indent += cls.pattern_indent
+        cls.current_indent += cls.pattern_indent
 
     @classmethod
     def dedent(cls):
-        """End the current log block (works only if level is DEBUG).
+        """End the current log block.
         """
-        if logging.getLogger().getEffectiveLevel() < logging.INFO:
-            cls.current_indent = (cls.current_indent[:-len(cls.pattern_blocks)] + cls.pattern_dedent)
+        cls.current_indent = (cls.current_indent[:-len(cls.pattern_blocks)] + cls.pattern_dedent)
 
 
 def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=None):
@@ -56,13 +55,15 @@ def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=N
 def timeit(description):
     """Measure time execution.
     """
-    BlockConsoleHandler.indent()
+    if LOGGER.getEffectiveLevel() < logging.INFO:
+        BlockConsoleHandler.indent()
     LOGGER.info(description)
     start = time.time()
     try:
         yield
     finally:
-        BlockConsoleHandler.dedent()
+        if LOGGER.getEffectiveLevel() < logging.INFO:
+            BlockConsoleHandler.dedent()
         LOGGER.debug("took %0.3f seconds", time.time() - start)
 
 

@@ -86,7 +86,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
    .. hint:: If you don't have *gphoto2* and/or *CUPS* installed (steps 5. and/or 6. skipped), use
              the ``--no-deps`` option to avoid installation failures (you may need to install Python
-             dependencies yourself)
+             dependencies by yourself)
 
 Run
 ---
@@ -96,7 +96,23 @@ Start the Photo Booth application using the command::
     $ pibooth
 
 All pictures taken are stored in a subfolder of the one defined in the configuration,
-named **YYYY-mm-dd hh-mm-ss** which the time when first photo of the sequence was taken.
+named **YYYY-mm-dd hh-mm-ss** which the time when first picture of the sequence was taken.
+
+You can display a basic help on option by using the command::
+
+    $ pibooth --help
+
+    usage: ptb.py [options]
+
+    A Photo Booth application in pure Python for the Raspberry Pi.
+
+    optional arguments:
+      -h, --help     show this help message and exit
+      --version      show program's version number and exit
+      --config       edit the current configuration
+      --reset        restore the default configuration
+      -v, --verbose  report more information about operations
+      -q, --quiet    report only errors and warnings
 
 Commands
 ^^^^^^^^
@@ -130,7 +146,7 @@ Final picture rendering
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``pibooth`` application  handle the rendering of the final picture using 2 variables defined in
-the configuration (see paragraph below):
+the configuration (see `Configuration`_ below):
 
 * ``[CAMERA][resolution] = (width, height)`` is the resolution of the captured photo in pixels.
   As explained in the configuration file, the preview size is directly dependent from this parameter.
@@ -224,7 +240,7 @@ Below is the default configuration file:
     resolution = (1934, 2464)
 
     [PRINTER]
-    # Name of the printer to send the pictures
+    # Name of the printer defined in CUPS (or use the 'default' one)
     printer_name = default
 
     # How long is the print view in seconds (0 to skip it)

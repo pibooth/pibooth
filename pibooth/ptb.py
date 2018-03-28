@@ -81,7 +81,7 @@ class StateChoose(State):
 
     def entry_actions(self):
         with timeit("Show picture choice (nothing selected)"):
-            self.app.window.show_choice()
+            self.app.window.show_choice(self.app.capt_choices)
         self.app.nbr_captures = None
         self.app.led_picture.blink()
         self.app.led_print.blink()
@@ -123,7 +123,7 @@ class StateChosen(State):
 
     def entry_actions(self):
         with timeit("Show picture choice ({} pictures selected)".format(self.app.nbr_captures)):
-            self.app.window.show_choice(selected=True, multiple=self.app.nbr_captures > 1)
+            self.app.window.show_choice(self.app.capt_choices, selected=self.app.nbr_captures)
         self.timer.start()
 
     def exit_actions(self):

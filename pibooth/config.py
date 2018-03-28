@@ -47,7 +47,7 @@ DEFAULT = {
         "resolution": ((1934, 2464), "Resolution for camera captures (preview will have same aspect ratio)"),
     },
     "PRINTER": {
-        "printer_name": ("default", "Name of the printer to send the pictures"),
+        "printer_name": ("default", "Name of the printer defined in CUPS (or use the 'default' one)"),
         "printer_delay": (10, "How long is the print view in seconds (0 to skip it)"),
     },
 }

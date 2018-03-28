@@ -182,16 +182,41 @@ class PtbWindow(object):
             self._update_foreground(pil_image, self.RIGHT)
         pygame.display.update()
 
-    def show_choice(self, selected=False, multiple=False):
+    def show_choice(self, choices, selected=None):
         """Show the choice view.
         """
         self._picture_number = (0, self._picture_number[1])
         if not selected:
-            self._update_background("choice_none.png")
-        elif not multiple:
-            self._update_background("choice_one.png")
+            image_name = "choose.png"
         else:
-            self._update_background("choice_some.png")
+            image_name = "chosen{}.png".format(selected)
+
+        image = None
+        buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
+        if not buff_image or self.size != buff_size:
+            if selected:
+                image_name = "chosen.png"
+            image = pictures.get_image(image_name, self.size)
+            size = (image.get_rect().width * 0.6, image.get_rect().height * 0.6)
+            layout0 = pictures.get_image("layout{}.png".format(choices[0]), size)
+            layout1 = pictures.get_image("layout{}.png".format(choices[1]), size)
+            hinter = (image.get_rect().width - layout0.get_rect().width - layout1.get_rect().width) // 3
+            vinter = int((image.get_rect().height - layout0.get_rect().height) * 0.66)
+            left = (hinter, vinter)
+            right = (hinter * 2 + layout0.get_rect().width, vinter)
+            if not selected:
+                image.blit(layout0, left)
+                image.blit(layout1, right)
+            elif selected == choices[0]:
+                image.blit(layout0, left)
+            elif selected == choices[1]:
+                image.blit(layout1, right)
+            else:
+                raise ValueError("Invalid selection '{}' (choose one of {})".format(selected, choices))
+
+            self._buffered_images[image_name] = (self.size, image)
+
+        self._update_background(image_name)
         pygame.display.update()
 
     def show_image(self, pil_image=None, pos=CENTER):
