@@ -68,7 +68,7 @@ class PtbConfigParser(ConfigParser):
     """Enhenced configuration file parser.
     """
 
-    language = None
+    language = 'en'
 
     def __init__(self, filename, clear=False):
         ConfigParser.__init__(self)
@@ -94,7 +94,6 @@ class PtbConfigParser(ConfigParser):
         language = self.get('GENERAL', 'language')
         if language not in possibles:
             LOGGER.warning("Unsupported language '%s', fallback to English", language)
-            PtbConfigParser.language = 'en'
         else:
             PtbConfigParser.language = language
 

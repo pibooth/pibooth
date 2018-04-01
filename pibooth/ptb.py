@@ -88,6 +88,7 @@ class StateChoose(State):
         self.timer.start()
 
     def do_actions(self, events):
+        self.app.window.animate()
         event = self.app.find_choice_event(events)
         if event:
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT) \
@@ -125,6 +126,9 @@ class StateChosen(State):
         with timeit("Show picture choice ({} pictures selected)".format(self.app.nbr_captures)):
             self.app.window.show_choice(self.app.capt_choices, selected=self.app.nbr_captures)
         self.timer.start()
+
+    def do_actions(self, events):
+        self.app.window.animate()
 
     def exit_actions(self):
         self.app.led_picture.switch_off()
@@ -378,6 +382,7 @@ class PtbApplication(object):
         try:
             self.led_startup.switch_on()
             self.state_machine.set_state('wait')
+            clock = pygame.time.Clock()
 
             while True:
                 events = list(reversed(pygame.event.get()))  # Take all events, most recent first
@@ -393,6 +398,7 @@ class PtbApplication(object):
                     self.window.resize(event.size)
 
                 self.state_machine.process(events)
+                clock.tick(30)  # Ensure the program will never run at more than 40 frames per second
 
         finally:
             self.led_startup.quit()

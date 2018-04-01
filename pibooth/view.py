@@ -3,10 +3,11 @@
 import time
 import pygame
 from pygame import gfxdraw
-from pibooth import pictures
-from pibooth.pictures import sizing
 from PIL import Image
+from pibooth import pictures
+from pibooth.pictures import background
 from pibooth.utils import LOGGER
+from pibooth.pictures import sizing
 
 
 class PtbWindow(object):
@@ -72,23 +73,14 @@ class PtbWindow(object):
         self._current_foreground = (pil_image, pos, resize)
         self.surface.blit(image, self._pos_map[pos](image))
 
-    def _update_background(self, image_name, pos=CENTER):
+    def _update_background(self, bkgd):
         """Show image on the background.
         """
-        buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
-        if buff_image and self.size == buff_size:
-            image = buff_image
-            LOGGER.debug("Use buffered image '%s'", image_name)
-        else:
-            image = pictures.get_image(image_name, self.size)
-
-        self.surface.fill((0, 0, 0))  # Clear background
-        self.surface.blit(image, self._pos_map[pos](image))
+        bkgd = self._buffered_images.setdefault(str(bkgd), bkgd)
+        bkgd.resize(self.surface)
+        bkgd.animate(self.surface)
         self._update_picture_number()
-        if self.size != buff_size:
-            LOGGER.debug("Add to buffer the image '%s'", image_name)
-            self._buffered_images[image_name] = (self.size, image)
-        self._current_background = (image_name, pos)
+        self._current_background = bkgd
 
     def _update_picture_number(self):
         """Update the pictures counter displayed.
@@ -155,18 +147,25 @@ class PtbWindow(object):
         """Repaint the window with currently displayed images.
         """
         if self._current_background:
-            self._update_background(*self._current_background)
+            self._update_background(self._current_background)
         else:
             self._update_picture_number()
         if self._current_foreground:
             self._update_foreground(*self._current_foreground)
         pygame.display.update()
 
+    def animate(self):
+        """Animate current background if possible.
+        """
+        if self._current_background:
+            self._current_background.animate(self.surface)
+            pygame.display.update()
+
     def show_oops(self):
         """Show failure view in case of exception.
         """
         self._picture_number = (0, self._picture_number[1])
-        self._update_background("oops.png")
+        self._update_background(background.OopsBackground())
         pygame.display.update()
 
     def show_intro(self, pil_image=None, with_print=True):
@@ -174,9 +173,9 @@ class PtbWindow(object):
         """
         self._picture_number = (0, self._picture_number[1])
         if with_print and pil_image:
-            self._update_background("intro_with_print.png")
+            self._update_background(background.IntroWithPrintBackground())
         else:
-            self._update_background("intro.png")
+            self._update_background(background.IntroBackground())
 
         if pil_image:
             self._update_foreground(pil_image, self.RIGHT)
@@ -187,36 +186,10 @@ class PtbWindow(object):
         """
         self._picture_number = (0, self._picture_number[1])
         if not selected:
-            image_name = "choose.png"
+            self._update_background(background.ChooseBackground(choices))
         else:
-            image_name = "chosen{}.png".format(selected)
+            self._update_background(background.ChosenBackground(choices, selected))
 
-        image = None
-        buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
-        if not buff_image or self.size != buff_size:
-            if selected:
-                image_name = "chosen.png"
-            image = pictures.get_image(image_name, self.size)
-            size = (image.get_rect().width * 0.6, image.get_rect().height * 0.6)
-            layout0 = pictures.get_image("layout{}.png".format(choices[0]), size)
-            layout1 = pictures.get_image("layout{}.png".format(choices[1]), size)
-            hinter = (image.get_rect().width - layout0.get_rect().width - layout1.get_rect().width) // 3
-            vinter = int((image.get_rect().height - layout0.get_rect().height) * 0.66)
-            left = (hinter, vinter)
-            right = (hinter * 2 + layout0.get_rect().width, vinter)
-            if not selected:
-                image.blit(layout0, left)
-                image.blit(layout1, right)
-            elif selected == choices[0]:
-                image.blit(layout0, left)
-            elif selected == choices[1]:
-                image.blit(layout1, right)
-            else:
-                raise ValueError("Invalid selection '{}' (choose one of {})".format(selected, choices))
-
-            self._buffered_images[image_name] = (self.size, image)
-
-        self._update_background(image_name)
         pygame.display.update()
 
     def show_image(self, pil_image=None, pos=CENTER):
@@ -235,14 +208,14 @@ class PtbWindow(object):
         """Show wait view.
         """
         self._picture_number = (0, self._picture_number[1])
-        self._update_background("processing.png")
+        self._update_background(background.ProcessingBackground())
         pygame.display.update()
 
     def show_print(self, pil_image=None):
         """Show print view.
         """
         self._picture_number = (0, self._picture_number[1])
-        self._update_background("print.png")
+        self._update_background(background.PrintBackground())
         if pil_image:
             self._update_foreground(pil_image, self.LEFT)
         pygame.display.update()
@@ -251,7 +224,7 @@ class PtbWindow(object):
         """Show finished view.
         """
         self._picture_number = (0, self._picture_number[1])
-        self._update_background("finished.png")
+        self._update_background(background.FinishedBackground())
         pygame.display.update()
 
     def flash(self, count):
@@ -274,7 +247,7 @@ class PtbWindow(object):
             raise ValueError("Total number of captures shall be greater than 0")
 
         self._picture_number = (current_nbr, total_nbr)
-        self._update_background("capture.png")
+        self._update_background(background.CaptureBackground())
         if self._current_foreground:
             self._update_foreground(*self._current_foreground)
         pygame.display.update()
