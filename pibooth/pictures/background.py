@@ -200,4 +200,4 @@ class FinishedBackground(Background):
 class OopsBackground(Background):
 
     def __init__(self):
-        Background.__init__(self, "opps.png")
+        Background.__init__(self, "oops.png")
