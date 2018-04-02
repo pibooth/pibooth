@@ -25,7 +25,7 @@ def shake(magnitude, step=5):
     for _ in xrange(0, 3):
         for x in range(0, magnitude, step):
             yield (x * s, 0)
-        for x in range(magnitude, 0, step):
+        for x in list(reversed(range(0, magnitude, step)))[1:-1]:
             yield (x * s, 0)
         s *= -1
     while True:
@@ -59,25 +59,25 @@ class Background(object):
 
     def __init__(self, image_name):
         self.rect = None
-        self.name = image_name
+        self.image_name = image_name
         self.background = None
 
     def __str__(self):
         """Return background final name.
         """
-        return self.name
+        return self.image_name
 
     def resize(self, screen):
         """Resize objects to fit to the screen.
         """
         if self.rect != screen.get_rect():
             self.rect = screen.get_rect()
-            self.background = pictures.get_image(self.name, (self.rect.width, self.rect.height))
+            self.background = pictures.get_image(self.image_name, (self.rect.width, self.rect.height))
             return True
         return False
 
     def animate(self, screen):
-        """Animate the surfaces on the screen.
+        """Paint and animate the surfaces on the screen.
         """
         screen.fill((0, 0, 0))  # Clear background
         screen.blit(self.background, self.background.get_rect(center=self.rect.center))
@@ -105,6 +105,7 @@ class ChooseBackground(Background):
         self.layout1 = None
         self.layout1_pos = None
         self.offset = None
+        self.speed = 4  # Pixels par frame
         self.shake_timer = PoolingTimer(10)
 
     def resize(self, screen):
@@ -122,7 +123,7 @@ class ChooseBackground(Background):
 
     def animate(self, screen):
         if not self.offset or self.shake_timer.is_timeout():
-            self.offset = shake(15)
+            self.offset = shake(8, self.speed)
             self.shake_timer.start()
 
         screen.fill((0, 0, 0))
@@ -141,6 +142,7 @@ class ChosenBackground(Background):
         self.layout = None
         self.layout_pos = None
         self.offset = None
+        self.speed = 100  # Pixels par frame
         self.transpose_timer = PoolingTimer(10)
 
     def __str__(self):
@@ -164,7 +166,7 @@ class ChosenBackground(Background):
     def animate(self, screen):
         end_pos = (self.layout.get_rect(center=self.rect.center).left, self.layout_pos[1])
         if not self.offset or self.transpose_timer.is_timeout():
-            self.offset = transpose(self.layout_pos, end_pos, 50)
+            self.offset = transpose(self.layout_pos, end_pos, self.speed)
             self.transpose_timer.start()
 
         screen.fill((0, 0, 0))

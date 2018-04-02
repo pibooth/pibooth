@@ -76,11 +76,10 @@ class PtbWindow(object):
     def _update_background(self, bkgd):
         """Show image on the background.
         """
-        bkgd = self._buffered_images.setdefault(str(bkgd), bkgd)
-        bkgd.resize(self.surface)
-        bkgd.animate(self.surface)
+        self._current_background = self._buffered_images.setdefault(str(bkgd), bkgd)
+        self._current_background.resize(self.surface)
+        self._current_background.animate(self.surface)
         self._update_picture_number()
-        self._current_background = bkgd
 
     def _update_picture_number(self):
         """Update the pictures counter displayed.

@@ -398,7 +398,7 @@ class PtbApplication(object):
                     self.window.resize(event.size)
 
                 self.state_machine.process(events)
-                clock.tick(30)  # Ensure the program will never run at more than 40 frames per second
+                clock.tick(40)  # Ensure the program will never run at more than x frames per second
 
         finally:
             self.led_startup.quit()
