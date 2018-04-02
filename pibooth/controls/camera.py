@@ -138,6 +138,7 @@ class RpiCamera(BaseCamera):
         """
         time.sleep(timeout)
 
+
     def stop_preview(self):
         """Stop the preview.
         """
@@ -158,6 +159,11 @@ class RpiCamera(BaseCamera):
             # "Rewind" the stream to the beginning so we can read its content
             stream.seek(0)
             return Image.open(stream)
+
+    def download_file(self, file_path=None, filename=None):
+        """Download the capture image (on RPiCamera, no need to download the file)
+        """
+        pass
 
     def quit(self):
         """Close the camera driver, it's definitive.
@@ -266,6 +272,12 @@ class GpCamera(BaseCamera):
         is returned.
         """
         file_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
+        return file_path
+
+    def download_file(self, file_path, filename=None):
+        """Download the capture image file and show it. If no filename given a PIL image
+        is returned.
+        """
         camera_file = gp.check_result(gp.gp_camera_file_get(
             self._cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
 
@@ -325,6 +337,12 @@ class HybridCamera(RpiCamera):
         is returned.
         """
         file_path = self._gp_cam.capture(gp.GP_CAPTURE_IMAGE)
+        return file_path
+
+    def download_file(self, file_path, filename=None):
+        """Download the capture image file and show it. If no filename given a PIL image
+        is returned.
+        """
         camera_file = gp.check_result(gp.gp_camera_file_get(
             self._gp_cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
 

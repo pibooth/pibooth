@@ -163,10 +163,10 @@ class StateCapture(State):
 
         if self.app.config.getboolean('WINDOW', 'flash'):
             self.app.window.flash(2)
-
         image_file_name = osp.join(self.app.dirname, "ptb{:03}.jpg".format(len(self.app.captures)))
         with timeit("Take picture and save it in {}".format(image_file_name)):
-            self.app.camera.capture(image_file_name)
+            file_path = self.app.camera.capture(image_file_name)
+            self.app.camera.download_file(file_path, image_file_name)
             self.app.captures.append(image_file_name)
 
     def exit_actions(self):
