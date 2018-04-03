@@ -152,6 +152,7 @@ class StateCapture(State):
         os.makedirs(self.app.dirname)
         self.app.led_preview.switch_on()
         self.app.camera.preview(self.app.window)
+        self.app.camera.file_paths = []
 
     def do_actions(self, events):
         self.app.window.set_picture_number(len(self.app.captures) + 1, self.app.nbr_captures)
@@ -166,7 +167,7 @@ class StateCapture(State):
         image_file_name = osp.join(self.app.dirname, "ptb{:03}.jpg".format(len(self.app.captures)))
         with timeit("Take picture and save it in {}".format(image_file_name)):
             file_path = self.app.camera.capture(image_file_name)
-            self.app.camera.download_file(file_path, image_file_name)
+            self.app.camera.file_paths.append((file_path, image_file_name))
             self.app.captures.append(image_file_name)
 
     def exit_actions(self):
@@ -185,6 +186,10 @@ class StateProcessing(State):
 
     def entry_actions(self):
         self.app.window.show_work_in_progress()
+
+        if self.app.camera.file_paths != []:
+            for file_path, image_file_name in self.app.camera.file_paths:
+                self.app.camera.download_file(file_path, image_file_name)
 
         with timeit("Creating merged picture"):
             footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
