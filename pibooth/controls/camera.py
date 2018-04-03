@@ -187,6 +187,7 @@ class GpCamera(BaseCamera):
         self._capture_hflip = flip
         self._rotation = rotation
         self._set_config_value('imgsettings', 'iso', iso)
+        self._set_config_value('settings', 'capturetarget', 'Carte mémoire')
         self._cam.set_config(self._config)
 
     def _set_config_value(self, section, option, value):
@@ -337,6 +338,8 @@ class HybridCamera(RpiCamera):
         is returned.
         """
         file_path = self._gp_cam.capture(gp.GP_CAPTURE_IMAGE)
+        print(file_path.folder, file_path.name)
+        time.sleep(1) # necessary to let the time for the camera to save the image
         return file_path
 
     def download_file(self, file_path, filename=None):
@@ -350,17 +353,18 @@ class HybridCamera(RpiCamera):
         image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
         image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
 
+        # COMMENTED ON 2018-04-02 by werdeil
         # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
-        rect = self.get_rect()
-        size = sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
+        # rect = self.get_rect()
+        # size = sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
 
-        self._cam.stop_preview()
-        if self._preview_hflip:
-            self._window.show_image(image.transpose(Image.FLIP_LEFT_RIGHT).resize(size))
-        else:
-            self._window.show_image(image.resize(size))
-        time.sleep(2)
-        self.preview(self._window)
+        # self._cam.stop_preview()
+        # if self._preview_hflip:
+        #     self._window.show_image(image.transpose(Image.FLIP_LEFT_RIGHT).resize(size))
+        # else:
+        #     self._window.show_image(image.resize(size))
+        # time.sleep(2)
+        # self.preview(self._window)
 
         if self._cam.hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
