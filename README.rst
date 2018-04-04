@@ -7,6 +7,9 @@
 The ``pibooth`` project attempts to provide a Photo Booth application *out-of-the-box*
 for Raspberry Pi.
 
+.. contents::
+   :depth: 1
+
 Requirements
 ------------
 
@@ -14,8 +17,8 @@ The requirements listed below are the one used for the development of ``pibooth`
 configuration may work fine. **All hardware buttons, lights and printer are optional**,
 the application can be entirely controlled using a standard keyboard.
 
-Hardware:
-^^^^^^^^^
+Hardware
+^^^^^^^^
 
 * 1 Raspberry Pi 2 Model B (or higher)
 * 1 Camera (Pi Camera v2.1 8 MP 1080p or any camera `compatible with gphoto2
@@ -25,8 +28,8 @@ Hardware:
 * 4 resistors of 100 Ohm
 * 1 printer
 
-Software:
-^^^^^^^^^
+Software
+^^^^^^^^
 
 * Python ``3.5.3``
 * RPi.GPIO ``0.6.3``
@@ -101,18 +104,6 @@ named **YYYY-mm-dd hh-mm-ss** which the time when first picture of the sequence 
 You can display a basic help on option by using the command::
 
     $ pibooth --help
-
-    usage: ptb.py [options]
-
-    A Photo Booth application in pure Python for the Raspberry Pi.
-
-    optional arguments:
-      -h, --help     show this help message and exit
-      --version      show program's version number and exit
-      --config       edit the current configuration
-      --reset        restore the default configuration
-      -v, --verbose  report more information about operations
-      -q, --quiet    report only errors and warnings
 
 Commands
 ^^^^^^^^
@@ -274,8 +265,8 @@ Circuit diagram
    :align: center
    :alt: Electronic sketch
 
-Credits:
---------
+Credits
+-------
 
 Icons from the Noun Project
 

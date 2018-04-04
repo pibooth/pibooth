@@ -78,7 +78,7 @@ class PtbWindow(object):
         """
         self._current_background = self._buffered_images.setdefault(str(bkgd), bkgd)
         self._current_background.resize(self.surface)
-        self._current_background.animate(self.surface)
+        self._current_background.paint(self.surface)
         self._update_picture_number()
 
     def _update_picture_number(self):
@@ -152,13 +152,6 @@ class PtbWindow(object):
         if self._current_foreground:
             self._update_foreground(*self._current_foreground)
         pygame.display.update()
-
-    def animate(self):
-        """Animate current background if possible.
-        """
-        if self._current_background:
-            self._current_background.animate(self.surface)
-            pygame.display.update()
 
     def show_oops(self):
         """Show failure view in case of exception.

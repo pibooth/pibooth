@@ -76,7 +76,7 @@ class Background(object):
             return True
         return False
 
-    def animate(self, screen):
+    def paint(self, screen):
         """Paint and animate the surfaces on the screen.
         """
         screen.fill((0, 0, 0))  # Clear background
@@ -104,9 +104,6 @@ class ChooseBackground(Background):
         self.layout0_pos = None
         self.layout1 = None
         self.layout1_pos = None
-        self.offset = None
-        self.speed = 4  # Pixels par frame
-        self.shake_timer = PoolingTimer(10)
 
     def resize(self, screen):
         if Background.resize(self, screen):
@@ -120,17 +117,13 @@ class ChooseBackground(Background):
 
             self.layout0_pos = (hinter, vinter)
             self.layout1_pos = (hinter * 2 + self.layout0.get_rect().width, vinter)
+            return True
+        return False
 
-    def animate(self, screen):
-        if not self.offset or self.shake_timer.is_timeout():
-            self.offset = shake(8, self.speed)
-            self.shake_timer.start()
-
-        screen.fill((0, 0, 0))
-        screen.blit(self.background, self.background.get_rect(center=self.rect.center))
-        pos = next(self.offset)
-        screen.blit(self.layout0, (self.layout0_pos[0] + pos[0], self.layout0_pos[1] + pos[1]))
-        screen.blit(self.layout1, (self.layout1_pos[0] - pos[0], self.layout1_pos[1] - pos[1]))
+    def paint(self, screen):
+        Background.paint(self, screen)
+        screen.blit(self.layout0, self.layout0_pos)
+        screen.blit(self.layout1, self.layout1_pos)
 
 
 class ChosenBackground(Background):
@@ -141,9 +134,6 @@ class ChosenBackground(Background):
         self.selected = selected
         self.layout = None
         self.layout_pos = None
-        self.offset = None
-        self.speed = 100  # Pixels par frame
-        self.transpose_timer = PoolingTimer(10)
 
     def __str__(self):
         return "chosen{}.png".format(self.selected)
@@ -154,25 +144,17 @@ class ChosenBackground(Background):
 
             self.layout = pictures.get_image("layout{}.png".format(self.selected), size)
 
-            hinter = (self.rect.width - self.layout.get_rect().width - self.layout.get_rect().width) // 3
+            hinter = self.layout.get_rect(center=self.rect.center).left
             vinter = int(self.background.get_rect(center=self.rect.center).top +
                          self.layout.get_rect(center=self.background.get_rect().center).top * 1.3)
 
-            if self.selected == self.choices[0]:
-                self.layout_pos = (hinter, vinter)
-            else:
-                self.layout_pos = (hinter * 2 + self.layout.get_rect().width, vinter)
+            self.layout_pos = (hinter, vinter)
+            return True
+        return False
 
-    def animate(self, screen):
-        end_pos = (self.layout.get_rect(center=self.rect.center).left, self.layout_pos[1])
-        if not self.offset or self.transpose_timer.is_timeout():
-            self.offset = transpose(self.layout_pos, end_pos, self.speed)
-            self.transpose_timer.start()
-
-        screen.fill((0, 0, 0))
-        screen.blit(self.background, self.background.get_rect(center=self.rect.center))
-        pos = next(self.offset)
-        screen.blit(self.layout, (self.layout_pos[0] + pos[0], self.layout_pos[1] + pos[1]))
+    def paint(self, screen):
+        Background.paint(self, screen)
+        screen.blit(self.layout, self.layout_pos)
 
 
 class CaptureBackground(Background):

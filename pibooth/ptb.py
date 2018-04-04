@@ -88,7 +88,6 @@ class StateChoose(State):
         self.timer.start()
 
     def do_actions(self, events):
-        self.app.window.animate()
         event = self.app.find_choice_event(events)
         if event:
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT) \
@@ -126,9 +125,6 @@ class StateChosen(State):
         with timeit("Show picture choice ({} pictures selected)".format(self.app.nbr_captures)):
             self.app.window.show_choice(self.app.capt_choices, selected=self.app.nbr_captures)
         self.timer.start()
-
-    def do_actions(self, events):
-        self.app.window.animate()
 
     def exit_actions(self):
         self.app.led_picture.switch_off()
