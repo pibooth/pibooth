@@ -32,8 +32,8 @@ class StateFailSafe(State):
 
     def entry_actions(self):
         self.app.dirname = None
-        self.app.captures = []
         self.app.nbr_captures = None
+        self.app.camera.get_captures()  # Flush previous captures
         self.app.window.show_oops()
         time.sleep(2)
 
@@ -139,19 +139,20 @@ class StateCapture(State):
 
     def __init__(self):
         State.__init__(self, 'capture', 'processing')
+        self.count = 0
 
     def entry_actions(self):
         LOGGER.info("Start new pictures sequence")
+        self.count = 0
         self.app.previous_picture = None
         self.app.previous_picture_file = None
         self.app.dirname = osp.join(self.app.savedir, time.strftime("%Y-%m-%d-%H-%M-%S"))
         os.makedirs(self.app.dirname)
         self.app.led_preview.switch_on()
         self.app.camera.preview(self.app.window)
-        self.app.camera.file_paths = []
 
     def do_actions(self, events):
-        self.app.window.set_picture_number(len(self.app.captures) + 1, self.app.nbr_captures)
+        self.app.window.set_picture_number(self.count + 1, self.app.nbr_captures)
 
         if self.app.config.getboolean('WINDOW', 'preview_countdown'):
             self.app.camera.preview_countdown(self.app.config.getint('WINDOW', 'preview_delay'))
@@ -160,18 +161,18 @@ class StateCapture(State):
 
         if self.app.config.getboolean('WINDOW', 'flash'):
             self.app.window.flash(2)
-        image_file_name = osp.join(self.app.dirname, "ptb{:03}.jpg".format(len(self.app.captures)))
-        with timeit("Take picture and save it in {}".format(image_file_name)):
-            file_path = self.app.camera.capture(image_file_name)
-            self.app.camera.file_paths.append((file_path, image_file_name))
-            self.app.captures.append(image_file_name)
+        capture_path = osp.join(self.app.dirname, "ptb{:03}.jpg".format(self.count + 1))
+        with timeit("Take picture and save it in {}".format(capture_path)):
+            self.app.camera.capture(capture_path)
+
+        self.count += 1
 
     def exit_actions(self):
         self.app.camera.stop_preview()
         self.app.led_preview.switch_off()
 
     def validate_transition(self, events):
-        if len(self.app.captures) >= self.app.nbr_captures:
+        if self.count >= self.app.nbr_captures:
             return self.next_name
 
 
@@ -183,10 +184,6 @@ class StateProcessing(State):
     def entry_actions(self):
         self.app.window.show_work_in_progress()
 
-        if self.app.camera.file_paths != []:
-            for file_path, image_file_name in self.app.camera.file_paths:
-                self.app.camera.download_file(file_path, image_file_name)
-
         with timeit("Creating merged picture"):
             footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
                             self.app.config.get('PICTURE', 'footer_text2')]
@@ -197,15 +194,11 @@ class StateProcessing(State):
             text_color = self.app.config.gettyped('PICTURE', 'text_color')
             orientation = self.app.config.get('PICTURE', 'orientation')
 
-            pil_captures = [Image.open(img) for img in self.app.captures]
-            self.app.previous_picture = concatenate_pictures(pil_captures, footer_texts, bg_color, text_color, orientation)
+            self.app.previous_picture = concatenate_pictures(self.app.camera.get_captures(), footer_texts, bg_color, text_color, orientation)
 
         self.app.previous_picture_file = osp.join(self.app.dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
         with timeit("Save the merged picture in {}".format(self.app.previous_picture_file)):
             self.app.previous_picture.save(self.app.previous_picture_file)
-
-    def exit_actions(self):
-        self.app.captures = []
 
     def validate_transition(self, events):
         if self.app.printer.is_installed() and self.app.config.getfloat('PRINTER', 'printer_delay') > 0:
@@ -316,7 +309,6 @@ class PtbApplication(object):
 
         # Variables shared between states
         self.dirname = None
-        self.captures = []
         self.nbr_captures = None
         self.previous_picture = None
         self.previous_picture_file = None

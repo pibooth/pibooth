@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 import io
 import time
 import subprocess
@@ -56,7 +55,13 @@ class BaseCamera(object):
         self._cam = None
         self._border = 50
         self._window = None
+        self._captures = {}
         self.resolution = resolution
+
+    def _post_process_capture(self, capture_path):
+        """Reworked and return a capture from file.
+        """
+        return Image.open(capture_path)
 
     def get_rect(self):
         """Return a Rect object (as defined in pygame) for resizing preview and images
@@ -78,6 +83,15 @@ class BaseCamera(object):
         position = ((size[0] - txt_width) // 2, (size[1] - txt_height) // 2 - size[1] // 10)
         draw.text(position, text, (255, 255, 255, alpha), font=font)
         return image
+
+    def get_captures(self):
+        """Return all captures as PIL images since last call.
+        """
+        images = []
+        for path in self._captures:
+            images.append(self._post_process_capture(path))
+        self._captures = {}
+        return images
 
 
 class RpiCamera(BaseCamera):
@@ -138,32 +152,17 @@ class RpiCamera(BaseCamera):
         """
         time.sleep(timeout)
 
-
     def stop_preview(self):
         """Stop the preview.
         """
         self._cam.stop_preview()
         self._window = None
 
-    def capture(self, filename=None):
-        """Capture a picture in a file. If no filename given a PIL image
-        is returned.
+    def capture(self, filename):
+        """Capture a picture in a file.
         """
-        if filename:
-            self._cam.capture(filename)
-            return filename
-        else:
-            # Create the in-memory stream
-            stream = io.BytesIO()
-            self._cam.capture(stream)
-            # "Rewind" the stream to the beginning so we can read its content
-            stream.seek(0)
-            return Image.open(stream)
-
-    def download_file(self, file_path=None, filename=None):
-        """Download the capture image (on RPiCamera, no need to download the file)
-        """
-        pass
+        self._cam.capture(filename)
+        self._captures[filename] = None  # Nothing to keep for post processing
 
     def quit(self):
         """Close the camera driver, it's definitive.
@@ -206,7 +205,7 @@ class GpCamera(BaseCamera):
         except gp.GPhoto2Error:
             raise ValueError('Unsupported setting {}/{}={}'.format(section, option, value))
 
-    def _get_preview_image(self):
+    def _get_preview_capture(self):
         """Capture a new preview image.
         """
         with timeit('Capturing new preview image'):
@@ -225,12 +224,25 @@ class GpCamera(BaseCamera):
         rect = self.get_rect()
         return image.resize(sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer'))
 
+    def _post_process_capture(self, capture_path):
+        file_path = self._captures[capture_path]
+        camera_file = gp.check_result(gp.gp_camera_file_get(
+            self._cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
+
+        image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
+        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
+        image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
+
+        if self._capture_hflip:
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
+        return image
+
     def preview(self, window, flip=True):
         """Setup the preview.
         """
         self._window = window
         self._preview_hflip = flip
-        self._window.show_image(self._get_preview_image())
+        self._window.show_image(self._get_preview_capture())
 
     def preview_countdown(self, timeout, alpha=60):
         """Show a countdown of `timeout` seconds on the preview.
@@ -243,7 +255,7 @@ class GpCamera(BaseCamera):
         overlay = None
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
-            image = self._get_preview_image()
+            image = self._get_preview_capture()
             remaining = int(timer.remaining() + 1)
             if not overlay or remaining != timeout:
                 # Rebluid overlay only if remaining number has changed
@@ -261,50 +273,19 @@ class GpCamera(BaseCamera):
 
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
-            self._window.show_image(self._get_preview_image())
+            self._window.show_image(self._get_preview_capture())
 
     def stop_preview(self):
         """Stop the preview.
         """
         self._window = None
 
-    def capture(self, filename=None):
-        """Capture a picture in a file. If no filename given a PIL image
-        is returned.
+    def capture(self, filename):
+        """Capture a picture in a file.
         """
         file_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
-        return file_path
-
-    def download_file(self, file_path, filename=None):
-        """Download the capture image file and show it. If no filename given a PIL image
-        is returned.
-        """
-        camera_file = gp.check_result(gp.gp_camera_file_get(
-            self._cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
-
-        image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
-        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
-        image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
-
-        # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
-        rect = self.get_rect()
-        size = sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
-
-        if self._rotation:
-            image = image.rotate(self._rotation)
-
-        if self._preview_hflip:
-            self._window.show_image(image.transpose(Image.FLIP_LEFT_RIGHT).resize(size))
-        else:
-            self._window.show_image(image.resize(size))
-
-        if self._capture_hflip:
-            image = image.transpose(Image.FLIP_LEFT_RIGHT)
-        if filename:
-            image.save(filename)
-            return filename
-        else:
-            return image
+        time.sleep(1)  # necessary to let the time for the camera to save the image
+        self._captures[filename] = file_path
 
     def quit(self):
         """Close the camera driver, it's definitive.
@@ -325,27 +306,8 @@ class HybridCamera(RpiCamera):
         self._gp_cam = gp.Camera()
         self._gp_cam.init()
 
-        self._preview_hflip = False
-
-    def preview(self, window, flip=True):
-        """Setup the preview.
-        """
-        self._preview_hflip = flip
-        RpiCamera.preview(self, window, flip)
-
-    def capture(self, filename=None):
-        """Capture a picture in a file. If no filename given a PIL image
-        is returned.
-        """
-        file_path = self._gp_cam.capture(gp.GP_CAPTURE_IMAGE)
-        print(file_path.folder, file_path.name)
-        time.sleep(1) # necessary to let the time for the camera to save the image
-        return file_path
-
-    def download_file(self, file_path, filename=None):
-        """Download the capture image file and show it. If no filename given a PIL image
-        is returned.
-        """
+    def _post_process_capture(self, capture_path):
+        file_path = self._captures[capture_path]
         camera_file = gp.check_result(gp.gp_camera_file_get(
             self._gp_cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
 
@@ -353,24 +315,19 @@ class HybridCamera(RpiCamera):
         image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
         image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
 
-        # COMMENTED ON 2018-04-02 by werdeil
-        # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
-        # rect = self.get_rect()
-        # size = sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer')
-
-        # self._cam.stop_preview()
-        # if self._preview_hflip:
-        #     self._window.show_image(image.transpose(Image.FLIP_LEFT_RIGHT).resize(size))
-        # else:
-        #     self._window.show_image(image.resize(size))
-        # time.sleep(2)
-        # self.preview(self._window)
-
         if self._cam.hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
+        return image
 
-        if filename:
-            image.save(filename)
-            return filename
-        else:
-            return image
+    def capture(self, filename):
+        """Capture a picture in a file.
+        """
+        file_path = self._gp_cam.capture(gp.GP_CAPTURE_IMAGE)
+        time.sleep(1)  # necessary to let the time for the camera to save the image
+        self._captures[filename] = file_path
+
+    def quit(self):
+        """Close the camera driver, it's definitive.
+        """
+        RpiCamera.quit(self)
+        self._gp_cam.exit()

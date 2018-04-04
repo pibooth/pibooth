@@ -7,9 +7,6 @@
 The ``pibooth`` project attempts to provide a Photo Booth application *out-of-the-box*
 for Raspberry Pi.
 
-.. contents::
-   :depth: 1
-
 Requirements
 ------------
 

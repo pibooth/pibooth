@@ -187,7 +187,7 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color)
 def concatenate_pictures(pictures, footer_texts, bg_color, text_color, orientation="auto"):
     """
     Merge up to 4 PIL images and retrun concatenated image as a new PIL image object.
-    Configuration of the final picture depends on the number of given pictures::
+    Configuration of the final picture depends on the number of given pictures.
     """
     if orientation == "auto":
         # Use the size of the first picture to determine the orientation
