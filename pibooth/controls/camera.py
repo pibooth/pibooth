@@ -85,13 +85,18 @@ class BaseCamera(object):
         return image
 
     def get_captures(self):
-        """Return all captures as PIL images since last call.
+        """Return all buffered captures as PIL images (buffer dropped after call).
         """
         images = []
         for path in self._captures:
             images.append(self._post_process_capture(path))
-        self._captures = {}
+        self.drop_captures()
         return images
+
+    def drop_captures(self):
+        """Delete all buffered captures.
+        """
+        self._captures = {}
 
 
 class RpiCamera(BaseCamera):
@@ -225,9 +230,9 @@ class GpCamera(BaseCamera):
         return image.resize(sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer'))
 
     def _post_process_capture(self, capture_path):
-        file_path = self._captures[capture_path]
+        gp_path = self._captures[capture_path]
         camera_file = gp.check_result(gp.gp_camera_file_get(
-            self._cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
+            self._cam, gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL))
 
         image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
         image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
@@ -283,9 +288,8 @@ class GpCamera(BaseCamera):
     def capture(self, filename):
         """Capture a picture in a file.
         """
-        file_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
+        self._captures[filename] = self._cam.capture(gp.GP_CAPTURE_IMAGE)
         time.sleep(1)  # necessary to let the time for the camera to save the image
-        self._captures[filename] = file_path
 
     def quit(self):
         """Close the camera driver, it's definitive.
@@ -302,18 +306,18 @@ class HybridCamera(RpiCamera):
 
     def __init__(self, *args, **kwargs):
         RpiCamera.__init__(self, *args, **kwargs)
-
+        gp.check_result(gp.use_python_logging())
         self._gp_cam = gp.Camera()
         self._gp_cam.init()
 
     def _post_process_capture(self, capture_path):
-        file_path = self._captures[capture_path]
+        gp_path = self._captures[capture_path]
         camera_file = gp.check_result(gp.gp_camera_file_get(
-            self._gp_cam, file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL))
+            self._gp_cam, gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL))
 
         image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
-        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
-        image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
+        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self._cam.resolution, 'outer'), Image.ANTIALIAS)
+        image = image.crop(sizing.new_size_by_croping(image.size, self._cam.resolution))
 
         if self._cam.hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
@@ -322,9 +326,8 @@ class HybridCamera(RpiCamera):
     def capture(self, filename):
         """Capture a picture in a file.
         """
-        file_path = self._gp_cam.capture(gp.GP_CAPTURE_IMAGE)
+        self._captures[filename] = self._gp_cam.capture(gp.GP_CAPTURE_IMAGE)
         time.sleep(1)  # necessary to let the time for the camera to save the image
-        self._captures[filename] = file_path
 
     def quit(self):
         """Close the camera driver, it's definitive.
