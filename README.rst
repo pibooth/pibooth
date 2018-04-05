@@ -98,7 +98,7 @@ Start the Photo Booth application using the command::
 All pictures taken are stored in a subfolder of the one defined in the configuration,
 named **YYYY-mm-dd hh-mm-ss** which the time when first picture of the sequence was taken.
 
-You can display a basic help on option by using the command::
+You can display a basic help on application options by using the command::
 
     $ pibooth --help
 

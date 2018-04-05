@@ -33,7 +33,7 @@ class StateFailSafe(State):
     def entry_actions(self):
         self.app.dirname = None
         self.app.nbr_captures = None
-        self.app.camera.get_captures()  # Flush previous captures
+        self.app.camera.drop_captures()  # Flush previous captures
         self.app.window.show_oops()
         time.sleep(2)
 

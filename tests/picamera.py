@@ -22,7 +22,7 @@ class PiCamera(object):
         self.preview = None
 
     def capture(self, filename):
-        shutil.copy2(os.path.join(os.path.dirname(__file__), 'capture.jpg'), filename)
+        shutil.copy2(os.path.join(os.path.dirname(__file__), 'capture.png'), filename)
 
     def close(self, *args, **kwargs):
         pass
