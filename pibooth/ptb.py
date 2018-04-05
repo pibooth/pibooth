@@ -161,7 +161,7 @@ class StateCapture(State):
 
         if self.app.config.getboolean('WINDOW', 'flash'):
             self.app.window.flash(2)
-        capture_path = osp.join(self.app.dirname, "ptb{:03}.jpg".format(self.count + 1))
+        capture_path = osp.join(self.app.dirname, "ptb{:03}.jpg".format(self.count))
         with timeit("Take picture and save it in {}".format(capture_path)):
             self.app.camera.capture(capture_path)
 

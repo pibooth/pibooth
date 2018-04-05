@@ -49,6 +49,23 @@ def gp_camera_connected():
     return False
 
 
+def gp_set_config_value(config, section, option, value):
+    """Set camera configuration. This method don't send the updated
+    configuration to the camera (avoid connection flooding if several
+    values have to be changed)
+    """
+    try:
+        LOGGER.debug('Setting option %s/%s=%s', section, option, value)
+        child = config.get_child_by_name(section).get_child_by_name(option)
+        choices = [c for c in child.get_choices()]
+        if not choices or value in choices:
+            child.set_value(str(value))
+        else:
+            LOGGER.warning("Invalid value '%s' for option %s (possible choices: %s)", value, option, choices)
+    except gp.GPhoto2Error:
+        raise ValueError('Unsupported setting {}/{}={}'.format(section, option, value))
+
+
 class BaseCamera(object):
 
     def __init__(self, resolution):
@@ -185,30 +202,15 @@ class GpCamera(BaseCamera):
         gp.check_result(gp.use_python_logging())
         self._cam = gp.Camera()
         self._cam.init()
-        self._config = self._cam.get_config()
 
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation
-        self._set_config_value('imgsettings', 'iso', iso)
-        self._set_config_value('settings', 'capturetarget', 'Carte mémoire')
-        self._cam.set_config(self._config)
 
-    def _set_config_value(self, section, option, value):
-        """Set camera configuration. This method don't send the updated
-        configuration to the camera (avoid connection flooding if several
-        values have to be changed)
-        """
-        try:
-            LOGGER.debug('Setting option %s/%s=%s', section, option, value)
-            child = self._config.get_child_by_name(section).get_child_by_name(option)
-            choices = [c for c in child.get_choices()]
-            if not choices or value in choices:
-                child.set_value(str(value))
-            else:
-                LOGGER.warning("Invalid value '%s' for option %s (possible choices: %s)", value, option, choices)
-        except gp.GPhoto2Error:
-            raise ValueError('Unsupported setting {}/{}={}'.format(section, option, value))
+        config = self._cam.get_config()
+        gp_set_config_value(config, 'imgsettings', 'iso', iso)
+        gp_set_config_value(config, 'settings', 'capturetarget', 'Carte mémoire')
+        self._cam.set_config(config)
 
     def _get_preview_capture(self):
         """Capture a new preview image.
@@ -309,6 +311,11 @@ class HybridCamera(RpiCamera):
         gp.check_result(gp.use_python_logging())
         self._gp_cam = gp.Camera()
         self._gp_cam.init()
+
+        config = self._gp_cam.get_config()
+        gp_set_config_value(config, 'imgsettings', 'iso', self._cam.iso)
+        gp_set_config_value(config, 'settings', 'capturetarget', 'Carte mémoire')
+        self._gp_cam.set_config(config)
 
     def _post_process_capture(self, capture_path):
         gp_path = self._captures[capture_path]

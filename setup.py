@@ -30,6 +30,7 @@ def main():
             'Programming Language :: Python :: 3.5',
             'Natural Language :: English',
             'Natural Language :: French',
+            'Natural Language :: German',
             'Topic :: Multimedia :: Graphics :: Capture :: Digital Camera',
         ],
         author="Vincent Verdeil, Antoine Rousseaux",
