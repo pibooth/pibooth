@@ -76,7 +76,7 @@ class BaseCamera(object):
         self.resolution = resolution
 
     def _post_process_capture(self, capture_path):
-        """Reworked and return a capture from file.
+        """Rework and return a capture from file.
         """
         return Image.open(capture_path)
 
@@ -291,7 +291,7 @@ class GpCamera(BaseCamera):
         """Capture a picture in a file.
         """
         self._captures[filename] = self._cam.capture(gp.GP_CAPTURE_IMAGE)
-        time.sleep(1)  # necessary to let the time for the camera to save the image
+        time.sleep(1)  # Necessary to let the time for the camera to save the image
 
     def quit(self):
         """Close the camera driver, it's definitive.
@@ -333,8 +333,9 @@ class HybridCamera(RpiCamera):
     def capture(self, filename):
         """Capture a picture in a file.
         """
+        RpiCamera.capture(self, filename)  # Just to show a captured image at screen
         self._captures[filename] = self._gp_cam.capture(gp.GP_CAPTURE_IMAGE)
-        time.sleep(1)  # necessary to let the time for the camera to save the image
+        time.sleep(1)  # Necessary to let the time for the camera to save the image
 
     def quit(self):
         """Close the camera driver, it's definitive.
