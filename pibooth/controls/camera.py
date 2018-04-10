@@ -105,7 +105,7 @@ class BaseCamera(object):
         """Return all buffered captures as PIL images (buffer dropped after call).
         """
         images = []
-        for path in self._captures:
+        for path in sorted(self._captures):
             images.append(self._post_process_capture(path))
         self.drop_captures()
         return images
@@ -242,6 +242,7 @@ class GpCamera(BaseCamera):
 
         if self._capture_hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
+        image.save(capture_path)
         return image
 
     def preview(self, window, flip=True):
@@ -328,6 +329,7 @@ class HybridCamera(RpiCamera):
 
         if self._cam.hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
+        image.save(capture_path)
         return image
 
     def capture(self, filename):
