@@ -143,12 +143,14 @@ class StateCapture(State):
 
     def entry_actions(self):
         LOGGER.info("Start new pictures sequence")
-        self.count = 0
         self.app.previous_picture = None
         self.app.previous_picture_file = None
         self.app.dirname = osp.join(self.app.savedir, time.strftime("%Y-%m-%d-%H-%M-%S"))
         os.makedirs(self.app.dirname)
         self.app.led_preview.switch_on()
+
+        self.count = 0
+        self.app.window.set_picture_number(self.count, self.app.nbr_captures)
         self.app.camera.preview(self.app.window)
 
     def do_actions(self, events):

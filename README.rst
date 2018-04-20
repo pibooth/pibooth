@@ -98,6 +98,10 @@ Start the Photo Booth application using the command::
 All pictures taken are stored in a subfolder of the one defined in the configuration,
 named **YYYY-mm-dd hh-mm-ss** which the time when first picture of the sequence was taken.
 
+Note that if you have both ``Pi`` and ``GPhoto2`` cameras connected to the Raspberry Pi, both are
+used. The preview is taken using the ``Pi`` one for a better video rendering and the capture is
+taken using the ``GPhoto2`` one for better picture rendering.
+
 You can display a basic help on application options by using the command::
 
     $ pibooth --help

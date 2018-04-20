@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from pibooth import pictures
-from pibooth.utils import PoolingTimer
 
 try:
     xrange
