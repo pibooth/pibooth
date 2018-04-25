@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import contextlib
 import pygame
 from pygame import gfxdraw
 from PIL import Image
@@ -218,6 +219,7 @@ class PtbWindow(object):
         self._update_background(background.FinishedBackground())
         pygame.display.update()
 
+    @contextlib.contextmanager
     def flash(self, count):
         """Flash the window content.
         """
@@ -230,9 +232,16 @@ class PtbWindow(object):
                 # Flash only the background, keep forground at the top
                 self._update_foreground(*self._current_foreground)
             pygame.display.update()
+            pygame.event.pump()
             time.sleep(0.02)
-            self.update()
-            time.sleep(0.02)
+            if i == count - 1:
+                yield  # Let's doing actions before end of flash
+                self.update()
+                pygame.event.pump()
+            else:
+                self.update()
+                pygame.event.pump()
+                time.sleep(0.02)
 
     def set_picture_number(self, current_nbr, total_nbr):
         """Set the current number of pictures taken.

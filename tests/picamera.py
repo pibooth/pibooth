@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import time
 import shutil
 
 
@@ -26,6 +27,7 @@ class PiCamera(object):
     def capture(self, filename):
         print("Capture picture")
         shutil.copy2(os.path.join(os.path.dirname(__file__), 'capture.png'), filename)
+        time.sleep(0.5)
 
     def close(self, *args, **kwargs):
         print("Quit camera")
