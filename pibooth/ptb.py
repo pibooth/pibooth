@@ -163,6 +163,9 @@ class StateCapture(State):
 
         capture_path = osp.join(self.app.dirname, "ptb{:03}.jpg".format(self.count))
 
+        if self.app.config.getboolean('WINDOW', 'preview_stop_on_capture'):
+            self.app.camera.stop_preview()
+
         with timeit("Take picture and save it in {}".format(capture_path)):
             if self.app.config.getboolean('WINDOW', 'flash'):
                 with self.app.window.flash(2):
@@ -171,6 +174,10 @@ class StateCapture(State):
                 self.app.camera.capture(capture_path)
 
         self.count += 1
+
+        if self.app.config.getboolean('WINDOW', 'preview_stop_on_capture') and self.count < self.app.nbr_captures:
+            # Restart preview only if other captures needed
+            self.app.camera.preview(self.app.window)
 
     def exit_actions(self):
         self.app.camera.stop_preview()

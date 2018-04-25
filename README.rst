@@ -218,6 +218,9 @@ Below is the default configuration file:
     # Show a countdown timer during the preview
     preview_countdown = True
 
+    # Stop the preview before taking the picture
+    preview_stop_on_capture = False
+
     [PICTURE]
     # Possible choice(s) of captures numbers (numbers between 1 to 4 max)
     captures = (4, 1)
