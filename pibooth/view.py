@@ -4,7 +4,6 @@ import time
 import pygame
 from pygame import gfxdraw
 from PIL import Image
-from pibooth import pictures
 from pibooth.pictures import background
 from pibooth.utils import LOGGER
 from pibooth.pictures import sizing
@@ -84,7 +83,7 @@ class PtbWindow(object):
     def _update_picture_number(self):
         """Update the pictures counter displayed.
         """
-        if self._picture_number[0] == 0:
+        if self._picture_number[0] is None:
             return  # Dont show cunter: no picture taken
         center = self.surface.get_rect().center
         radius = 10
@@ -156,14 +155,14 @@ class PtbWindow(object):
     def show_oops(self):
         """Show failure view in case of exception.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._picture_number = (None, self._picture_number[1])
         self._update_background(background.OopsBackground())
         pygame.display.update()
 
     def show_intro(self, pil_image=None, with_print=True):
         """Show introduction view.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._picture_number = (None, self._picture_number[1])
         if with_print and pil_image:
             self._update_background(background.IntroWithPrintBackground())
         else:
@@ -176,7 +175,7 @@ class PtbWindow(object):
     def show_choice(self, choices, selected=None):
         """Show the choice view.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._picture_number = (None, self._picture_number[1])
         if not selected:
             self._update_background(background.ChooseBackground(choices))
         else:
@@ -199,14 +198,14 @@ class PtbWindow(object):
     def show_work_in_progress(self):
         """Show wait view.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._picture_number = (None, self._picture_number[1])
         self._update_background(background.ProcessingBackground())
         pygame.display.update()
 
     def show_print(self, pil_image=None):
         """Show print view.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._picture_number = (None, self._picture_number[1])
         self._update_background(background.PrintBackground())
         if pil_image:
             self._update_foreground(pil_image, self.LEFT)
@@ -215,14 +214,17 @@ class PtbWindow(object):
     def show_finished(self):
         """Show finished view.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._picture_number = (None, self._picture_number[1])
         self._update_background(background.FinishedBackground())
         pygame.display.update()
 
     def flash(self, count):
         """Flash the window content.
         """
-        for _ in range(count):
+        if count < 1:
+            raise ValueError("The flash counter shall be greater than 0")
+
+        for i in range(count):
             self.surface.fill((255, 255, 255))
             if self._current_foreground:
                 # Flash only the background, keep forground at the top

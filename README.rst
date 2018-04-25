@@ -78,7 +78,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
         $ sudo apt-get install cups libcups2-dev
 
-7. Install ``pibooth`` from the pypi repository:
+7. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
 
    ::
 
