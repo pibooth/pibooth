@@ -153,6 +153,7 @@ class StateCapture(State):
 
     def entry_actions(self):
         LOGGER.info("Start new pictures sequence")
+        self.app.nbr_printed = 0
         self.app.previous_picture = None
         self.app.previous_picture_file = None
         self.app.dirname = osp.join(self.app.savedir, time.strftime("%Y-%m-%d-%H-%M-%S"))
@@ -238,7 +239,6 @@ class StatePrint(State):
 
     def entry_actions(self):
         self.printed = False
-        self.app.nbr_printed = 0
         with timeit("Display the merged picture"):
             self.app.window.show_print(self.app.previous_picture)
         self.app.led_print.blink()
@@ -246,6 +246,7 @@ class StatePrint(State):
 
     def do_actions(self, events):
         if self.app.find_print_event(events) and self.app.previous_picture_file:
+
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
                 self.app.printer.print_file(self.app.previous_picture_file)
