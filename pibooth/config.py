@@ -49,6 +49,7 @@ DEFAULT = {
     "PRINTER": {
         "printer_name": ("default", "Name of the printer defined in CUPS (or use the 'default' one)"),
         "printer_delay": (10, "How long is the print view in seconds (0 to skip it)"),
+        "max_duplicates": (3, "Maximum number of duplicates sent to the printer (avoid paper wast)"),
     },
 }
 

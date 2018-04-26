@@ -33,6 +33,7 @@ class StateFailSafe(State):
     def entry_actions(self):
         self.app.dirname = None
         self.app.nbr_captures = None
+        self.app.nbr_printed = 0
         self.app.camera.drop_captures()  # Flush previous captures
         self.app.window.show_oops()
         time.sleep(2)
@@ -44,17 +45,26 @@ class StateWait(State):
         State.__init__(self, 'wait', 'choose')
 
     def entry_actions(self):
-        self.app.window.show_intro(self.app.previous_picture, self.app.printer.is_installed())
+        self.app.window.show_intro(self.app.previous_picture, self.app.printer.is_installed() and
+                                   self.app.nbr_printed < self.app.config.getint('PRINTER', 'max_duplicates'))
         self.app.led_picture.blink()
         if self.app.previous_picture_file and self.app.printer.is_installed():
             self.app.led_print.blink()
 
     def do_actions(self, events):
         if self.app.find_print_event(events) and self.app.previous_picture_file and self.app.printer.is_installed():
+
+            if self.app.nbr_printed >= self.app.config.getint('PRINTER', 'max_duplicates'):
+                LOGGER.warning("Too many duplicates sent to the printer (%s max)", self.app.config.getint('PRINTER', 'max_duplicates'))
+                self.app.window.show_intro(self.app.previous_picture, False)
+                return
+
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
                 self.app.printer.print_file(self.app.previous_picture_file)
-            time.sleep(1)
+
+            time.sleep(2)  # Just to let the LED switched on
+            self.app.nbr_printed += 1
             self.app.led_print.blink()
 
     def exit_actions(self):
@@ -228,6 +238,7 @@ class StatePrint(State):
 
     def entry_actions(self):
         self.printed = False
+        self.app.nbr_printed = 0
         with timeit("Display the merged picture"):
             self.app.window.show_print(self.app.previous_picture)
         self.app.led_print.blink()
@@ -238,7 +249,9 @@ class StatePrint(State):
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
                 self.app.printer.print_file(self.app.previous_picture_file)
+
             time.sleep(2)  # Just to let the LED switched on
+            self.app.nbr_printed += 1
             self.app.led_print.blink()
             self.printed = True
 
@@ -322,6 +335,7 @@ class PtbApplication(object):
         # Variables shared between states
         self.dirname = None
         self.nbr_captures = None
+        self.nbr_printed = 0
         self.previous_picture = None
         self.previous_picture_file = None
 

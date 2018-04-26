@@ -260,6 +260,9 @@ Below is the default configuration file:
     # How long is the print view in seconds (0 to skip it)
     printer_delay = 10
 
+    # Maximum number of duplicates sent to the printer (avoid paper wast)
+    max_duplicates = 3
+
 Printer configuration
 ---------------------
 
