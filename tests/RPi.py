@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+Mocks for tests on other HW than Raspberry Pi.
+"""
+
 
 class GPIO(object):
 
@@ -12,21 +16,21 @@ class GPIO(object):
     LOW = 'low'
 
     @classmethod
-    def setmode(cls, *args, **kwargs):
-        pass
+    def setmode(cls, mode):
+        print("Mock: set GPIO mode {}".format(mode))
 
     @classmethod
-    def setup(cls, *args, **kwargs):
-        pass
+    def setup(cls, pin, direction, **kwargs):
+        print("Mock: setup GPIO pin {} to {}".format(pin, direction))
 
     @classmethod
-    def output(cls, *args, **kwargs):
-        pass
+    def output(cls, pin, status):
+        print("Mock: output GPIO pin {} to {}".format(pin, status))
 
     @classmethod
-    def add_event_detect(cls, *args, **kwargs):
-        pass
+    def add_event_detect(cls, pin, status, **kwargs):
+        print("Mock: detect GPIO pin {} when {}".format(pin, status))
 
     @classmethod
     def cleanup(cls):
-        pass
+        print("Mock: quit GPIO")

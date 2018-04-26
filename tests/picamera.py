@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+"""
+Mocks for tests on other HW than Raspberry Pi.
+"""
+
+
 import os
 import time
 import shutil
@@ -11,23 +16,23 @@ class PiCamera(object):
         self.preview = None
 
     def start_preview(self, *args, **kwargs):
-        print("Start preview")
+        print("Mock: start preview")
         self.preview = True
 
     def add_overlay(self, *args, **kwargs):
-        print("Add overlay")
+        print("Mock: add overlay")
 
     def remove_overlay(self, *args, **kwargs):
-        print("Remove overlay")
+        print("Mock: remove overlay")
 
     def stop_preview(self, *args, **kwargs):
-        print("Stop preview")
+        print("Mock: stop preview")
         self.preview = None
 
     def capture(self, filename):
-        print("Capture picture")
+        print("Mock: capture picture")
         shutil.copy2(os.path.join(os.path.dirname(__file__), 'capture.png'), filename)
         time.sleep(0.5)
 
     def close(self, *args, **kwargs):
-        print("Quit camera")
+        print("Mock: quit camera")
