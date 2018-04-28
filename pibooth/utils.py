@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import time
+import os.path as osp
 import logging
 import contextlib
 
@@ -18,7 +20,8 @@ class BlockConsoleHandler(logging.StreamHandler):
 
     def emit(self, record):
         cls = self.__class__
-        record.msg = '{}{}'.format(cls.current_indent, record.msg)
+        if cls.is_debug():
+            record.msg = '{}{}'.format(cls.current_indent, record.msg)
         logging.StreamHandler.emit(self, record)
 
         if cls.current_indent.endswith(cls.pattern_indent):
@@ -27,43 +30,68 @@ class BlockConsoleHandler(logging.StreamHandler):
             cls.current_indent = cls.current_indent[:-len(cls.pattern_dedent)]
 
     @classmethod
+    def is_debug(cls):
+        """Return True if this handler is set to DEBUG level on the root logger.
+        """
+        for hdlr in logging.getLogger().handlers:
+            if isinstance(hdlr, cls):
+                return hdlr.level < logging.INFO
+        return False
+
+    @classmethod
     def indent(cls):
         """Begin a new log block.
         """
-        cls.current_indent += cls.pattern_indent
+        if cls.is_debug():
+            cls.current_indent += cls.pattern_indent
 
     @classmethod
     def dedent(cls):
         """End the current log block.
         """
-        cls.current_indent = (cls.current_indent[:-len(cls.pattern_blocks)] + cls.pattern_dedent)
+        if cls.is_debug():
+            cls.current_indent = (cls.current_indent[:-len(cls.pattern_blocks)] + cls.pattern_dedent)
 
 
-def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=None):
+def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=None, filename=None):
     """Configure root logger for console printing.
     """
     root = logging.getLogger()
+
     if not root.handlers:
+        # Set lower level to be sure that all handlers receive the logs
+        root.setLevel(logging.DEBUG)
+
+        if filename:
+            # Create a file handler, all levels are printed
+            filename = osp.abspath(osp.expanduser(filename))
+            dirname = osp.dirname(filename)
+            if not osp.isdir(dirname):
+                os.makedirs(dirname)
+            hdlr = logging.FileHandler(filename)
+            hdlr.setFormatter(logging.Formatter(msgfmt, datefmt))
+            hdlr.setLevel(logging.DEBUG)
+            root.addHandler(hdlr)
+
+        # Create a console handler
         hdlr = BlockConsoleHandler(sys.stdout)
         hdlr.setFormatter(logging.Formatter(msgfmt, datefmt))
-        root.addHandler(hdlr)
         if level is not None:
-            root.setLevel(level)
+            hdlr.setLevel(level)
+        root.addHandler(hdlr)
 
 
 @contextlib.contextmanager
 def timeit(description):
     """Measure time execution.
     """
-    if LOGGER.getEffectiveLevel() < logging.INFO:
-        BlockConsoleHandler.indent()
+    BlockConsoleHandler.indent()
     LOGGER.info(description)
     start = time.time()
     try:
         yield
     finally:
-        if LOGGER.getEffectiveLevel() < logging.INFO:
-            BlockConsoleHandler.dedent()
+        BlockConsoleHandler.dedent()
         LOGGER.debug("took %0.3f seconds", time.time() - start)
 
 

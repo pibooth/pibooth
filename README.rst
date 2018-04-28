@@ -4,8 +4,8 @@
    :alt: Pibooth
 
 
-The ``pibooth`` project attempts to provide a Photo Booth application *out-of-the-box*
-for Raspberry Pi.
+The ``pibooth`` project attempts to provide a photo booth application *out-of-the-box*
+in pure Python for Raspberry Pi.
 
 Requirements
 ------------
@@ -18,7 +18,7 @@ Hardware
 ^^^^^^^^
 
 * 1 Raspberry Pi 2 Model B (or higher)
-* 1 Camera (Pi Camera v2.1 8 MP 1080p or any camera `compatible with gphoto2
+* 1 Camera (Pi Camera v2.1 8 MP 1080p or any camera `compatible with gPhoto2
   <http://www.gphoto.org/proj/libgphoto2/support.php>`_)
 * 2 push buttons
 * 4 LEDs
@@ -63,7 +63,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo apt-get update
         $ sudo apt-get upgrade
 
-5. Optionally install ``gphoto2`` (required only for external camera):
+5. Optionally install ``gPhoto2`` (required only for external camera):
 
    ::
 
@@ -84,23 +84,23 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
         $ sudo pip3 install pibooth
 
-   .. hint:: If you don't have *gphoto2* and/or *CUPS* installed (steps 5. and/or 6. skipped), use
+   .. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/or 6. skipped), use
              the ``--no-deps`` option to avoid installation failures (you may need to install Python
              dependencies by yourself)
 
 Run
 ---
 
-Start the Photo Booth application using the command::
+Start the photo booth application using the command::
 
     $ pibooth
 
 All pictures taken are stored in a subfolder of the one defined in the configuration,
 named **YYYY-mm-dd hh-mm-ss** which the time when first picture of the sequence was taken.
 
-Note that if you have both ``Pi`` and ``GPhoto2`` cameras connected to the Raspberry Pi, both are
+Note that if you have both ``Pi`` and ``gPhoto2`` cameras connected to the Raspberry Pi, both are
 used. The preview is taken using the ``Pi`` one for a better video rendering and the capture is
-taken using the ``GPhoto2`` one for better picture rendering.
+taken using the ``gPhoto2`` one for better picture rendering.
 
 You can display a basic help on application options by using the command::
 
@@ -140,7 +140,7 @@ Final picture rendering
 The ``pibooth`` application  handle the rendering of the final picture using 2 variables defined in
 the configuration (see `Configuration`_ below):
 
-* ``[CAMERA][resolution] = (width, height)`` is the resolution of the captured photo in pixels.
+* ``[CAMERA][resolution] = (width, height)`` is the resolution of the captured picture in pixels.
   As explained in the configuration file, the preview size is directly dependent from this parameter.
 * ``[PICTURE][orientation] = auto/landscape/portrait`` is the orientation of the final picture
   (after concatenation of all captures). If the value is **auto**, the orientation is automatically
@@ -226,7 +226,7 @@ Below is the default configuration file:
     captures = (4, 1)
 
     # Orientation of the final image ('auto', 'portrait' or 'landscape')
-    orientation =  auto
+    orientation = auto
 
     # First text displayed
     footer_text1 = Footer 1

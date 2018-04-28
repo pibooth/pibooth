@@ -30,12 +30,12 @@ def rpi_camera_connected():
 
 
 def gp_camera_connected():
-    """Return True if a camera compatible with gphoto2 is found.
+    """Return True if a camera compatible with gPhoto2 is found.
     """
     if not gp:
-        return False  # gphoto2 is not installed
+        return False  # gPhoto2 is not installed
     if hasattr(gp, 'gp_camera_autodetect'):
-        # gphoto2 version 2.5+
+        # gPhoto2 version 2.5+
         cameras = gp.check_result(gp.gp_camera_autodetect())
     else:
         port_info_list = gp.PortInfoList()
@@ -194,7 +194,7 @@ class RpiCamera(BaseCamera):
 
 class GpCamera(BaseCamera):
 
-    """Gphoto2 camera management.
+    """gPhoto2 camera management.
     """
 
     def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False):
@@ -303,7 +303,7 @@ class GpCamera(BaseCamera):
 class HybridCamera(RpiCamera):
 
     """Camera management using the Raspberry Pi camera for the preview (better
-    video rendering) and a Gphoto2 compatible camera for the capture (higher
+    video rendering) and a gPhoto2 compatible camera for the capture (higher
     resolution)
     """
 

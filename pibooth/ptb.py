@@ -445,6 +445,9 @@ def main():
     parser.add_argument("--reset", action='store_true',
                         help=u"restore the default configuration")
 
+    parser.add_argument("--log", default=None,
+                        help=u"save console output to the given file")
+
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-v", "--verbose", dest='logging', action='store_const', const=logging.DEBUG,
                        help=u"report more information about operations", default=logging.INFO)
@@ -453,15 +456,15 @@ def main():
 
     options, _args = parser.parse_known_args()
 
-    configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s')
+    configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=options.log)
 
     config = PtbConfigParser("~/.config/pibooth/pibooth.cfg", options.reset)
 
     if options.config:
-        LOGGER.info("Editing the Photo Booth configuration...")
+        LOGGER.info("Editing the photo booth configuration...")
         config.editor()
     elif not options.reset:
-        LOGGER.info("Starting the Photo Booth application...")
+        LOGGER.info("Starting the photo booth application...")
         app = PtbApplication(config)
         app.main_loop()
 

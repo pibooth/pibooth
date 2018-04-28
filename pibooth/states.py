@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import traceback
-from pibooth.utils import LOGGER
+from pibooth.utils import LOGGER, BlockConsoleHandler
 
 
 class State(object):
@@ -71,7 +70,7 @@ class StateMachine(object):
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
-                if LOGGER.getEffectiveLevel() < logging.INFO:
+                if BlockConsoleHandler.is_debug():
                     traceback.print_exc()
                 new_state_name = self.failsafe_state.name
             else:
@@ -90,7 +89,7 @@ class StateMachine(object):
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
-                if LOGGER.getEffectiveLevel() < logging.INFO:
+                if BlockConsoleHandler.is_debug():
                     traceback.print_exc()
                 state_name = self.failsafe_state.name
             else:
@@ -108,7 +107,7 @@ class StateMachine(object):
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
-                if LOGGER.getEffectiveLevel() < logging.INFO:
+                if BlockConsoleHandler.is_debug():
                     traceback.print_exc()
                 self.set_state(self.failsafe_state.name)
             else:

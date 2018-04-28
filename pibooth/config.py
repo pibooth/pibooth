@@ -70,6 +70,7 @@ class PtbConfigParser(ConfigParser):
     """
 
     language = 'en'
+    editors = ['leafpad', 'vi', 'emacs']
 
     def __init__(self, filename, clear=False):
         ConfigParser.__init__(self)
@@ -125,9 +126,17 @@ class PtbConfigParser(ConfigParser):
     def editor(self):
         """Open a text editor to edit the configuration file.
         """
-        process = subprocess.Popen(['leafpad', self.filename])
-        process.communicate()
-        self.reload()
+        for editor in self.editors:
+            try:
+                process = subprocess.Popen([editor, self.filename])
+                process.communicate()
+                self.reload()
+                return
+            except OSError as e:
+                if e.errno != os.errno.ENOENT:
+                    # Something else went wrong while trying to run `wget`
+                    raise
+        LOGGER.critical("Cant find installed editor amongs %s", self.editors)
 
     def get(self, section, option, **kwargs):
         """Override the default function of ConfigParser to add a
