@@ -134,9 +134,9 @@ class PtbConfigParser(ConfigParser):
                 return
             except OSError as e:
                 if e.errno != os.errno.ENOENT:
-                    # Something else went wrong while trying to run `wget`
+                    # Something else went wrong while trying to run the editor
                     raise
-        LOGGER.critical("Cant find installed editor amongs %s", self.editors)
+        LOGGER.critical("Can't find installed text editor among %s", self.editors)
 
     def get(self, section, option, **kwargs):
         """Override the default function of ConfigParser to add a

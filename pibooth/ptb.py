@@ -36,6 +36,7 @@ class StateFailSafe(State):
         self.app.nbr_printed = 0
         self.app.camera.drop_captures()  # Flush previous captures
         self.app.window.show_oops()
+        pygame.event.pump()
         time.sleep(2)
 
 
@@ -166,6 +167,7 @@ class StateCapture(State):
 
     def do_actions(self, events):
         self.app.window.set_picture_number(self.count + 1, self.app.nbr_captures)
+        pygame.event.pump()
 
         if self.app.config.getboolean('WINDOW', 'preview_countdown'):
             self.app.camera.preview_countdown(self.app.config.getint('WINDOW', 'preview_delay'))
@@ -268,6 +270,7 @@ class StateFinish(State):
 
     def entry_actions(self):
         self.app.window.show_finished()
+        pygame.event.pump()
         time.sleep(0.5)
 
 

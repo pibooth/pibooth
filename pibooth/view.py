@@ -84,8 +84,8 @@ class PtbWindow(object):
     def _update_picture_number(self):
         """Update the pictures counter displayed.
         """
-        if self._picture_number[0] is None:
-            return  # Dont show cunter: no picture taken
+        if not self._picture_number[0]:
+            return  # Dont show counter: no picture taken
         center = self.surface.get_rect().center
         radius = 10
         border = 20
@@ -156,14 +156,14 @@ class PtbWindow(object):
     def show_oops(self):
         """Show failure view in case of exception.
         """
-        self._picture_number = (None, self._picture_number[1])
+        self._picture_number = (0, self._picture_number[1])
         self._update_background(background.OopsBackground())
         pygame.display.update()
 
     def show_intro(self, pil_image=None, with_print=True):
         """Show introduction view.
         """
-        self._picture_number = (None, self._picture_number[1])
+        self._picture_number = (0, self._picture_number[1])
         if with_print and pil_image:
             self._update_background(background.IntroWithPrintBackground())
         else:
@@ -176,7 +176,7 @@ class PtbWindow(object):
     def show_choice(self, choices, selected=None):
         """Show the choice view.
         """
-        self._picture_number = (None, self._picture_number[1])
+        self._picture_number = (0, self._picture_number[1])
         if not selected:
             self._update_background(background.ChooseBackground(choices))
         else:
@@ -199,14 +199,14 @@ class PtbWindow(object):
     def show_work_in_progress(self):
         """Show wait view.
         """
-        self._picture_number = (None, self._picture_number[1])
+        self._picture_number = (0, self._picture_number[1])
         self._update_background(background.ProcessingBackground())
         pygame.display.update()
 
     def show_print(self, pil_image=None):
         """Show print view.
         """
-        self._picture_number = (None, self._picture_number[1])
+        self._picture_number = (0, self._picture_number[1])
         self._update_background(background.PrintBackground())
         if pil_image:
             self._update_foreground(pil_image, self.LEFT)
@@ -215,7 +215,7 @@ class PtbWindow(object):
     def show_finished(self):
         """Show finished view.
         """
-        self._picture_number = (None, self._picture_number[1])
+        self._picture_number = (0, self._picture_number[1])
         self._update_background(background.FinishedBackground())
         pygame.display.update()
 
