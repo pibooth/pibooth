@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+"""Pibooth view management.
+"""
+
 import time
 import contextlib
 import pygame
@@ -11,9 +14,6 @@ from pibooth.pictures import sizing
 
 
 class PtbWindow(object):
-
-    """Manage the window.
-    """
 
     CENTER = 'center'
     RIGHT = 'right'

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Photobooth main module.
+"""Pibooth main module.
 """
 
 import os

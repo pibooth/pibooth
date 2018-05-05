@@ -187,7 +187,7 @@ Below is the default configuration file:
 .. code-block:: ini
 
     [GENERAL]
-    # User interface language (fallback to English if not found)
+    # User interface language ('en', 'fr', 'de', ...)
     language = en
 
     # Path to save pictures
@@ -196,17 +196,17 @@ Below is the default configuration file:
     # Cleanup the 'directory' before start
     clear_on_startup = True
 
-    # How long to debounce the button in seconds
-    debounce_delay = 0.3
-
     # Start pibooth at Raspberry Pi startup
     autostart = False
 
     # Show fail message and go back to wait state in case of exception
     failsafe = True
 
+    # How long to debounce the hardware buttons in seconds
+    debounce_delay = 0.3
+
     [WINDOW]
-    # (width, height) of the display monitor or 'fullscreen'
+    # The (width, height) of the display window or 'fullscreen'
     size = (800, 480)
 
     # Blinking background when picture is taken
@@ -228,10 +228,10 @@ Below is the default configuration file:
     # Orientation of the final image ('auto', 'portrait' or 'landscape')
     orientation = auto
 
-    # First text displayed
+    # Main text displayed
     footer_text1 = Footer 1
 
-    # Second text displayed
+    # Secondary text displayed
     footer_text2 = Footer 2
 
     # Footer text RGB color
@@ -241,13 +241,13 @@ Below is the default configuration file:
     bg_color = (255, 255, 255)
 
     [CAMERA]
-    # Adjust for lighting issues (normal is 100 or 200. Dark is 800 max)
+    # Adjust for lighting issues, normal is 100 or 200 and dark is 800 max
     iso = 100
 
     # Flip horizontally the captured picture
     flip = False
 
-    # Rotation of the camera (valid values are 0, 90, 180, and 270)
+    # Rotation of the camera (0, 90, 180 or 270)
     rotation = 0
 
     # Resolution for camera captures (preview will have same aspect ratio)

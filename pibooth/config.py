@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-"""Photobooth configuration.
+"""Pibooth configuration.
 """
 
 import ast
 import os
 import os.path as osp
 import subprocess
+from collections import OrderedDict as odict
 from pibooth.utils import LOGGER
 
 try:
@@ -16,42 +17,66 @@ except ImportError:
     from ConfigParser import ConfigParser
 
 
-DEFAULT = {
-    "GENERAL": {
-        "directory": ("~/Pictures/pibooth", "Path to save pictures"),
-        "clear_on_startup": (True, "Cleanup the 'directory' before start"),
-        "debounce_delay": (0.3, "How long to debounce the button in seconds"),
-        "language": ("en", "User interface language (fallback to English if not found)"),
-        "autostart": (False, "Start pibooth at Raspberry Pi startup"),
-        "failsafe": (True, "Show fail message and go back to wait state in case of exception"),
-    },
-    "PICTURE": {
-        "captures": ((4, 1), "Possible choice(s) of captures numbers (numbers between 1 to 4 max)"),
-        "orientation": ("auto", "Orientation of the final image ('auto', 'portrait' or 'landscape')"),
-        "footer_text1": ("Footer 1", "First text displayed"),
-        "footer_text2": ("Footer 2", "Second text displayed"),
-        "bg_color": ((255, 255, 255), "Background RGB color or path to a background image"),
-        "text_color": ((0, 0, 0), "Footer text RGB color"),
-    },
-    "WINDOW": {
-        "size": ((800, 480), "(Width, Height) of the display monitor or 'fullscreen'"),
-        "flash": (True, "Blinking background when picture is taken"),
-        "preview_delay": (3, "How long is the preview in seconds"),
-        "preview_countdown": (True, "Show a countdown timer during the preview"),
-        "preview_stop_on_capture": (False, "Stop the preview before taking the picture"),
-    },
-    "CAMERA": {
-        "iso": (100, "Adjust for lighting issues. Normal is 100 or 200. Dark is 800 max"),
-        "flip": (False, "Flip horizontally the captured picture"),
-        "rotation": (0, "Rotation of the camera (valid values are 0, 90, 180, and 270)"),
-        "resolution": ((1934, 2464), "Resolution for camera captures (preview will have same aspect ratio)"),
-    },
-    "PRINTER": {
-        "printer_name": ("default", "Name of the printer defined in CUPS (or use the 'default' one)"),
-        "printer_delay": (10, "How long is the print view in seconds (0 to skip it)"),
-        "max_duplicates": (3, "Maximum number of duplicates sent to the printer (avoid paper wast)"),
-    },
-}
+def get_supported_languages():
+    """Return the list of supported language.
+    """
+    path = osp.join(osp.dirname(osp.abspath(__file__)), 'pictures')
+    return [name for name in os.listdir(path) if osp.isdir(osp.join(path, name))
+            and not name.startswith('.') and not name.startswith('__')]
+
+
+def values_list_repr(values):
+    """Concatenate a list of values to a readable string.
+    """
+    return "'{}' or '{}'".format("', '".join([str(i) for i in values[:-1]]), values[-1])
+
+
+DEFAULT = odict((
+    ("GENERAL",
+        odict((
+            ("language", ("en", "User interface language ({})".format(values_list_repr(get_supported_languages())))),
+            ("directory", ("~/Pictures/pibooth", "Path to save pictures")),
+            ("clear_on_startup", (True, "Cleanup the 'directory' before start")),
+            ("autostart", (False, "Start pibooth at Raspberry Pi startup")),
+            ("failsafe", (True, "Show fail message and go back to wait state in case of exception")),
+            ("debounce_delay", (0.3, "How long to debounce the hardware buttons in seconds")),
+        ))
+     ),
+    ("WINDOW",
+        odict((
+            ("size", ((800, 480), "The (width, height) of the display window or 'fullscreen'")),
+            ("flash", (True, "Blinking background when picture is taken")),
+            ("preview_delay", (3, "How long is the preview in seconds")),
+            ("preview_countdown", (True, "Show a countdown timer during the preview")),
+            ("preview_stop_on_capture", (False, "Stop the preview before taking the picture")),
+        ))
+     ),
+    ("PICTURE",
+        odict((
+            ("captures", ((4, 1), "Possible choice(s) of captures numbers (numbers between 1 to 4 max)")),
+            ("orientation", ("auto", "Orientation of the final image ('auto', 'portrait' or 'landscape')")),
+            ("footer_text1", ("Footer 1", "Main text displayed")),
+            ("footer_text2", ("Footer 2", "Secondary text displayed")),
+            ("text_color", ((0, 0, 0), "Footer text RGB color")),
+            ("bg_color", ((255, 255, 255), "Background RGB color or path to a background image")),
+        ))
+     ),
+    ("CAMERA",
+        odict((
+            ("iso", (100, "Adjust for lighting issues, normal is 100 or 200 and dark is 800 max")),
+            ("flip", (False, "Flip horizontally the captured picture")),
+            ("rotation", (0, "Rotation of the camera (0, 90, 180 or 270)")),
+            ("resolution", ((1934, 2464), "Resolution for camera captures (preview will have same aspect ratio)")),
+        ))
+     ),
+    ("PRINTER",
+        odict((
+            ("printer_name", ("default", "Name of the printer defined in CUPS (or use the 'default' one)")),
+            ("printer_delay", (10, "How long is the print view in seconds (0 to skip it)")),
+            ("max_duplicates", (3, "Maximum number of duplicates sent to the printer (avoid paper wast)")),
+        ))
+     ),
+))
 
 
 def generate_default_config(filename):
@@ -91,10 +116,8 @@ class PtbConfigParser(ConfigParser):
         self.read(self.filename)
 
         # Handle the language configuration, save it as a class attribute for easy access
-        path = osp.join(osp.dirname(osp.abspath(__file__)), 'pictures')
-        possibles = [name for name in os.listdir(path) if osp.isdir(osp.join(path, name))]
         language = self.get('GENERAL', 'language')
-        if language not in possibles:
+        if language not in get_supported_languages():
             LOGGER.warning("Unsupported language '%s', fallback to English", language)
         else:
             PtbConfigParser.language = language

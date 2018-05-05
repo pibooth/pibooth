@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+"""Pibooth base states.
+"""
+
 import traceback
 from pibooth.utils import LOGGER, BlockConsoleHandler
 

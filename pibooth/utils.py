@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+"""Pibooth utilities.
+"""
+
 import os
 import sys
 import time
