@@ -11,9 +11,8 @@ class State(object):
 
     app = None
 
-    def __init__(self, name, next_name=None):
+    def __init__(self, name):
         self.name = name
-        self.next_name = next_name
 
     def entry_actions(self):
         """Perform actions when state is activated
@@ -33,7 +32,7 @@ class State(object):
     def validate_transition(self, events):
         """Return the name of the next state if can be activated
         """
-        return self.next_name
+        pass
 
 
 class StateMachine(object):

@@ -27,8 +27,9 @@ from pibooth.controls.printer import PtbPrinter
 
 class StateFailSafe(State):
 
-    def __init__(self):
-        State.__init__(self, 'failsafe', 'wait')
+    def __init__(self, timeout):
+        State.__init__(self, 'failsafe')
+        self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
         self.app.dirname = None
@@ -36,14 +37,17 @@ class StateFailSafe(State):
         self.app.nbr_printed = 0
         self.app.camera.drop_captures()  # Flush previous captures
         self.app.window.show_oops()
-        pygame.event.pump()
-        time.sleep(2)
+        self.timer.start()
+
+    def validate_transition(self, events):
+        if self.timer.is_timeout():
+            return 'wait'
 
 
 class StateWait(State):
 
     def __init__(self):
-        State.__init__(self, 'wait', 'choose')
+        State.__init__(self, 'wait')
 
     def entry_actions(self):
         self.app.window.show_intro(self.app.previous_picture, self.app.printer.is_installed() and
@@ -78,7 +82,7 @@ class StateWait(State):
     def validate_transition(self, events):
         if self.app.find_picture_event(events):
             if len(self.app.capt_choices) > 1:
-                return self.next_name
+                return 'choose'
             else:
                 self.app.nbr_captures = self.app.capt_choices[0]
                 return 'capture'
@@ -87,7 +91,7 @@ class StateWait(State):
 class StateChoose(State):
 
     def __init__(self, timeout):
-        State.__init__(self, 'choose', 'chosen')
+        State.__init__(self, 'choose')
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
@@ -121,15 +125,15 @@ class StateChoose(State):
 
     def validate_transition(self, events):
         if self.app.nbr_captures:
-            return self.next_name
+            return 'chosen'
         elif self.timer.is_timeout():
-            return "wait"
+            return 'wait'
 
 
 class StateChosen(State):
 
     def __init__(self, timeout):
-        State.__init__(self, 'chosen', 'capture')
+        State.__init__(self, 'chosen')
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
@@ -143,13 +147,13 @@ class StateChosen(State):
 
     def validate_transition(self, events):
         if self.timer.is_timeout():
-            return self.next_name
+            return 'capture'
 
 
 class StateCapture(State):
 
     def __init__(self):
-        State.__init__(self, 'capture', 'processing')
+        State.__init__(self, 'capture')
         self.count = 0
 
     def entry_actions(self):
@@ -198,13 +202,13 @@ class StateCapture(State):
 
     def validate_transition(self, events):
         if self.count >= self.app.nbr_captures:
-            return self.next_name
+            return 'processing'
 
 
 class StateProcessing(State):
 
     def __init__(self):
-        State.__init__(self, 'processing', 'print')
+        State.__init__(self, 'processing')
 
     def entry_actions(self):
         self.app.window.show_work_in_progress()
@@ -227,7 +231,7 @@ class StateProcessing(State):
 
     def validate_transition(self, events):
         if self.app.printer.is_installed() and self.app.config.getfloat('PRINTER', 'printer_delay') > 0:
-            return self.next_name
+            return 'print'
         else:
             return 'finish'  # Can not print
 
@@ -235,7 +239,7 @@ class StateProcessing(State):
 class StatePrint(State):
 
     def __init__(self):
-        State.__init__(self, 'print', 'finish')
+        State.__init__(self, 'print')
         self.timer = PoolingTimer(self.app.config.getfloat('PRINTER', 'printer_delay'))
         self.printed = False
 
@@ -260,18 +264,22 @@ class StatePrint(State):
 
     def validate_transition(self, events):
         if self.timer.is_timeout() or self.printed:
-            return self.next_name
+            return 'finish'
 
 
 class StateFinish(State):
 
-    def __init__(self):
-        State.__init__(self, 'finish', 'wait')
+    def __init__(self, timeout):
+        State.__init__(self, 'finish')
+        self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
         self.app.window.show_finished()
-        pygame.event.pump()
-        time.sleep(0.5)
+        self.timer.start()
+
+    def validate_transition(self, events):
+        if self.timer.is_timeout():
+            return 'wait'
 
 
 class PtbApplication(object):
@@ -306,9 +314,9 @@ class PtbApplication(object):
         self.state_machine.add_state(StateCapture())
         self.state_machine.add_state(StateProcessing())
         self.state_machine.add_state(StatePrint())
-        self.state_machine.add_state(StateFinish())
+        self.state_machine.add_state(StateFinish(0.5))
         if config.getboolean('GENERAL', 'failsafe'):
-            self.state_machine.add_failsafe_state(StateFailSafe())
+            self.state_machine.add_failsafe_state(StateFailSafe(2))
 
         # Initialize the camera
         if camera.gp_camera_connected() and camera.rpi_camera_connected():
