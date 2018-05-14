@@ -89,7 +89,7 @@ def generate_default_config(filename):
                 fp.write("# {}\n{} = {}\n\n".format(value[1], name, value[0]))
 
 
-class PtbConfigParser(ConfigParser):
+class PiConfigParser(ConfigParser):
 
     """Enhenced configuration file parser.
     """
@@ -120,7 +120,7 @@ class PtbConfigParser(ConfigParser):
         if language not in get_supported_languages():
             LOGGER.warning("Unsupported language '%s', fallback to English", language)
         else:
-            PtbConfigParser.language = language
+            PiConfigParser.language = language
 
         # Handle autostart of the application
         self.enable_autostart(self.getboolean('GENERAL', 'autostart'))

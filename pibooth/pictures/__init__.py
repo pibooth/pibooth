@@ -3,14 +3,14 @@
 import os.path as osp
 from PIL import Image
 import pygame
-from pibooth.config import PtbConfigParser
+from pibooth.config import PiConfigParser
 from pibooth.pictures import sizing
 
 
 def get_filename(name):
     """Return absolute path to a picture located in the current package.
     """
-    return osp.join(osp.dirname(osp.abspath(__file__)), PtbConfigParser.language, name)
+    return osp.join(osp.dirname(osp.abspath(__file__)), PiConfigParser.language, name)
 
 
 def get_image(name, size=None, antialiasing=True):

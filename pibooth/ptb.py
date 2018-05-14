@@ -17,7 +17,7 @@ import pibooth
 from pibooth.utils import LOGGER, timeit, PoolingTimer, configure_logging
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
-from pibooth.config import PtbConfigParser
+from pibooth.config import PiConfigParser
 from pibooth.controls import camera
 from pibooth.pictures.concatenate import concatenate_pictures
 from pibooth.controls.light import PtbLed
@@ -283,7 +283,7 @@ class StateFinish(State):
             return 'wait'
 
 
-class PtbApplication(object):
+class PiApplication(object):
 
     def __init__(self, config):
         self.config = config
@@ -470,14 +470,14 @@ def main():
 
     configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=options.log)
 
-    config = PtbConfigParser("~/.config/pibooth/pibooth.cfg", options.reset)
+    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", options.reset)
 
     if options.config:
         LOGGER.info("Editing the photo booth configuration...")
         config.editor()
     elif not options.reset:
         LOGGER.info("Starting the photo booth application...")
-        app = PtbApplication(config)
+        app = PiApplication(config)
         app.main_loop()
 
 
