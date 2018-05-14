@@ -62,6 +62,7 @@ class StateWait(State):
             if self.app.nbr_printed >= self.app.config.getint('PRINTER', 'max_duplicates'):
                 LOGGER.warning("Too many duplicates sent to the printer (%s max)", self.app.config.getint('PRINTER', 'max_duplicates'))
                 self.app.window.show_intro(self.app.previous_picture, False)
+                self.app.led_print.switch_off()
                 return
 
             with timeit("Send final picture to printer"):
