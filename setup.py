@@ -63,7 +63,7 @@ def main():
                 {'universal': True}
         },
         zip_safe=False,  # Don't install the lib as an .egg zipfile
-        entry_points={'console_scripts': ["pibooth = pibooth.ptb:main"]},
+        entry_points={'console_scripts': ["pibooth = pibooth.booth:main"]},
     )
 
 

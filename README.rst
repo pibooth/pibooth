@@ -166,7 +166,7 @@ following actions:
 
 - run ``pibooth`` with the command ::
 
-   $ PYTHONPATH=. python3 pibooth/ptb.py
+   $ PYTHONPATH=. python3 pibooth/booth.py
 
 Configuration
 -------------

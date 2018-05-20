@@ -179,7 +179,7 @@ class StateCapture(State):
         else:
             self.app.camera.preview_wait(self.app.config.getint('WINDOW', 'preview_delay'))
 
-        capture_path = osp.join(self.app.dirname, "ptb{:03}.jpg".format(self.count))
+        capture_path = osp.join(self.app.dirname, "pibooth{:03}.jpg".format(self.count))
 
         if self.app.config.getboolean('WINDOW', 'preview_stop_on_capture'):
             self.app.camera.stop_preview()
