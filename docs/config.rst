@@ -20,9 +20,6 @@ Default configuration
     # Show fail message and go back to wait state in case of exception
     failsafe = True
 
-    # How long to debounce the hardware buttons in seconds
-    debounce_delay = 0.3
-
     [WINDOW]
     # The (width, height) of the display window or 'fullscreen'
     size = (800, 480)
@@ -82,6 +79,9 @@ Default configuration
     max_duplicates = 3
 
     [CONTROLS]
+    # How long to debounce the hardware buttons in seconds
+    debounce_delay = 0.3
+
     # Physical GPIO IN pin to take a picture
     picture_btn_pin = 11
 

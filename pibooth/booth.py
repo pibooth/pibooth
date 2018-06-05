@@ -338,11 +338,11 @@ class PiApplication(object):
 
         self.led_picture = PtbLed(config.getint('CONTROLS', 'picture_led_pin'))
         self.button_picture = PtbButton(config.getint('CONTROLS', 'picture_btn_pin'),
-                                        config.getfloat('GENERAL', 'debounce_delay'))
+                                        config.getfloat('CONTROLS', 'debounce_delay'))
 
         self.led_print = PtbLed(config.getint('CONTROLS', 'print_led_pin'))
         self.button_print = PtbButton(config.getint('CONTROLS', 'print_btn_pin'),
-                                      config.getfloat('GENERAL', 'debounce_delay'))
+                                      config.getfloat('CONTROLS', 'debounce_delay'))
 
         self.led_startup = PtbLed(config.getint('CONTROLS', 'startup_led_pin'))
         self.led_preview = PtbLed(config.getint('CONTROLS', 'preview_led_pin'))

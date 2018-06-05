@@ -39,7 +39,6 @@ DEFAULT = odict((
             ("clear_on_startup", (True, "Cleanup the 'directory' before start")),
             ("autostart", (False, "Start pibooth at Raspberry Pi startup")),
             ("failsafe", (True, "Show fail message and go back to wait state in case of exception")),
-            ("debounce_delay", (0.3, "How long to debounce the hardware buttons in seconds")),
         ))
      ),
     ("WINDOW",
@@ -78,6 +77,7 @@ DEFAULT = odict((
      ),
     ("CONTROLS",
         odict((
+            ("debounce_delay", (0.3, "How long to debounce the hardware buttons in seconds")),
             ("picture_btn_pin", (11, "Physical GPIO IN pin to take a picture")),
             ("picture_led_pin", (7, "Physical GPIO OUT pin to light a LED when picture button is pressed")),
             ("print_btn_pin", (13, "Physical GPIO IN pin to print a picture")),
