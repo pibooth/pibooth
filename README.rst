@@ -212,6 +212,9 @@ Shrink page ...  Shrink (print the whole page)
 Circuit diagram
 ---------------
 
+Here is the diagram for hardware connections. Please refer to the configuration to known the
+default pins used.
+
 .. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/sketch.png
    :align: center
    :alt: Electronic sketch

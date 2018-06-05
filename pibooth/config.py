@@ -76,6 +76,16 @@ DEFAULT = odict((
             ("max_duplicates", (3, "Maximum number of duplicates sent to the printer (avoid paper wast)")),
         ))
      ),
+    ("CONTROLS",
+        odict((
+            ("picture_btn_pin", (11, "Physical GPIO IN pin to take a picture")),
+            ("picture_led_pin", (7, "Physical GPIO OUT pin to light a LED when picture button is pressed")),
+            ("print_btn_pin", (13, "Physical GPIO IN pin to print a picture")),
+            ("print_led_pin", (15, "Physical GPIO OUT pin to light a LED when print button is pressed")),
+            ("startup_led_pin", (29, "Physical GPIO OUT pin to light a LED at pibooth startup")),
+            ("preview_led_pin", (31, "Physical GPIO OUT pin to light a LED during preview")),
+        ))
+     ),
 ))
 
 

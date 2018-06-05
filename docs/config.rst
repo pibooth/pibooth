@@ -5,7 +5,7 @@ Default configuration
 .. code-block:: ini
 
     [GENERAL]
-    # User interface language ('en', 'fr', 'de', ...)
+    # User interface language ('de', 'en' or 'fr')
     language = en
 
     # Path to save pictures
@@ -80,3 +80,22 @@ Default configuration
 
     # Maximum number of duplicates sent to the printer (avoid paper wast)
     max_duplicates = 3
+
+    [CONTROLS]
+    # Physical GPIO IN pin to take a picture
+    picture_btn_pin = 11
+
+    # Physical GPIO OUT pin to light a LED when picture button is pressed
+    picture_led_pin = 7
+
+    # Physical GPIO IN pin to print a picture
+    print_btn_pin = 13
+
+    # Physical GPIO OUT pin to light a LED when print button is pressed
+    print_led_pin = 15
+
+    # Physical GPIO OUT pin to light a LED at pibooth startup
+    startup_led_pin = 29
+
+    # Physical GPIO OUT pin to light a LED during preview
+    preview_led_pin = 31

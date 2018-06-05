@@ -60,7 +60,8 @@ class StateWait(State):
         if self.app.find_print_event(events) and self.app.previous_picture_file and self.app.printer.is_installed():
 
             if self.app.nbr_printed >= self.app.config.getint('PRINTER', 'max_duplicates'):
-                LOGGER.warning("Too many duplicates sent to the printer (%s max)", self.app.config.getint('PRINTER', 'max_duplicates'))
+                LOGGER.warning("Too many duplicates sent to the printer (%s max)",
+                               self.app.config.getint('PRINTER', 'max_duplicates'))
                 self.app.window.show_intro(self.app.previous_picture, False)
                 self.app.led_print.switch_off()
                 return
@@ -224,7 +225,8 @@ class StateProcessing(State):
             text_color = self.app.config.gettyped('PICTURE', 'text_color')
             orientation = self.app.config.get('PICTURE', 'orientation')
 
-            self.app.previous_picture = concatenate_pictures(self.app.camera.get_captures(), footer_texts, bg_color, text_color, orientation)
+            self.app.previous_picture = concatenate_pictures(
+                self.app.camera.get_captures(), footer_texts, bg_color, text_color, orientation)
 
         self.app.previous_picture_file = osp.join(self.app.dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
         with timeit("Save the merged picture in {}".format(self.app.previous_picture_file)):
@@ -334,14 +336,16 @@ class PiApplication(object):
                                 config.getint('CAMERA', 'rotation'),
                                 config.getboolean('CAMERA', 'flip'))
 
-        self.led_picture = PtbLed(7)  # LED 1 (see sketch)
-        self.button_picture = PtbButton(11, config.getfloat('GENERAL', 'debounce_delay'))
+        self.led_picture = PtbLed(config.getint('CONTROLS', 'picture_led_pin'))
+        self.button_picture = PtbButton(config.getint('CONTROLS', 'picture_btn_pin'),
+                                        config.getfloat('GENERAL', 'debounce_delay'))
 
-        self.led_print = PtbLed(15)  # LED 2 (see sketch)
-        self.button_print = PtbButton(13, config.getfloat('GENERAL', 'debounce_delay'))
+        self.led_print = PtbLed(config.getint('CONTROLS', 'print_led_pin'))
+        self.button_print = PtbButton(config.getint('CONTROLS', 'print_btn_pin'),
+                                      config.getfloat('GENERAL', 'debounce_delay'))
 
-        self.led_startup = PtbLed(29)  # LED 3 (see sketch)
-        self.led_preview = PtbLed(31)  # LED 4 (see sketch)
+        self.led_startup = PtbLed(config.getint('CONTROLS', 'startup_led_pin'))
+        self.led_preview = PtbLed(config.getint('CONTROLS', 'preview_led_pin'))
 
         self.printer = PtbPrinter(config.get('PRINTER', 'printer_name'))
 
