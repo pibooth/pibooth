@@ -68,7 +68,8 @@ class StateWait(State):
 
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
-                self.app.printer.print_file(self.app.previous_picture_file)
+                self.app.printer.print_file(self.app.previous_picture_file,
+                                            self.app.config.getint('PRINTER', 'nbr_copies'))
 
             time.sleep(2)  # Just to let the LED switched on
             self.app.nbr_printed += 1
@@ -107,10 +108,10 @@ class StateChoose(State):
     def do_actions(self, events):
         event = self.app.find_choice_event(events)
         if event:
-            if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT) \
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT)\
                     or (event.type == BUTTON_DOWN and event.pin == self.app.button_picture):
                 self.app.nbr_captures = self.app.capt_choices[0]
-            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT) \
+            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT)\
                     or (event.type == BUTTON_DOWN and event.pin == self.app.button_print):
                 self.app.nbr_captures = self.app.capt_choices[1]
 
@@ -258,7 +259,8 @@ class StatePrint(State):
 
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
-                self.app.printer.print_file(self.app.previous_picture_file)
+                self.app.printer.print_file(self.app.previous_picture_file,
+                                            self.app.config.getint('PRINTER', 'nbr_copies'))
 
             time.sleep(2)  # Just to let the LED switched on
             self.app.nbr_printed += 1

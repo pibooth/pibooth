@@ -75,8 +75,11 @@ Default configuration
     # How long is the print view in seconds (0 to skip it)
     printer_delay = 10
 
-    # Maximum number of duplicates sent to the printer (avoid paper wast)
+    # Maximum number of duplicate pages sent to the printer (avoid paper wast)
     max_duplicates = 3
+
+    # Prints 1, 2, 3 or 4 picture copies per page
+    nbr_copies = 1
 
     [CONTROLS]
     # How long to debounce the hardware buttons in seconds

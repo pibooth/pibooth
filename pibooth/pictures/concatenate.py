@@ -17,7 +17,7 @@ def new_image_with_background(width, height, background):
         return image
 
 
-def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color):
+def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, inter_width=None):
     """
     Merge up to 4 PIL images in portrait orientation.
 
@@ -34,7 +34,8 @@ def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color):
     widths, heights = zip(*(i.size for i in pictures))
 
     # starting here we consider that all the images have the same height and widths
-    inter_width = max(heights) // 20
+    if inter_width is None:
+        inter_width = max(heights) // 20
 
     if len(pictures) == 1:
         new_width = max(widths) + inter_width * 2
@@ -110,7 +111,7 @@ def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color):
     return final_image
 
 
-def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color):
+def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color, inter_width=None):
     """
     Merge up to 4 PIL images in landscape orientation.
 
@@ -124,7 +125,8 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color)
     widths, heights = zip(*(i.size for i in pictures))
 
     # starting here we consider that all the images have the same height and widths
-    inter_width = max(heights) // 20
+    if inter_width is None:
+        inter_width = max(heights) // 20
 
     if len(pictures) == 1:
         new_width = max(widths) + inter_width * 2
@@ -200,7 +202,7 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color)
     return final_image
 
 
-def concatenate_pictures(pictures, footer_texts, bg_color, text_color, orientation="auto"):
+def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto", inter_width=None):
     """
     Merge up to 4 PIL images and retrun concatenated image as a new PIL image object.
     Configuration of the final picture depends on the number of given pictures.
@@ -211,10 +213,16 @@ def concatenate_pictures(pictures, footer_texts, bg_color, text_color, orientati
             orientation = "landscape"
         else:
             orientation = "portrait"
+    elif orientation == "revauto":
+        # Use the size of the first picture to determine the reversed orientation
+        if pictures[0].size[0] < pictures[0].size[1]:
+            orientation = "landscape"
+        else:
+            orientation = "portrait"
 
     if orientation == "portrait":
-        return concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color)
+        return concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, inter_width)
     elif orientation == "landscape":
-        return concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color)
+        return concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color, inter_width)
     else:
         raise ValueError("Invalid orientation '{}'".format(orientation))

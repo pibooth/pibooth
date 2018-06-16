@@ -4,9 +4,11 @@ try:
     import cups
 except ImportError:
     cups = None  # CUPS is optional
+import tempfile
 import threading
 import collections
 import os.path as osp
+from PIL import Image
 from xml.etree import ElementTree
 try:
     from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -14,6 +16,7 @@ except ImportError:
     # Python 2.x fallback
     from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from pibooth.utils import LOGGER
+from pibooth.pictures.concatenate import concatenate_pictures
 
 
 class NotificationHandler(BaseHTTPRequestHandler):
@@ -147,14 +150,21 @@ class PtbPrinter(object):
         """
         return cups is not None and self.name
 
-    def print_file(self, filename):
+    def print_file(self, filename, copies=1):
         """Send a file to the CUPS server to the default printer.
         """
         if not self._notif_server.is_running():
             self._notif_server.start()
         if not self.name:
             raise EnvironmentError("No printer found (check config file or CUPS config)")
-        self._conn.printFile(self.name, filename, osp.basename(filename), {})
+
+        if copies > 1:
+            with tempfile.NamedTemporaryFile(suffix=osp.basename(filename)) as fp:
+                picture = Image.open(filename)
+                concatenate_pictures((picture,) * copies, orientation='revauto', inter_width=2).save(fp.name)
+                self._conn.printFile(self.name, fp.name, osp.basename(filename), {})
+        else:
+            self._conn.printFile(self.name, filename, osp.basename(filename), {})
 
     def cancel_all_tasks(self):
         """Cancel all tasks in the queue.
