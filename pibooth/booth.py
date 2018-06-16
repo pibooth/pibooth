@@ -364,7 +364,7 @@ class PiApplication(object):
                 raise ValueError("Invalid captures number '{}'".format(chx))
 
     def find_quit_event(self, events):
-        """Return the event if found in the list.
+        """Return the first found event if found in the list.
         """
         for event in events:
             if event.type == pygame.QUIT or\
@@ -372,7 +372,7 @@ class PiApplication(object):
                 return event
 
     def find_fullscreen_event(self, events):
-        """Return the event if found in the list.
+        """Return the first found event if found in the list.
         """
         for event in events:
             if  event.type == pygame.KEYDOWN and\
@@ -380,7 +380,7 @@ class PiApplication(object):
                 return event
 
     def find_picture_event(self, events):
-        """Return the event if found in the list.
+        """Return the first found event if found in the list.
         """
         for event in events:
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_p) or \
@@ -388,7 +388,7 @@ class PiApplication(object):
                 return event
 
     def find_print_event(self, events):
-        """Return the event if found in the list.
+        """Return the first found event if found in the list.
         """
         for event in events:
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_e and
@@ -397,14 +397,14 @@ class PiApplication(object):
                 return event
 
     def find_resize_event(self, events):
-        """Return the event if found in the list.
+        """Return the first found event if found in the list.
         """
         for event in events:
             if event.type == pygame.VIDEORESIZE:
                 return event
 
     def find_choice_event(self, events):
-        """Return the event if found in the list.
+        """Return the first found event if found in the list.
         """
         for event in events:
             if (event.type == pygame.KEYDOWN and event.key in (pygame.K_LEFT, pygame.K_RIGHT)) or \

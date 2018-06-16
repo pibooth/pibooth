@@ -75,29 +75,37 @@ def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color):
         x_offset += (pictures[2].size[0] + inter_width)
         matrix.paste(pictures[3], (x_offset, y_offset))
 
-    matrix = matrix.resize(sizing.new_size_keep_aspect_ratio(matrix.size, (2400, 3000)), Image.ANTIALIAS)
     final_width, final_height = 2400, 3600
-    footer_size = 600
+    if not footer_texts[0] and not footer_texts[1]:
+        matrix_width, matrix_height = final_width, final_height
+        footer_size = 0
+    else:
+        matrix_width, matrix_height = 2400, 3000
+        footer_size = 600
 
+    matrix = matrix.resize(sizing.new_size_keep_aspect_ratio(
+        matrix.size, (matrix_width, matrix_height)), Image.ANTIALIAS)
     final_image = new_image_with_background(final_width, final_height, bg_color)
-    final_image.paste(matrix, ((final_width - matrix.size[0]) // 2, (final_height - footer_size - matrix.size[1]) // 2), mask=matrix)
+    final_image.paste(matrix, ((final_width - matrix.size[0]) // 2,
+                               (final_height - footer_size - matrix.size[1]) // 2), mask=matrix)
 
-    # Text part
-    draw = ImageDraw.Draw(final_image)
+    if footer_size:
+        # Text part
+        draw = ImageDraw.Draw(final_image)
 
-    # Footer 1
-    name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), int(2 / 3. * footer_size))
-    name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
-    footer_x = (final_width - name_width) // 2
-    footer_y = final_height - footer_size - 100
-    draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
+        # Footer 1
+        name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), int(2 / 3. * footer_size))
+        name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
+        footer_x = (final_width - name_width) // 2
+        footer_y = final_height - footer_size - 100
+        draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
 
-    # Footer 2
-    date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), int(1 / 3. * footer_size))
-    date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
-    footer_x = (final_width - date_width) // 2
-    footer_y = final_height - footer_size + 300
-    draw.text((footer_x, footer_y), footer_texts[1], text_color, font=date_font)
+        # Footer 2
+        date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), int(1 / 3. * footer_size))
+        date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
+        footer_x = (final_width - date_width) // 2
+        footer_y = final_height - footer_size + 300
+        draw.text((footer_x, footer_y), footer_texts[1], text_color, font=date_font)
 
     return final_image
 
@@ -157,29 +165,37 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color)
         x_offset += (pictures[2].size[0] + inter_width)
         matrix.paste(pictures[3], (x_offset, y_offset))
 
-    matrix = matrix.resize(sizing.new_size_keep_aspect_ratio(matrix.size, (3600, 2100)), Image.ANTIALIAS)
     final_width, final_height = 3600, 2400
-    footer_size = 300
+    if not footer_texts[0] and not footer_texts[1]:
+        matrix_width, matrix_height = final_width, final_height
+        footer_size = 0
+    else:
+        matrix_width, matrix_height = 3600, 2100
+        footer_size = 300
 
+    matrix = matrix.resize(sizing.new_size_keep_aspect_ratio(
+        matrix.size, (matrix_width, matrix_height)), Image.ANTIALIAS)
     final_image = new_image_with_background(final_width, final_height, bg_color)
-    final_image.paste(matrix, ((final_width - matrix.size[0]) // 2, (final_height - footer_size - matrix.size[1]) // 2), mask=matrix)
+    final_image.paste(matrix, ((final_width - matrix.size[0]) // 2,
+                               (final_height - footer_size - matrix.size[1]) // 2), mask=matrix)
 
-    # Text part
-    draw = ImageDraw.Draw(final_image)
+    if footer_size:
+        # Text part
+        draw = ImageDraw.Draw(final_image)
 
-    # Footer 1
-    name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), int(2 / 3. * footer_size))
-    name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
-    footer_x = final_width // 4 - name_width // 2
-    footer_y = final_height - (footer_size + name_height) // 2 - 50
-    draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
+        # Footer 1
+        name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), int(2 / 3. * footer_size))
+        name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
+        footer_x = final_width // 4 - name_width // 2
+        footer_y = final_height - (footer_size + name_height) // 2 - 50
+        draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
 
-    # Footer 2
-    date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), int(1 / 3. * footer_size))
-    date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
-    footer_x = 3 * final_width // 4 - date_width // 2
-    footer_y = final_height - (footer_size + date_height) // 2 - 50
-    draw.text((footer_x, footer_y), footer_texts[1], text_color, font=date_font)
+        # Footer 2
+        date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), int(1 / 3. * footer_size))
+        date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
+        footer_x = 3 * final_width // 4 - date_width // 2
+        footer_y = final_height - (footer_size + date_height) // 2 - 50
+        draw.text((footer_x, footer_y), footer_texts[1], text_color, font=date_font)
 
     return final_image
 
