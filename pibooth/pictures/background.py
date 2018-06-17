@@ -2,57 +2,6 @@
 
 from pibooth import pictures
 
-try:
-    xrange
-except NameError:
-    # Python 3.x fallback
-    xrange = range
-try:
-    from itertools import zip_longest
-except ImportError:
-    # Python 2.x fallback
-    from itertools import izip_longest as zip_longest
-
-
-def shake(magnitude, step=5):
-    """
-    This function creates our shake-generator it "moves" the surface to the left and
-    right three times by yielding (-5, 0), (-10, 0), ... (-20, 0), (-15, 0) ... (20, 0),
-    then keeps yieling (0, 0)
-    """
-    s = -1
-    for _ in xrange(0, 3):
-        for x in range(0, magnitude, step):
-            yield (x * s, 0)
-        for x in list(reversed(range(0, magnitude, step)))[1:-1]:
-            yield (x * s, 0)
-        s *= -1
-    while True:
-        yield (0, 0)
-
-
-def transpose(origin, target, step=5):
-    """
-    This function creates our transpose-generator it "moves" the surface along
-    a ligne until the target is reached, then keeps yieling 'target'.
-    """
-    xend = abs(target[0] - origin[0])
-    if origin[0] > target[0]:
-        xs = -1
-    else:
-        xs = 1
-    yend = abs(target[1] - origin[1])
-    if origin[1] > target[1]:
-        ys = -1
-    else:
-        ys = 1
-
-    for pos in zip_longest(iter(xrange(0, xend, step)), iter(xrange(0, yend, step))):
-        yield (xs * pos[0] if pos[0] is not None else xs * xend, ys * pos[1] if pos[1] is not None else ys * yend)
-
-    while True:
-        yield (xs * xend, ys * yend)
-
 
 class Background(object):
 

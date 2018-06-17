@@ -108,11 +108,9 @@ class StateChoose(State):
     def do_actions(self, events):
         event = self.app.find_choice_event(events)
         if event:
-            if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT)\
-                    or (event.type == BUTTON_DOWN and event.pin == self.app.button_picture):
+            if event.key == pygame.K_LEFT:
                 self.app.nbr_captures = self.app.capt_choices[0]
-            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT)\
-                    or (event.type == BUTTON_DOWN and event.pin == self.app.button_print):
+            elif event.key == pygame.K_RIGHT:
                 self.app.nbr_captures = self.app.capt_choices[1]
 
     def exit_actions(self):
@@ -372,6 +370,7 @@ class PiApplication(object):
             if event.type == pygame.QUIT or\
                     (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 return event
+        return None
 
     def find_fullscreen_event(self, events):
         """Return the first found event if found in the list.
@@ -380,6 +379,15 @@ class PiApplication(object):
             if  event.type == pygame.KEYDOWN and\
                     event.key == pygame.K_f and pygame.key.get_mods() & pygame.KMOD_CTRL:
                 return event
+        return None
+
+    def find_resize_event(self, events):
+        """Return the first found event if found in the list.
+        """
+        for event in events:
+            if event.type == pygame.VIDEORESIZE:
+                return event
+        return None
 
     def find_picture_event(self, events):
         """Return the first found event if found in the list.
@@ -388,6 +396,11 @@ class PiApplication(object):
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_p) or \
                     (event.type == BUTTON_DOWN and event.pin == self.button_picture):
                 return event
+            elif event.type == pygame.MOUSEBUTTONUP:
+                rect = self.window.get_rect()
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
+                    return event
+        return None
 
     def find_print_event(self, events):
         """Return the first found event if found in the list.
@@ -397,22 +410,32 @@ class PiApplication(object):
                     pygame.key.get_mods() & pygame.KMOD_CTRL) or \
                     (event.type == BUTTON_DOWN and event.pin == self.button_print):
                 return event
-
-    def find_resize_event(self, events):
-        """Return the first found event if found in the list.
-        """
-        for event in events:
-            if event.type == pygame.VIDEORESIZE:
-                return event
+            elif event.type == pygame.MOUSEBUTTONUP:
+                rect = self.window.get_rect()
+                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
+                    return event
+        return None
 
     def find_choice_event(self, events):
         """Return the first found event if found in the list.
         """
         for event in events:
-            if (event.type == pygame.KEYDOWN and event.key in (pygame.K_LEFT, pygame.K_RIGHT)) or \
-                    (event.type == BUTTON_DOWN and event.pin == self.button_picture) or \
-                    (event.type == BUTTON_DOWN and event.pin == self.button_print):
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT) or \
+                    (event.type == BUTTON_DOWN and event.pin == self.button_picture):
+                event.key = pygame.K_LEFT
                 return event
+            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT) or \
+                    (event.type == BUTTON_DOWN and event.pin == self.button_print):
+                event.key = pygame.K_RIGHT
+                return event
+            elif event.type == pygame.MOUSEBUTTONUP:
+                rect = self.window.get_rect()
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
+                    event.key = pygame.K_LEFT
+                else:
+                    event.key = pygame.K_RIGHT
+                return event
+        return None
 
     def main_loop(self):
         """Run the main game loop.
