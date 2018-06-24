@@ -312,7 +312,8 @@ class GpCamera(BaseCamera):
     def quit(self):
         """Close the camera driver, it's definitive.
         """
-        self._cam.exit()
+        if self._cam:
+            self._cam.exit()
 
 
 class HybridCamera(RpiCamera):
