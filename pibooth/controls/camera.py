@@ -207,7 +207,6 @@ class GpCamera(BaseCamera):
         self._rotation = rotation
         self._iso = str(iso)
         self.preview_pid = None
-        self.camera_init()
 
     def camera_init(self):
         """
@@ -253,32 +252,37 @@ class GpCamera(BaseCamera):
         image.save(capture_path)
         return image
 
-    def preview(self, window, flip=True):
+    def preview(self, window, flip=True, timeout=5):
         """Setup the preview.
         """
-        self._window = window
-        self._preview_hflip = flip
-        self._window.show_image(self._get_preview_capture())
+        if not self.preview_pid:
+            self._window = window
+            self._preview_hflip = flip
+            # subprocess.call("mkfifo fifo.mjpg", shell=True)
+            subprocess.call("gphoto2 --capture-movie={0}s --stdout> fifo.mjpg &".format(timeout), shell=True)
+            self.preview_pid = subprocess.Popen("omxplayer fifo.mjpg --live --crop 252,0,804,704", stdout=subprocess.PIPE, shell=True)
+
 
     def preview_countdown(self, timeout, alpha=60):
         """Show a countdown of `timeout` seconds on the preview.
         Returns when the countdown is finished.
         """
-        timeout = int(timeout)
+        timeout = 5 #int(timeout)
         if timeout < 1:
             raise ValueError("Start time shall be greater than 0")
 
         overlay = None
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
-            image = self._get_preview_capture()
+            self.preview(self._window, timeout=timeout)
             remaining = int(timer.remaining() + 1)
             if not overlay or remaining != timeout:
                 # Rebluid overlay only if remaining number has changed
-                overlay = self.get_overlay(image.size, str(remaining), alpha)
+                # overlay = self.get_overlay(image.size, str(remaining), alpha)
                 timeout = remaining
-            image.paste(overlay, (0, 0), overlay)
-            self._window.show_image(image)
+            #image.paste(overlay, (0, 0), overlay)
+            #self._window.show_image(image)
+
 
     def preview_wait(self, timeout):
         """Wait the given time and refresh the preview.
@@ -289,7 +293,7 @@ class GpCamera(BaseCamera):
 
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
-            self._window.show_image(self._get_preview_capture())
+            self.preview(self._window, timeout=timeout)
 
     def stop_preview(self):
         """Stop the preview.
@@ -299,8 +303,11 @@ class GpCamera(BaseCamera):
     def capture(self, filename):
         """Capture a picture in a file.
         """
+        self.preview_pid = 0
+        self.camera_init()
         self._captures[filename] = self._cam.capture(gp.GP_CAPTURE_IMAGE)
         time.sleep(1)  # Necessary to let the time for the camera to save the image
+        self.quit()
 
     def quit(self):
         """Close the camera driver, it's definitive.
