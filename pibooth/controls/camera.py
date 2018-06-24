@@ -58,10 +58,11 @@ def gp_set_config_value(config, section, option, value):
         LOGGER.debug('Setting option %s/%s=%s', section, option, value)
         child = config.get_child_by_name(section).get_child_by_name(option)
         choices = [c for c in child.get_choices()]
-        if not choices or value in choices:
+        if value not in choices:
+            LOGGER.warning("Invalid value '%s' for option %s (possible choices: %s), still trying to set it", value, option, choices)
             child.set_value(str(value))
         else:
-            LOGGER.warning("Invalid value '%s' for option %s (possible choices: %s)", value, option, choices)
+            child.set_value(str(value))
     except gp.GPhoto2Error:
         raise ValueError('Unsupported setting {}/{}={}'.format(section, option, value))
 
