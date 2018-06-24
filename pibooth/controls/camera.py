@@ -201,15 +201,22 @@ class GpCamera(BaseCamera):
     def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False):
         BaseCamera.__init__(self, resolution)
         gp.check_result(gp.use_python_logging())
-        self._cam = gp.Camera()
-        self._cam.init()
 
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation
+        self._iso = str(iso)
+        self.preview_pid = None
+        self.camera_init()
 
+    def camera_init(self):
+        """
+        Camera initialisation
+        """
+        self._cam = gp.Camera()
+        self._cam.init()
         config = self._cam.get_config()
-        gp_set_config_value(config, 'imgsettings', 'iso', iso)
+        gp_set_config_value(config, 'imgsettings', 'iso', self._iso)
         gp_set_config_value(config, 'settings', 'capturetarget', 'Carte mémoire')
         self._cam.set_config(config)
 
