@@ -256,11 +256,15 @@ class GpCamera(BaseCamera):
         """Setup the preview.
         """
         if not self.preview_pid:
+
             self._window = window
+            rect = self.get_rect()
             self._preview_hflip = flip
             # subprocess.call("mkfifo fifo.mjpg", shell=True)
             subprocess.call("gphoto2 --capture-movie={0}s --stdout> fifo.mjpg &".format(timeout), shell=True)
-            self.preview_pid = subprocess.Popen("omxplayer fifo.mjpg --live --crop 252,0,804,704", stdout=subprocess.PIPE, shell=True)
+            window_rect = '{0},{1},{2},{3}'.format(tuple(rect)[0], tuple(rect)[1], tuple(rect)[0]+tuple(rect)[2], tuple(rect)[1]+tuple(rect)[3])
+            command = "omxplayer fifo.mjpg --live --crop 252,0,804,704 --win {0}".format(window_rect)
+            self.preview_pid = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 
 
     def preview_countdown(self, timeout, alpha=60):
