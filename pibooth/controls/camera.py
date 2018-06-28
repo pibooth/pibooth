@@ -222,25 +222,6 @@ class GpCamera(BaseCamera):
         gp_set_config_value(config, 'settings', 'capturetarget', 'Carte mémoire')
         self._cam.set_config(config)
 
-    def _get_preview_capture(self):
-        """Capture a new preview image.
-        """
-        with timeit('Capturing new preview image'):
-            camera_file = self._cam.capture_preview()
-            file_data = gp.check_result(gp.gp_file_get_data_and_size(camera_file))
-            image = Image.open(io.BytesIO(memoryview(file_data)))
-            if self._preview_hflip:
-                image = image.transpose(Image.FLIP_LEFT_RIGHT)
-            if self._rotation:
-                image = image.rotate(self._rotation)
-
-            image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
-            image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
-
-        # Resize to the window rect (outer because rect already resized innner, see 'get_rect')
-        rect = self.get_rect()
-        return image.resize(sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer'))
-
     def _post_process_capture(self, capture_path):
         gp_path = self._captures[capture_path]
         camera_file = gp.check_result(gp.gp_camera_file_get(
