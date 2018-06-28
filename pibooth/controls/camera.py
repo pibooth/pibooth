@@ -262,13 +262,17 @@ class GpCamera(BaseCamera):
 
             self._window = window
             rect = self.get_rect()
-            self._preview_hflip = flip
+            if flip:
+                orientation=1
+            else:
+                orientation=0
+
             # subprocess.call("mkfifo fifo.mjpg", shell=True)
             self.gphoto2_process = subprocess.Popen("gphoto2 --capture-movie --stdout> fifo.mjpg &",
                                                     shell=True,
                                                     preexec_fn=os.setsid)
             window_rect = '{0},{1},{2},{3}'.format(tuple(rect)[0], tuple(rect)[1], tuple(rect)[0]+tuple(rect)[2], tuple(rect)[1]+tuple(rect)[3])
-            command = "omxplayer fifo.mjpg --live --crop 252,0,804,704 --win {0}".format(window_rect)
+            command = "omxplayer fifo.mjpg --live --crop 252,0,804,704 --win {0} --orientation {1}".format(window_rect, orientation)
             self.omxplayer_process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
 
 
