@@ -61,7 +61,8 @@ def gp_set_config_value(config, section, option, value):
         child = config.get_child_by_name(section).get_child_by_name(option)
         choices = [c for c in child.get_choices()]
         if value not in choices:
-            LOGGER.warning("Invalid value '%s' for option %s (possible choices: %s), still trying to set it", value, option, choices)
+            LOGGER.warning(
+                "Invalid value '%s' for option %s (possible choices: %s), still trying to set it", value, option, choices)
             child.set_value(str(value))
         else:
             child.set_value(str(value))
@@ -211,9 +212,8 @@ class GpCamera(BaseCamera):
         self.gphoto2_process = None
         self.omxplayer_process = None
 
-    def camera_init(self):
-        """
-        Camera initialisation
+    def _init(self):
+        """Camera initialisation
         """
         self._cam = gp.Camera()
         self._cam.init()
@@ -240,22 +240,20 @@ class GpCamera(BaseCamera):
         """Setup the preview.
         """
         if not self.gphoto2_process:
-
             self._window = window
             rect = self.get_rect()
             if flip:
-                orientation=1
+                orientation = 1
             else:
-                orientation=0
-
-            # subprocess.call("mkfifo fifo.mjpg", shell=True)
+                orientation = 0
             self.gphoto2_process = subprocess.Popen("gphoto2 --capture-movie --stdout> fifo.mjpg &",
                                                     shell=True,
                                                     preexec_fn=os.setsid)
-            window_rect = '{0},{1},{2},{3}'.format(tuple(rect)[0], tuple(rect)[1], tuple(rect)[0]+tuple(rect)[2], tuple(rect)[1]+tuple(rect)[3])
-            command = "omxplayer fifo.mjpg --live --crop 252,0,804,704 --win {0} --orientation {1}".format(window_rect, orientation)
+            window_rect = '{0},{1},{2},{3}'.format(tuple(rect)[0], tuple(rect)[1], tuple(rect)[
+                                                   0] + tuple(rect)[2], tuple(rect)[1] + tuple(rect)[3])
+            command = "omxplayer fifo.mjpg --live --crop 252,0,804,704 --win {0} --orientation {1}".format(
+                window_rect, orientation)
             self.omxplayer_process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
-
 
     def preview_countdown(self, timeout, alpha=60):
         """Show a countdown of `timeout` seconds on the preview.
@@ -275,8 +273,7 @@ class GpCamera(BaseCamera):
                 # overlay = self.get_overlay(image.size, str(remaining), alpha)
                 timeout = remaining
             #image.paste(overlay, (0, 0), overlay)
-            #self._window.show_image(image)
-
+            # self._window.show_image(image)
 
     def preview_wait(self, timeout):
         """Wait the given time and refresh the preview.
@@ -300,11 +297,10 @@ class GpCamera(BaseCamera):
             self.omxplayer_process = None
         self._window = None
 
-
     def capture(self, filename):
         """Capture a picture in a file.
         """
-        self.camera_init()
+        self._init()
         self._captures[filename] = self._cam.capture(gp.GP_CAPTURE_IMAGE)
         time.sleep(1)  # Necessary to let the time for the camera to save the image
         self.quit()
@@ -340,7 +336,8 @@ class HybridCamera(RpiCamera):
             self._gp_cam, gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL))
 
         image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
-        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self._cam.resolution, 'outer'), Image.ANTIALIAS)
+        image = image.resize(sizing.new_size_keep_aspect_ratio(
+            image.size, self._cam.resolution, 'outer'), Image.ANTIALIAS)
         image = image.crop(sizing.new_size_by_croping(image.size, self._cam.resolution))
 
         if self._cam.hflip:
