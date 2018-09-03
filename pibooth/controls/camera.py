@@ -14,7 +14,7 @@ except ImportError:
 from PIL import Image, ImageFont, ImageDraw
 from pibooth import fonts
 from pibooth.pictures import sizing
-from pibooth.utils import LOGGER, PoolingTimer, timeit
+from pibooth.utils import LOGGER, PoolingTimer
 
 
 def rpi_camera_connected():

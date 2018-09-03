@@ -39,6 +39,7 @@ class PtbWindow(object):
         self._current_background = None
         self._current_foreground = None
         self._picture_number = (0, 4)  # (current, max)
+        self._default_cursor = pygame.mouse.get_cursor()
 
         self._pos_map = {self.CENTER: self._center_pos,
                          self.RIGHT: self._right_pos,
@@ -61,7 +62,8 @@ class PtbWindow(object):
             LOGGER.debug("Use buffered image '%s'", image_name)
         else:
             if resize:
-                image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, image_size_max), Image.ANTIALIAS)
+                image = pil_image.resize(sizing.new_size_keep_aspect_ratio(
+                    pil_image.size, image_size_max), Image.ANTIALIAS)
             else:
                 image = pil_image
             image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
@@ -95,7 +97,8 @@ class PtbWindow(object):
         for nbr in range(self._picture_number[1]):
             gfxdraw.aacircle(self.surface, x, y, radius, color)
             if self._picture_number[0] > nbr:
-                gfxdraw.aacircle(self.surface, x, y, radius - 3, color)  # Because anti-aliased filled circle doesn't exist
+                # Because anti-aliased filled circle doesn't exist
+                gfxdraw.aacircle(self.surface, x, y, radius - 3, color)
                 gfxdraw.filled_circle(self.surface, x, y, radius - 3, color)
             x += (2 * radius + border)
 
@@ -260,11 +263,11 @@ class PtbWindow(object):
         """
         if self.is_fullscreen:
             self.is_fullscreen = False  # Set before get size
-            pygame.mouse.set_visible(True)
+            pygame.mouse.set_cursor(*self._default_cursor)
             self.surface = pygame.display.set_mode(self.size, pygame.RESIZABLE)
         else:
             self.is_fullscreen = True  # Set before get size
-            pygame.mouse.set_visible(False)
+            pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
             self.surface = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
 
         self.update()
