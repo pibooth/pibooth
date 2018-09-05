@@ -166,7 +166,7 @@ following actions:
 
 - install ``pibooth`` in editable mode ::
 
-   $ pip3 install -e . --user
+   $ sudo pip3 install -e .
 
 - start the application exactly in the same way as installed from pypi. All modifications performed
   in the cloned repository are taken into account when the application starts.
