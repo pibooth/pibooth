@@ -162,7 +162,7 @@ class StateCapture(State):
         self.app.nbr_printed = 0
         self.app.previous_picture = None
         self.app.previous_picture_file = None
-        self.app.dirname = osp.join(self.app.savedir, time.strftime("%Y-%m-%d-%H-%M-%S"))
+        self.app.dirname = osp.join(self.app.savedir, "raw", time.strftime("%Y-%m-%d-%H-%M-%S"))
         os.makedirs(self.app.dirname)
         self.app.led_preview.switch_on()
 
@@ -227,7 +227,7 @@ class StateProcessing(State):
             self.app.previous_picture = concatenate_pictures(
                 self.app.camera.get_captures(), footer_texts, bg_color, text_color, orientation)
 
-        self.app.previous_picture_file = osp.join(self.app.dirname, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
+        self.app.previous_picture_file = osp.join(self.app.savedir, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
         with timeit("Save the merged picture in {}".format(self.app.previous_picture_file)):
             self.app.previous_picture.save(self.app.previous_picture_file)
 
