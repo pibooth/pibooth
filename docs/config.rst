@@ -43,6 +43,9 @@ Default configuration
     # Orientation of the final image ('auto', 'portrait' or 'landscape')
     orientation = auto
 
+    # Effect applied to the captures (a list of quoted names can be given)
+    effect = none
+
     # Main text displayed
     footer_text1 = Footer 1
 
