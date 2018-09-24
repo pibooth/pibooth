@@ -12,6 +12,29 @@ import shutil
 
 class PiCamera(object):
 
+    IMAGE_EFFECTS = {u'blur': 15,
+                     u'cartoon': 22,
+                     u'colorbalance': 21,
+                     u'colorpoint': 20,
+                     u'colorswap': 17,
+                     u'deinterlace1': 23,
+                     u'deinterlace2': 24,
+                     u'denoise': 7,
+                     u'emboss': 8,
+                     u'film': 14,
+                     u'gpen': 11,
+                     u'hatch': 10,
+                     u'negative': 1,
+                     u'none': 0,
+                     u'oilpaint': 9,
+                     u'pastel': 12,
+                     u'posterise': 19,
+                     u'saturation': 16,
+                     u'sketch': 6,
+                     u'solarize': 2,
+                     u'washedout': 18,
+                     u'watercolor': 13}
+
     def __init__(self):
         self.preview = None
 
