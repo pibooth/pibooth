@@ -6,12 +6,12 @@ import time
 import signal
 import subprocess
 import pygame
-import picamera
 try:
     import gphoto2 as gp
 except ImportError:
     gp = None  # gphoto2 is optional
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageFont, ImageDraw, ImageFilter
+import picamera
 from pibooth import fonts
 from pibooth.pictures import sizing
 from pibooth.utils import LOGGER, PoolingTimer
@@ -125,6 +125,8 @@ class RpiCamera(BaseCamera):
     """Camera management
     """
 
+    IMAGE_EFFECTS = list(picamera.PiCamera.IMAGE_EFFECTS.keys())
+
     def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False):
         BaseCamera.__init__(self, resolution)
         self._cam = picamera.PiCamera()
@@ -184,11 +186,19 @@ class RpiCamera(BaseCamera):
         self._cam.stop_preview()
         self._window = None
 
-    def capture(self, filename):
+    def capture(self, filename, effect=None):
         """Capture a picture in a file.
         """
-        self._cam.capture(filename)
-        self._captures[filename] = None  # Nothing to keep for post processing
+        effect = str(effect).lower()
+        if effect not in self.IMAGE_EFFECTS:
+            raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
+
+        try:
+            self._cam.image_effect = effect
+            self._cam.capture(filename)
+            self._captures[filename] = None  # Nothing to keep for post processing
+        finally:
+            self._cam.image_effect = 'none'
 
     def quit(self):
         """Close the camera driver, it's definitive.
@@ -200,6 +210,18 @@ class GpCamera(BaseCamera):
 
     """gPhoto2 camera management.
     """
+
+    IMAGE_EFFECTS = [u'none',
+                     u'blur',
+                     u'contour',
+                     u'detail',
+                     u'edge_enhance',
+                     u'edge_enhance_more',
+                     u'emboss',
+                     u'find_edges',
+                     u'smooth',
+                     u'smooth_more',
+                     u'sharpen']
 
     def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False):
         BaseCamera.__init__(self, resolution)
@@ -223,7 +245,7 @@ class GpCamera(BaseCamera):
         self._cam.set_config(config)
 
     def _post_process_capture(self, capture_path):
-        gp_path = self._captures[capture_path]
+        gp_path, effect = self._captures[capture_path]
         camera_file = gp.check_result(gp.gp_camera_file_get(
             self._cam, gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL))
 
@@ -233,6 +255,10 @@ class GpCamera(BaseCamera):
 
         if self._capture_hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
+        if effect != 'none':
+            image = image.filter(getattr(ImageFilter, effect.upper()))
+
         image.save(capture_path)
         return image
 
@@ -297,11 +323,15 @@ class GpCamera(BaseCamera):
             self.omxplayer_process = None
         self._window = None
 
-    def capture(self, filename):
+    def capture(self, filename, effect=None):
         """Capture a picture in a file.
         """
+        effect = str(effect).lower()
+        if effect not in self.IMAGE_EFFECTS:
+            raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
+
         self._init()
-        self._captures[filename] = self._cam.capture(gp.GP_CAPTURE_IMAGE)
+        self._captures[filename] = (self._cam.capture(gp.GP_CAPTURE_IMAGE), effect)
         time.sleep(1)  # Necessary to let the time for the camera to save the image
         self.quit()
 
@@ -319,6 +349,8 @@ class HybridCamera(RpiCamera):
     resolution)
     """
 
+    IMAGE_EFFECTS = GpCamera.IMAGE_EFFECTS
+
     def __init__(self, *args, **kwargs):
         RpiCamera.__init__(self, *args, **kwargs)
         gp.check_result(gp.use_python_logging())
@@ -331,7 +363,7 @@ class HybridCamera(RpiCamera):
         self._gp_cam.set_config(config)
 
     def _post_process_capture(self, capture_path):
-        gp_path = self._captures[capture_path]
+        gp_path, effect = self._captures[capture_path]
         camera_file = gp.check_result(gp.gp_camera_file_get(
             self._gp_cam, gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL))
 
@@ -342,14 +374,22 @@ class HybridCamera(RpiCamera):
 
         if self._cam.hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
+        if effect != 'none':
+            image = image.filter(getattr(ImageFilter, effect.upper()))
+
         image.save(capture_path)
         return image
 
-    def capture(self, filename):
+    def capture(self, filename, effect=None):
         """Capture a picture in a file.
         """
+        effect = str(effect).lower()
+        if effect not in self.IMAGE_EFFECTS:
+            raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
+
         RpiCamera.capture(self, filename)  # Just to show a captured image at screen
-        self._captures[filename] = self._gp_cam.capture(gp.GP_CAPTURE_IMAGE)
+        self._captures[filename] = (self._gp_cam.capture(gp.GP_CAPTURE_IMAGE), effect)
         time.sleep(1)  # Necessary to let the time for the camera to save the image
 
     def quit(self):

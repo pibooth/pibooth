@@ -54,6 +54,7 @@ DEFAULT = odict((
         odict((
             ("captures", ((4, 1), "Possible choice(s) of captures numbers (numbers between 1 to 4 max)")),
             ("orientation", ("auto", "Orientation of the final image ('auto', 'portrait' or 'landscape')")),
+            ("effect", ("none", "Effect applied to the captures (a list of quoted names can be given)")),
             ("footer_text1", ("Footer 1", "Main text displayed")),
             ("footer_text2", ("Footer 2", "Secondary text displayed")),
             ("text_color", ((0, 0, 0), "Footer text RGB color")),
@@ -157,7 +158,7 @@ class PiConfigParser(ConfigParser):
             LOGGER.info("Remove the auto-startup file in '%s'", dirname)
             os.remove(filename)
 
-    def editor(self):
+    def open_editor(self):
         """Open a text editor to edit the configuration file.
         """
         for editor in self.editors:

@@ -84,10 +84,10 @@ class StateWait(State):
 
     def validate_transition(self, events):
         if self.app.find_picture_event(events):
-            if len(self.app.capt_choices) > 1:
+            if len(self.app.capture_choices) > 1:
                 return 'choose'
             else:
-                self.app.nbr_captures = self.app.capt_choices[0]
+                self.app.nbr_captures = self.app.capture_choices[0]
                 return 'capture'
 
 
@@ -99,7 +99,7 @@ class StateChoose(State):
 
     def entry_actions(self):
         with timeit("Show picture choice (nothing selected)"):
-            self.app.window.show_choice(self.app.capt_choices)
+            self.app.window.show_choice(self.app.capture_choices)
         self.app.nbr_captures = None
         self.app.led_picture.blink()
         self.app.led_print.blink()
@@ -109,15 +109,15 @@ class StateChoose(State):
         event = self.app.find_choice_event(events)
         if event:
             if event.key == pygame.K_LEFT:
-                self.app.nbr_captures = self.app.capt_choices[0]
+                self.app.nbr_captures = self.app.capture_choices[0]
             elif event.key == pygame.K_RIGHT:
-                self.app.nbr_captures = self.app.capt_choices[1]
+                self.app.nbr_captures = self.app.capture_choices[1]
 
     def exit_actions(self):
-        if self.app.nbr_captures == self.app.capt_choices[0]:
+        if self.app.nbr_captures == self.app.capture_choices[0]:
             self.app.led_picture.switch_on()
             self.app.led_print.switch_off()
-        elif self.app.nbr_captures == self.app.capt_choices[1]:
+        elif self.app.nbr_captures == self.app.capture_choices[1]:
             self.app.led_print.switch_on()
             self.app.led_picture.switch_off()
         else:
@@ -139,7 +139,7 @@ class StateChosen(State):
 
     def entry_actions(self):
         with timeit("Show picture choice ({} pictures selected)".format(self.app.nbr_captures)):
-            self.app.window.show_choice(self.app.capt_choices, selected=self.app.nbr_captures)
+            self.app.window.show_choice(self.app.capture_choices, selected=self.app.nbr_captures)
         self.timer.start()
 
     def exit_actions(self):
@@ -184,12 +184,24 @@ class StateCapture(State):
         if self.app.config.getboolean('WINDOW', 'preview_stop_on_capture'):
             self.app.camera.stop_preview()
 
+        effects = self.app.config.gettyped('PICTURE', 'effect')
+        if not isinstance(effects, (list, tuple)):
+            # Same effect for all captures
+            effect = effects
+        elif len(effects) >= self.app.nbr_captures:
+            # Take the effect corresponding to the current capture
+            effect = effects[self.count]
+        else:
+            # Not possible
+            raise ValueError("Not enough effects defined for {} captures {}".format(
+                self.app.nbr_captures, effects))
+
         with timeit("Take picture and save it in {}".format(capture_path)):
             if self.app.config.getboolean('WINDOW', 'flash'):
                 with self.app.window.flash(2):
-                    self.app.camera.capture(capture_path)
+                    self.app.camera.capture(capture_path, effect)
             else:
-                self.app.camera.capture(capture_path)
+                self.app.camera.capture(capture_path, effect)
 
         self.count += 1
 
@@ -356,10 +368,10 @@ class PiApplication(object):
         self.previous_picture = None
         self.previous_picture_file = None
 
-        self.capt_choices = config.gettyped('PICTURE', 'captures')
-        if isinstance(self.capt_choices, int):
-            self.capt_choices = (self.capt_choices,)
-        for chx in self.capt_choices:
+        self.capture_choices = config.gettyped('PICTURE', 'captures')
+        if isinstance(self.capture_choices, int):
+            self.capture_choices = (self.capture_choices,)
+        for chx in self.capture_choices:
             if chx not in [1, 2, 3, 4]:
                 raise ValueError("Invalid captures number '{}'".format(chx))
 
@@ -503,7 +515,7 @@ def main():
 
     if options.config:
         LOGGER.info("Editing the photo booth configuration...")
-        config.editor()
+        config.open_editor()
     elif not options.reset:
         LOGGER.info("Starting the photo booth application...")
         app = PiApplication(config)

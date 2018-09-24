@@ -4,8 +4,9 @@
    :alt: Pibooth
 
 
-The ``pibooth`` project attempts to provide a photo booth application *out-of-the-box*
-in pure Python for Raspberry Pi.
+The ``pibooth`` project attempts to provide a photobooth application *out-of-the-box*
+in pure Python for Raspberry Pi. Have a look to the `wiki <https://github.com/werdeil/pibooth/wiki>`_
+to discover some realizations from GitHb users.
 
 Requirements
 ------------
@@ -18,7 +19,7 @@ Hardware
 ^^^^^^^^
 
 * 1 Raspberry Pi 2 Model B (or higher)
-* 1 Camera (Pi Camera v2.1 8 MP 1080p or any camera `compatible with gPhoto2
+* 1 Camera (Pi Camera v2.1 8 MP 1080p or any DSLR camera `compatible with gPhoto2
   <http://www.gphoto.org/proj/libgphoto2/support.php>`_)
 * 2 push buttons
 * 4 LEDs
@@ -63,7 +64,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo apt-get update
         $ sudo apt-get upgrade
 
-5. Optionally install ``gPhoto2`` (required only for external camera):
+5. Optionally install ``gPhoto2`` (required only for DSLR camera):
 
    ::
 
@@ -133,6 +134,18 @@ The application follows the states sequence defined in the diagram below:
 The states of the **LED 1** and **LED 2** are modified depending on the actions available
 for the user. The **LED 3** is switched on when the application starts and the **LED 4**
 is switched on during the preview and photo capture.
+
+A word about capture effects
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Image effects can be applied on the capture using the ``[PICTURE][effect]`` variable defined in the
+configuration. A set of predefined effects are available depending on the camera used:
+
+* `picamera effects <https://picamera.readthedocs.io/en/latest/api_camera.html#picamera.PiCamera.image_effect>`_
+* `gPhoto2 effects (PIL based) <https://pillow.readthedocs.io/en/latest/reference/ImageFilter.html>`_
+
+Instead of one effect name, a list of names can be provided. In this case, the effects are applied
+sequentially on the captures.
 
 Final picture rendering
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -212,7 +225,7 @@ Shrink page ...  Shrink (print the whole page)
 Circuit diagram
 ---------------
 
-Here is the diagram for hardware connections. Please refer to the configuration to known the
+Here is the diagram for hardware connections. Please refer to the configuration to know the
 default pins used.
 
 .. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/sketch.png
