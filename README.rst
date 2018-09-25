@@ -92,16 +92,17 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 Run
 ---
 
-Start the photo booth application using the command::
+Start the photobooth application using the command::
 
     $ pibooth
 
-All pictures taken are stored in a subfolder of the one defined in the configuration,
-named **YYYY-mm-dd hh-mm-ss** which the time when first picture of the sequence was taken.
+All pictures taken are stored in the folder defined in ``[GENERAL][directory]``. They are named
+**YYYY-mm-dd-hh-mm-ss_pibooth.jpg** which the time when first capture of the sequence was taken.
+A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is created to store the corresponding raw captures.
 
-Note that if you have both ``Pi`` and ``gPhoto2`` cameras connected to the Raspberry Pi, both are
-used. The preview is taken using the ``Pi`` one for a better video rendering and the capture is
-taken using the ``gPhoto2`` one for better picture rendering.
+.. note:: if you have both ``Pi`` and ``gPhoto2`` cameras connected to the Raspberry Pi, both are
+          used. The preview is taken using the ``Pi`` one for a better video rendering and the
+          capture is taken using the ``gPhoto2`` one for better picture rendering.
 
 You can display a basic help on application options by using the command::
 
@@ -139,13 +140,30 @@ A word about capture effects
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Image effects can be applied on the capture using the ``[PICTURE][effect]`` variable defined in the
-configuration. A set of predefined effects are available depending on the camera used:
+configuration.
 
-* `picamera effects <https://picamera.readthedocs.io/en/latest/api_camera.html#picamera.PiCamera.image_effect>`_
-* `gPhoto2 effects (PIL based) <https://pillow.readthedocs.io/en/latest/reference/ImageFilter.html>`_
+.. code-block:: ini
+
+    [PICTURE]
+
+    # Effect applied on all captures
+    effect = film
 
 Instead of one effect name, a list of names can be provided. In this case, the effects are applied
-sequentially on the captures.
+sequentially on the captures sequence.
+
+.. code-block:: ini
+
+    [PICTURE]
+
+    # Define a rolling sequence of effects. For each capture the corresponding effect is applied.
+    effect = ('film', 'cartoon', 'washedout', 'film')
+
+Have a look to the predefined effects available depending on the camera used:
+
+    * `picamera effects <https://picamera.readthedocs.io/en/latest/api_camera.html#picamera.PiCamera.image_effect>`_
+    * `gPhoto2 effects (PIL based) <https://pillow.readthedocs.io/en/latest/reference/ImageFilter.html>`_
+
 
 Final picture rendering
 ^^^^^^^^^^^^^^^^^^^^^^^

@@ -239,7 +239,8 @@ class StateProcessing(State):
             self.app.previous_picture = concatenate_pictures(
                 self.app.camera.get_captures(), footer_texts, bg_color, text_color, orientation)
 
-        self.app.previous_picture_file = osp.join(self.app.savedir, time.strftime("%Y-%m-%d-%H-%M-%S") + "_ptb.jpg")
+        self.app.previous_picture_file = osp.join(
+            self.app.savedir, osp.basename(self.app.dirname) + "_pibooth.jpg")
         with timeit("Save the merged picture in {}".format(self.app.previous_picture_file)):
             self.app.previous_picture.save(self.app.previous_picture_file)
 
