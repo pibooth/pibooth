@@ -6,7 +6,7 @@
 
 The ``pibooth`` project attempts to provide a photobooth application *out-of-the-box*
 in pure Python for Raspberry Pi. Have a look to the `wiki <https://github.com/werdeil/pibooth/wiki>`_
-to discover some realizations from GitHb users.
+to discover some realizations from GitHub users.
 
 Requirements
 ------------
@@ -72,7 +72,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo chmod 755 gphoto2-updater.sh
         $ sudo ./gphoto2-updater.sh
 
-6. Optionally install ``CUPS`` to handle printers (more instruction to add a new printer can be found
+6. Optionally install ``CUPS`` to handle printers (more instructions to add a new printer can be found
    `here <https://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer>`_):
 
    ::
@@ -97,8 +97,8 @@ Start the photobooth application using the command::
     $ pibooth
 
 All pictures taken are stored in the folder defined in ``[GENERAL][directory]``. They are named
-**YYYY-mm-dd-hh-mm-ss_pibooth.jpg** which the time when first capture of the sequence was taken.
-A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is created to store the corresponding raw captures.
+**YYYY-mm-dd-hh-mm-ss_pibooth.jpg** which is the time when first capture of the sequence was taken.
+A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is created to store the single raw captures.
 
 .. note:: if you have both ``Pi`` and ``gPhoto2`` cameras connected to the Raspberry Pi, both are
           used. The preview is taken using the ``Pi`` one for a better video rendering and the
