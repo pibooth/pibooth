@@ -19,13 +19,15 @@ class PtbWindow(object):
     RIGHT = 'right'
     LEFT = 'left'
 
-    def __init__(self, title, size):
+    def __init__(self, title, size, show_arrows=True):
         if isinstance(size, str) and size.lower() == 'fullscreen':
             self.__size = (800, 480)
         elif isinstance(size, (tuple, list)):
             self.__size = size
         else:
             raise TypeError("Invalid size '{}' ({})".format(size, type(size)))
+
+        self.show_arrows = show_arrows
 
         # Save the desktop mode, shall be done before `setmode` (SDL 1.2.10, and pygame 1.8.0)
         info = pygame.display.Info()
@@ -168,9 +170,9 @@ class PtbWindow(object):
         """
         self._picture_number = (0, self._picture_number[1])
         if with_print and pil_image:
-            self._update_background(background.IntroWithPrintBackground())
+            self._update_background(background.IntroWithPrintBackground(self.show_arrows))
         else:
-            self._update_background(background.IntroBackground())
+            self._update_background(background.IntroBackground(self.show_arrows))
 
         if pil_image:
             self._update_foreground(pil_image, self.RIGHT)
@@ -181,7 +183,7 @@ class PtbWindow(object):
         """
         self._picture_number = (0, self._picture_number[1])
         if not selected:
-            self._update_background(background.ChooseBackground(choices))
+            self._update_background(background.ChooseBackground(choices, self.show_arrows))
         else:
             self._update_background(background.ChosenBackground(choices, selected))
 
@@ -210,7 +212,7 @@ class PtbWindow(object):
         """Show print view.
         """
         self._picture_number = (0, self._picture_number[1])
-        self._update_background(background.PrintBackground())
+        self._update_background(background.PrintBackground(self.show_arrows))
         if pil_image:
             self._update_foreground(pil_image, self.LEFT)
         pygame.display.update()

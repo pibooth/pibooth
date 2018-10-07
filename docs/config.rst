@@ -27,6 +27,9 @@ Default configuration
     # Blinking background when picture is taken
     flash = True
 
+    # Show arrows to indicate physical buttons
+    arrows = True
+
     # How long is the preview in seconds
     preview_delay = 3
 

@@ -148,7 +148,7 @@ class PtbPrinter(object):
     def is_installed(self):
         """Return True if the CUPS server is available for printing.
         """
-        return cups is not None and self.name
+        return cups is not None and self.name is not None
 
     def print_file(self, filename, copies=1):
         """Send a file to the CUPS server to the default printer.

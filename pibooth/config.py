@@ -45,6 +45,7 @@ DEFAULT = odict((
         odict((
             ("size", ((800, 480), "The (width, height) of the display window or 'fullscreen'")),
             ("flash", (True, "Blinking background when picture is taken")),
+            ("arrows", (True, "Show arrows to indicate physical buttons")),
             ("preview_delay", (3, "How long is the preview in seconds")),
             ("preview_countdown", (True, "Show a countdown timer during the preview")),
             ("preview_stop_on_capture", (False, "Stop the preview before taking the picture")),
