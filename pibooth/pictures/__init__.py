@@ -10,7 +10,11 @@ from pibooth.pictures import sizing
 def get_filename(name):
     """Return absolute path to a picture located in the current package.
     """
-    return osp.join(osp.dirname(osp.abspath(__file__)), PiConfigParser.language, name)
+    path = osp.join(osp.dirname(osp.abspath(__file__)), PiConfigParser.language, name)
+    if not osp.isfile(path):
+        # Look for common image
+        return osp.join(osp.dirname(osp.abspath(__file__)), 'com', name)
+    return path
 
 
 def get_image(name, size=None, antialiasing=True):

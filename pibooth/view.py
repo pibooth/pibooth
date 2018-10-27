@@ -8,6 +8,7 @@ import contextlib
 import pygame
 from pygame import gfxdraw
 from PIL import Image
+from pibooth import pictures, fonts
 from pibooth.pictures import background
 from pibooth.utils import LOGGER
 from pibooth.pictures import sizing
@@ -40,6 +41,7 @@ class PtbWindow(object):
         self._buffered_images = {}
         self._current_background = None
         self._current_foreground = None
+        self._print_number = 0
         self._picture_number = (0, 4)  # (current, max)
         self._default_cursor = pygame.mouse.get_cursor()
 
@@ -84,12 +86,14 @@ class PtbWindow(object):
         self._current_background.resize(self.surface)
         self._current_background.paint(self.surface)
         self._update_picture_number()
+        self._update_print_number()
 
     def _update_picture_number(self):
         """Update the pictures counter displayed.
         """
         if not self._picture_number[0]:
             return  # Dont show counter: no picture taken
+
         center = self.surface.get_rect().center
         radius = 10
         border = 20
@@ -103,6 +107,23 @@ class PtbWindow(object):
                 gfxdraw.aacircle(self.surface, x, y, radius - 3, color)
                 gfxdraw.filled_circle(self.surface, x, y, radius - 3, color)
             x += (2 * radius + border)
+
+    def _update_print_number(self):
+        """Update the number of files in the printer queue.
+        """
+        if not self._print_number:
+            return  # Dont show counter: no file in queue
+
+        smaller = self.size[1] if self.size[1] < self.size[0] else self.size[0]
+        side = int(smaller * 0.05)  # 5% of the window
+
+        if side > 0:
+            image = pictures.get_image('printer.png', (side, side))
+            y = self.surface.get_rect().height - image.get_rect().height - 10
+            self.surface.blit(image, (10, y))
+            font = pygame.font.Font(fonts.get_filename("Amatic-Bold.ttf"), side)
+            label = font.render(str(self._print_number), True, (255, 255, 255))
+            self.surface.blit(label, (side + 20, y))
 
     def _center_pos(self, image):
         """
@@ -154,6 +175,7 @@ class PtbWindow(object):
             self._update_background(self._current_background)
         else:
             self._update_picture_number()
+            self._update_print_number()
         if self._current_foreground:
             self._update_foreground(*self._current_foreground)
         pygame.display.update()
@@ -259,6 +281,16 @@ class PtbWindow(object):
         if self._current_foreground:
             self._update_foreground(*self._current_foreground)
         pygame.display.update()
+
+    def set_print_number(self, current_nbr):
+        """Set the current number of tasks in the printer queue.
+        """
+        if self._print_number != current_nbr:
+            self._print_number = current_nbr
+            self._update_background(self._current_background)
+            if self._current_foreground:
+                self._update_foreground(*self._current_foreground)
+            pygame.display.update()
 
     def toggle_fullscreen(self):
         """Set window to full screen or initial size.

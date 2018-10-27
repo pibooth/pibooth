@@ -22,7 +22,7 @@ from pibooth.controls import camera
 from pibooth.pictures.concatenate import concatenate_pictures
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
-from pibooth.controls.printer import PtbPrinter
+from pibooth.controls.printer import PRINTER_TASKS_UPDATED, PtbPrinter
 
 
 class StateFailSafe(State):
@@ -62,8 +62,6 @@ class StateWait(State):
             if self.app.nbr_printed >= self.app.config.getint('PRINTER', 'max_duplicates'):
                 LOGGER.warning("Too many duplicates sent to the printer (%s max)",
                                self.app.config.getint('PRINTER', 'max_duplicates'))
-                self.app.window.show_intro(self.app.previous_picture, False)
-                self.app.led_print.switch_off()
                 return
 
             with timeit("Send final picture to printer"):
@@ -71,9 +69,18 @@ class StateWait(State):
                 self.app.printer.print_file(self.app.previous_picture_file,
                                             self.app.config.getint('PRINTER', 'nbr_copies'))
 
-            time.sleep(2)  # Just to let the LED switched on
+            time.sleep(1)  # Just to let the LED switched on
             self.app.nbr_printed += 1
-            self.app.led_print.blink()
+
+            if self.app.nbr_printed >= self.app.config.getint('PRINTER', 'max_duplicates'):
+                self.app.window.show_intro(self.app.previous_picture, False)
+                self.app.led_print.switch_off()
+            else:
+                self.app.led_print.blink()
+
+        event = self.app.find_print_status_event(events)
+        if event:
+            self.app.window.set_print_number(len(event.tasks))
 
     def exit_actions(self):
         self.app.led_picture.switch_off()
@@ -99,6 +106,7 @@ class StateChoose(State):
 
     def entry_actions(self):
         with timeit("Show picture choice (nothing selected)"):
+            self.app.window.set_print_number(0)  # Hide printer status
             self.app.window.show_choice(self.app.capture_choices)
         self.app.nbr_captures = None
         self.app.led_picture.blink()
@@ -261,6 +269,7 @@ class StatePrint(State):
     def entry_actions(self):
         self.printed = False
         with timeit("Display the merged picture"):
+            self.app.window.set_print_number(len(self.app.printer.get_all_tasks()))
             self.app.window.show_print(self.app.previous_picture)
         self.app.led_print.blink()
         self.timer.start()
@@ -273,13 +282,15 @@ class StatePrint(State):
                 self.app.printer.print_file(self.app.previous_picture_file,
                                             self.app.config.getint('PRINTER', 'nbr_copies'))
 
-            time.sleep(2)  # Just to let the LED switched on
+            time.sleep(1)  # Just to let the LED switched on
             self.app.nbr_printed += 1
             self.app.led_print.blink()
             self.printed = True
 
     def validate_transition(self, events):
         if self.timer.is_timeout() or self.printed:
+            if self.printed:
+                self.app.window.set_print_number(len(self.app.printer.get_all_tasks()))
             return 'finish'
 
 
@@ -428,6 +439,14 @@ class PiApplication(object):
                 rect = self.window.get_rect()
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     return event
+        return None
+
+    def find_print_status_event(self, events):
+        """Return the first found event if found in the list.
+        """
+        for event in events:
+            if event.type == PRINTER_TASKS_UPDATED:
+                return event
         return None
 
     def find_choice_event(self, events):

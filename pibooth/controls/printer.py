@@ -8,6 +8,8 @@ import tempfile
 import threading
 import collections
 import os.path as osp
+
+import pygame
 from PIL import Image
 from xml.etree import ElementTree
 try:
@@ -17,6 +19,9 @@ except ImportError:
     from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from pibooth.utils import LOGGER
 from pibooth.pictures.concatenate import concatenate_pictures
+
+
+PRINTER_TASKS_UPDATED = pygame.USEREVENT + 2
 
 
 class NotificationHandler(BaseHTTPRequestHandler):
@@ -49,7 +54,7 @@ class NotificationHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_PUT(self):
-        """Serve a PUT request.
+        """Serve a PUT request and trasfert event to server callback.
         """
         chunk_size = self.get_chunk_size()
         if chunk_size == 0:
@@ -61,9 +66,8 @@ class NotificationHandler(BaseHTTPRequestHandler):
                 for item in reversed([e for e in channel.iterfind('item')]):
                     txt = ElementTree.tostring(item, encoding='utf8')
                     if txt not in NotificationHandler._last_notif:
-                        # Print only the new notifications
-                        LOGGER.info("%s - %s", item.findtext('pubDate'), item.findtext('title'))
                         NotificationHandler._last_notif.append(txt)
+                        self.server.callback(dict((elem.tag, elem.text) for elem in item.iter() if elem.text.strip()))
 
         self.send_response(200)
         self.end_headers()
@@ -71,10 +75,11 @@ class NotificationHandler(BaseHTTPRequestHandler):
 
 class NotificationServer(HTTPServer):
 
-    def __init__(self, cups_conn):
+    def __init__(self, cups_conn, callback):
         HTTPServer.__init__(self, ('localhost', 9988), NotificationHandler)
         self._thread = None
         self._conn = cups_conn
+        self.callback = callback
         self.notif_uri = 'rss://{}:{}'.format(self.server_address[0],
                                               self.server_address[1])
 
@@ -130,7 +135,7 @@ class PtbPrinter(object):
 
     def __init__(self, name='default'):
         self._conn = cups.Connection() if cups else None
-        self._notif_server = NotificationServer(self._conn)
+        self._notif_server = NotificationServer(self._conn, self._on_event)
         self.name = None
         if not cups:
             LOGGER.warning("No printer found (pycups not installed)")
@@ -144,6 +149,16 @@ class PtbPrinter(object):
 
         if not self.name:
             LOGGER.warning("No printer found (nothing defined in CUPS)")
+        else:
+            LOGGER.info("Connected to printer '%s'", self.name)
+
+    def _on_event(self, event):
+        """
+        Call for each new print event.
+        """
+        LOGGER.info("%s - %s", event.get('pubDate', '?'), event.get('title', '?'))
+        pygame.event.post(pygame.event.Event(PRINTER_TASKS_UPDATED,
+                                             tasks=self.get_all_tasks()))
 
     def is_installed(self):
         """Return True if the CUPS server is available for printing.
@@ -172,6 +187,15 @@ class PtbPrinter(object):
         if not self.name:
             raise EnvironmentError("No printer found (check config file or CUPS config)")
         self._conn.cancelAllJobs(self.name)
+
+    def get_all_tasks(self):
+        """Return a dict (indexed by job ID) of dicts representing all tasks
+        in the queue.
+        """
+        if not self.name:
+            raise EnvironmentError("No printer found (check config file or CUPS config)")
+        return self._conn.getJobs(my_jobs=True, requested_attributes=["job-id", "job-name",
+                                                                      "job-uri", "job-state"])
 
     def quit(self):
         """Do cleanup actions.
