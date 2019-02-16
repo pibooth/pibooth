@@ -265,6 +265,7 @@ class GpCamera(BaseCamera):
     def preview(self, window, flip=True, timeout=5):
         """Setup the preview.
         """
+        self.gphoto2_process = True #hack to avoid the preview
         if not self.gphoto2_process:
             self._window = window
             rect = self.get_rect()
@@ -280,6 +281,8 @@ class GpCamera(BaseCamera):
             command = "omxplayer fifo.mjpg --live --crop 252,0,804,704 --win {0} --orientation {1}".format(
                 window_rect, orientation)
             self.omxplayer_process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+        else:
+            self._window = window
 
     def preview_countdown(self, timeout, alpha=60):
         """Show a countdown of `timeout` seconds on the preview.
@@ -288,7 +291,9 @@ class GpCamera(BaseCamera):
         timeout = int(timeout)
         if timeout < 1:
             raise ValueError("Start time shall be greater than 0")
-
+        rect = self._window.get_rect()
+        size = (((rect.width + 31) // 32) * 32, ((rect.height + 15) // 16) * 16)
+        image = Image.new('RGB', size, color = (0, 0, 0))
         overlay = None
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
@@ -296,10 +301,13 @@ class GpCamera(BaseCamera):
             remaining = int(timer.remaining() + 1)
             if not overlay or remaining != timeout:
                 # Rebluid overlay only if remaining number has changed
-                # overlay = self.get_overlay(image.size, str(remaining), alpha)
+                image = Image.new('RGB', size, color = (0, 0, 0))
+                overlay = self.get_overlay(image.size, str(remaining), alpha)
                 timeout = remaining
-            #image.paste(overlay, (0, 0), overlay)
-            # self._window.show_image(image)
+                print("timer", remaining)
+                image.paste(overlay, (0, 0), overlay)
+                self._window.show_image(image)
+
 
     def preview_wait(self, timeout):
         """Wait the given time and refresh the preview.
@@ -315,9 +323,9 @@ class GpCamera(BaseCamera):
     def stop_preview(self):
         """Stop the preview.
         """
-        if self.gphoto2_process:
-            os.killpg(os.getpgid(self.gphoto2_process.pid), signal.SIGTERM)
-            self.gphoto2_process = None
+        # if self.gphoto2_process:
+        #     os.killpg(os.getpgid(self.gphoto2_process.pid), signal.SIGTERM)
+        #     self.gphoto2_process = None
         if self.omxplayer_process:
             os.killpg(os.getpgid(self.omxplayer_process.pid), signal.SIGTERM)
             self.omxplayer_process = None
