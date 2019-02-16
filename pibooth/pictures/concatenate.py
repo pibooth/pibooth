@@ -209,16 +209,19 @@ def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 25
     """
     if orientation == "auto":
         # Use the size of the first picture to determine the orientation
-        if pictures[0].size[0] > pictures[0].size[1]:
-            orientation = "landscape"
+        is_portrait = pictures[0].size[0] < pictures[0].size[1]
+        if len(pictures) == 1 or len(pictures) == 4:
+            if is_portrait:
+                orientation = "portrait"
+            else:
+                orientation = "landscape"
+        elif len(pictures) == 2 or len(pictures) == 3:
+            if is_portrait:
+                orientation = "landscape"
+            else:
+                orientation = "portrait"
         else:
-            orientation = "portrait"
-    elif orientation == "revauto":
-        # Use the size of the first picture to determine the reversed orientation
-        if pictures[0].size[0] < pictures[0].size[1]:
-            orientation = "landscape"
-        else:
-            orientation = "portrait"
+            raise ValueError("List of max 4 pictures expected, got {}".format(len(pictures)))
 
     if orientation == "portrait":
         return concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, inter_width)

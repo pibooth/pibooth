@@ -176,7 +176,7 @@ class PtbPrinter(object):
         if copies > 1:
             with tempfile.NamedTemporaryFile(suffix=osp.basename(filename)) as fp:
                 picture = Image.open(filename)
-                concatenate_pictures((picture,) * copies, orientation='revauto', inter_width=2).save(fp.name)
+                concatenate_pictures((picture,) * copies, orientation='auto', inter_width=2).save(fp.name)
                 self._conn.printFile(self.name, fp.name, osp.basename(filename), {})
         else:
             self._conn.printFile(self.name, filename, osp.basename(filename), {})

@@ -89,6 +89,28 @@ A brief description on how to set-up a Raspberry Pi to use this software.
              the ``--no-deps`` option to avoid installation failures (you may need to install Python
              dependencies by yourself)
 
+Install developing version
+--------------------------
+
+If you want to use an **unofficial version** of the ``pibooth`` application, you need to work from
+a clone of this ``git`` repository. Replace the step 7. of the `Install`_ procedure above by the
+following actions:
+
+1. Clone from github ::
+
+    $ git clone https://github.com/werdeil/pibooth.git
+
+2. Go in the cloned directory ::
+
+    $ cd pibooth
+
+3. Install ``pibooth`` in editable mode ::
+
+    $ sudo pip3 install -e .
+
+4. Start the application exactly in the same way as installed from pypi. All modifications performed
+   in the cloned repository are taken into account when the application starts.
+
 Run
 ---
 
@@ -179,28 +201,6 @@ the configuration (see `Configuration`_ below):
 
 .. note:: The resolution is an important parameter, it is responsible for the quality of the final
           picture. Have a look to `picamera possible resolutions <http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes>`_ .
-
-Install developing version
---------------------------
-
-If you want to use an unofficial version of the ``pibooth`` application, you need to work from a
-clone of this ``git`` repository. Replace the step 7. of the `Install`_ procedure above by the
-following actions:
-
-- clone from github ::
-
-   $ git clone https://github.com/werdeil/pibooth.git
-
-- go in the cloned directory ::
-
-   $ cd pibooth
-
-- install ``pibooth`` in editable mode ::
-
-   $ sudo pip3 install -e .
-
-- start the application exactly in the same way as installed from pypi. All modifications performed
-  in the cloned repository are taken into account when the application starts.
 
 Configuration
 -------------
