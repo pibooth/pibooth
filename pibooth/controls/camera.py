@@ -14,7 +14,22 @@ from PIL import Image, ImageFont, ImageDraw, ImageFilter
 import picamera
 from pibooth import fonts
 from pibooth.pictures import sizing
+from pibooth.config import PiConfigParser
 from pibooth.utils import LOGGER, PoolingTimer
+
+
+# Mapping of gPhoto2 config values for supported languages
+GP_PARAMS = {
+    'fr': {
+        'Memory card': 'Carte mémoire',
+    },
+    'en': {
+        'Memory card': 'Memory card',
+    },
+    'de': {
+        'Memory card': 'Speicherkarte',
+    },
+}
 
 
 def rpi_camera_connected():
@@ -57,6 +72,7 @@ def gp_set_config_value(config, section, option, value):
     values have to be changed)
     """
     try:
+        value = GP_PARAMS.get(PiConfigParser.language, 'en').get(value, value)
         LOGGER.debug('Setting option %s/%s=%s', section, option, value)
         child = config.get_child_by_name(section).get_child_by_name(option)
         choices = [c for c in child.get_choices()]
@@ -241,7 +257,7 @@ class GpCamera(BaseCamera):
         self._cam.init()
         config = self._cam.get_config()
         gp_set_config_value(config, 'imgsettings', 'iso', self._iso)
-        gp_set_config_value(config, 'settings', 'capturetarget', 'Carte mémoire')
+        gp_set_config_value(config, 'settings', 'capturetarget', 'Memory card')
         self._cam.set_config(config)
 
     def _post_process_capture(self, capture_path):
@@ -365,7 +381,7 @@ class HybridCamera(RpiCamera):
 
         config = self._gp_cam.get_config()
         gp_set_config_value(config, 'imgsettings', 'iso', self._cam.iso)
-        gp_set_config_value(config, 'settings', 'capturetarget', 'Carte mémoire')
+        gp_set_config_value(config, 'settings', 'capturetarget', 'Memory card')
         self._gp_cam.set_config(config)
 
     def _post_process_capture(self, capture_path):
