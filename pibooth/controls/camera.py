@@ -265,7 +265,7 @@ class GpCamera(BaseCamera):
     def preview(self, window, flip=True, timeout=5):
         """Setup the preview.
         """
-        self.gphoto2_process = True #hack to avoid the preview
+        self.gphoto2_process = True  # hack to avoid the preview
         if not self.gphoto2_process:
             self._window = window
             rect = self.get_rect()
@@ -293,7 +293,7 @@ class GpCamera(BaseCamera):
             raise ValueError("Start time shall be greater than 0")
         rect = self._window.get_rect()
         size = (((rect.width + 31) // 32) * 32, ((rect.height + 15) // 16) * 16)
-        image = Image.new('RGB', size, color = (0, 0, 0))
+        image = Image.new('RGB', size, color=(0, 0, 0))
         overlay = None
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
@@ -301,13 +301,11 @@ class GpCamera(BaseCamera):
             remaining = int(timer.remaining() + 1)
             if not overlay or remaining != timeout:
                 # Rebluid overlay only if remaining number has changed
-                image = Image.new('RGB', size, color = (0, 0, 0))
+                image = Image.new('RGB', size, color=(0, 0, 0))
                 overlay = self.get_overlay(image.size, str(remaining), alpha)
                 timeout = remaining
-                print("timer", remaining)
                 image.paste(overlay, (0, 0), overlay)
                 self._window.show_image(image)
-
 
     def preview_wait(self, timeout):
         """Wait the given time and refresh the preview.
