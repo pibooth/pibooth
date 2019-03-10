@@ -61,6 +61,9 @@ Default configuration
     # Background RGB color or path to a background image
     bg_color = (255, 255, 255)
 
+    # Fonts url to be used on the image
+    fonts = none
+
     [CAMERA]
     # Adjust for lighting issues, normal is 100 or 200 and dark is 800 max
     iso = 100
