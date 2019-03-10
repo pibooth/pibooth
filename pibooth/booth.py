@@ -238,6 +238,7 @@ class StateProcessing(State):
             footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
                             self.app.config.get('PICTURE', 'footer_text2')]
             bg_color = self.app.config.gettyped('PICTURE', 'bg_color')
+            footer_fonts = self.app.config.get('PICTURE', 'fonts')
             if not isinstance(bg_color, (tuple, list)):
                 # Path to a background image
                 bg_color = Image.open(self.app.config.getpath('PICTURE', 'bg_color'))
@@ -245,7 +246,7 @@ class StateProcessing(State):
             orientation = self.app.config.get('PICTURE', 'orientation')
 
             self.app.previous_picture = concatenate_pictures(
-                self.app.camera.get_captures(), footer_texts, bg_color, text_color, orientation)
+                self.app.camera.get_captures(), footer_texts, bg_color, text_color, orientation, footer_fonts)
 
         self.app.previous_picture_file = osp.join(
             self.app.savedir, osp.basename(self.app.dirname) + "_pibooth.jpg")

@@ -17,7 +17,7 @@ def new_image_with_background(width, height, background):
         return image
 
 
-def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, inter_width=None):
+def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, inter_width=None, footer_fonts):
     """
     Merge up to 4 PIL images in portrait orientation.
 
@@ -95,14 +95,14 @@ def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, 
         draw = ImageDraw.Draw(final_image)
 
         # Footer 1
-        name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), int(2 / 3. * footer_size))
+        name_font = ImageFont.truetype(footer_fonts[0], int(2 / 3. * footer_size))
         name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
         footer_x = (final_width - name_width) // 2
         footer_y = final_height - footer_size - 100
         draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
 
         # Footer 2
-        date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), int(1 / 3. * footer_size))
+        date_font = ImageFont.truetype(footer_fonts[-1], int(1 / 3. * footer_size))
         date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
         footer_x = (final_width - date_width) // 2
         footer_y = final_height - footer_size + 300
@@ -111,7 +111,7 @@ def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, 
     return final_image
 
 
-def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color, inter_width=None):
+def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color, inter_width=None, footer_fonts):
     """
     Merge up to 4 PIL images in landscape orientation.
 
@@ -186,14 +186,14 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color,
         draw = ImageDraw.Draw(final_image)
 
         # Footer 1
-        name_font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), int(2 / 3. * footer_size))
+        name_font = ImageFont.truetype(footer_fonts[0], int(2 / 3. * footer_size))
         name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
         footer_x = final_width // 4 - name_width // 2
         footer_y = final_height - (footer_size + name_height) // 2 - 50
         draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
 
         # Footer 2
-        date_font = ImageFont.truetype(fonts.get_filename("AmaticSC-Regular.ttf"), int(1 / 3. * footer_size))
+        date_font = ImageFont.truetype(footer_fonts[-1], int(1 / 3. * footer_size))
         date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
         footer_x = 3 * final_width // 4 - date_width // 2
         footer_y = final_height - (footer_size + date_height) // 2 - 50
@@ -202,11 +202,14 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color,
     return final_image
 
 
-def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto", inter_width=None):
+def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto", inter_width=None, footer_fonts=None):
     """
     Merge up to 4 PIL images and retrun concatenated image as a new PIL image object.
     Configuration of the final picture depends on the number of given pictures.
     """
+    if not footer_fonts:
+        footer_fonts = [fonts.get_filename("Amatic-Bold.ttf"), fonts.get_filename("AmaticSC-Regular.ttf")]
+
     if orientation == "auto":
         # Use the size of the first picture to determine the orientation
         is_portrait = pictures[0].size[0] < pictures[0].size[1]
@@ -224,8 +227,8 @@ def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 25
             raise ValueError("List of max 4 pictures expected, got {}".format(len(pictures)))
 
     if orientation == "portrait":
-        return concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, inter_width)
+        return concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, inter_width, footer_fonts)
     elif orientation == "landscape":
-        return concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color, inter_width)
+        return concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color, inter_width, footer_fonts)
     else:
         raise ValueError("Invalid orientation '{}'".format(orientation))
