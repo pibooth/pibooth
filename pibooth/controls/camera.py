@@ -72,7 +72,7 @@ def gp_set_config_value(config, section, option, value):
     values have to be changed)
     """
     try:
-        value = GP_PARAMS.get(PiConfigParser.language, 'en').get(value, value)
+        value = GP_PARAMS.get(PiConfigParser.language, GP_PARAMS['en']).get(value, value)
         LOGGER.debug('Setting option %s/%s=%s', section, option, value)
         child = config.get_child_by_name(section).get_child_by_name(option)
         choices = [c for c in child.get_choices()]
