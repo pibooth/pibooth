@@ -60,7 +60,7 @@ DEFAULT = odict((
             ("footer_text2", ("Footer 2", "Secondary text displayed")),
             ("text_color", ((0, 0, 0), "Footer text RGB color")),
             ("bg_color", ((255, 255, 255), "Background RGB color or path to a background image")),
-            ("fonts", ("none", "Fonts url to be used on the image")
+            ("fonts", ("none", "Fonts url to be used on the image")),
         ))
      ),
     ("CAMERA",
