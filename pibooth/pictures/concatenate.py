@@ -17,7 +17,7 @@ def new_image_with_background(width, height, background):
         return image
 
 
-def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, inter_width=None, footer_fonts):
+def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, footer_fonts, inter_width=None):
     """
     Merge up to 4 PIL images in portrait orientation.
 
@@ -111,7 +111,7 @@ def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, 
     return final_image
 
 
-def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color, inter_width=None, footer_fonts):
+def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color, footer_fonts, inter_width=None):
     """
     Merge up to 4 PIL images in landscape orientation.
 
