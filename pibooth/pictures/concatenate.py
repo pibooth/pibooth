@@ -202,13 +202,15 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color,
     return final_image
 
 
-def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto", inter_width=None, footer_fonts=None):
+def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto", footer_fonts=None, inter_width=None):
     """
     Merge up to 4 PIL images and retrun concatenated image as a new PIL image object.
     Configuration of the final picture depends on the number of given pictures.
     """
-    if not footer_fonts:
+    if footer_fonts == 'none':
         footer_fonts = [fonts.get_filename("Amatic-Bold.ttf"), fonts.get_filename("AmaticSC-Regular.ttf")]
+    else:
+        footer_fonts = footer_fonts.split(',')
 
     if orientation == "auto":
         # Use the size of the first picture to determine the orientation
@@ -227,8 +229,8 @@ def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 25
             raise ValueError("List of max 4 pictures expected, got {}".format(len(pictures)))
 
     if orientation == "portrait":
-        return concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, inter_width, footer_fonts)
+        return concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, footer_fonts, inter_width)
     elif orientation == "landscape":
-        return concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color, inter_width, footer_fonts)
+        return concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color, footer_fonts, inter_width)
     else:
         raise ValueError("Invalid orientation '{}'".format(orientation))
