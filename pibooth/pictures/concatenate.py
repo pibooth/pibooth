@@ -202,7 +202,7 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color,
     return final_image
 
 
-def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto", footer_fonts=None, inter_width=None):
+def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto", footer_fonts='none', inter_width=None):
     """
     Merge up to 4 PIL images and retrun concatenated image as a new PIL image object.
     Configuration of the final picture depends on the number of given pictures.
