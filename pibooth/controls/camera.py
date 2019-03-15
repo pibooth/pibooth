@@ -267,7 +267,7 @@ class GpCamera(BaseCamera):
 
         image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
         image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
-        image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
+        image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
 
         if self._capture_hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
@@ -392,7 +392,7 @@ class HybridCamera(RpiCamera):
         image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
         image = image.resize(sizing.new_size_keep_aspect_ratio(
             image.size, self._cam.resolution, 'outer'), Image.ANTIALIAS)
-        image = image.crop(sizing.new_size_by_croping(image.size, self._cam.resolution))
+        image = image.crop(sizing.new_size_by_croping_ratio(image.size, self._cam.resolution))
 
         if self._cam.hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)

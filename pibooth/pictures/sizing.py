@@ -34,7 +34,7 @@ def new_size_keep_aspect_ratio(original_size, target_size, resize_type='inner'):
 def new_size_by_croping(original_size, target_size, crop_type='middle'):
     """Return a tuple representing a rectangle (x, y, width, height) coresponding
     to a crop of the original size. The position of the rectangle can be defined
-    by the crop_type paramater:
+    by the crop_type parameter:
 
        * top-left
        * top-middle
@@ -63,3 +63,48 @@ def new_size_by_croping(original_size, target_size, crop_type='middle'):
         y = original_size[1] - target_size[1]
 
     return (x, y, target_size[0] + x, target_size[1] + y)
+
+
+def new_size_by_croping_ratio(original_size, target_size, crop_type='middle'):
+    """Return a tuple representing a rectangle (x, y, width, height) coresponding
+    to a crop of the original size. The position of the rectangle can be defined
+    by the crop_type parameter:
+
+       * top-left
+       * top-middle
+       * top-right
+       * middle-left
+       * middle
+       * middle-right
+       * bottom-left
+       * bottom-middle
+       * bottom-right
+       """
+    # Get current and desired ratio for the images
+    img_ratio = original_size[0] / float(original_size[1])
+    ratio = target_size[0] / float(target_size[1])
+
+    tx, ty = original_size
+    if ratio > img_ratio:
+        # crop the width
+        ty = int(ratio * original_size[1])
+    elif ratio < img_ratio:
+        # crop on height
+        tx = int(ratio * original_size[0])
+
+    x, y = 0, 0
+    if crop_type.endswith('left'):
+        x = 0
+    elif crop_type.endswith('middle'):
+        x = (original_size[0] - tx) // 2
+    elif crop_type.endswith('right'):
+        x = original_size[0] - tx
+
+    if crop_type.startswith('top'):
+        y = 0
+    elif crop_type.startswith('middle'):
+        y = (original_size[1] - ty) // 2
+    elif crop_type.startswith('bottom'):
+        y = original_size[1] - ty
+
+    return (x, y, tx + x, ty + y)
