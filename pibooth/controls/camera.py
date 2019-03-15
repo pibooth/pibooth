@@ -266,7 +266,7 @@ class GpCamera(BaseCamera):
             self._cam, gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL))
 
         image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
-        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
+        # image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'), Image.ANTIALIAS)
         image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
 
         if self._capture_hflip:
@@ -292,8 +292,8 @@ class GpCamera(BaseCamera):
             self.gphoto2_process = subprocess.Popen("gphoto2 --capture-movie --stdout> fifo.mjpg &",
                                                     shell=True,
                                                     preexec_fn=os.setsid)
-            window_rect = '{0},{1},{2},{3}'.format(tuple(rect)[0], tuple(rect)[1], tuple(rect)[
-                                                   0] + tuple(rect)[2], tuple(rect)[1] + tuple(rect)[3])
+            window_rect = '{0},{1},{2},{3}'.format(tuple(rect)[0], tuple(rect)[1], tuple(rect)[0] + tuple(rect)[2],
+                                                   tuple(rect)[1] + tuple(rect)[3])
             command = "omxplayer fifo.mjpg --live --crop 252,0,804,704 --win {0} --orientation {1}".format(
                 window_rect, orientation)
             self.omxplayer_process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
@@ -390,8 +390,8 @@ class HybridCamera(RpiCamera):
             self._gp_cam, gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL))
 
         image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
-        image = image.resize(sizing.new_size_keep_aspect_ratio(
-            image.size, self._cam.resolution, 'outer'), Image.ANTIALIAS)
+        # image = image.resize(sizing.new_size_keep_aspect_ratio(
+        #     image.size, self._cam.resolution, 'outer'), Image.ANTIALIAS)
         image = image.crop(sizing.new_size_by_croping_ratio(image.size, self._cam.resolution))
 
         if self._cam.hflip:

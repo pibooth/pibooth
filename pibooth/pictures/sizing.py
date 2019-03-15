@@ -86,11 +86,11 @@ def new_size_by_croping_ratio(original_size, target_size, crop_type='middle'):
 
     tx, ty = original_size
     if ratio > img_ratio:
-        # crop the width
-        ty = int(ratio * original_size[1])
+        # crop on constant width
+        ty = int(original_size[0] / ratio)
     elif ratio < img_ratio:
-        # crop on height
-        tx = int(ratio * original_size[0])
+        # crop on constant height
+        tx = int(ratio * original_size[1])
 
     x, y = 0, 0
     if crop_type.endswith('left'):
