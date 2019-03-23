@@ -410,7 +410,6 @@ class HybridCamera(RpiCamera):
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
-        RpiCamera.capture(self, filename)  # Just to show a captured image at screen
         self._captures[filename] = (self._gp_cam.capture(gp.GP_CAPTURE_IMAGE), effect)
         time.sleep(1)  # Necessary to let the time for the camera to save the image
 
