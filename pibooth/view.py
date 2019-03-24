@@ -256,13 +256,13 @@ class PtbWindow(object):
         for i in range(count):
             self.surface.fill((255, 255, 255))
             if self._current_foreground:
-                # Flash only the background, keep forground at the top
+                # Flash only the background, keep foreground at the top
                 self._update_foreground(*self._current_foreground)
             pygame.display.update()
             pygame.event.pump()
             time.sleep(0.02)
             if i == count - 1:
-                yield  # Let's doing actions before end of flash
+                yield  # Let's do actions before end of flash
                 self.update()
                 pygame.event.pump()
             else:
