@@ -31,6 +31,17 @@ GP_PARAMS = {
     },
 }
 
+LANGUAGES = {
+    'fr': {
+        'smile_message': "Souriez !"
+    },
+    'en': {
+        'smile_message': "Smile!"
+    },
+    'de': {
+        'smile_message': "Bitte lächeln!"
+    }
+}
 
 def rpi_camera_connected():
     """Return True if a RPi camera is found.
@@ -113,10 +124,15 @@ class BaseCamera(object):
         """Return a PIL image with the given text that can be used
         as an overlay for the camera.
         """
-        font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), size[1] * 8 // 10)
         image = Image.new('RGBA', size)
         draw = ImageDraw.Draw(image)
-        txt_width, txt_height = draw.textsize(text, font=font)
+        txt_width = size[0] + 1
+        i = 10
+        while txt_width > size[0]:
+            font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), size[1] * i // 10)
+            txt_width, txt_height = draw.textsize(text, font=font)
+            i -= 1
+
         position = ((size[0] - txt_width) // 2, (size[1] - txt_height) // 2 - size[1] // 10)
         draw.text(position, text, (255, 255, 255, alpha), font=font)
         return image
@@ -407,8 +423,15 @@ class HybridCamera(RpiCamera):
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
+        # Create an image padded to the required size
+        rect = self.get_rect()
+        size = (((rect.width + 31) // 32) * 32, ((rect.height + 15) // 16) * 16)
+        image = self.get_overlay(size, LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), 60)
+        overlay = self._cam.add_overlay(image.tobytes(), image.size, layer=3,
+                                        window=tuple(rect), fullscreen=False)
         self._captures[filename] = (self._gp_cam.capture(gp.GP_CAPTURE_IMAGE), effect)
         time.sleep(1)  # Necessary to let the time for the camera to save the image
+        self._cam.remove_overlay(overlay)
 
     def quit(self):
         """Close the camera driver, it's definitive.
