@@ -91,22 +91,7 @@ def concatenate_pictures_portrait(pictures, footer_texts, bg_color, text_color, 
                                (final_height - footer_size - matrix.size[1]) // 2), mask=matrix)
 
     if footer_size:
-        # Text part
-        draw = ImageDraw.Draw(final_image)
-
-        # Footer 1
-        name_font = ImageFont.truetype(footer_fonts[0], int(2 / 3. * footer_size))
-        name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
-        footer_x = (final_width - name_width) // 2
-        footer_y = final_height - footer_size - 100
-        draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
-
-        # Footer 2
-        date_font = ImageFont.truetype(footer_fonts[-1], int(1 / 3. * footer_size))
-        date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
-        footer_x = (final_width - date_width) // 2
-        footer_y = final_height - footer_size + 300
-        draw.text((footer_x, footer_y), footer_texts[1], text_color, font=date_font)
+        draw_footer_text(final_image, footer_texts, footer_fonts, footer_size, text_color)
 
     return final_image
 
@@ -182,24 +167,28 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color,
                                (final_height - footer_size - matrix.size[1]) // 2), mask=matrix)
 
     if footer_size:
-        # Text part
-        draw = ImageDraw.Draw(final_image)
-
-        # Footer 1
-        name_font = ImageFont.truetype(footer_fonts[0], int(2 / 3. * footer_size))
-        name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
-        footer_x = final_width // 4 - name_width // 2
-        footer_y = final_height - (footer_size + name_height) // 2 - 50
-        draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
-
-        # Footer 2
-        date_font = ImageFont.truetype(footer_fonts[-1], int(1 / 3. * footer_size))
-        date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
-        footer_x = 3 * final_width // 4 - date_width // 2
-        footer_y = final_height - (footer_size + date_height) // 2 - 50
-        draw.text((footer_x, footer_y), footer_texts[1], text_color, font=date_font)
+        draw_footer_text(final_image, footer_texts, footer_fonts, footer_size, text_color)
 
     return final_image
+
+
+def draw_footer_text(final_image, footer_texts, footer_fonts, footer_size, text_color):
+    final_width, final_height = final_image.size
+    draw = ImageDraw.Draw(final_image)
+
+    # Footer 1
+    name_font = ImageFont.truetype(footer_fonts[0], int(2 / 3. * footer_size))
+    name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
+    footer_x = final_width // 4 - name_width // 2
+    footer_y = final_height - (footer_size + name_height) // 2 - 50
+    draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
+
+    # Footer 2
+    date_font = ImageFont.truetype(footer_fonts[-1], int(1 / 3. * footer_size))
+    date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
+    footer_x = 3 * final_width // 4 - date_width // 2
+    footer_y = final_height - (footer_size + date_height) // 2 - 50
+    draw.text((footer_x, footer_y), footer_texts[1], text_color, font=date_font)
 
 
 def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto", footer_fonts='none', inter_width=None):
