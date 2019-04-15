@@ -142,7 +142,7 @@ Toggle Full screen   Ctrl + F         \-
 Choose layout        LEFT or RIGHT    Button 1 or Button 2
 Take pictures        P                Button 1
 Export Printer/Cloud Ctrl + E         Button 2
-Quit                 ESC              \-
+Settings             ESC              \-
 ==================== ================ =====================
 
 States and lights management

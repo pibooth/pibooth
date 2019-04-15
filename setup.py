@@ -55,6 +55,7 @@ def main():
             'picamera',
             'Pillow',
             'Pygame',
+            'pygame-menu',
             'gphoto2',
             'pycups',
         ],

@@ -17,7 +17,8 @@ import pibooth
 from pibooth.utils import LOGGER, timeit, PoolingTimer, configure_logging
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
-from pibooth.config import PiConfigParser
+from pibooth.config.parser import PiConfigParser
+from pibooth.config.menu import PiConfigMenu
 from pibooth.controls import camera
 from pibooth.pictures.concatenate import concatenate_pictures
 from pibooth.controls.light import PtbLed
@@ -382,19 +383,29 @@ class PiApplication(object):
         self.previous_picture = None
         self.previous_picture_file = None
 
-        self.capture_choices = config.gettyped('PICTURE', 'captures')
-        if isinstance(self.capture_choices, int):
-            self.capture_choices = (self.capture_choices,)
-        for chx in self.capture_choices:
+    @property
+    def capture_choices(self):
+        choices = self.config.gettyped('PICTURE', 'captures')
+        if isinstance(choices, int):
+            choices = (choices,)
+        for chx in choices:
             if chx not in [1, 2, 3, 4]:
                 raise ValueError("Invalid captures number '{}'".format(chx))
+        return choices
 
     def find_quit_event(self, events):
         """Return the first found event if found in the list.
         """
         for event in events:
-            if event.type == pygame.QUIT or\
-                    (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            if event.type == pygame.QUIT:
+                return event
+        return None
+
+    def find_settings_event(self, events):
+        """Return the first found event if found in the list.
+        """
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 return event
         return None
 
@@ -478,6 +489,7 @@ class PiApplication(object):
             self.led_startup.switch_on()
             self.state_machine.set_state('wait')
             clock = pygame.time.Clock()
+            menu = None
 
             while True:
                 events = list(reversed(pygame.event.get()))  # Take all events, most recent first
@@ -492,7 +504,17 @@ class PiApplication(object):
                 if event:
                     self.window.resize(event.size)
 
+                if self.find_settings_event(events):
+                    menu = PiConfigMenu(self.window.surface, self.config)
+                    menu.show()
+
+                if menu:
+                    menu.process(events)
+                    self.window.update()
+                    menu = None
+
                 self.state_machine.process(events)
+
                 clock.tick(40)  # Ensure the program will never run at more than x frames per second
 
         finally:

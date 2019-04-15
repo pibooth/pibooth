@@ -14,7 +14,7 @@ from PIL import Image, ImageFont, ImageDraw, ImageFilter
 import picamera
 from pibooth import fonts
 from pibooth.pictures import sizing
-from pibooth.config import PiConfigParser
+from pibooth.config.parser import PiConfigParser
 from pibooth.utils import LOGGER, PoolingTimer
 
 
@@ -42,6 +42,7 @@ LANGUAGES = {
         'smile_message': "Bitte lächeln!"
     }
 }
+
 
 def rpi_camera_connected():
     """Return True if a RPi camera is found.
@@ -352,9 +353,6 @@ class GpCamera(BaseCamera):
     def stop_preview(self):
         """Stop the preview.
         """
-        # if self.gphoto2_process:
-        #     os.killpg(os.getpgid(self.gphoto2_process.pid), signal.SIGTERM)
-        #     self.gphoto2_process = None
         if self.omxplayer_process:
             os.killpg(os.getpgid(self.omxplayer_process.pid), signal.SIGTERM)
             self.omxplayer_process = None
