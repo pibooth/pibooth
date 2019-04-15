@@ -7,7 +7,7 @@ from pibooth.pictures import sizing
 
 def new_image_with_background(width, height, background):
     """Create a new image with the given background. The background can be
-    a RGB color tuple ora PIL image.
+    a RGB color tuple or a PIL image.
     """
     if isinstance(background, (tuple, list)):
         return Image.new('RGB', (width, height), color=background)
@@ -204,7 +204,7 @@ def concatenate_pictures_landscape(pictures, footer_texts, bg_color, text_color,
 
 def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto", footer_fonts='none', inter_width=None):
     """
-    Merge up to 4 PIL images and retrun concatenated image as a new PIL image object.
+    Merge up to 4 PIL images and return concatenated image as a new PIL image object.
     Configuration of the final picture depends on the number of given pictures.
     """
     if footer_fonts == 'none':
