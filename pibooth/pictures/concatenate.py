@@ -43,6 +43,9 @@ def new_image_with_background_opencv(width, height, background):
 
 
 def image_resize_keep_aspect_ratio_opencv(image, width, height, inter=cv2.INTER_AREA):
+    """Resize an image to fixed dimensions while keeping its aspect ratio. The
+    image will be cropped to fit in the target dimensions.
+    """
     (h, w) = image.shape[:2]
 
     source_aspect_ratio = w/h
@@ -61,6 +64,9 @@ def image_resize_keep_aspect_ratio_opencv(image, width, height, inter=cv2.INTER_
 
 
 def image_resize(image, width=None, height=None, inter=cv2.INTER_AREA):
+    """Resize image to a specific width or height, preserving aspect ratio
+    by scaling the other dimension accordingly.
+    """
     (h, w) = image.shape[:2]
 
     if width is None and height is None:
@@ -77,6 +83,9 @@ def image_resize(image, width=None, height=None, inter=cv2.INTER_AREA):
 
 
 def get_pics_layout_size(pictures, portrait, inter_width):
+    """Return picture matrix dimensions based on input pictures and margin
+    between pictures.
+    """
     widths, heights = zip(*(i.size for i in pictures))
 
     # starting here we consider that all the images have the same height and widths
@@ -102,8 +111,7 @@ def get_pics_layout_size(pictures, portrait, inter_width):
 
 
 def get_pics_layout_offset(pictures, portrait, inter_width):
-    """
-    Yield offset coordinates for 4 PIL images in portrait orientation...
+    """ Yield offset coordinates for up to 4 PIL images in portrait orientation...
 
       +---------+     +---------+     +---+-+---+     +---------+
       |         |     |   +-+   |     |   |1|   |     | +-+ +-+ |
@@ -154,6 +162,8 @@ def get_pics_layout_offset(pictures, portrait, inter_width):
 
 
 def get_final_image_dimensions(portrait, footer_texts):
+    """ Return final image dimensions based on text in footers.
+    """
     if portrait:
         final_width, final_height = 2400, 3600
     else:
@@ -170,10 +180,8 @@ def get_final_image_dimensions(portrait, footer_texts):
 
 
 def concatenate_pictures_PIL(portrait, pictures, footer_texts, bg_color, text_color, footer_fonts, inter_width=None):
+    """ Merge up to 4 PIL images.
     """
-    Merge up to 4 PIL images.
-    """
-
     new_width, new_height, inter_width = get_pics_layout_size(pictures, portrait, inter_width)
     matrix = Image.new('RGBA', (new_width, new_height))
 
@@ -198,8 +206,7 @@ def concatenate_pictures_PIL(portrait, pictures, footer_texts, bg_color, text_co
 
 
 def concatenate_pictures_opencv(portrait, pictures, footer_texts, bg_color, text_color, footer_fonts, inter_width=None):
-    """
-    Merge up to 4 PIL images using opencv to manipulate the images.
+    """ Merge up to 4 PIL images using opencv to manipulate the images.
     """
     new_width, new_height, inter_width = get_pics_layout_size(pictures, portrait, inter_width)
 
@@ -231,6 +238,8 @@ def concatenate_pictures_opencv(portrait, pictures, footer_texts, bg_color, text
 
 
 def draw_footer_text(final_image, portrait, footer_texts, footer_fonts, footer_size, text_color):
+    """Draw footer text on final image.
+    """
     final_width, final_height = final_image.size
     draw = ImageDraw.Draw(final_image)
 
@@ -250,8 +259,7 @@ def draw_footer_text(final_image, portrait, footer_texts, footer_fonts, footer_s
 
 
 def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto", footer_fonts='none', inter_width=None):
-    """
-    Merge up to 4 PIL images and return concatenated image as a new PIL image object.
+    """ Merge up to 4 PIL images and return concatenated image as a new PIL image object.
     Configuration of the final picture depends on the number of given pictures.
     """
     if footer_fonts == 'none':
