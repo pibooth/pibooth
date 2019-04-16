@@ -182,6 +182,8 @@ def get_final_image_dimensions(portrait, footer_texts):
 def concatenate_pictures_PIL(portrait, pictures, footer_texts, bg_color, text_color, footer_fonts, inter_width=None):
     """ Merge up to 4 PIL images.
     """
+    start = time.time()
+
     new_width, new_height, inter_width = get_pics_layout_size(pictures, portrait, inter_width)
     matrix = Image.new('RGBA', (new_width, new_height))
 
@@ -202,6 +204,9 @@ def concatenate_pictures_PIL(portrait, pictures, footer_texts, bg_color, text_co
     if footer_size:
         draw_footer_text(final_image, portrait, footer_texts, footer_fonts, footer_size, text_color)
 
+    end = time.time()
+    LOGGER.info("Took {}s to create final image with PIL".format(end - start))
+
     return final_image
 
 
@@ -210,7 +215,11 @@ def concatenate_pictures_opencv(portrait, pictures, footer_texts, bg_color, text
     """
     new_width, new_height, inter_width = get_pics_layout_size(pictures, portrait, inter_width)
 
+    start = time.time(); overall_start = start; LOGGER.debug("Creating pictures matrix image with size {}x{}".format(new_width, new_height))
+
     matrix = np.zeros((new_height, new_width, 3), np.uint8)
+
+    end = time.time(); LOGGER.debug("Took {}s to init pictures matrix image".format(end - start)); start = end
 
     # Consider that the photo are correctly ordered
     offset_generator = get_pics_layout_offset(pictures, portrait, inter_width)
@@ -219,20 +228,35 @@ def concatenate_pictures_opencv(portrait, pictures, footer_texts, bg_color, text
         x_offset, y_offset = next(offset_generator)
         matrix[y_offset:(y_offset+pictures[i].size[1]), x_offset:(x_offset+pictures[i].size[0])] = cv_pic
 
+    # cv2.imshow("matrix", matrix); cv2.waitKey(); cv2.destroyAllWindows()
+
+    end = time.time(); LOGGER.debug("Took {}s to layout pictures matrix".format(end - start)); start = end
+
     final_width, final_height, matrix_width, matrix_height, footer_size = get_final_image_dimensions(portrait, footer_texts)
 
     matrix = image_resize(matrix, height=matrix_height)
     (matrix_h, matrix_w) = matrix.shape[:2]
 
+    end = time.time(); LOGGER.debug("Took {}s to resize pictures matrix image to {}x{}".format(end - start, matrix_w, matrix_h)); start = end
+
     final_image = new_image_with_background_opencv(final_width, final_height, bg_color)
+
+    end = time.time(); LOGGER.debug("Took {}s to init final image with background".format(end - start)); start = end
 
     x_offset = (final_width - matrix_w) // 2
     final_image[0:matrix_h, x_offset:(x_offset+matrix_w)] = matrix
 
+    end = time.time(); LOGGER.debug("Took {}s to paste pictures matrix image in final image".format(end - start)); start = end
+
     final_image = Image.fromarray(final_image)
+
+    end = time.time(); LOGGER.debug("Took {}s to convert final image from opencv to PIL image".format(end - start)); start = end
 
     if footer_size:
         draw_footer_text(final_image, portrait, footer_texts, footer_fonts, footer_size, text_color)
+
+    end = time.time(); LOGGER.debug("Took {}s to write text on final image".format(end - start)); start = end
+    LOGGER.info("Took {}s to create final image with opencv".format(end - overall_start))
 
     return final_image
 
