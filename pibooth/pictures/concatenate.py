@@ -42,10 +42,12 @@ def new_image_with_background_opencv(width, height, background):
     return img
 
 
-def image_resize_keep_aspect_ratio_opencv(image, width, height, inter=cv2.INTER_AREA):
+def image_resize_keep_aspect_ratio_opencv(image, width, height, inter=None):
     """Resize an image to fixed dimensions while keeping its aspect ratio. The
     image will be cropped to fit in the target dimensions.
     """
+    if not inter:
+        inter =cv2.INTER_AREA
     (h, w) = image.shape[:2]
 
     source_aspect_ratio = w/h
@@ -63,10 +65,12 @@ def image_resize_keep_aspect_ratio_opencv(image, width, height, inter=cv2.INTER_
     return cv2.resize(cropped, (width, height), inter)
 
 
-def image_resize(image, width=None, height=None, inter=cv2.INTER_AREA):
+def image_resize(image, width=None, height=None, inter=None):
     """Resize image to a specific width or height, preserving aspect ratio
     by scaling the other dimension accordingly.
     """
+    if not inter:
+        inter =cv2.INTER_AREA
     (h, w) = image.shape[:2]
 
     if width is None and height is None:
