@@ -213,40 +213,31 @@ def concatenate_pictures_PIL(portrait, pictures, footer_texts, bg_color, text_co
 def concatenate_pictures_opencv(portrait, pictures, footer_texts, bg_color, text_color, footer_fonts, inter_width=None):
     """ Merge up to 4 PIL images using opencv to manipulate the images.
     """
-    new_width, new_height, inter_width = get_pics_layout_size(pictures, portrait, inter_width)
-
-    start = time.time(); overall_start = start; LOGGER.debug("Creating pictures matrix image with size {}x{}".format(new_width, new_height))
-
-    matrix = np.zeros((new_height, new_width, 3), np.uint8)
-
-    end = time.time(); LOGGER.debug("Took {}s to init pictures matrix image".format(end - start)); start = end
-
-    # Consider that the photo are correctly ordered
-    offset_generator = get_pics_layout_offset(pictures, portrait, inter_width)
-    for i in range(len(pictures)):
-        cv_pic = np.array(pictures[i].convert('RGB'))
-        x_offset, y_offset = next(offset_generator)
-        matrix[y_offset:(y_offset+pictures[i].size[1]), x_offset:(x_offset+pictures[i].size[0])] = cv_pic
-
-    # cv2.imshow("matrix", matrix); cv2.waitKey(); cv2.destroyAllWindows()
-
-    end = time.time(); LOGGER.debug("Took {}s to layout pictures matrix".format(end - start)); start = end
-
+    matrix_raw_width, matrix_raw_height, inter_width = get_pics_layout_size(pictures, portrait, inter_width)
     final_width, final_height, matrix_width, matrix_height, footer_size = get_final_image_dimensions(portrait, footer_texts)
+    offset_generator = get_pics_layout_offset(pictures, portrait, inter_width)
 
-    matrix = image_resize(matrix, height=matrix_height)
-    (matrix_h, matrix_w) = matrix.shape[:2]
+    start = time.time(); overall_start = start; LOGGER.debug("Creating pictures matrix image with size {}x{}".format(matrix_raw_width, matrix_raw_height))
 
-    end = time.time(); LOGGER.debug("Took {}s to resize pictures matrix image to {}x{}".format(end - start, matrix_w, matrix_h)); start = end
+    pics_scaling_factor = min(matrix_width/matrix_raw_width, matrix_height/matrix_raw_height)
+    pics_x_offset = int(matrix_width - matrix_raw_width*pics_scaling_factor) // 2
+    pics_y_offset = int(matrix_height - matrix_raw_height*pics_scaling_factor) // 2
 
     final_image = new_image_with_background_opencv(final_width, final_height, bg_color)
 
     end = time.time(); LOGGER.debug("Took {}s to init final image with background".format(end - start)); start = end
 
-    x_offset = (final_width - matrix_w) // 2
-    final_image[0:matrix_h, x_offset:(x_offset+matrix_w)] = matrix
+    # Consider that the photo are correctly ordered
+    for i in range(len(pictures)):
+        cv_pic = np.array(pictures[i].convert('RGB'))
+        cv_pic = cv2.resize(cv_pic, None, fx=pics_scaling_factor, fy=pics_scaling_factor, interpolation=cv2.INTER_AREA)
+        (h, w) = cv_pic.shape[:2]
+        x_offset, y_offset = next(offset_generator)
+        x_offset, y_offset = pics_x_offset + int(pics_scaling_factor*x_offset), pics_y_offset + int(pics_scaling_factor*y_offset)
+        final_image[y_offset:(y_offset+h), x_offset:(x_offset+w)] = cv_pic
+        # cv2.imshow("final_image", final_image); cv2.waitKey(); cv2.destroyAllWindows()
 
-    end = time.time(); LOGGER.debug("Took {}s to paste pictures matrix image in final image".format(end - start)); start = end
+    end = time.time(); LOGGER.debug("Took {}s to layout pictures matrix".format(end - start)); start = end
 
     final_image = Image.fromarray(final_image)
 
