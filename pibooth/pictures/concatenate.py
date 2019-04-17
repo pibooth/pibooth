@@ -2,7 +2,7 @@
 
 from PIL import Image, ImageDraw, ImageFont
 from pibooth import fonts
-from pibooth.utils import LOGGER
+from pibooth.utils import LOGGER, timeit
 from pibooth.pictures import sizing
 try:
     import cv2
@@ -186,30 +186,26 @@ def get_final_image_dimensions(portrait, footer_texts):
 def concatenate_pictures_PIL(portrait, pictures, footer_texts, bg_color, text_color, footer_fonts, inter_width=None):
     """ Merge up to 4 PIL images.
     """
-    start = time.time()
+    with timeit("Create final image with PIL"):
+        new_width, new_height, inter_width = get_pics_layout_size(pictures, portrait, inter_width)
+        matrix = Image.new('RGBA', (new_width, new_height))
 
-    new_width, new_height, inter_width = get_pics_layout_size(pictures, portrait, inter_width)
-    matrix = Image.new('RGBA', (new_width, new_height))
+        # Consider that the photo are correctly ordered
+        offset_generator = get_pics_layout_offset(pictures, portrait, inter_width)
+        for i in range(len(pictures)):
+            matrix.paste(pictures[i], next(offset_generator))
 
-    # Consider that the photo are correctly ordered
-    offset_generator = get_pics_layout_offset(pictures, portrait, inter_width)
-    for i in range(len(pictures)):
-        matrix.paste(pictures[i], next(offset_generator))
+        final_width, final_height, matrix_width, matrix_height, footer_size = get_final_image_dimensions(portrait, footer_texts)
 
-    final_width, final_height, matrix_width, matrix_height, footer_size = get_final_image_dimensions(portrait, footer_texts)
+        matrix = matrix.resize(sizing.new_size_keep_aspect_ratio(
+            matrix.size, (matrix_width, matrix_height)), Image.ANTIALIAS)
 
-    matrix = matrix.resize(sizing.new_size_keep_aspect_ratio(
-        matrix.size, (matrix_width, matrix_height)), Image.ANTIALIAS)
+        final_image = new_image_with_background(final_width, final_height, bg_color)
+        final_image.paste(matrix, ((final_width - matrix.size[0]) // 2,
+                                   (final_height - footer_size - matrix.size[1]) // 2), mask=matrix)
 
-    final_image = new_image_with_background(final_width, final_height, bg_color)
-    final_image.paste(matrix, ((final_width - matrix.size[0]) // 2,
-                               (final_height - footer_size - matrix.size[1]) // 2), mask=matrix)
-
-    if footer_size:
-        draw_footer_text(final_image, portrait, footer_texts, footer_fonts, footer_size, text_color)
-
-    end = time.time()
-    LOGGER.info("Took {}s to create final image with PIL".format(end - start))
+        if footer_size:
+            draw_footer_text(final_image, portrait, footer_texts, footer_fonts, footer_size, text_color)
 
     return final_image
 
@@ -217,41 +213,35 @@ def concatenate_pictures_PIL(portrait, pictures, footer_texts, bg_color, text_co
 def concatenate_pictures_opencv(portrait, pictures, footer_texts, bg_color, text_color, footer_fonts, inter_width=None):
     """ Merge up to 4 PIL images using opencv to manipulate the images.
     """
-    matrix_raw_width, matrix_raw_height, inter_width = get_pics_layout_size(pictures, portrait, inter_width)
-    final_width, final_height, matrix_width, matrix_height, footer_size = get_final_image_dimensions(portrait, footer_texts)
-    offset_generator = get_pics_layout_offset(pictures, portrait, inter_width)
+    with timeit("Create final image with opencv"):
+        matrix_raw_width, matrix_raw_height, inter_width = get_pics_layout_size(pictures, portrait, inter_width)
+        final_width, final_height, matrix_width, matrix_height, footer_size = get_final_image_dimensions(portrait, footer_texts)
+        offset_generator = get_pics_layout_offset(pictures, portrait, inter_width)
 
-    start = time.time(); overall_start = start; LOGGER.debug("Creating pictures matrix image with size {}x{}".format(matrix_raw_width, matrix_raw_height))
+        with timeit("Init final image with background"):
+            pics_scaling_factor = min(matrix_width/matrix_raw_width, matrix_height/matrix_raw_height)
+            pics_x_offset = int(matrix_width - matrix_raw_width*pics_scaling_factor) // 2
+            pics_y_offset = int(matrix_height - matrix_raw_height*pics_scaling_factor) // 2
 
-    pics_scaling_factor = min(matrix_width/matrix_raw_width, matrix_height/matrix_raw_height)
-    pics_x_offset = int(matrix_width - matrix_raw_width*pics_scaling_factor) // 2
-    pics_y_offset = int(matrix_height - matrix_raw_height*pics_scaling_factor) // 2
+            final_image = new_image_with_background_opencv(final_width, final_height, bg_color)
 
-    final_image = new_image_with_background_opencv(final_width, final_height, bg_color)
+        with timeit("Layout pictures matrix"):
+            # Consider that the photo are correctly ordered
+            for i in range(len(pictures)):
+                cv_pic = np.array(pictures[i].convert('RGB'))
+                cv_pic = cv2.resize(cv_pic, None, fx=pics_scaling_factor, fy=pics_scaling_factor, interpolation=cv2.INTER_AREA)
+                (h, w) = cv_pic.shape[:2]
+                x_offset, y_offset = next(offset_generator)
+                x_offset, y_offset = pics_x_offset + int(pics_scaling_factor*x_offset), pics_y_offset + int(pics_scaling_factor*y_offset)
+                final_image[y_offset:(y_offset+h), x_offset:(x_offset+w)] = cv_pic
+                # cv2.imshow("final_image", final_image); cv2.waitKey(); cv2.destroyAllWindows()
 
-    end = time.time(); LOGGER.debug("Took {}s to init final image with background".format(end - start)); start = end
+        with timeit("Convert final image from opencv to PIL image"):
+            final_image = Image.fromarray(final_image)
 
-    # Consider that the photo are correctly ordered
-    for i in range(len(pictures)):
-        cv_pic = np.array(pictures[i].convert('RGB'))
-        cv_pic = cv2.resize(cv_pic, None, fx=pics_scaling_factor, fy=pics_scaling_factor, interpolation=cv2.INTER_AREA)
-        (h, w) = cv_pic.shape[:2]
-        x_offset, y_offset = next(offset_generator)
-        x_offset, y_offset = pics_x_offset + int(pics_scaling_factor*x_offset), pics_y_offset + int(pics_scaling_factor*y_offset)
-        final_image[y_offset:(y_offset+h), x_offset:(x_offset+w)] = cv_pic
-        # cv2.imshow("final_image", final_image); cv2.waitKey(); cv2.destroyAllWindows()
-
-    end = time.time(); LOGGER.debug("Took {}s to layout pictures matrix".format(end - start)); start = end
-
-    final_image = Image.fromarray(final_image)
-
-    end = time.time(); LOGGER.debug("Took {}s to convert final image from opencv to PIL image".format(end - start)); start = end
-
-    if footer_size:
-        draw_footer_text(final_image, portrait, footer_texts, footer_fonts, footer_size, text_color)
-
-    end = time.time(); LOGGER.debug("Took {}s to write text on final image".format(end - start)); start = end
-    LOGGER.info("Took {}s to create final image with opencv".format(end - overall_start))
+        with timeit("Write text on final image"):
+            if footer_size:
+                draw_footer_text(final_image, portrait, footer_texts, footer_fonts, footer_size, text_color)
 
     return final_image
 
