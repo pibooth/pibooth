@@ -143,15 +143,16 @@ Commands
 
 After the graphical interface is started, the following actions are available:
 
-==================== ================ =====================
-Action               Keyboard key     Physical button
-==================== ================ =====================
-Toggle Full screen   Ctrl + F         \-
-Choose layout        LEFT or RIGHT    Button 1 or Button 2
-Take pictures        P                Button 1
-Export Printer/Cloud Ctrl + E         Button 2
-Settings             ESC              \-
-==================== ================ =====================
+======================= ================ =====================
+Action                  Keyboard key     Physical button
+======================= ================ =====================
+Toggle Full screen      Ctrl + F         \-
+Choose layout           LEFT or RIGHT    Button 1 or Button 2
+Take pictures           P                Button 1
+Export Printer/Cloud    Ctrl + E         Button 2
+Settings                ESC              \-
+Quit settings sub-menu  BACK             \-
+======================= ================ =====================
 
 States and lights management
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

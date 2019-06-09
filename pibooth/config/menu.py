@@ -39,7 +39,7 @@ class PiConfigMenu(object):
                                    menu_color_title=(120, 45, 30),
                                    bgfun=lambda: self.surface.fill((40, 0, 40)),
                                    enabled=False,
-                                   onclose=pgmloc.PYGAME_MENU_CLOSE
+                                   onclose=self.config.save
                                    )
 
         for name in ('GENERAL', 'WINDOW', 'PICTURE', 'PRINTER'):
@@ -58,7 +58,7 @@ class PiConfigMenu(object):
                             draw_region_y=45,
                             menu_color=(0, 50, 100),
                             menu_color_title=(120, 45, 30),
-                            bgfun=lambda: self.surface.fill((40, 0, 40))
+                            bgfun=lambda: self.surface.fill((40, 0, 40)),
                             )
 
         for name, option in DEFAULT[section].items():

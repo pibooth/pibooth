@@ -198,16 +198,6 @@ DEFAULT = odict((
 ))
 
 
-def generate_default_config(filename):
-    """Genrate the default configuration.
-    """
-    with open(filename, 'w') as fp:
-        for section, options in DEFAULT.items():
-            fp.write("[{}]\n".format(section))
-            for name, value in options.items():
-                fp.write("# {}\n{} = {}\n\n".format(value[1], name, value[0]))
-
-
 class PiConfigParser(ConfigParser):
 
     """Enhenced configuration file parser.
@@ -221,11 +211,10 @@ class PiConfigParser(ConfigParser):
         self.filename = osp.abspath(osp.expanduser(filename))
 
         if not osp.isfile(self.filename) or clear:
-            LOGGER.info("Generate the configuration file in '%s'", self.filename)
             dirname = osp.dirname(self.filename)
             if not osp.isdir(dirname):
                 os.makedirs(dirname)
-            generate_default_config(self.filename)
+            self.save(True)
 
         self.reload()
 
@@ -243,6 +232,20 @@ class PiConfigParser(ConfigParser):
 
         # Handle autostart of the application
         self.enable_autostart(self.getboolean('GENERAL', 'autostart'))
+
+    def save(self, default=False):
+        """Save the current or default values into the configuration file.
+        """
+        LOGGER.info("Generate the configuration file in '%s'", self.filename)
+        with open(self.filename, 'w') as fp:
+            for section, options in DEFAULT.items():
+                fp.write("[{}]\n".format(section))
+                for name, value in options.items():
+                    if default:
+                        val = value[0]
+                    else:
+                        val = self.get(section, name)
+                    fp.write("# {}\n{} = {}\n\n".format(value[1], name, val))
 
     def enable_autostart(self, enable=True):
         """Auto-start pibooth at the Raspberry Pi startup.
