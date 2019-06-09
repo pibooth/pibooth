@@ -11,6 +11,8 @@ except ImportError:
 import time
 import numpy as np
 
+DEFAULT_FONTS = (fonts.get_filename("Amatic-Bold.ttf"), fonts.get_filename("AmaticSC-Regular.ttf"))
+
 
 def new_image_with_background(width, height, background):
     """Create a new image with the given background. The background can be
@@ -271,15 +273,12 @@ def draw_footer_text(final_image, portrait, footer_texts, footer_fonts, footer_s
     draw.text((footer_x, footer_y), footer_texts[1], text_color, font=date_font)
 
 
-def concatenate_pictures(pictures, footer_texts=('', ''), bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto", footer_fonts='none', inter_width=None):
+def concatenate_pictures(pictures, footer_texts=('', ''), footer_fonts=DEFAULT_FONTS,
+                         bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto",
+                         inter_width=None):
     """ Merge up to 4 PIL images and return concatenated image as a new PIL image object.
     Configuration of the final picture depends on the number of given pictures.
     """
-    if footer_fonts == 'none':
-        footer_fonts = [fonts.get_filename("Amatic-Bold.ttf"), fonts.get_filename("AmaticSC-Regular.ttf")]
-    else:
-        footer_fonts = footer_fonts.split(',')
-
     if orientation == "auto":
         # Use the size of the first picture to determine the orientation
         is_portrait = pictures[0].size[0] < pictures[0].size[1]

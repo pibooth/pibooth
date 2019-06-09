@@ -118,8 +118,8 @@ DEFAULT = odict((
                  "Background RGB color or path to a background image",
                  None, None)),
             ("fonts",
-                ("none",
-                 "Fonts url to be used on the image",
+                ("",
+                 "Font path/url to be used for footer texts (2 paths comma-separated can be given)",
                  None, None)),
         ))
      ),

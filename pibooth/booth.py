@@ -20,7 +20,7 @@ from pibooth.view import PtbWindow
 from pibooth.config.parser import PiConfigParser
 from pibooth.config.menu import PiConfigMenu
 from pibooth.controls import camera
-from pibooth.pictures.concatenate import concatenate_pictures
+from pibooth.pictures.concatenate import concatenate_pictures, DEFAULT_FONTS
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
 from pibooth.controls.printer import PRINTER_TASKS_UPDATED, PtbPrinter
@@ -239,15 +239,26 @@ class StateProcessing(State):
             footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
                             self.app.config.get('PICTURE', 'footer_text2')]
             bg_color = self.app.config.gettyped('PICTURE', 'bg_color')
-            footer_fonts = self.app.config.get('PICTURE', 'fonts')
+
             if not isinstance(bg_color, (tuple, list)):
                 # Path to a background image
                 bg_color = Image.open(self.app.config.getpath('PICTURE', 'bg_color'))
             text_color = self.app.config.gettyped('PICTURE', 'text_color')
             orientation = self.app.config.get('PICTURE', 'orientation')
 
-            self.app.previous_picture = concatenate_pictures(
-                self.app.camera.get_captures(), footer_texts, bg_color, text_color, orientation, footer_fonts)
+            footer_fonts = self.app.config.get('PICTURE', 'fonts')
+            if not footer_fonts:
+                footer_fonts = DEFAULT_FONTS
+            else:
+                footer_fonts = [ft.strip() for ft in footer_fonts.split(',')]
+                if len(footer_fonts) < 2:
+                    footer_fonts.append(footer_fonts[0])  # Apply same font for both footers
+
+            self.app.previous_picture = concatenate_pictures(self.app.camera.get_captures(),
+                                                             footer_texts,
+                                                             footer_fonts,
+                                                             bg_color, text_color,
+                                                             orientation)
 
         self.app.previous_picture_file = osp.join(
             self.app.savedir, osp.basename(self.app.dirname) + "_pibooth.jpg")
