@@ -2,7 +2,7 @@
 
 from PIL import Image, ImageDraw, ImageFont
 from pibooth import fonts
-from pibooth.utils import LOGGER, timeit
+from pibooth.utils import timeit
 from pibooth.pictures import sizing
 try:
     import cv2
@@ -47,19 +47,19 @@ def image_resize_keep_aspect_ratio_opencv(image, width, height, inter=None):
     image will be cropped to fit in the target dimensions.
     """
     if not inter:
-        inter =cv2.INTER_AREA
+        inter = cv2.INTER_AREA
     (h, w) = image.shape[:2]
 
-    source_aspect_ratio = w/h
-    target_aspect_ratio = width/height
+    source_aspect_ratio = w / h
+    target_aspect_ratio = width / height
 
     if source_aspect_ratio <= target_aspect_ratio:
-        h_cropped = int(w/target_aspect_ratio)
-        y_offset = int((h - h_cropped)/2)
+        h_cropped = int(w / target_aspect_ratio)
+        y_offset = int((h - h_cropped) / 2)
         cropped = image[y_offset:(y_offset + h_cropped), 0:w]
     else:
-        w_cropped = int(h*target_aspect_ratio)
-        x_offset = int((w - w_cropped)/2)
+        w_cropped = int(h * target_aspect_ratio)
+        x_offset = int((w - w_cropped) / 2)
         cropped = image[0:h, x_offset:(x_offset + w_cropped)]
 
     return cv2.resize(cropped, (width, height), inter)
@@ -70,7 +70,7 @@ def image_resize(image, width=None, height=None, inter=None):
     by scaling the other dimension accordingly.
     """
     if not inter:
-        inter =cv2.INTER_AREA
+        inter = cv2.INTER_AREA
     (h, w) = image.shape[:2]
 
     if width is None and height is None:
@@ -195,7 +195,8 @@ def concatenate_pictures_PIL(portrait, pictures, footer_texts, bg_color, text_co
         for i in range(len(pictures)):
             matrix.paste(pictures[i], next(offset_generator))
 
-        final_width, final_height, matrix_width, matrix_height, footer_size = get_final_image_dimensions(portrait, footer_texts)
+        final_width, final_height, matrix_width, matrix_height, footer_size = get_final_image_dimensions(
+            portrait, footer_texts)
 
         matrix = matrix.resize(sizing.new_size_keep_aspect_ratio(
             matrix.size, (matrix_width, matrix_height)), Image.ANTIALIAS)
@@ -215,13 +216,14 @@ def concatenate_pictures_opencv(portrait, pictures, footer_texts, bg_color, text
     """
     with timeit("Create final image with opencv"):
         matrix_raw_width, matrix_raw_height, inter_width = get_pics_layout_size(pictures, portrait, inter_width)
-        final_width, final_height, matrix_width, matrix_height, footer_size = get_final_image_dimensions(portrait, footer_texts)
+        final_width, final_height, matrix_width, matrix_height, footer_size = get_final_image_dimensions(
+            portrait, footer_texts)
         offset_generator = get_pics_layout_offset(pictures, portrait, inter_width)
 
         with timeit("Init final image with background"):
-            pics_scaling_factor = min(matrix_width/matrix_raw_width, matrix_height/matrix_raw_height)
-            pics_x_offset = int(matrix_width - matrix_raw_width*pics_scaling_factor) // 2
-            pics_y_offset = int(matrix_height - matrix_raw_height*pics_scaling_factor) // 2
+            pics_scaling_factor = min(matrix_width / matrix_raw_width, matrix_height / matrix_raw_height)
+            pics_x_offset = int(matrix_width - matrix_raw_width * pics_scaling_factor) // 2
+            pics_y_offset = int(matrix_height - matrix_raw_height * pics_scaling_factor) // 2
 
             final_image = new_image_with_background_opencv(final_width, final_height, bg_color)
 
@@ -229,11 +231,13 @@ def concatenate_pictures_opencv(portrait, pictures, footer_texts, bg_color, text
             # Consider that the photo are correctly ordered
             for i in range(len(pictures)):
                 cv_pic = np.array(pictures[i].convert('RGB'))
-                cv_pic = cv2.resize(cv_pic, None, fx=pics_scaling_factor, fy=pics_scaling_factor, interpolation=cv2.INTER_AREA)
+                cv_pic = cv2.resize(cv_pic, None, fx=pics_scaling_factor,
+                                    fy=pics_scaling_factor, interpolation=cv2.INTER_AREA)
                 (h, w) = cv_pic.shape[:2]
                 x_offset, y_offset = next(offset_generator)
-                x_offset, y_offset = pics_x_offset + int(pics_scaling_factor*x_offset), pics_y_offset + int(pics_scaling_factor*y_offset)
-                final_image[y_offset:(y_offset+h), x_offset:(x_offset+w)] = cv_pic
+                x_offset, y_offset = pics_x_offset + \
+                    int(pics_scaling_factor * x_offset), pics_y_offset + int(pics_scaling_factor * y_offset)
+                final_image[y_offset:(y_offset + h), x_offset:(x_offset + w)] = cv_pic
                 # cv2.imshow("final_image", final_image); cv2.waitKey(); cv2.destroyAllWindows()
 
         with timeit("Convert final image from opencv to PIL image"):

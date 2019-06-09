@@ -54,7 +54,6 @@ def main():
             'RPi.GPIO',
             'picamera',
             'Pillow==5.0.0',
-            'opencv-python',
             'Pygame==1.9.4',
             'pygame-menu>=1.96.1',
             'gphoto2',

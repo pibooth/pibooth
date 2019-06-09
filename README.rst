@@ -33,7 +33,6 @@ Software
 * RPi.GPIO ``0.6.3``
 * picamera ``1.13``
 * Pillow ``5.0.0``
-* opencv-python ``3.4.4.19``
 * pygame ``1.9.4``
 * pygame-menu ``1.96.1``
 * gphoto2 ``1.8.0`` ( libgphoto2 ``2.5.15`` )
@@ -81,7 +80,14 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
         $ sudo apt-get install cups libcups2-dev
 
-7. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
+7. Optionally install ``OpenCV`` to improve images generation efficiency:
+
+   ::
+
+        $ sudo apt-get install python3-pyqt4
+        $ sudo pip3 install opencv-python
+
+8. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
 
    ::
 
@@ -95,7 +101,7 @@ Install developing version
 --------------------------
 
 If you want to use an **unofficial version** of the ``pibooth`` application, you need to work from
-a clone of this ``git`` repository. Replace the step 7. of the `Install`_ procedure above by the
+a clone of this ``git`` repository. Replace the step 8. of the `Install`_ procedure above by the
 following actions:
 
 1. Clone from github ::
