@@ -44,6 +44,7 @@ class PiCamera(object):
 
     def add_overlay(self, *args, **kwargs):
         print("Mock: add overlay")
+        return args[0]
 
     def remove_overlay(self, *args, **kwargs):
         print("Mock: remove overlay")

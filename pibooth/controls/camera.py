@@ -250,8 +250,8 @@ class RpiCamera(BaseCamera):
     def stop_preview(self):
         """Stop the preview.
         """
-        self._cam.stop_preview()
         self._hide_overlay()
+        self._cam.stop_preview()
         self._window = None
 
     def capture(self, filename, effect=None):
@@ -267,6 +267,8 @@ class RpiCamera(BaseCamera):
             self._captures[filename] = None  # Nothing to keep for post processing
         finally:
             self._cam.image_effect = 'none'
+
+        self._hide_overlay()  # If stop_preview() has not been called
 
     def quit(self):
         """Close the camera driver, it's definitive.
@@ -406,6 +408,8 @@ class GpCamera(BaseCamera):
         time.sleep(1)  # Necessary to let the time for the camera to save the image
         self.quit()
 
+        self._hide_overlay()  # If stop_preview() has not been called
+
     def quit(self):
         """Close the camera driver, it's definitive.
         """
@@ -459,6 +463,8 @@ class HybridCamera(RpiCamera):
 
         self._captures[filename] = (self._gp_cam.capture(gp.GP_CAPTURE_IMAGE), effect)
         time.sleep(1)  # Necessary to let the time for the camera to save the image
+
+        self._hide_overlay()  # If stop_preview() has not been called
 
     def quit(self):
         """Close the camera driver, it's definitive.
