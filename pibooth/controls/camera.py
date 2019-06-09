@@ -104,8 +104,25 @@ class BaseCamera(object):
         self._cam = None
         self._border = 50
         self._window = None
+        self._overlay = None
         self._captures = {}
         self.resolution = resolution
+
+    def _post_process_capture(self, capture_path):
+        """Rework and return a capture from file.
+        """
+        return Image.open(capture_path)
+
+    def _show_overlay(self, text, alpha):
+        """Add an image as an overlay.
+        """
+        self._overlay = text
+
+    def _hide_overlay(self):
+        """Remove any existing overlay.
+        """
+        if self._overlay:
+            self._overlay = None
 
     def _post_process_capture(self, capture_path):
         """Rework and return a capture from file.
@@ -121,7 +138,7 @@ class BaseCamera(object):
                                                 (rect.width - 2 * self._border, rect.height - 2 * self._border))
         return pygame.Rect(rect.centerx - res[0] // 2, rect.centery - res[1] // 2, res[0], res[1])
 
-    def get_overlay(self, size, text, alpha):
+    def build_overlay(self, size, text, alpha):
         """Return a PIL image with the given text that can be used
         as an overlay for the camera.
         """
@@ -171,6 +188,26 @@ class RpiCamera(BaseCamera):
         self._cam.iso = iso
         self._cam.rotation = rotation
 
+    def _show_overlay(self, text, alpha):
+        """Add an image as an overlay.
+        """
+        if self._window:  # No window means no preview displayed
+            rect = self.get_rect()
+
+            # Create an image padded to the required size (required by picamera)
+            size = (((rect.width + 31) // 32) * 32, ((rect.height + 15) // 16) * 16)
+
+            image = self.build_overlay(size, str(text), alpha)
+            self._overlay = self._cam.add_overlay(image.tobytes(), image.size, layer=3,
+                                                  window=tuple(rect), fullscreen=False)
+
+    def _hide_overlay(self):
+        """Remove any existing overlay.
+        """
+        if self._overlay:
+            self._cam.remove_overlay(self._overlay)
+            self._overlay = None
+
     def preview(self, window, flip=True):
         """Display a preview on the given Rect (flip if necessary).
         """
@@ -196,27 +233,25 @@ class RpiCamera(BaseCamera):
         if not self._cam.preview:
             raise EnvironmentError("Preview shall be started first")
 
-        # Create an image padded to the required size
-        rect = self.get_rect()
-        size = (((rect.width + 31) // 32) * 32, ((rect.height + 15) // 16) * 16)
-
         while timeout > 0:
-            image = self.get_overlay(size, str(timeout), alpha)
-            overlay = self._cam.add_overlay(image.tobytes(), image.size, layer=3,
-                                            window=tuple(rect), fullscreen=False)
+            self._show_overlay(timeout, alpha)
             time.sleep(1)
             timeout -= 1
-            self._cam.remove_overlay(overlay)
+            self._hide_overlay()
 
-    def preview_wait(self, timeout):
+        self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
+
+    def preview_wait(self, timeout, alpha=60):
         """Wait the given time.
         """
         time.sleep(timeout)
+        self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
 
     def stop_preview(self):
         """Stop the preview.
         """
         self._cam.stop_preview()
+        self._hide_overlay()
         self._window = None
 
     def capture(self, filename, effect=None):
@@ -277,6 +312,18 @@ class GpCamera(BaseCamera):
         gp_set_config_value(config, 'settings', 'capturetarget', 'Memory card')
         self._cam.set_config(config)
 
+    def _show_overlay(self, text, alpha):
+        """Add an image as an overlay.
+        """
+        if self._window:  # No window means no preview displayed
+            rect = self._window.get_rect()
+            size = (((rect.width + 31) // 32) * 32, ((rect.height + 15) // 16) * 16)
+
+            image = Image.new('RGB', size, color=(0, 0, 0))
+            self._overlay = self.build_overlay(image.size, text, alpha)
+            image.paste(self._overlay, (0, 0), self._overlay)
+            self._window.show_image(image)
+
     def _post_process_capture(self, capture_path):
         gp_path, effect = self._captures[capture_path]
         camera_file = gp.check_result(gp.gp_camera_file_get(
@@ -294,12 +341,12 @@ class GpCamera(BaseCamera):
         image.save(capture_path)
         return image
 
-    def preview(self, window, flip=True, timeout=5):
+    def preview(self, window, flip=True):
         """Setup the preview.
         """
+        self._window = window
         self.gphoto2_process = True  # hack to avoid the preview
         if not self.gphoto2_process:
-            self._window = window
             rect = self.get_rect()
             if flip:
                 orientation = 1
@@ -313,8 +360,6 @@ class GpCamera(BaseCamera):
             command = "omxplayer fifo.mjpg --live --crop 252,0,804,704 --win {0} --orientation {1}".format(
                 window_rect, orientation)
             self.omxplayer_process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
-        else:
-            self._window = window
 
     def preview_countdown(self, timeout, alpha=60):
         """Show a countdown of `timeout` seconds on the preview.
@@ -323,32 +368,23 @@ class GpCamera(BaseCamera):
         timeout = int(timeout)
         if timeout < 1:
             raise ValueError("Start time shall be greater than 0")
-        rect = self._window.get_rect()
-        size = (((rect.width + 31) // 32) * 32, ((rect.height + 15) // 16) * 16)
-        image = Image.new('RGB', size, color=(0, 0, 0))
-        overlay = None
+
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
             self.preview(self._window)
             remaining = int(timer.remaining() + 1)
-            if not overlay or remaining != timeout:
+            if not self._overlay or remaining != timeout:
                 # Rebluid overlay only if remaining number has changed
-                image = Image.new('RGB', size, color=(0, 0, 0))
-                overlay = self.get_overlay(image.size, str(remaining), alpha)
+                self._show_overlay(str(remaining), alpha)
                 timeout = remaining
-                image.paste(overlay, (0, 0), overlay)
-                self._window.show_image(image)
 
-    def preview_wait(self, timeout):
-        """Wait the given time and refresh the preview.
+        self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
+
+    def preview_wait(self, timeout, alpha=60):
+        """Wait the given time.
         """
-        timeout = int(timeout)
-        if timeout < 1:
-            raise ValueError("Start time shall be greater than 0")
-
-        timer = PoolingTimer(timeout)
-        while not timer.is_timeout():
-            self.preview(self._window, timeout=timeout)
+        time.sleep(timeout)
+        self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
 
     def stop_preview(self):
         """Stop the preview.
@@ -421,15 +457,8 @@ class HybridCamera(RpiCamera):
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
-        # Create an image padded to the required size
-        rect = self.get_rect()
-        size = (((rect.width + 31) // 32) * 32, ((rect.height + 15) // 16) * 16)
-        image = self.get_overlay(size, LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), 60)
-        overlay = self._cam.add_overlay(image.tobytes(), image.size, layer=3,
-                                        window=tuple(rect), fullscreen=False)
         self._captures[filename] = (self._gp_cam.capture(gp.GP_CAPTURE_IMAGE), effect)
         time.sleep(1)  # Necessary to let the time for the camera to save the image
-        self._cam.remove_overlay(overlay)
 
     def quit(self):
         """Close the camera driver, it's definitive.
