@@ -53,12 +53,12 @@ def main():
         install_requires=[
             'RPi.GPIO',
             'picamera',
-            'Pillow>=4.0.0',
-            'Pygame>=1.9.6',
+            'Pillow==5.0.0',
+            'opencv-python',
+            'Pygame==1.9.4',
             'pygame-menu>=1.96.1',
             'gphoto2',
             'pycups',
-            'opencv-python',
         ],
         options={
             'bdist_wheel':

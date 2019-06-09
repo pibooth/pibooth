@@ -32,7 +32,8 @@ Software
 * Python ``3.5.3``
 * RPi.GPIO ``0.6.3``
 * picamera ``1.13``
-* Pillow ``4.0.0``
+* Pillow ``5.0.0``
+* opencv-python ``3.4.4.19``
 * pygame ``1.9.4``
 * pygame-menu ``1.96.1``
 * gphoto2 ``1.8.0`` ( libgphoto2 ``2.5.15`` )
