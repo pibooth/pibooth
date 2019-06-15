@@ -46,7 +46,7 @@ class StateMachine(object):
         State.app = application
 
     def add_state(self, state):
-        """Add a state to the internal dictionary
+        """Add a state to the internal dictionary.
         """
         self.states[state.name] = state
 
@@ -56,8 +56,15 @@ class StateMachine(object):
         self.failsafe_state = state
         self.states[state.name] = state
 
+    def remove_state(self, state_name):
+        """Remove a state to the internal dictionary.
+        """
+        state = self.states.pop(state_name, None)
+        if state == self.failsafe_state:
+            self.failsafe_state = None
+
     def process(self, events):
-        """Let the current state do it's thing
+        """Let the current state do it's thing.
         """
         # Only continue if there is an active state
         if self.active_state is None:

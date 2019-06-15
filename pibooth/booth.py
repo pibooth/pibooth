@@ -8,16 +8,16 @@ import os
 import time
 import shutil
 import logging
-import pygame
 import argparse
 import os.path as osp
+import pygame
 from RPi import GPIO
 from PIL import Image
 import pibooth
 from pibooth.utils import LOGGER, timeit, PoolingTimer, configure_logging
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
-from pibooth.config.parser import PiConfigParser
+from pibooth.config.parser import PiConfigParser, get_supported_languages
 from pibooth.config.menu import PiConfigMenu
 from pibooth.controls import camera
 from pibooth.pictures.concatenate import concatenate_pictures, DEFAULT_FONTS
@@ -285,6 +285,8 @@ class StatePrint(State):
             self.app.window.set_print_number(len(self.app.printer.get_all_tasks()))
             self.app.window.show_print(self.app.previous_picture)
         self.app.led_print.blink()
+        # Reset timeout in case of settings changed
+        self.timer.timeout = self.app.config.getfloat('PRINTER', 'printer_delay')
         self.timer.start()
 
     def do_actions(self, events):
@@ -345,8 +347,7 @@ class PiApplication(object):
         pygame.event.set_blocked(pygame.MOUSEMOTION)
 
         # Create window of (width, height)
-        self.window = PtbWindow('Pibooth', config.gettyped('WINDOW', 'size'),
-                                config.getboolean('WINDOW', 'arrows'))
+        self.window = PtbWindow('Pibooth')
 
         self.state_machine = StateMachine(self)
         self.state_machine.add_state(StateWait())
@@ -356,8 +357,6 @@ class PiApplication(object):
         self.state_machine.add_state(StateProcessing())
         self.state_machine.add_state(StatePrint())
         self.state_machine.add_state(StateFinish(0.5))
-        if config.getboolean('GENERAL', 'failsafe'):
-            self.state_machine.add_failsafe_state(StateFailSafe(2))
 
         # Initialize the camera
         if camera.gp_camera_connected() and camera.rpi_camera_connected():
@@ -403,6 +402,40 @@ class PiApplication(object):
             if chx not in [1, 2, 3, 4]:
                 raise ValueError("Invalid captures number '{}'".format(chx))
         return choices
+
+    def reset(self):
+        """Restore the application with initial parameters defined in the
+        configuration file.
+        """
+        # Handle the language configuration, save it as a class attribute for easy access
+        language = self.config.get('GENERAL', 'language')
+        if language not in get_supported_languages():
+            LOGGER.warning("Unsupported language '%s', fallback to English", language)
+        else:
+            PiConfigParser.language = language
+
+        # Handle autostart of the application
+        self.config.enable_autostart(self.config.getboolean('GENERAL', 'autostart'))
+
+        self.window.drop_cache()
+        self.window.show_arrows = self.config.getboolean('WINDOW', 'arrows')
+
+        # Handle window size
+        size = self.config.gettyped('WINDOW', 'size')
+        if isinstance(size, str) and size.lower() == 'fullscreen':
+            if not self.window.is_fullscreen:
+                self.window.toggle_fullscreen()
+        else:
+            if self.window.is_fullscreen:
+                self.window.toggle_fullscreen()
+            self.window.resize(size)
+
+        # Initialize state machine
+        if self.config.getboolean('GENERAL', 'failsafe'):
+            self.state_machine.add_failsafe_state(StateFailSafe(2))
+        else:
+            self.state_machine.remove_state('failsafe')
+        self.state_machine.set_state('wait')
 
     def find_quit_event(self, events):
         """Return the first found event if found in the list.
@@ -497,9 +530,9 @@ class PiApplication(object):
         """Run the main game loop.
         """
         try:
-            self.led_startup.switch_on()
-            self.state_machine.set_state('wait')
             clock = pygame.time.Clock()
+            self.led_startup.switch_on()
+            self.reset()
             menu = None
 
             while True:
@@ -516,12 +549,12 @@ class PiApplication(object):
                     self.window.resize(event.size)
 
                 if self.find_settings_event(events):
-                    menu = PiConfigMenu(self.window.surface, self.config)
+                    menu = PiConfigMenu(self.window, self.config)
                     menu.show()
 
                 if menu:
                     menu.process(events)
-                    self.window.update()
+                    self.reset()
                     menu = None
 
                 self.state_machine.process(events)
@@ -571,6 +604,7 @@ def main():
     if options.config:
         LOGGER.info("Editing the photo booth configuration...")
         config.open_editor()
+        config.enable_autostart(config.getboolean('GENERAL', 'autostart'))
     elif not options.reset:
         LOGGER.info("Starting the photo booth application...")
         app = PiApplication(config)

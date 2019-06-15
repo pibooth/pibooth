@@ -76,7 +76,7 @@ DEFAULT = odict((
             ("preview_delay",
                 (3,
                  "How long is the preview in seconds",
-                 "Preview delay", [str(i) for i in range(1, 20)])),
+                 "Preview delay", [str(i) for i in range(1, 21)])),
             ("preview_countdown",
                 (True,
                  "Show a countdown timer during the preview",
@@ -152,7 +152,7 @@ DEFAULT = odict((
             ("printer_delay",
                 (10,
                  "How long is the print view in seconds (0 to skip it)",
-                 "Time to show print screen", [str(i) for i in range(1, 21)])),
+                 "Time to show print screen", [str(i) for i in range(0, 21)])),
             ("max_duplicates",
                 (3,
                  "Maximum number of duplicate pages sent to the printer (avoid paper wast)",
@@ -215,23 +215,9 @@ class PiConfigParser(ConfigParser):
             if not osp.isdir(dirname):
                 os.makedirs(dirname)
             self.save(True)
+            self.enable_autostart(DEFAULT['GENERAL']['autostart'][0])
 
-        self.reload()
-
-    def reload(self):
-        """Reload current configuration file.
-        """
         self.read(self.filename)
-
-        # Handle the language configuration, save it as a class attribute for easy access
-        language = self.get('GENERAL', 'language')
-        if language not in get_supported_languages():
-            LOGGER.warning("Unsupported language '%s', fallback to English", language)
-        else:
-            PiConfigParser.language = language
-
-        # Handle autostart of the application
-        self.enable_autostart(self.getboolean('GENERAL', 'autostart'))
 
     def save(self, default=False):
         """Save the current or default values into the configuration file.
@@ -275,7 +261,7 @@ class PiConfigParser(ConfigParser):
             try:
                 process = subprocess.Popen([editor, self.filename])
                 process.communicate()
-                self.reload()
+                self.read(self.filename)
                 return
             except OSError as e:
                 if e.errno != errno.ENOENT:

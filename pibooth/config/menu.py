@@ -3,10 +3,15 @@
 """Pibooth config menu.
 """
 
+import pygame
 import pygameMenu as pgm
+from pygameMenu import config_controls
 from pygameMenu import locals as pgmloc
 from pygameMenu import fonts as pgmfonts
 from pibooth.config.parser import DEFAULT
+
+
+config_controls.MENU_CTRL_BACK = pygame.K_ESCAPE
 
 
 def _find(choices, value):
@@ -22,14 +27,15 @@ def _find(choices, value):
 
 class PiConfigMenu(object):
 
-    def __init__(self, surface, config):
-        self.surface = surface
+    def __init__(self, window, config):
+        self.window = window
         self.config = config
+        self._main_menu = None
 
-        width = self.surface.get_rect().width
-        height = self.surface.get_rect().height
+        width = self.window.get_rect().width
+        height = self.window.get_rect().height
 
-        self._main_menu = pgm.Menu(surface,
+        self._main_menu = pgm.Menu(self.window.surface,
                                    width,
                                    height,
                                    pgmfonts.FONT_FRANCHISE,
@@ -37,7 +43,7 @@ class PiConfigMenu(object):
                                    draw_region_y=55,
                                    menu_color=(0, 75, 100),
                                    menu_color_title=(120, 45, 30),
-                                   bgfun=lambda: self.surface.fill((40, 0, 40)),
+                                   bgfun=lambda: self.window.surface.fill((40, 0, 40)),
                                    enabled=False,
                                    onclose=self.config.save
                                    )
@@ -48,8 +54,8 @@ class PiConfigMenu(object):
         self._main_menu.add_option('Exit Pibooth', pgmloc.PYGAME_MENU_EXIT)
 
     def _build_submenu(self, section, width, height):
-        """Build submenu"""
-        menu = pgm.TextMenu(self.surface,
+        """Build sub-menu"""
+        menu = pgm.TextMenu(self.window.surface,
                             width,
                             height,
                             pgmfonts.FONT_FRANCHISE,
@@ -58,7 +64,7 @@ class PiConfigMenu(object):
                             draw_region_y=45,
                             menu_color=(0, 50, 100),
                             menu_color_title=(120, 45, 30),
-                            bgfun=lambda: self.surface.fill((40, 0, 40)),
+                            bgfun=lambda: self.window.surface.fill((40, 0, 40)),
                             )
 
         for name, option in DEFAULT[section].items():
@@ -86,7 +92,13 @@ class PiConfigMenu(object):
         """
         self._main_menu.enable()
 
+    def is_shown(self):
+        """Return True if the menu is shown.
+        """
+        return self._main_menu.is_enabled()
+
     def process(self, events):
         """Process the events related to the menu.
         """
-        self._main_menu.mainloop(events)
+        self._main_menu.mainloop(events)  # block until exit menu (dopause=True)
+        self.window.update()

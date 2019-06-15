@@ -20,13 +20,8 @@ class PtbWindow(object):
     RIGHT = 'right'
     LEFT = 'left'
 
-    def __init__(self, title, size, show_arrows=True):
-        if isinstance(size, str) and size.lower() == 'fullscreen':
-            self.__size = (800, 480)
-        elif isinstance(size, (tuple, list)):
-            self.__size = size
-        else:
-            raise TypeError("Invalid size '{}' ({})".format(size, type(size)))
+    def __init__(self, title, size=(800, 480), show_arrows=True):
+        self.__size = size
 
         self.show_arrows = show_arrows
 
@@ -48,9 +43,6 @@ class PtbWindow(object):
         self._pos_map = {self.CENTER: self._center_pos,
                          self.RIGHT: self._right_pos,
                          self.LEFT: self._left_pos}
-
-        if isinstance(size, str) and size.lower() == 'fullscreen':
-            self.toggle_fullscreen()
 
     def _update_foreground(self, pil_image, pos=CENTER, resize=True):
         """Show a PIL image on the foreground.
@@ -305,3 +297,9 @@ class PtbWindow(object):
             self.surface = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
 
         self.update()
+
+    def drop_cache(self):
+        """Drop all cached background and foreground to force
+        refreshing pictures.
+        """
+        self._buffered_images = {}
