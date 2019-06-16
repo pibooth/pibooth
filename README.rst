@@ -13,7 +13,7 @@ Requirements
 
 The requirements listed below are the one used for the development of ``pibooth``, but other
 configuration may work fine. **All hardware buttons, lights and printer are optional**,
-the application can be entirely controlled using a standard keyboard.
+the application can be entirely controlled using a keyboard, a mouse or a touchsceen.
 
 Hardware
 ^^^^^^^^
@@ -150,8 +150,9 @@ Toggle Full screen      Ctrl + F         \-
 Choose layout           LEFT or RIGHT    Button 1 or Button 2
 Take pictures           P                Button 1
 Export Printer/Cloud    Ctrl + E         Button 2
-Settings                ESC              \-
-Quit settings sub-menu  BACK             \-
+Open/close settings     ESC              \-
+Select option           UP or DOWN       \-
+Change option value     LEFT or RIGHT    \-
 ======================= ================ =====================
 
 States and lights management
@@ -215,8 +216,16 @@ Configuration
 -------------
 
 At the first run, a configuration file is generated in ``~/.config/pibooth/pibooth.cfg``
-which permits to configure the behavior of the application. The configuration can be
-easily edited using the command::
+which permits to configure the behavior of the application.
+
+A quick config GUI menu (see `Commands`_ ) gives access to the most common options:
+
+.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/settings.png
+   :align: center
+   :alt: Settings
+
+More options are available by editing the configuration file which can easily
+done using the command::
 
     $ pibooth --config
 
