@@ -55,7 +55,7 @@ def main():
             'picamera',
             'Pillow==5.0.0',
             'Pygame==1.9.4',
-            'pygame-menu>=1.96.1',
+            'pygame-menu>=2.0.0',
             'gphoto2',
             'pycups',
         ],

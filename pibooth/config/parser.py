@@ -166,7 +166,7 @@ DEFAULT = odict((
     ("CONTROLS",
         odict((
             ("debounce_delay",
-                (0.3,
+                (0.15,
                  "How long to debounce the hardware buttons in seconds",
                  None, None)),
             ("picture_btn_pin",

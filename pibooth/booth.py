@@ -373,6 +373,7 @@ class PiApplication(object):
                                 config.getint('CAMERA', 'rotation'),
                                 config.getboolean('CAMERA', 'flip'))
 
+        # Initialize the hardware buttons
         self.led_picture = PtbLed(config.getint('CONTROLS', 'picture_led_pin'))
         self.button_picture = PtbButton(config.getint('CONTROLS', 'picture_btn_pin'),
                                         config.getfloat('CONTROLS', 'debounce_delay'))
@@ -384,28 +385,25 @@ class PiApplication(object):
         self.led_startup = PtbLed(config.getint('CONTROLS', 'startup_led_pin'))
         self.led_preview = PtbLed(config.getint('CONTROLS', 'preview_led_pin'))
 
+        # Initialize double-event timer
+        self._db_click_timer = PoolingTimer(config.getfloat('CONTROLS', 'debounce_delay') + 0.05)
+        self._db_click = None
+
+        # Initialize the printer
         self.printer = PtbPrinter(config.get('PRINTER', 'printer_name'))
 
         # Variables shared between states
         self.dirname = None
         self.nbr_captures = None
+        self.capture_choices = (4, 1)
         self.nbr_printed = 0
         self.previous_picture = None
         self.previous_picture_file = None
 
-    @property
-    def capture_choices(self):
-        choices = self.config.gettyped('PICTURE', 'captures')
-        if isinstance(choices, int):
-            choices = (choices,)
-        for chx in choices:
-            if chx not in [1, 2, 3, 4]:
-                raise ValueError("Invalid captures number '{}'".format(chx))
-        return choices
-
-    def reset(self):
+    def initialize(self):
         """Restore the application with initial parameters defined in the
         configuration file.
+        Only parameters that can be changed at runtime are restored.
         """
         # Handle the language configuration, save it as a class attribute for easy access
         language = self.config.get('GENERAL', 'language')
@@ -414,11 +412,23 @@ class PiApplication(object):
         else:
             PiConfigParser.language = language
 
+        # Set the captures choices
+        choices = self.config.gettyped('PICTURE', 'captures')
+        if isinstance(choices, int):
+            choices = (choices,)
+        for chx in choices:
+            if chx not in [1, 2, 3, 4]:
+                LOGGER.warning("Invalid captures number '%s' in config, fallback to '%s'",
+                               chx, self.capture_choices)
+                choices = self.capture_choices
+                break
+        self.capture_choices = choices
+
         # Handle autostart of the application
         self.config.enable_autostart(self.config.getboolean('GENERAL', 'autostart'))
 
-        self.window.drop_cache()
         self.window.show_arrows = self.config.getboolean('WINDOW', 'arrows')
+        self.window.drop_cache()
 
         # Handle window size
         size = self.config.gettyped('WINDOW', 'size')
@@ -436,6 +446,32 @@ class PiApplication(object):
         else:
             self.state_machine.remove_state('failsafe')
         self.state_machine.set_state('wait')
+
+    def get_double_event(self, events, search_function, convert_to=None):
+        """Return an event if a second identical event is found in the allowed time
+        or return the last buffered event if the timeout is reached.
+
+        Return 'wait' if waiting for second identical event and the timeout is not
+        reached yet.
+        """
+        event = search_function(events)
+        if not self._db_click and event:
+            self._db_click = event
+            self._db_click_timer.start()
+            event = 'wait'
+        elif self._db_click:
+            event = search_function(events)
+            if not self._db_click_timer.is_timeout() and event:
+                # Double press
+                if convert_to:
+                    event = convert_to
+                self._db_click = None
+            elif not self._db_click_timer.is_timeout():
+                event = 'wait'
+            else:
+                event = self._db_click
+                self._db_click = None
+        return event
 
     def find_quit_event(self, events):
         """Return the first found event if found in the list.
@@ -470,31 +506,35 @@ class PiApplication(object):
                 return event
         return None
 
-    def find_picture_event(self, events):
+    def find_picture_event(self, events, type_filter=None):
         """Return the first found event if found in the list.
         """
         for event in events:
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_p) or \
                     (event.type == BUTTON_DOWN and event.pin == self.button_picture):
-                return event
+                if type_filter is None or type_filter == event.type:
+                    return event
             elif event.type == pygame.MOUSEBUTTONUP:
                 rect = self.window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
-                    return event
+                    if type_filter is None or type_filter == event.type:
+                        return event
         return None
 
-    def find_print_event(self, events):
+    def find_print_event(self, events, type_filter=None):
         """Return the first found event if found in the list.
         """
         for event in events:
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_e and
                     pygame.key.get_mods() & pygame.KMOD_CTRL) or \
                     (event.type == BUTTON_DOWN and event.pin == self.button_print):
-                return event
+                if type_filter is None or type_filter == event.type:
+                    return event
             elif event.type == pygame.MOUSEBUTTONUP:
                 rect = self.window.get_rect()
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
-                    return event
+                    if type_filter is None or type_filter == event.type:
+                        return event
         return None
 
     def find_print_status_event(self, events):
@@ -532,12 +572,11 @@ class PiApplication(object):
         try:
             clock = pygame.time.Clock()
             self.led_startup.switch_on()
-            self.reset()
+            self.initialize()
             menu = None
 
             while True:
                 events = list(reversed(pygame.event.get()))  # Take all events, most recent first
-
                 if self.find_quit_event(events):
                     break
 
@@ -548,18 +587,37 @@ class PiApplication(object):
                 if event:
                     self.window.resize(event.size)
 
-                if self.find_settings_event(events):
+                # Manage double press on picture button/surface to show menu
+                if not menu:
+                    db_event = self.get_double_event(events, self.find_picture_event,
+                                                     convert_to=pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE))
+                    if db_event == 'wait':
+                        continue
+                    elif db_event:
+                        events.insert(0, db_event)
+
+                if not menu and self.find_settings_event(events):
                     menu = PiConfigMenu(self.window, self.config)
                     menu.show()
 
-                if menu:
+                if menu and menu.is_shown():
+                    self.window.update()
+
+                    # Convert HW button events to keyboard events
+                    if self.find_picture_event(events, BUTTON_DOWN):
+                        events.insert(0, pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN))
+                    elif self.find_print_event(events, BUTTON_DOWN):
+                        events.insert(0, pygame.event.Event(pygame.KEYDOWN, key=pygame.K_LEFT))
+
                     menu.process(events)
-                    self.reset()
+                elif menu and not menu.is_shown():
+                    self.initialize()
                     menu = None
+                else:
+                    self.state_machine.process(events)
 
-                self.state_machine.process(events)
-
-                clock.tick(40)  # Ensure the program will never run at more than x frames per second
+                pygame.display.update()
+                clock.tick(20)  # Ensure the program will never run at more than x frames per second
 
         finally:
             self.led_startup.quit()

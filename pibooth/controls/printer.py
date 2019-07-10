@@ -172,6 +172,8 @@ class PtbPrinter(object):
             self._notif_server.start()
         if not self.name:
             raise EnvironmentError("No printer found (check config file or CUPS config)")
+        if not osp.isfile(filename):
+            raise IOError("No such file or directory: {}".format(filename))
 
         if copies > 1:
             with tempfile.NamedTemporaryFile(suffix=osp.basename(filename)) as fp:
@@ -180,6 +182,7 @@ class PtbPrinter(object):
                 self._conn.printFile(self.name, fp.name, osp.basename(filename), {})
         else:
             self._conn.printFile(self.name, filename, osp.basename(filename), {})
+        LOGGER.debug("File '%s' sent to the printer", filename)
 
     def cancel_all_tasks(self):
         """Cancel all tasks in the queue.

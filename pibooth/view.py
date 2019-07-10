@@ -55,7 +55,6 @@ class PtbWindow(object):
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
             image = buff_image
-            LOGGER.debug("Use buffered image '%s'", image_name)
         else:
             if resize:
                 image = pil_image.resize(sizing.new_size_keep_aspect_ratio(
@@ -170,14 +169,12 @@ class PtbWindow(object):
             self._update_print_number()
         if self._current_foreground:
             self._update_foreground(*self._current_foreground)
-        pygame.display.update()
 
     def show_oops(self):
         """Show failure view in case of exception.
         """
         self._picture_number = (0, self._picture_number[1])
         self._update_background(background.OopsBackground())
-        pygame.display.update()
 
     def show_intro(self, pil_image=None, with_print=True):
         """Show introduction view.
@@ -190,7 +187,6 @@ class PtbWindow(object):
 
         if pil_image:
             self._update_foreground(pil_image, self.RIGHT)
-        pygame.display.update()
 
     def show_choice(self, choices, selected=None):
         """Show the choice view.
@@ -200,8 +196,6 @@ class PtbWindow(object):
             self._update_background(background.ChooseBackground(choices, self.show_arrows))
         else:
             self._update_background(background.ChosenBackground(choices, selected))
-
-        pygame.display.update()
 
     def show_image(self, pil_image=None, pos=CENTER):
         """Show PIL image as it (no resize).
@@ -213,14 +207,12 @@ class PtbWindow(object):
                 self._current_foreground = None
         else:
             self._update_foreground(pil_image, pos, False)
-        pygame.display.update()
 
     def show_work_in_progress(self):
         """Show wait view.
         """
         self._picture_number = (0, self._picture_number[1])
         self._update_background(background.ProcessingBackground())
-        pygame.display.update()
 
     def show_print(self, pil_image=None):
         """Show print view.
@@ -229,14 +221,12 @@ class PtbWindow(object):
         self._update_background(background.PrintBackground(self.show_arrows))
         if pil_image:
             self._update_foreground(pil_image, self.LEFT)
-        pygame.display.update()
 
     def show_finished(self):
         """Show finished view.
         """
         self._picture_number = (0, self._picture_number[1])
         self._update_background(background.FinishedBackground())
-        pygame.display.update()
 
     @contextlib.contextmanager
     def flash(self, count):
@@ -250,16 +240,18 @@ class PtbWindow(object):
             if self._current_foreground:
                 # Flash only the background, keep foreground at the top
                 self._update_foreground(*self._current_foreground)
-            pygame.display.update()
             pygame.event.pump()
+            pygame.display.update()
             time.sleep(0.02)
             if i == count - 1:
                 yield  # Let's do actions before end of flash
                 self.update()
                 pygame.event.pump()
+                pygame.display.update()
             else:
                 self.update()
                 pygame.event.pump()
+                pygame.display.update()
                 time.sleep(0.02)
 
     def set_picture_number(self, current_nbr, total_nbr):
@@ -302,4 +294,6 @@ class PtbWindow(object):
         """Drop all cached background and foreground to force
         refreshing pictures.
         """
+        self._current_background = None
+        self._current_foreground = None
         self._buffered_images = {}

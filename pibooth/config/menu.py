@@ -18,8 +18,8 @@ def _find(choices, value):
     """Find index for the given value in choices.
     """
     i = 0
-    for _, val in choices:
-        if val == value:
+    for val in choices:
+        if val[0] == value:
             return i
         i += 1
     return 0
@@ -41,11 +41,13 @@ class PiConfigMenu(object):
                                    pgmfonts.FONT_FRANCHISE,
                                    'Settings',
                                    draw_region_y=55,
+                                   menu_alpha=80,
                                    menu_color=(0, 75, 100),
                                    menu_color_title=(120, 45, 30),
-                                   bgfun=lambda: self.window.surface.fill((40, 0, 40)),
                                    enabled=False,
-                                   onclose=self.config.save
+                                   onclose=self.config.save,
+                                   dopause=False,
+                                   bgfun=None
                                    )
 
         for name in ('GENERAL', 'WINDOW', 'PICTURE', 'PRINTER'):
@@ -62,14 +64,15 @@ class PiConfigMenu(object):
                             section.capitalize(),
                             font_size=30,
                             draw_region_y=45,
+                            menu_alpha=90,
                             menu_color=(0, 50, 100),
                             menu_color_title=(120, 45, 30),
-                            bgfun=lambda: self.window.surface.fill((40, 0, 40)),
+                            dopause=False
                             )
 
         for name, option in DEFAULT[section].items():
             if option[2]:
-                values = [(v, v) for v in option[3]]
+                values = [(v,) for v in option[3]]
                 menu.add_selector(option[2],
                                   values,
                                   onchange=self._on_option_changed,
@@ -101,4 +104,3 @@ class PiConfigMenu(object):
         """Process the events related to the menu.
         """
         self._main_menu.mainloop(events)  # block until exit menu (dopause=True)
-        self.window.update()

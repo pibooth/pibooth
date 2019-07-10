@@ -150,9 +150,9 @@ Toggle Full screen      Ctrl + F         \-
 Choose layout           LEFT or RIGHT    Button 1 or Button 2
 Take pictures           P                Button 1
 Export Printer/Cloud    Ctrl + E         Button 2
-Open/close settings     ESC              \-
-Select option           UP or DOWN       \-
-Change option value     LEFT or RIGHT    \-
+Open/close settings     ESC              Double Button 1
+Select option           UP or DOWN       Button 1
+Change option value     LEFT or RIGHT    Button 2
 ======================= ================ =====================
 
 States and lights management
@@ -218,13 +218,13 @@ Configuration
 At the first run, a configuration file is generated in ``~/.config/pibooth/pibooth.cfg``
 which permits to configure the behavior of the application.
 
-A quick config GUI menu (see `Commands`_ ) gives access to the most common options:
+A quick configuration GUI menu (see `Commands`_ ) gives access to the most common options:
 
 .. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/settings.png
    :align: center
    :alt: Settings
 
-More options are available by editing the configuration file which can easily
+More options are available by editing the configuration file which is easily
 done using the command::
 
     $ pibooth --config
