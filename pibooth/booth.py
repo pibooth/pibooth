@@ -576,7 +576,7 @@ class PiApplication(object):
             menu = None
 
             while True:
-                events = list(reversed(pygame.event.get()))  # Take all events, most recent first
+                events = list(pygame.event.get())
                 if self.find_quit_event(events):
                     break
 
