@@ -25,7 +25,7 @@ class GPIO(object):
 
     @classmethod
     def output(cls, pin, status):
-        print("Mock: output GPIO pin {} to {}".format(pin, status))
+        pass
 
     @classmethod
     def add_event_detect(cls, pin, status, **kwargs):
