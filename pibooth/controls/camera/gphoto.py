@@ -28,6 +28,7 @@ GP_PARAMS = {
     },
 }
 
+
 def gp_camera_connected():
     """Return True if a camera compatible with gPhoto2 is found.
     """
@@ -65,7 +66,8 @@ def gp_set_config_value(config, section, option, value):
         else:
             child.set_value(str(value))
     except gp.GPhoto2Error:
-        raise ValueError('Unsupported setting {}/{}={}'.format(section, option, value))
+        LOGGER.error('Unsupported setting %s/%s=%s (nothing configured on DSLR)', section, option, value)
+
 
 class GpCamera(BaseCamera):
 
