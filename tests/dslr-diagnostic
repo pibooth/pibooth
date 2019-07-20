@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import io
+import os
+import sys
+import logging
+from PIL import Image
+import gphoto2 as gp
+
+
+LOGFILE = None
+APPNAME = os.path.basename(os.path.abspath(__file__))
+GP_WIDGET_TYPES = {gp.GP_WIDGET_WINDOW: "Window toplevel",
+                   gp.GP_WIDGET_SECTION: "Section (or Tab)",
+                   gp.GP_WIDGET_TEXT: "Text",
+                   gp.GP_WIDGET_RANGE: "Slider",
+                   gp.GP_WIDGET_TOGGLE: "Toggle button (or check box)",
+                   gp.GP_WIDGET_RADIO: "Radio button",
+                   gp.GP_WIDGET_MENU: "Menu widget (same as Radio)",
+                   gp.GP_WIDGET_BUTTON: "Button press",
+                   gp.GP_WIDGET_DATE: "Date entering",
+                   }
+
+
+def write_log(text, new_section=False):
+    """Write text in the log file"""
+    global LOGFILE
+    if not LOGFILE:
+        LOGFILE = open(APPNAME + '.log', 'w')
+
+    if new_section:
+        print('\n' + '=' * 80)
+        LOGFILE.write('\n' + '=' * 80 + '\n')
+
+    text = str(text)
+    print(text[:200])
+    if len(text) > 200:
+        print("[... -> see log file for full message]")
+    LOGFILE.write(text + '\n')
+
+
+def print_config(config, parent=''):
+    """Print all parameters of the camera"""
+    for child in config.get_children():
+        path = '/'.join((parent, child.get_name()))
+        if child.get_type() == gp.GP_WIDGET_SECTION:
+            print_config(child, path)
+        else:
+            write_log('{}'.format(path))
+            write_log('  Label       : {}'.format(child.get_label()))
+            write_log('  Readonly    : {}'.format('yes' if child.get_readonly() else 'no'))
+            write_log('  Widget type : {}'.format(GP_WIDGET_TYPES[child.get_type()]))
+            write_log('  Current     : {}'.format(child.get_value()))
+            if child.get_type() == gp.GP_WIDGET_RADIO:
+                write_log('  Choices     : {}'.format([c for c in child.get_choices()]))
+            elif child.get_type() == gp.GP_WIDGET_RANGE:
+                write_log('  Choices     : min={}, max={}, step={}'.format(*child.get_range()))
+            elif child.get_type() == gp.GP_WIDGET_TOGGLE:
+                write_log('  Choices     : [0, 1]')
+            elif child.get_type() == gp.GP_WIDGET_MENU:
+                write_log('  Choices     : {}'.format([child.get_choice(n) for n in range(child.count_choices())]))
+            else:
+                write_log('  Choices     : n/a')
+
+
+def set_config_value(config, section, option, value):
+    """Set camera configuration. """
+    try:
+        write_log('Setting option {}/{}="{}"'.format(section, option, value))
+        child = config.get_child_by_name(section).get_child_by_name(option)
+        choices = [c for c in child.get_choices()]
+        if str(value) not in choices:
+            write_log("   -> invalid value '{}' for option {} (possible choices: {})".format(value, option, choices))
+            child.set_value(str(value))
+        else:
+            child.set_value(str(value))
+    except gp.GPhoto2Error:
+        write_log('   -> unsupported setting {}/{}={} (nothing configured on DSLR)'.format(section, option, value))
+
+
+if __name__ == '__main__':
+
+    logging.basicConfig(
+        format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
+    gp.check_result(gp.use_python_logging())
+
+    write_log("Listing all connected DSLR camera", True)
+    if hasattr(gp, 'gp_camera_autodetect'):
+        # gphoto2 version 2.5+
+        cameras_list = gp.check_result(gp.gp_camera_autodetect())
+    else:
+        port_info_list = gp.PortInfoList()
+        port_info_list.load()
+        abilities_list = gp.CameraAbilitiesList()
+        abilities_list.load()
+        cameras_list = abilities_list.detect(port_info_list)
+
+    if not cameras_list:
+        write_log('No compatible DSLR camera detected')
+        sys.exit(1)
+
+    cameras_list = sorted(cameras_list, key=lambda x: x[0])
+    for index, (name, addr) in enumerate(cameras_list):
+        write_log("{:02d} : addr-> {}  name-> {}".format(index, addr, name))
+
+    write_log("Stating diagnostic of connected DSLR camera", True)
+    camera = gp.Camera()
+    camera.init()
+
+    try:
+        config = camera.get_config()
+        print_config(config)
+
+        write_log("Testing commands used by pibooth", True)
+        set_config_value(config, 'imgsettings', 'iso', 100)
+        set_config_value(config, 'settings', 'capturetarget', 'Memory card')
+
+        write_log("Take a capture")
+        gp_path = camera.capture(gp.GP_CAPTURE_IMAGE)
+
+        write_log("Download file from DSLR")
+        camera_file = gp.check_result(gp.gp_camera_file_get(
+            camera, gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL))
+
+        write_log("Save capture locally from memory buffer")
+        image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
+        image.save(APPNAME + '.jpg')
+
+    except Exception as ex:
+        write_log("ABORT  : exception occures: {}".format(ex), True)
+    else:
+        write_log("SUCCESS: diagnostic completed", True)
+
+    camera.exit()
+
+    write_log("If you are investigating why pibooth does not work with your DSLR camera,")
+    write_log("please paste the content of generated file '{}'".format(APPNAME + '.log'))
+    write_log("on https://github.com/werdeil/pibooth/issues")
