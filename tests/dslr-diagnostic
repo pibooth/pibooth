@@ -50,6 +50,7 @@ def print_config(config, parent=''):
             write_log('{}'.format(path))
             write_log('  Label       : {}'.format(child.get_label()))
             write_log('  Readonly    : {}'.format('yes' if child.get_readonly() else 'no'))
+            write_log('  Data type   : {}'.format(type(child.get_value())))
             write_log('  Widget type : {}'.format(GP_WIDGET_TYPES[child.get_type()]))
             write_log('  Current     : {}'.format(child.get_value()))
             if child.get_type() == gp.GP_WIDGET_RADIO:
