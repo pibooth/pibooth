@@ -168,6 +168,10 @@ The states of the **LED 1** and **LED 2** are modified depending on the actions 
 for the user. The **LED 3** is switched on when the application starts and the **LED 4**
 is switched on during the preview and photo capture.
 
+.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/background_samples.png
+   :align: center
+   :alt: Settings
+
 A word about capture effects
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
