@@ -97,27 +97,8 @@ A brief description on how to set-up a Raspberry Pi to use this software.
              the ``--no-deps`` option to avoid installation failures (you may need to install Python
              dependencies by yourself)
 
-Install developing version
---------------------------
-
-If you want to use an **unofficial version** of the ``pibooth`` application, you need to work from
-a clone of this ``git`` repository. Replace the step 8. of the `Install`_ procedure above by the
-following actions:
-
-1. Clone from github ::
-
-    $ git clone https://github.com/werdeil/pibooth.git
-
-2. Go in the cloned directory ::
-
-    $ cd pibooth
-
-3. Install ``pibooth`` in editable mode ::
-
-    $ sudo pip3 install -e .
-
-4. Start the application exactly in the same way as installed from pypi. All modifications performed
-   in the cloned repository are taken into account when the application starts.
+*NOTE:* an editable version of ``pibooth`` can be installed by following
+`these instructions <https://github.com/werdeil/pibooth/blob/master/docs/dev.rst>`_ .
 
 Run
 ---
@@ -138,23 +119,6 @@ You can display a basic help on application options by using the command::
 
     $ pibooth --help
 
-Commands
-^^^^^^^^
-
-After the graphical interface is started, the following actions are available:
-
-======================= ================ =====================
-Action                  Keyboard key     Physical button
-======================= ================ =====================
-Toggle Full screen      Ctrl + F         \-
-Choose layout           LEFT or RIGHT    Button 1 or Button 2
-Take pictures           P                Button 1
-Export Printer/Cloud    Ctrl + E         Button 2
-Open/close settings     ESC              Double Button 1
-Select option           UP or DOWN       Button 1
-Change option value     LEFT or RIGHT    Button 2
-======================= ================ =====================
-
 States and lights management
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -171,6 +135,23 @@ is switched on during the preview and photo capture.
 .. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/background_samples.png
    :align: center
    :alt: Settings
+
+Commands
+^^^^^^^^
+
+After the graphical interface is started, the following actions are available:
+
+======================= ================ =====================
+Action                  Keyboard key     Physical button
+======================= ================ =====================
+Toggle Full screen      Ctrl + F         \-
+Choose layout           LEFT or RIGHT    Button 1 or Button 2
+Take pictures           P                Button 1
+Export Printer/Cloud    Ctrl + E         Button 2
+Open/close settings     ESC              Double Button 1
+Select option           UP or DOWN       Button 1
+Change option value     LEFT or RIGHT    Button 2
+======================= ================ =====================
 
 A word about capture effects
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
