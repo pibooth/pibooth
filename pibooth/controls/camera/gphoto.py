@@ -15,19 +15,6 @@ from pibooth.config.parser import PiConfigParser
 from pibooth.utils import LOGGER, PoolingTimer
 from pibooth.controls.camera.base import BaseCamera, LANGUAGES
 
-# Mapping of gPhoto2 config values for supported languages
-GP_PARAMS = {
-    'fr': {
-        'Memory card': 'Carte mémoire',
-    },
-    'en': {
-        'Memory card': 'Memory card',
-    },
-    'de': {
-        'Memory card': 'Speicherkarte',
-    },
-}
-
 
 def gp_camera_connected():
     """Return True if a camera compatible with gPhoto2 is found.
@@ -47,26 +34,6 @@ def gp_camera_connected():
         return True
 
     return False
-
-
-def gp_set_config_value(config, section, option, value):
-    """Set camera configuration. This method don't send the updated
-    configuration to the camera (avoid connection flooding if several
-    values have to be changed)
-    """
-    try:
-        value = GP_PARAMS.get(PiConfigParser.language, GP_PARAMS['en']).get(value, value)
-        LOGGER.debug('Setting option %s/%s=%s', section, option, value)
-        child = config.get_child_by_name(section).get_child_by_name(option)
-        choices = [c for c in child.get_choices()]
-        if value not in choices:
-            LOGGER.warning(
-                "Invalid value '%s' for option %s (possible choices: %s), still trying to set it", value, option, choices)
-            child.set_value(str(value))
-        else:
-            child.set_value(str(value))
-    except gp.GPhoto2Error:
-        LOGGER.error('Unsupported setting %s/%s=%s (nothing configured on DSLR)', section, option, value)
 
 
 class GpCamera(BaseCamera):
@@ -93,7 +60,7 @@ class GpCamera(BaseCamera):
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation
-        self._iso = str(iso)
+        self._iso = iso
         self.gphoto2_process = None
         self.omxplayer_process = None
 
@@ -103,8 +70,8 @@ class GpCamera(BaseCamera):
         self._cam = gp.Camera()
         self._cam.init()
         config = self._cam.get_config()
-        gp_set_config_value(config, 'imgsettings', 'iso', self._iso)
-        gp_set_config_value(config, 'settings', 'capturetarget', 'Memory card')
+        self.set_config_value(config, 'imgsettings', 'iso', self._iso)
+        self.set_config_value(config, 'settings', 'capturetarget', 'Memory card')
         self._cam.set_config(config)
 
     def _show_overlay(self, text, alpha):
@@ -120,6 +87,8 @@ class GpCamera(BaseCamera):
             self._window.show_image(image)
 
     def _post_process_capture(self, capture_path):
+        """Rework and return a Image object from file.
+        """
         gp_path, effect = self._captures[capture_path]
         camera_file = gp.check_result(gp.gp_camera_file_get(
             self._cam, gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL))
@@ -135,6 +104,27 @@ class GpCamera(BaseCamera):
 
         image.save(capture_path)
         return image
+
+    @staticmethod
+    def set_config_value(config, section, option, value):
+        """Set camera configuration. This method don't send the updated
+        configuration to the camera (avoid connection flooding if several
+        values have to be changed)
+        """
+        try:
+            LOGGER.debug('Setting option %s/%s=%s', section, option, value)
+            child = config.get_child_by_name(section).get_child_by_name(option)
+            choices = [c for c in child.get_choices()]
+            data_type = type(child.get_value())
+            value = data_type(value)  # Cast value
+            if value not in choices:
+                LOGGER.warning(
+                    "Invalid value '%s' for option %s (possible choices: %s), trying to set it anyway", value, option, choices)
+                child.set_value(value)
+            else:
+                child.set_value(value)
+        except gp.GPhoto2Error:
+            LOGGER.error('Unsupported setting %s/%s=%s (please configure your DSLR manually)', section, option, value)
 
     def preview(self, window, flip=True):
         """Setup the preview.

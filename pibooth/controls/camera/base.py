@@ -46,7 +46,7 @@ class BaseCamera(object):
             self._overlay = None
 
     def _post_process_capture(self, capture_path):
-        """Rework and return a capture from file.
+        """Rework and return a Image object from file.
         """
         return Image.open(capture_path)
 
@@ -88,4 +88,4 @@ class BaseCamera(object):
     def drop_captures(self):
         """Delete all buffered captures.
         """
-        self._captures = {}
+        self._captures.clear()
