@@ -90,10 +90,8 @@ class GpCamera(BaseCamera):
         """Rework and return a Image object from file.
         """
         gp_path, effect = self._captures[capture_path]
-        camera_file = gp.check_result(gp.gp_camera_file_get(
-            self._cam, gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL))
-
-        image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
+        camera_file = self._cam.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
+        image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
         image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
 
         if self._capture_hflip:

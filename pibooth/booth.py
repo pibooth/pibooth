@@ -235,6 +235,7 @@ class StateProcessing(State):
     def entry_actions(self):
         self.app.window.show_work_in_progress()
 
+    def do_actions(self, events):
         with timeit("Creating merged picture"):
             footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
                             self.app.config.get('PICTURE', 'footer_text2')]

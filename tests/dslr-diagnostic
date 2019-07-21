@@ -121,11 +121,10 @@ if __name__ == '__main__':
         gp_path = camera.capture(gp.GP_CAPTURE_IMAGE)
 
         write_log("Download file from DSLR")
-        camera_file = gp.check_result(gp.gp_camera_file_get(
-            camera, gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL))
+        camera_file = camera.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
 
         write_log("Save capture locally from memory buffer")
-        image = Image.open(io.BytesIO(memoryview(camera_file.get_data_and_size())))
+        image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
         image.save(APPNAME + '.jpg')
 
     except Exception as ex:
