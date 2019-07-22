@@ -11,10 +11,10 @@ LANGUAGES = {
         'smile_message': "Souriez !"
     },
     'en': {
-        'smile_message': "Smile!"
+        'smile_message': "Smile !"
     },
     'de': {
-        'smile_message': "Bitte lächeln!"
+        'smile_message': "Bitte lächeln !"
     }
 }
 
@@ -28,11 +28,6 @@ class BaseCamera(object):
         self._overlay = None
         self._captures = {}
         self.resolution = resolution
-
-    def _post_process_capture(self, capture_path):
-        """Rework and return a capture from file.
-        """
-        return Image.open(capture_path)
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
