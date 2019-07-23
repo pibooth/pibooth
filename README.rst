@@ -8,6 +8,10 @@ The ``pibooth`` project attempts to provide a photobooth application *out-of-the
 in pure Python for Raspberry Pi. Have a look to the `wiki <https://github.com/werdeil/pibooth/wiki>`_
 to discover some realizations from GitHub users.
 
+.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/background_samples.png
+   :align: center
+   :alt: Settings
+
 Requirements
 ------------
 
@@ -34,7 +38,7 @@ Software
 * picamera ``1.13``
 * Pillow ``5.0.0``
 * pygame ``1.9.4``
-* pygame-menu ``1.96.1``
+* pygame-menu ``2.0.0``
 * gphoto2 ``1.8.0`` ( libgphoto2 ``2.5.15`` )
 * pycups ``1.9.73`` ( CUPS ``2.2.1`` )
 
@@ -97,8 +101,8 @@ A brief description on how to set-up a Raspberry Pi to use this software.
              the ``--no-deps`` option to avoid installation failures (you may need to install Python
              dependencies by yourself)
 
-*NOTE:* an editable version of ``pibooth`` can be installed by following
-`these instructions <https://github.com/werdeil/pibooth/blob/master/docs/dev.rst>`_ .
+**NOTE:** an editable/customizable version of ``pibooth`` can be installed by following
+`these instructions <https://github.com/werdeil/pibooth/blob/master/docs/dev.rst>`_ . Be aware that the code on the `master` branch may be unstable.
 
 Run
 ---
@@ -111,9 +115,9 @@ All pictures taken are stored in the folder defined in ``[GENERAL][directory]``.
 **YYYY-mm-dd-hh-mm-ss_pibooth.jpg** which is the time when first capture of the sequence was taken.
 A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is created to store the single raw captures.
 
-.. note:: if you have both ``Pi`` and ``gPhoto2`` cameras connected to the Raspberry Pi, both are
-          used. The preview is taken using the ``Pi`` one for a better video rendering and the
-          capture is taken using the ``gPhoto2`` one for better picture rendering.
+.. note:: if you have both ``Pi`` and ``DSLR`` cameras connected to the Raspberry Pi, **both are used**,
+          this is called the **Hybrid** mode. The preview is taken using the ``Pi`` one for a better
+          video rendering and the capture is taken using the ``gPhoto2`` one for better picture rendering.
 
 You can display a basic help on application options by using the command::
 
@@ -131,10 +135,6 @@ The application follows the states sequence defined in the diagram below:
 The states of the **LED 1** and **LED 2** are modified depending on the actions available
 for the user. The **LED 3** is switched on when the application starts and the **LED 4**
 is switched on during the preview and photo capture.
-
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/background_samples.png
-   :align: center
-   :alt: Settings
 
 Commands
 ^^^^^^^^
