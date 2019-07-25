@@ -8,10 +8,9 @@ try:
     import cv2
 except ImportError:
     cv2 = None  # opencv is optional
-import time
 import numpy as np
 
-DEFAULT_FONTS = (fonts.get_filename("Amatic-Bold.ttf"), fonts.get_filename("AmaticSC-Regular.ttf"))
+DEFAULT_FONTS = ("Amatic-Bold.ttf", "AmaticSC-Regular.ttf")
 
 
 def new_image_with_background(width, height, background):
@@ -259,14 +258,14 @@ def draw_footer_text(final_image, portrait, footer_texts, footer_fonts, footer_s
     draw = ImageDraw.Draw(final_image)
 
     # Footer 1
-    name_font = ImageFont.truetype(footer_fonts[0], int(2 / 3. * footer_size))
+    name_font = ImageFont.truetype(fonts.get_filename(footer_fonts[0]), int(2 / 3. * footer_size))
     name_width, name_height = draw.textsize(footer_texts[0], font=name_font)
     footer_x = (final_width - name_width) // 2 if portrait else final_width // 4 - name_width // 2
     footer_y = final_height - footer_size - 100 if portrait else final_height - (footer_size + name_height) // 2 - 50
     draw.text((footer_x, footer_y), footer_texts[0], text_color, font=name_font)
 
     # Footer 2
-    date_font = ImageFont.truetype(footer_fonts[-1], int(1 / 3. * footer_size))
+    date_font = ImageFont.truetype(fonts.get_filename(footer_fonts[-1]), int(1 / 3. * footer_size))
     date_width, date_height = draw.textsize(footer_texts[1], font=date_font)
     footer_x = (final_width - date_width) // 2 if portrait else 3 * final_width // 4 - date_width // 2
     footer_y = final_height - footer_size + 300 if portrait else final_height - (footer_size + date_height) // 2 - 50
