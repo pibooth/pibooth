@@ -197,6 +197,22 @@ the configuration (see `Configuration`_ below):
 .. note:: The resolution is an important parameter, it is responsible for the quality of the final
           picture. Have a look to `picamera possible resolutions <http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes>`_ .
 
+The fonts used on the final picture can be customized using the configuration key ``[PICTURE][fonts]``.
+This key can take one or two path(s) to font files. It is also possible to use the embedded fonts:
+
+- **Amatic-Bold.ttf**
+- **AmaticSC-Regular.ttf**
+- **Roboto-BoldItalic.ttf**
+- **Roboto-LightItalic.ttf**
+
+System fonts can also be used. The available system fonts can be listed using the following command
+in a python shell:
+
+.. code-block:: python
+
+    >>> import pygame
+    >>> print(pygame.font.get_fonts())
+
 Configuration
 -------------
 
