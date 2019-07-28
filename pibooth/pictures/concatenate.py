@@ -10,8 +10,6 @@ except ImportError:
     cv2 = None  # opencv is optional
 import numpy as np
 
-DEFAULT_FONTS = ("Amatic-Bold.ttf", "AmaticSC-Regular.ttf")
-
 
 def new_image_with_background(width, height, background):
     """Create a new image with the given background. The background can be
@@ -272,7 +270,7 @@ def draw_footer_text(final_image, portrait, footer_texts, footer_fonts, footer_s
     draw.text((footer_x, footer_y), footer_texts[1], text_color, font=date_font)
 
 
-def concatenate_pictures(pictures, footer_texts=('', ''), footer_fonts=DEFAULT_FONTS,
+def concatenate_pictures(pictures, footer_texts=('', ''), footer_fonts=("Amatic-Bold", "AmaticSC-Regular"),
                          bg_color=(255, 255, 255), text_color=(0, 0, 0), orientation="auto",
                          inter_width=None):
     """ Merge up to 4 PIL images and return concatenated image as a new PIL image object.

@@ -61,8 +61,8 @@ Default configuration
     # Background RGB color or path to a background image
     bg_color = (255, 255, 255)
 
-    # Font path/url to be used for footer texts (2 paths comma-separated can be given)
-    fonts =
+    # Font name/path/url to be used for footer texts (1 or 2 names/paths)
+    fonts = ('Amatic-Bold', 'AmaticSC-Regular')
 
     [CAMERA]
     # Adjust for lighting issues, normal is 100 or 200 and dark is 800 max

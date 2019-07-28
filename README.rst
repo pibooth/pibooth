@@ -15,8 +15,8 @@ to discover some realizations from GitHub users.
 Requirements
 ------------
 
-The requirements listed below are the one used for the development of ``pibooth``, but other
-configuration may work fine. **All hardware buttons, lights and printer are optional**,
+The requirements listed below are the ones used for the development of ``pibooth``, but
+other configuration may work fine. **All hardware buttons, lights and printer are optional**,
 the application can be entirely controlled using a keyboard, a mouse or a touchsceen.
 
 Hardware
@@ -118,7 +118,7 @@ A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is created to store the single raw captu
 
 .. note:: if you have both ``Pi`` and ``DSLR`` cameras connected to the Raspberry Pi, **both are used**,
           this is called the **Hybrid** mode. The preview is taken using the ``Pi`` one for a better
-          video rendering and the capture is taken using the ``gPhoto2`` one for better picture rendering.
+          video rendering and the capture is taken using the ``DSLR`` one for better picture rendering.
 
 You can display a basic help on application options by using the command::
 
@@ -199,12 +199,28 @@ the configuration (see `Configuration`_ below):
           picture. Have a look to `picamera possible resolutions <http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes>`_ .
 
 The fonts used on the final picture can be customized using the configuration key ``[PICTURE][fonts]``.
-This key can take one or two path(s) to font files. It is also possible to use the embedded fonts:
+This key can take one or two name/path/url:
 
-- **Amatic-Bold.ttf**
-- **AmaticSC-Regular.ttf**
-- **Roboto-BoldItalic.ttf**
-- **Roboto-LightItalic.ttf**
+.. code-block:: ini
+
+    [PICTURE]
+
+    # Same font applied on footer_text1 and footer_text2
+    fonts = Amatic-Bold
+
+.. code-block:: ini
+
+    [PICTURE]
+
+    # 'arial' font applied on footer_text1, 'Roboto-BoldItalic' font on footer_text2
+    fonts = ('arial', 'Roboto-BoldItalic')
+
+It is possible to use the embedded fonts:
+
+- **Amatic-Bold**
+- **AmaticSC-Regular**
+- **Roboto-BoldItalic**
+- **Roboto-LightItalic**
 
 System fonts can also be used. The available system fonts can be listed using the following command
 in a python shell:

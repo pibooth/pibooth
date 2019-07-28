@@ -16,6 +16,9 @@ def get_filename(name):
     if embedded_path and osp.isfile(embedded_path):
         return embedded_path
 
+    elif embedded_path and osp.isfile(embedded_path + '.ttf'):
+        return embedded_path + '.ttf'
+
     system_path = pygame.font.match_font(name)
     if system_path and osp.isfile(system_path):
         return system_path
