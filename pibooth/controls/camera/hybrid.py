@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import time
 from pibooth.controls.camera.rpi import RpiCamera
-from pibooth.controls.camera.gphoto import GpCamera, gp
+from pibooth.controls.camera.gphoto import GpCamera
 
 
 class HybridCamera(RpiCamera):
@@ -17,7 +16,6 @@ class HybridCamera(RpiCamera):
     def __init__(self, *args, **kwargs):
         RpiCamera.__init__(self, *args, **kwargs)
         self._gp_cam = GpCamera(*args, **kwargs)
-        self._gp_cam._init()
         self._gp_cam._captures = self._captures  # Same dict for both cameras
 
     def _post_process_capture(self, capture_path):
@@ -28,14 +26,7 @@ class HybridCamera(RpiCamera):
     def capture(self, filename, effect=None):
         """Capture a picture in a file.
         """
-        effect = str(effect).lower()
-        if effect not in self.IMAGE_EFFECTS:
-            raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
-
-        self._captures[filename] = (self._gp_cam._cam.capture(gp.GP_CAPTURE_IMAGE), effect)
-        time.sleep(1)  # Necessary to let the time for the camera to save the image
-
-        self._hide_overlay()  # If stop_preview() has not been called
+        return self._gp_cam.capture(filename, effect)
 
     def quit(self):
         """Close the camera driver, it's definitive.

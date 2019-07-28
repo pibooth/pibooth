@@ -65,17 +65,21 @@ def print_config(config, parent=''):
                 write_log('  Choices     : n/a')
 
 
-def set_config_value(config, section, option, value):
+def set_config_value(camera, section, option, value):
     """Set camera configuration. """
     try:
         write_log('Setting option {}/{}="{}"'.format(section, option, value))
+        config = camera.get_config()
         child = config.get_child_by_name(section).get_child_by_name(option)
-        choices = [c for c in child.get_choices()]
-        if str(value) not in choices:
-            write_log("   -> invalid value '{}' for option {} (possible choices: {})".format(value, option, choices))
-            child.set_value(str(value))
+        if child.get_type() == gp.GP_WIDGET_RADIO:
+            choices = [c for c in child.get_choices()]
         else:
-            child.set_value(str(value))
+            choices = None
+
+        if choices and value not in choices:
+            write_log("   -> invalid value '{}' for option {} (possible choices: {})".format(value, option, choices))
+        child.set_value(value)
+        camera.set_config(config)
     except gp.GPhoto2Error:
         write_log('   -> unsupported setting {}/{}={} (nothing configured on DSLR)'.format(section, option, value))
 
@@ -110,12 +114,17 @@ if __name__ == '__main__':
     camera.init()
 
     try:
-        config = camera.get_config()
-        print_config(config)
+        print_config(camera.get_config())
 
         write_log("Testing commands used by pibooth", True)
-        set_config_value(config, 'imgsettings', 'iso', 100)
-        set_config_value(config, 'settings', 'capturetarget', 'Memory card')
+        set_config_value(camera, 'imgsettings', 'iso', '100')
+        set_config_value(camera, 'settings', 'capturetarget', 'Memory card')
+
+        write_log("Take capture preview")
+        config = camera.get_config()
+        set_config_value(camera, 'actions', 'viewfinder', 1)
+        camera.capture_preview()
+        set_config_value(camera, 'actions', 'viewfinder', 0)
 
         write_log("Take a capture")
         gp_path = camera.capture(gp.GP_CAPTURE_IMAGE)

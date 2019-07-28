@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import io
-import os
 import time
-import signal
-import subprocess
+import pygame
 try:
     import gphoto2 as gp
 except ImportError:
@@ -53,38 +51,64 @@ class GpCamera(BaseCamera):
                      u'smooth_more',
                      u'sharpen']
 
-    def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False):
+    def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False, init=True):
         BaseCamera.__init__(self, resolution)
         gp.check_result(gp.use_python_logging())
-
+        self._preview_compatible = True
+        self._viewfinder_init_value = 0
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation
         self._iso = iso
-        self.gphoto2_process = None
-        self.omxplayer_process = None
 
-    def _init(self):
+        if init:
+            self._initialize()
+
+    def _initialize(self):
         """Camera initialisation
         """
         self._cam = gp.Camera()
         self._cam.init()
-        config = self._cam.get_config()
-        self.set_config_value(config, 'imgsettings', 'iso', self._iso)
-        self.set_config_value(config, 'settings', 'capturetarget', 'Memory card')
-        self._cam.set_config(config)
+
+        try:
+            self._viewfinder_init_value = self.get_config_value('actions', 'viewfinder')
+            self._preview_compatible = True
+        except ValueError:
+            LOGGER.warning("The connected DSLR camera is not compatible with preview")
+            self._preview_compatible = False
+        self.set_config_value('imgsettings', 'iso', self._iso)
+        self.set_config_value('settings', 'capturetarget', 'Memory card')
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
         """
         if self._window:  # No window means no preview displayed
-            rect = self._window.get_rect()
-            size = (((rect.width + 31) // 32) * 32, ((rect.height + 15) // 16) * 16)
+            rect = self.get_rect()
+            self._overlay = self.build_overlay((rect.width, rect.height), str(text), alpha)
 
-            image = Image.new('RGB', size, color=(0, 0, 0))
-            self._overlay = self.build_overlay(image.size, text, alpha)
+    def _get_preview_image(self):
+        """Capture a new preview image.
+        """
+        rect = self.get_rect()
+        if self._preview_compatible:
+            cam_file = self._cam.capture_preview()
+            image = Image.open(io.BytesIO(cam_file.get_data_and_size()))
+            if self._preview_hflip:
+                image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
+            # Same process as RPI camera (almost), this is for keeping
+            # final rendering sizing (see pibooth.picutres.concatenate)
+            image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
+            image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
+
+            # Resize to fit the available space in the window
+            image = image.resize(sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer'))
+        else:
+            image = Image.new('RGB', (rect.width, rect.height), color=(0, 0, 0))
+
+        if self._overlay:
             image.paste(self._overlay, (0, 0), self._overlay)
-            self._window.show_image(image)
+        return image
 
     def _post_process_capture(self, capture_path):
         """Rework and return a Image object from file.
@@ -103,48 +127,51 @@ class GpCamera(BaseCamera):
         image.save(capture_path)
         return image
 
-    @staticmethod
-    def set_config_value(config, section, option, value):
+    def set_config_value(self, section, option, value):
         """Set camera configuration. This method don't send the updated
         configuration to the camera (avoid connection flooding if several
         values have to be changed)
         """
         try:
             LOGGER.debug('Setting option %s/%s=%s', section, option, value)
+            config = self._cam.get_config()
             child = config.get_child_by_name(section).get_child_by_name(option)
-            choices = [c for c in child.get_choices()]
+            if child.get_type() == gp.GP_WIDGET_RADIO:
+                choices = [c for c in child.get_choices()]
+            else:
+                choices = None
             data_type = type(child.get_value())
             value = data_type(value)  # Cast value
-            if value not in choices:
+            if choices and value not in choices:
                 LOGGER.warning(
                     "Invalid value '%s' for option %s (possible choices: %s), trying to set it anyway", value, option, choices)
-                child.set_value(value)
-            else:
-                child.set_value(value)
+            child.set_value(value)
+            self._cam.set_config(config)
+        except gp.GPhoto2Error as ex:
+            LOGGER.error('Unsupported option %s/%s=%s (%s), configure your DSLR manually', section, option, value, ex)
+
+    def get_config_value(self, section, option):
+        """Get camera configuration option.
+        """
+        try:
+            config = self._cam.get_config()
+            child = config.get_child_by_name(section).get_child_by_name(option)
+            value = child.get_value()
+            LOGGER.debug('Getting option %s/%s=%s', section, option, value)
+            return value
         except gp.GPhoto2Error:
-            LOGGER.error('Unsupported setting %s/%s=%s (please configure your DSLR manually)', section, option, value)
+            raise ValueError('Unknown option {}/{}'.format(section, option))
 
     def preview(self, window, flip=True):
         """Setup the preview.
         """
         self._window = window
-        self.gphoto2_process = True  # hack to avoid the preview
-        if not self.gphoto2_process:
-            rect = self.get_rect()
-            if flip:
-                orientation = 1
-            else:
-                orientation = 0
-            self.gphoto2_process = subprocess.Popen("gphoto2 --capture-movie --stdout> fifo.mjpg &",
-                                                    shell=True,
-                                                    preexec_fn=os.setsid)
-            window_rect = '{0},{1},{2},{3}'.format(tuple(rect)[0], tuple(rect)[1], tuple(rect)[0] + tuple(rect)[2],
-                                                   tuple(rect)[1] + tuple(rect)[3])
-            command = "omxplayer fifo.mjpg --live --crop 252,0,804,704 --win {0} --orientation {1}".format(
-                window_rect, orientation)
-            self.omxplayer_process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+        self._preview_hflip = flip
+        if self._preview_compatible:
+            self.set_config_value('actions', 'viewfinder', 1)
+            self._window.show_image(self._get_preview_image())
 
-    def preview_countdown(self, timeout, alpha=60):
+    def preview_countdown(self, timeout, alpha=80):
         """Show a countdown of `timeout` seconds on the preview.
         Returns when the countdown is finished.
         """
@@ -152,42 +179,65 @@ class GpCamera(BaseCamera):
         if timeout < 1:
             raise ValueError("Start time shall be greater than 0")
 
+        shown = False
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
-            self.preview(self._window)
             remaining = int(timer.remaining() + 1)
             if not self._overlay or remaining != timeout:
                 # Rebluid overlay only if remaining number has changed
                 self._show_overlay(str(remaining), alpha)
                 timeout = remaining
+                shown = False
+
+            if self._preview_compatible:
+                self._window.show_image(self._get_preview_image())
+            elif not shown:
+                self._window.show_image(self._get_preview_image())
+                shown = True  # Do not update dummy preview until next overlay update
+
+            pygame.event.pump()
+            pygame.display.update()
 
         self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
+        self._window.show_image(self._get_preview_image())
 
-    def preview_wait(self, timeout, alpha=60):
+    def preview_wait(self, timeout, alpha=80):
         """Wait the given time.
         """
-        time.sleep(timeout)
+        timeout = int(timeout)
+        if timeout < 1:
+            raise ValueError("Start time shall be greater than 0")
+
+        timer = PoolingTimer(timeout)
+        if self._preview_compatible:
+            while not timer.is_timeout():
+                self._window.show_image(self._get_preview_image())
+                pygame.event.pump()
+                pygame.display.update()
+        else:
+            time.sleep(timer.remaining())
+
         self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
+        self._window.show_image(self._get_preview_image())
 
     def stop_preview(self):
         """Stop the preview.
         """
-        if self.omxplayer_process:
-            os.killpg(os.getpgid(self.omxplayer_process.pid), signal.SIGTERM)
-            self.omxplayer_process = None
+        self._hide_overlay()
         self._window = None
 
     def capture(self, filename, effect=None):
         """Capture a picture in a file.
         """
+        if self._preview_compatible:
+            self.set_config_value('actions', 'viewfinder', self._viewfinder_init_value)
+
         effect = str(effect).lower()
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
-        self._init()
         self._captures[filename] = (self._cam.capture(gp.GP_CAPTURE_IMAGE), effect)
         time.sleep(1)  # Necessary to let the time for the camera to save the image
-        self.quit()
 
         self._hide_overlay()  # If stop_preview() has not been called
 
