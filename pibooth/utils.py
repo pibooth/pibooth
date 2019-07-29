@@ -9,9 +9,28 @@ import time
 import os.path as osp
 import logging
 import contextlib
+try:
+    from itertools import zip_longest, islice
+except ImportError:
+    # Python 2.x fallback
+    from itertools import izip_longest as zip_longest, islice
 
 
 LOGGER = logging.getLogger("pibooth")
+
+
+def take(n, iterable):
+    """Return first n items of the iterable as a list"""
+    return list(islice(iterable, n))
+
+
+def print_columns_words(words, column_count=3):
+    """Print a list of words into columns"""
+    columns, dangling = divmod(len(words), column_count)
+    columns = [take(columns + (dangling > i), iter(words)) for i in range(column_count)]
+    paddings = [max(map(len, column)) for column in columns]
+    for row in zip_longest(*columns, fillvalue=''):
+        print('  '.join(word.ljust(pad) for word, pad in zip(row, paddings)))
 
 
 class BlockConsoleHandler(logging.StreamHandler):

@@ -199,7 +199,6 @@ the configuration (see `Configuration`_ below):
           picture. Have a look to `picamera possible resolutions <http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes>`_ .
 
 The fonts used on the final picture can be customized using the configuration key ``[PICTURE][fonts]``.
-This key can take one or two name/path/url:
 
 .. code-block:: ini
 
@@ -208,6 +207,8 @@ This key can take one or two name/path/url:
     # Same font applied on footer_text1 and footer_text2
     fonts = Amatic-Bold
 
+This key can take two name/path/url:
+
 .. code-block:: ini
 
     [PICTURE]
@@ -215,20 +216,9 @@ This key can take one or two name/path/url:
     # 'arial' font applied on footer_text1, 'Roboto-BoldItalic' font on footer_text2
     fonts = ('arial', 'Roboto-BoldItalic')
 
-It is possible to use the embedded fonts:
+The available fonts can be listed using the following the command::
 
-- **Amatic-Bold**
-- **AmaticSC-Regular**
-- **Roboto-BoldItalic**
-- **Roboto-LightItalic**
-
-System fonts can also be used. The available system fonts can be listed using the following command
-in a python shell:
-
-.. code-block:: python
-
-    >>> import pygame
-    >>> print(pygame.font.get_fonts())
+    $ pibooth --fonts
 
 Configuration
 -------------

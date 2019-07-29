@@ -1,8 +1,26 @@
 # -*- coding: utf-8 -*-
 
+import os
+import fnmatch
 import os.path as osp
 from difflib import SequenceMatcher
 import pygame
+
+
+EMBEDDED_FONT_PATH = osp.dirname(osp.abspath(__file__))
+
+
+def get_available_fonts():
+    """Return the list of available fonts.
+    """
+    fonts_list = []
+    for font_file in os.listdir(EMBEDDED_FONT_PATH):
+        if fnmatch.fnmatch(font_file, '*.ttf'):
+            fonts_list.append(osp.splitext(osp.basename(font_file))[0])
+
+    fonts_list.extend(pygame.font.get_fonts())
+
+    return sorted(fonts_list)
 
 
 def get_filename(name):

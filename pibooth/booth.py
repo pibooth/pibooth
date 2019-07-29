@@ -14,12 +14,14 @@ import pygame
 from RPi import GPIO
 from PIL import Image
 import pibooth
-from pibooth.utils import LOGGER, timeit, PoolingTimer, configure_logging
+from pibooth.utils import (LOGGER, timeit, PoolingTimer,
+                           configure_logging, print_columns_words)
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
 from pibooth.config.parser import PiConfigParser, get_supported_languages
 from pibooth.config.menu import PiConfigMenu
 from pibooth.controls import camera
+from pibooth.fonts import get_available_fonts
 from pibooth.pictures.concatenate import concatenate_pictures
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
@@ -644,6 +646,9 @@ def main():
     parser.add_argument("--reset", action='store_true',
                         help=u"restore the default configuration")
 
+    parser.add_argument("--fonts", action='store_true',
+                        help=u"display all available fonts")
+
     parser.add_argument("--log", default=None,
                         help=u"save console output to the given file")
 
@@ -663,6 +668,8 @@ def main():
         LOGGER.info("Editing the photo booth configuration...")
         config.open_editor()
         config.enable_autostart(config.getboolean('GENERAL', 'autostart'))
+    elif options.fonts:
+        print_columns_words(get_available_fonts(), 3)
     elif not options.reset:
         LOGGER.info("Starting the photo booth application...")
         app = PiApplication(config)
