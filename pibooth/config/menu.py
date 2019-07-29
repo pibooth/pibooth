@@ -5,13 +5,13 @@
 
 import pygame
 import pygameMenu as pgm
-from pygameMenu import config_controls
+from pygameMenu import controls as pmgctrl
 from pygameMenu import events as pgmevt
 from pygameMenu import fonts as pgmfonts
 from pibooth.config.parser import DEFAULT
 
 
-config_controls.MENU_CTRL_BACK = pygame.K_ESCAPE
+pmgctrl.KEY_BACK = pygame.K_ESCAPE
 
 
 def _find(choices, value):
@@ -46,7 +46,7 @@ class PiConfigMenu(object):
                                    menu_color_title=(120, 45, 30),
                                    enabled=False,
                                    option_shadow=True,
-                                   onclose=self.config.save,
+                                   onclose=self._on_close,
                                    dopause=False,
                                    bgfun=None
                                    )
@@ -54,23 +54,22 @@ class PiConfigMenu(object):
         for name in ('GENERAL', 'WINDOW', 'PICTURE', 'PRINTER'):
             submenu = self._build_submenu(name, width, height)
             self._main_menu.add_option(submenu.get_title(), submenu)
-        self._main_menu.add_option('Exit Pibooth', pgmevt.PYGAME_MENU_EXIT)
+        self._main_menu.add_option('Exit Pibooth', pgmevt.EXIT)
 
     def _build_submenu(self, section, width, height):
         """Build sub-menu"""
-        menu = pgm.TextMenu(self.window.surface,
-                            width,
-                            height,
-                            pgmfonts.FONT_FRANCHISE,
-                            section.capitalize(),
-                            font_size=30,
-                            draw_region_y=45,
-                            menu_alpha=90,
-                            option_shadow=True,
-                            menu_color=(0, 50, 100),
-                            menu_color_title=(120, 45, 30),
-                            dopause=False
-                            )
+        menu = pgm.Menu(self.window.surface,
+                        width,
+                        height,
+                        pgmfonts.FONT_FRANCHISE,
+                        section.capitalize(),
+                        font_size=30,
+                        menu_alpha=90,
+                        option_shadow=True,
+                        menu_color=(0, 50, 100),
+                        menu_color_title=(120, 45, 30),
+                        dopause=False,
+                        )
 
         for name, option in DEFAULT[section].items():
             if option[2]:
@@ -78,7 +77,6 @@ class PiConfigMenu(object):
                     menu.add_text_input(option[2],
                                         onchange=self._on_text_changed,
                                         default=self.config.get(section, name),
-                                        maxsize=20,
                                         # Additional parameters:
                                         section=section,
                                         option=name)
@@ -101,10 +99,16 @@ class PiConfigMenu(object):
             self.config.set(kwargs['section'], kwargs['option'], str(value[0]))
 
     def _on_text_changed(self, value, **kwargs):
-        """Called after each option changed.
+        """Called after each text input changed.
         """
         if self._main_menu.is_enabled():
             self.config.set(kwargs['section'], kwargs['option'], str(value))
+
+    def _on_close(self):
+        """Called when the menu is closed.
+        """
+        self._main_menu.disable()
+        self.config.save()
 
     def show(self):
         """Show the menu.
