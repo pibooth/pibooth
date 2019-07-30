@@ -429,7 +429,7 @@ class PiApplication(object):
         # Handle autostart of the application
         self.config.enable_autostart(self.config.getboolean('GENERAL', 'autostart'))
 
-        self.window.show_arrows = self.config.getboolean('WINDOW', 'arrows')
+        self.window.arrow_location = self.config.get('WINDOW', 'arrows')
         self.window.drop_cache()
 
         # Handle window size

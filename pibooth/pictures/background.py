@@ -4,6 +4,11 @@ import pygame
 from pibooth import pictures
 
 
+ARROW_TOP = 'top'
+ARROW_BOTTOM = 'bottom'
+ARROW_HIDDEN = 'hidden'
+
+
 class Background(object):
 
     def __init__(self, image_name):
@@ -41,22 +46,26 @@ class Background(object):
 
 class IntroBackground(Background):
 
-    def __init__(self, show_arrows=True):
+    def __init__(self, arrow_location=ARROW_BOTTOM):
         Background.__init__(self, "intro.png")
-        self.show_arrows = show_arrows
+        self.arrow_location = arrow_location
         self.left_arrow = None
         self.left_arrow_pos = None
 
     def resize(self, screen):
         if Background.resize(self, screen):
-            if self.show_arrows:
+            if self.arrow_location != ARROW_HIDDEN:
                 size = (self.get_rect().width * 0.3, self.get_rect().height * 0.3)
-                self.left_arrow = pictures.get_image("arrow.png", size)
+
+                vflip = True if self.arrow_location == ARROW_TOP else False
+                self.left_arrow = pictures.get_image("arrow.png", size, vflip=vflip)
 
                 x = int(self.get_rect().left + self.get_rect().width // 4
                         - self.left_arrow.get_rect().width // 2)
-                y = int(self.get_rect().top +
-                        2 * self.get_rect().height // 3)
+                if self.arrow_location == ARROW_TOP:
+                    y = self.get_rect().top + 10
+                else:
+                    y = int(self.get_rect().top + 2 * self.get_rect().height // 3)
 
                 self.left_arrow_pos = (x, y)
             return True
@@ -64,22 +73,22 @@ class IntroBackground(Background):
 
     def paint(self, screen):
         Background.paint(self, screen)
-        if self.show_arrows:
+        if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.left_arrow, self.left_arrow_pos)
 
 
 class IntroWithPrintBackground(IntroBackground):
 
-    def __init__(self, show_arrows=True):
-        IntroBackground.__init__(self, show_arrows)
+    def __init__(self, arrow_location=ARROW_BOTTOM):
+        IntroBackground.__init__(self, arrow_location)
         self.image_name = "intro_with_print.png"
 
 
 class ChooseBackground(Background):
 
-    def __init__(self, choices, show_arrows=True):
+    def __init__(self, choices, arrow_location=ARROW_BOTTOM):
         Background.__init__(self, "choose.png")
-        self.show_arrows = show_arrows
+        self.arrow_location = arrow_location
         self.choices = choices
         self.layout0 = None
         self.layout0_pos = None
@@ -105,12 +114,17 @@ class ChooseBackground(Background):
             self.layout0_pos = (x0, y)
             self.layout1_pos = (x1, y)
 
-            if self.show_arrows:
-                y = self.layout0_pos[1] + self.layout0.get_rect().height + 5
+            if self.arrow_location != ARROW_HIDDEN:
+                if self.arrow_location == ARROW_TOP:
+                    y = self.get_rect().top + 5
+                    size = (self.get_rect().width * 0.1, self.layout0_pos[1] - y - 10)
+                else:
+                    y = self.layout0_pos[1] + self.layout0.get_rect().height + 5
+                    size = (self.get_rect().width * 0.1, self.get_rect().bottom - y - 5)
 
-                size = (self.get_rect().width * 0.1, self.get_rect().bottom - y - 5)
-                self.left_arrow = pictures.get_image("arrow.png", size)
-                self.right_arrow = pygame.transform.flip(self.left_arrow, True, False)
+                vflip = True if self.arrow_location == ARROW_TOP else False
+                self.left_arrow = pictures.get_image("arrow.png", size, vflip=vflip)
+                self.right_arrow = pictures.get_image("arrow.png", size, hflip=True, vflip=vflip)
 
                 inter = (self.get_rect().width - 2 * self.left_arrow.get_rect().width) // 4
 
@@ -127,7 +141,7 @@ class ChooseBackground(Background):
         Background.paint(self, screen)
         screen.blit(self.layout0, self.layout0_pos)
         screen.blit(self.layout1, self.layout1_pos)
-        if self.show_arrows:
+        if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.left_arrow, self.left_arrow_pos)
             screen.blit(self.right_arrow, self.right_arrow_pos)
 
@@ -176,22 +190,27 @@ class ProcessingBackground(Background):
 
 class PrintBackground(Background):
 
-    def __init__(self, show_arrows=True):
+    def __init__(self, arrow_location=ARROW_BOTTOM):
         Background.__init__(self, "print.png")
-        self.show_arrows = show_arrows
+        self.arrow_location = arrow_location
         self.right_arrow = None
         self.right_arrow_pos = None
 
     def resize(self, screen):
         if Background.resize(self, screen):
-            if self.show_arrows:
+            if self.arrow_location != ARROW_HIDDEN:
                 size = (self.get_rect().width * 0.3, self.get_rect().height * 0.3)
-                self.right_arrow = pygame.transform.flip(pictures.get_image("arrow.png", size), True, False)
+
+                vflip = True if self.arrow_location == ARROW_TOP else False
+                self.right_arrow = pictures.get_image("arrow.png", size, hflip=True, vflip=vflip)
 
                 x = int(self.get_rect().left + self.get_rect().width * 0.75
                         - self.right_arrow.get_rect().width // 2)
-                y = int(self.get_rect().top +
-                        2 * self.get_rect().height // 3)
+
+                if self.arrow_location == ARROW_TOP:
+                    y = self.get_rect().top + + 10
+                else:
+                    y = int(self.get_rect().top + 2 * self.get_rect().height // 3)
 
                 self.right_arrow_pos = (x, y)
             return True
@@ -199,7 +218,7 @@ class PrintBackground(Background):
 
     def paint(self, screen):
         Background.paint(self, screen)
-        if self.show_arrows:
+        if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.right_arrow, self.right_arrow_pos)
 
 

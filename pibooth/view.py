@@ -20,10 +20,10 @@ class PtbWindow(object):
     RIGHT = 'right'
     LEFT = 'left'
 
-    def __init__(self, title, size=(800, 480), show_arrows=True):
+    def __init__(self, title, size=(800, 480), arrow_location=background.ARROW_BOTTOM):
         self.__size = size
 
-        self.show_arrows = show_arrows
+        self.arrow_location = arrow_location
 
         # Save the desktop mode, shall be done before `setmode` (SDL 1.2.10, and pygame 1.8.0)
         info = pygame.display.Info()
@@ -181,9 +181,9 @@ class PtbWindow(object):
         """
         self._picture_number = (0, self._picture_number[1])
         if with_print and pil_image:
-            self._update_background(background.IntroWithPrintBackground(self.show_arrows))
+            self._update_background(background.IntroWithPrintBackground(self.arrow_location))
         else:
-            self._update_background(background.IntroBackground(self.show_arrows))
+            self._update_background(background.IntroBackground(self.arrow_location))
 
         if pil_image:
             self._update_foreground(pil_image, self.RIGHT)
@@ -193,7 +193,7 @@ class PtbWindow(object):
         """
         self._picture_number = (0, self._picture_number[1])
         if not selected:
-            self._update_background(background.ChooseBackground(choices, self.show_arrows))
+            self._update_background(background.ChooseBackground(choices, self.arrow_location))
         else:
             self._update_background(background.ChosenBackground(choices, selected))
 
@@ -218,7 +218,8 @@ class PtbWindow(object):
         """Show print view.
         """
         self._picture_number = (0, self._picture_number[1])
-        self._update_background(background.PrintBackground(self.show_arrows))
+        self._update_background(background.PrintBackground(self.arrow_location
+))
         if pil_image:
             self._update_foreground(pil_image, self.LEFT)
 
