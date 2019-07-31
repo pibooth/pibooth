@@ -30,6 +30,9 @@ Default configuration
     # Show arrows to indicate physical buttons ('bottom', 'top' or 'hidden')
     arrows = bottom
 
+    # Apply horizontal offset to arrows position
+    arrows_x_offset = 0
+
     # How long is the preview in seconds
     preview_delay = 3
 

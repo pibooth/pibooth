@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import pygame
 from pibooth import pictures
 
 
@@ -46,9 +45,10 @@ class Background(object):
 
 class IntroBackground(Background):
 
-    def __init__(self, arrow_location=ARROW_BOTTOM):
+    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
         Background.__init__(self, "intro.png")
         self.arrow_location = arrow_location
+        self.arrow_offset = arrow_offset
         self.left_arrow = None
         self.left_arrow_pos = None
 
@@ -67,7 +67,7 @@ class IntroBackground(Background):
                 else:
                     y = int(self.get_rect().top + 2 * self.get_rect().height // 3)
 
-                self.left_arrow_pos = (x, y)
+                self.left_arrow_pos = (x - self.arrow_offset, y)
             return True
         return False
 
@@ -79,16 +79,17 @@ class IntroBackground(Background):
 
 class IntroWithPrintBackground(IntroBackground):
 
-    def __init__(self, arrow_location=ARROW_BOTTOM):
-        IntroBackground.__init__(self, arrow_location)
+    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
+        IntroBackground.__init__(self, arrow_location, arrow_offset)
         self.image_name = "intro_with_print.png"
 
 
 class ChooseBackground(Background):
 
-    def __init__(self, choices, arrow_location=ARROW_BOTTOM):
+    def __init__(self, choices, arrow_location=ARROW_BOTTOM, arrow_offset=0):
         Background.__init__(self, "choose.png")
         self.arrow_location = arrow_location
+        self.arrow_offset = arrow_offset
         self.choices = choices
         self.layout0 = None
         self.layout0_pos = None
@@ -117,8 +118,10 @@ class ChooseBackground(Background):
             if self.arrow_location != ARROW_HIDDEN:
                 if self.arrow_location == ARROW_TOP:
                     y = self.get_rect().top + 5
+                    x_offset = 30
                     size = (self.get_rect().width * 0.1, self.layout0_pos[1] - y - 10)
                 else:
+                    x_offset = 0
                     y = self.layout0_pos[1] + self.layout0.get_rect().height + 5
                     size = (self.get_rect().width * 0.1, self.get_rect().bottom - y - 5)
 
@@ -128,11 +131,11 @@ class ChooseBackground(Background):
 
                 inter = (self.get_rect().width - 2 * self.left_arrow.get_rect().width) // 4
 
-                x0 = int(self.get_rect().left + inter)
-                x1 = int(self.get_rect().left + 3 * inter + self.left_arrow.get_rect().width)
+                x0 = int(self.get_rect().left + inter) - x_offset
+                x1 = int(self.get_rect().left + 3 * inter + self.left_arrow.get_rect().width) + x_offset
 
-                self.left_arrow_pos = (x0, y)
-                self.right_arrow_pos = (x1, y)
+                self.left_arrow_pos = (x0 - self.arrow_offset, y)
+                self.right_arrow_pos = (x1 + self.arrow_offset, y)
 
             return True
         return False
@@ -190,9 +193,10 @@ class ProcessingBackground(Background):
 
 class PrintBackground(Background):
 
-    def __init__(self, arrow_location=ARROW_BOTTOM):
+    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
         Background.__init__(self, "print.png")
         self.arrow_location = arrow_location
+        self.arrow_offset = arrow_offset
         self.right_arrow = None
         self.right_arrow_pos = None
 
@@ -208,11 +212,11 @@ class PrintBackground(Background):
                         - self.right_arrow.get_rect().width // 2)
 
                 if self.arrow_location == ARROW_TOP:
-                    y = self.get_rect().top + + 10
+                    y = self.get_rect().top + 10
                 else:
                     y = int(self.get_rect().top + 2 * self.get_rect().height // 3)
 
-                self.right_arrow_pos = (x, y)
+                self.right_arrow_pos = (x + self.arrow_offset, y)
             return True
         return False
 

@@ -430,6 +430,7 @@ class PiApplication(object):
         self.config.enable_autostart(self.config.getboolean('GENERAL', 'autostart'))
 
         self.window.arrow_location = self.config.get('WINDOW', 'arrows')
+        self.window.arrow_offset = self.config.getint('WINDOW', 'arrows_x_offset')
         self.window.drop_cache()
 
         # Handle window size
