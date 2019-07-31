@@ -7,7 +7,7 @@ import pygame
 import pygameMenu as pgm
 from pygameMenu import controls as pmgctrl
 from pygameMenu import events as pgmevt
-from pygameMenu import fonts as pgmfonts
+from pygameMenu import font as pgmfont
 from pibooth.config.parser import DEFAULT
 
 
@@ -38,7 +38,7 @@ class PiConfigMenu(object):
         self._main_menu = pgm.Menu(self.window.surface,
                                    width,
                                    height,
-                                   pgmfonts.FONT_FRANCHISE,
+                                   pgmfont.FONT_COMIC_NEUE,
                                    'Settings',
                                    draw_region_y=55,
                                    menu_alpha=80,
@@ -61,7 +61,7 @@ class PiConfigMenu(object):
         menu = pgm.Menu(self.window.surface,
                         width,
                         height,
-                        pgmfonts.FONT_FRANCHISE,
+                        pgmfont.FONT_COMIC_NEUE,
                         section.capitalize(),
                         font_size=30,
                         menu_alpha=90,
