@@ -33,7 +33,7 @@ Hardware
 Software
 ^^^^^^^^
 
-* Raspbian ``Buster with desktop and recommended software`
+* Raspbian ``Buster with desktop and recommended software``
 * Python ``3.5.3``
 * RPi.GPIO ``0.6.3``
 * picamera ``1.13``

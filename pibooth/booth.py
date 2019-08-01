@@ -590,15 +590,6 @@ class PiApplication(object):
                 if event:
                     self.window.resize(event.size)
 
-                # Manage double press on picture button/surface to show menu
-                if not menu:
-                    db_event = self.get_double_event(events, self.find_picture_event,
-                                                     convert_to=pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE))
-                    if db_event == 'wait':
-                        continue
-                    elif db_event:
-                        events.insert(0, db_event)
-
                 if not menu and self.find_settings_event(events):
                     menu = PiConfigMenu(self.window, self.config)
                     menu.show()
