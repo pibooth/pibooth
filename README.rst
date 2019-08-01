@@ -33,13 +33,14 @@ Hardware
 Software
 ^^^^^^^^
 
+* Raspbian ``Buster with desktop and recommended software`
 * Python ``3.5.3``
 * RPi.GPIO ``0.6.3``
 * picamera ``1.13``
 * Pillow ``5.0.0``
 * pygame ``1.9.4``
-* pygame-menu ``2.0.0``
-* gphoto2 ``1.8.0`` ( libgphoto2 ``2.5.15`` )
+* pygame-menu ``2.0.1``
+* gphoto2 ``2.5.23`` ( libgphoto2 ``2.5.23`` )
 * pycups ``1.9.73`` ( CUPS ``2.2.1`` )
 
 Install
@@ -47,29 +48,23 @@ Install
 
 A brief description on how to set-up a Raspberry Pi to use this software.
 
-1. Download latest Raspbian image and set-up an SD-card. You can follow
+1. Download the Raspbian image and set-up an SD-card. You can follow
    `these instructions <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_ .
 
-2. Insert the SD-card into the Raspberry Pi and fire it up. Use the raspi-config tool that is shown
-   automatically on the first boot to configure your system (e.g., expand partition, change hostname,
-   password, enable SSH, configure to boot into GUI, etc.).
+2. Insert the SD-card into the Raspberry Pi and fire it up. Use the ``raspi-config`` tool
+   to configure your system (e.g., expand partition, change hostname, password, enable SSH,
+   configure to boot into GUI, etc.).
 
    .. hint:: Don't forget to enable the camera in raspi-config.
 
-3. Reboot and open a terminal. Install the latest firmware version:
-
-   ::
-
-        $ sudo rpi-update
-
-4. Upgrade all installed software:
+3. Upgrade all installed software:
 
    ::
 
         $ sudo apt-get update
         $ sudo apt-get upgrade
 
-5. Optionally install ``gPhoto2`` (required only for DSLR camera):
+4. Optionally install the last stable ``gPhoto2`` version (required only for DSLR camera):
 
    ::
 
@@ -77,21 +72,21 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo chmod 755 gphoto2-updater.sh
         $ sudo ./gphoto2-updater.sh
 
-6. Optionally install ``CUPS`` to handle printers (more instructions to add a new printer can be found
+5. Optionally install ``CUPS`` to handle printers (more instructions to add a new printer can be found
    `here <https://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer>`_):
 
    ::
 
         $ sudo apt-get install cups libcups2-dev
 
-7. Optionally install ``OpenCV`` to improve images generation efficiency:
+6. Optionally install ``OpenCV`` to improve images generation efficiency:
 
    ::
 
         $ sudo apt-get install python3-pyqt4
         $ sudo pip3 install opencv-python
 
-8. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
+7. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
 
    ::
 
@@ -111,6 +106,12 @@ Run
 Start the photobooth application using the command::
 
     $ pibooth
+
+.. hint:: The error ``gphoto2.GPhoto2Error: [-53] Could not claim the USB device`` may be
+          raised because of the ``gvfs-gphoto2-volume-monitor`` process running in the
+          background. Kill it before starting ``pibooth`` using the command::
+
+              $ pkill -f gphoto2
 
 All pictures taken are stored in the folder defined in ``[GENERAL][directory]``. They are named
 **YYYY-mm-dd-hh-mm-ss_pibooth.jpg** which is the time when first capture of the sequence was taken.
