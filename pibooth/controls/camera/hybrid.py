@@ -26,7 +26,9 @@ class HybridCamera(RpiCamera):
     def capture(self, filename, effect=None):
         """Capture a picture in a file.
         """
-        return self._gp_cam.capture(filename, effect)
+        self._gp_cam.capture(filename, effect)
+
+        self._hide_overlay()  # If stop_preview() has not been called
 
     def quit(self):
         """Close the camera driver, it's definitive.
