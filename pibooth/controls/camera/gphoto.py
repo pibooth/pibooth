@@ -167,6 +167,7 @@ class GpCamera(BaseCamera):
         """
         self._window = window
         self._preview_hflip = flip
+
         if self._preview_compatible:
             self.set_config_value('actions', 'viewfinder', 1)
             self._window.show_image(self._get_preview_image())

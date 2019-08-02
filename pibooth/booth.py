@@ -577,6 +577,7 @@ class PiApplication(object):
             self.led_startup.switch_on()
             self.initialize()
             menu = None
+            fps = 40
 
             while True:
                 events = list(pygame.event.get())
@@ -591,7 +592,7 @@ class PiApplication(object):
                     self.window.resize(event.size)
 
                 if not menu and self.find_settings_event(events):
-                    menu = PiConfigMenu(self.window, self.config)
+                    menu = PiConfigMenu(self.window, self.config, fps)
                     menu.show()
 
                 if menu and menu.is_shown():
@@ -611,7 +612,7 @@ class PiApplication(object):
                     self.state_machine.process(events)
 
                 pygame.display.update()
-                clock.tick(20)  # Ensure the program will never run at more than x frames per second
+                clock.tick(fps)  # Ensure the program will never run at more than x frames per second
 
         finally:
             self.led_startup.quit()

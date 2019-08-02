@@ -27,7 +27,7 @@ def _find(choices, value):
 
 class PiConfigMenu(object):
 
-    def __init__(self, window, config):
+    def __init__(self, window, config, fps):
         self.window = window
         self.config = config
         self._main_menu = None
@@ -55,6 +55,8 @@ class PiConfigMenu(object):
             submenu = self._build_submenu(name, width, height)
             self._main_menu.add_option(submenu.get_title(), submenu)
         self._main_menu.add_option('Exit Pibooth', pgmevt.EXIT)
+
+        self._main_menu.set_fps(fps)
 
     def _build_submenu(self, section, width, height):
         """Build sub-menu"""
