@@ -83,8 +83,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
    ::
 
-        $ sudo apt-get install python3-pyqt4
-        $ sudo pip3 install opencv-python
+        $ sudo apt-get install python3-opencv
 
 7. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
 
