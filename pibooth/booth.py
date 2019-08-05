@@ -349,7 +349,11 @@ class PiApplication(object):
         pygame.event.set_blocked(pygame.MOUSEMOTION)
 
         # Create window of (width, height)
-        self.window = PtbWindow('Pibooth')
+        init_size = self.config.gettyped('WINDOW', 'size')
+        if not isinstance(init_size, str):
+            self.window = PtbWindow('Pibooth', init_size)
+        else:
+            self.window = PtbWindow('Pibooth')
 
         self.state_machine = StateMachine(self)
         self.state_machine.add_state(StateWait())
@@ -441,7 +445,6 @@ class PiApplication(object):
         else:
             if self.window.is_fullscreen:
                 self.window.toggle_fullscreen()
-            self.window.resize(size)
 
         # Initialize state machine
         if self.config.getboolean('GENERAL', 'failsafe'):
@@ -600,9 +603,13 @@ class PiApplication(object):
 
                     # Convert HW button events to keyboard events
                     if self.find_picture_event(events, BUTTON_DOWN):
-                        events.insert(0, pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN))
+                        events.insert(0, pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN,
+                                                            unicode='\uf701', mod=0, scancode=125,
+                                                            window=None))
                     elif self.find_print_event(events, BUTTON_DOWN):
-                        events.insert(0, pygame.event.Event(pygame.KEYDOWN, key=pygame.K_LEFT))
+                        events.insert(0, pygame.event.Event(pygame.KEYDOWN, key=pygame.K_LEFT,
+                                                            unicode='\uf703', mod=0, scancode=124,
+                                                            window=None))
 
                     menu.process(events)
                 elif menu and not menu.is_shown():
