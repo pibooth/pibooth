@@ -88,7 +88,7 @@ DEFAULT = odict((
             ("preview_stop_on_capture",
                 (False,
                  "Stop the preview before taking the picture",
-                 "Preview stop on capture", ['True', 'False'])),
+                 None, None)),
         ))
      ),
     ("PICTURE",

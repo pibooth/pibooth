@@ -7,7 +7,7 @@ import pygame
 import pygameMenu as pgm
 from pygameMenu import controls as pmgctrl
 from pygameMenu import events as pgmevt
-from pygameMenu import font as pgmfont
+from pibooth import fonts
 from pibooth.config.parser import DEFAULT
 
 
@@ -38,14 +38,14 @@ class PiConfigMenu(object):
         self._main_menu = pgm.Menu(self.window.surface,
                                    width,
                                    height,
-                                   pgmfont.FONT_COMIC_NEUE,
+                                   fonts.get_filename("Amatic-Bold"),
                                    'Settings',
                                    draw_region_y=55,
-                                   menu_alpha=80,
-                                   menu_color=(0, 75, 100),
-                                   menu_color_title=(120, 45, 30),
+                                   font_color=(38, 139, 210),
+                                   color_selected=(42, 161, 152),
+                                   menu_color=(253, 246, 227),
+                                   menu_color_title=(238, 232, 213),
                                    enabled=False,
-                                   option_shadow=True,
                                    onclose=self._on_close,
                                    dopause=False,
                                    bgfun=None
@@ -63,13 +63,13 @@ class PiConfigMenu(object):
         menu = pgm.Menu(self.window.surface,
                         width,
                         height,
-                        pgmfont.FONT_COMIC_NEUE,
+                        fonts.get_filename("Amatic-Bold"),
                         section.capitalize(),
                         font_size=30,
-                        menu_alpha=90,
-                        option_shadow=True,
-                        menu_color=(0, 50, 100),
-                        menu_color_title=(120, 45, 30),
+                        font_color=(133, 153, 0),
+                        color_selected = (203, 75, 22),
+                        menu_color = (253, 246, 227),
+                        menu_color_title = (238, 232, 213),
                         dopause=False,
                         )
 

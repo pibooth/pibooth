@@ -599,8 +599,6 @@ class PiApplication(object):
                     menu.show()
 
                 if menu and menu.is_shown():
-                    self.window.update()
-
                     # Convert HW button events to keyboard events
                     if self.find_picture_event(events, BUTTON_DOWN):
                         events.insert(0, pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN,
