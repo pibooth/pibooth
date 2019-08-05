@@ -2,10 +2,18 @@
 
 """
 Mocks for tests on other HW than Raspberry Pi.
+Pin can be triggered using::
+
+    $ kill -<GPIO pin number> <pibooth PID>
 """
 
+import os
+import time
+import signal
+from functools import partial
 
-class GPIO(object):
+
+class GpioMock(object):
 
     BOARD = 'board'
     IN = 'in'
@@ -15,22 +23,36 @@ class GPIO(object):
     HIGH = 'high'
     LOW = 'low'
 
-    @classmethod
-    def setmode(cls, mode):
+    def __init__(self):
+        self._last_signal_time = time.time()
+
+    def _on_receive_signal(self, pin, frame, callback, bouncetime):
+        if abs(time.time() - self._last_signal_time) * 1000 >= bouncetime:
+            print('Mock: GPIO', pin, 'triggered')
+            self._last_signal_time = time.time()
+            callback(pin)
+
+    def setmode(self, mode):
         print("Mock: set GPIO mode {}".format(mode))
 
-    @classmethod
-    def setup(cls, pin, direction, **kwargs):
+    def setup(self, pin, direction, **kwargs):
         print("Mock: setup GPIO pin {} to {}".format(pin, direction))
 
-    @classmethod
-    def output(cls, pin, status):
+    def output(self, pin, status):
         pass
 
-    @classmethod
-    def add_event_detect(cls, pin, status, **kwargs):
-        print("Mock: detect GPIO pin {} when {}".format(pin, status))
+    def add_event_detect(self, pin, status, **kwargs):
+        print("Mock: add detection on GPIO pin {} when {}".format(pin, status))
+        callback = kwargs.get('callback')
+        bouncetime = kwargs.get('bouncetime', 0)
+        if callback:
+            print("Mock: simulate GPIO", pin, "by typing:")
+            print("      $ kill -{} {}".format(pin, os.getpid()))
+            signal.signal(pin, partial(self._on_receive_signal, callback=callback,
+                                       bouncetime=bouncetime))
 
-    @classmethod
-    def cleanup(cls):
+    def cleanup(self):
         print("Mock: quit GPIO")
+
+
+GPIO = GpioMock()
