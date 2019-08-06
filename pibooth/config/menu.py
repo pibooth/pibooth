@@ -147,7 +147,7 @@ class PiConfigMenu(object):
     def create_next_event(self):
         """Create a pygame event to select the next widget.
         """
-        return pygame.event.Event(pygame.KEYDOWN, key=pgmctrl.KEY_MOVE_DOWN,
+        return pygame.event.Event(pygame.KEYDOWN, key=pgmctrl.KEY_MOVE_UP,
                                   unicode='\uf701', mod=0, scancode=125,
                                   window=None, test=True)
 
