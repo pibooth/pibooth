@@ -5,13 +5,13 @@
 
 import pygame
 import pygameMenu as pgm
-from pygameMenu import controls as pmgctrl
+from pygameMenu import controls as pgmctrl
 from pygameMenu import events as pgmevt
 from pibooth import fonts
 from pibooth.config.parser import DEFAULT
 
 
-pmgctrl.KEY_BACK = pygame.K_ESCAPE
+pgmctrl.KEY_BACK = pygame.K_ESCAPE
 
 
 def _find(choices, value):
@@ -48,7 +48,6 @@ class PiConfigMenu(object):
                                    enabled=False,
                                    onclose=self._on_close,
                                    dopause=False,
-                                   bgfun=None
                                    )
 
         for name in ('GENERAL', 'WINDOW', 'PICTURE', 'PRINTER'):
@@ -112,6 +111,15 @@ class PiConfigMenu(object):
         self._main_menu.disable()
         self.config.save()
 
+    def get_selected_widget(self):
+        """
+        Return the currently selected widget.
+
+        :return: Widget object
+        :rtype: pygameMenu.widgets.widget.Widget
+        """
+        return self._main_menu._top._actual._option[self._main_menu._top._actual._index]
+
     def show(self):
         """Show the menu.
         """
@@ -121,6 +129,27 @@ class PiConfigMenu(object):
         """Return True if the menu is shown.
         """
         return self._main_menu.is_enabled()
+
+    def create_click_event(self):
+        """Create a pygame event to click on the currently selected
+        widget on the menu. If the widget is a button, ENTER event
+        is created, else LEFT event is created.
+        """
+        if isinstance(self.get_selected_widget(), pgm.widgets.Button):
+            return pygame.event.Event(pygame.KEYDOWN, key=pgmctrl.KEY_APPLY,
+                                      unicode='\r', mod=0, scancode=36,
+                                      window=None, test=True)
+        else:
+            return pygame.event.Event(pygame.KEYDOWN, key=pgmctrl.KEY_RIGHT,
+                                      unicode='\uf703', mod=0, scancode=124,
+                                      window=None, test=True)
+
+    def create_next_event(self):
+        """Create a pygame event to select the next widget.
+        """
+        return pygame.event.Event(pygame.KEYDOWN, key=pgmctrl.KEY_MOVE_DOWN,
+                                  unicode='\uf701', mod=0, scancode=125,
+                                  window=None, test=True)
 
     def process(self, events):
         """Process the events related to the menu.

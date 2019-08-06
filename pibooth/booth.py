@@ -599,15 +599,11 @@ class PiApplication(object):
                     menu.show()
 
                 if menu and menu.is_shown():
-                    # Convert HW button events to keyboard events
+                    # Convert HW button events to keyboard events for menu
                     if self.find_picture_event(events, BUTTON_DOWN):
-                        events.insert(0, pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN,
-                                                            unicode='\uf701', mod=0, scancode=125,
-                                                            window=None))
+                        events.insert(0, menu.create_next_event())
                     elif self.find_print_event(events, BUTTON_DOWN):
-                        events.insert(0, pygame.event.Event(pygame.KEYDOWN, key=pygame.K_LEFT,
-                                                            unicode='\uf703', mod=0, scancode=124,
-                                                            window=None))
+                        events.insert(0, menu.create_click_event())
 
                     menu.process(events)
                 elif menu and not menu.is_shown():
