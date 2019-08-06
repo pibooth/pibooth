@@ -151,6 +151,13 @@ class PiConfigMenu(object):
                                   unicode='\uf701', mod=0, scancode=125,
                                   window=None, test=True)
 
+    def create_back_event(self):
+        """Create a pygame event to back to the previous menu.
+        """
+        return pygame.event.Event(pygame.KEYDOWN, key=pgmctrl.KEY_BACK,
+                                  unicode='\x1b', mod=0, scancode=53,
+                                  window=None, test=True)
+
     def process(self, events):
         """Process the events related to the menu.
         """

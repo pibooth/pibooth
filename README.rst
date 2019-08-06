@@ -149,7 +149,7 @@ Toggle Full screen      Ctrl + F         \-
 Choose layout           LEFT or RIGHT    Button 1 or Button 2
 Take pictures           P                Button 1
 Export Printer/Cloud    Ctrl + E         Button 2
-Open/close settings     ESC              Double Button 1
+Open/close settings     ESC              Button 1 + Button 2
 Select option           UP or DOWN       Button 1
 Change option value     LEFT or RIGHT    Button 2
 ======================= ================ =====================

@@ -391,10 +391,6 @@ class PiApplication(object):
         self.led_startup = PtbLed(config.getint('CONTROLS', 'startup_led_pin'))
         self.led_preview = PtbLed(config.getint('CONTROLS', 'preview_led_pin'))
 
-        # Initialize double-event timer
-        self._db_click_timer = PoolingTimer(config.getfloat('CONTROLS', 'debounce_delay') + 0.05)
-        self._db_click = None
-
         # Initialize the printer
         self.printer = PtbPrinter(config.get('PRINTER', 'printer_name'))
 
@@ -453,32 +449,6 @@ class PiApplication(object):
             self.state_machine.remove_state('failsafe')
         self.state_machine.set_state('wait')
 
-    def get_double_event(self, events, search_function, convert_to=None):
-        """Return an event if a second identical event is found in the allowed time
-        or return the last buffered event if the timeout is reached.
-
-        Return 'wait' if waiting for second identical event and the timeout is not
-        reached yet.
-        """
-        event = search_function(events)
-        if not self._db_click and event:
-            self._db_click = event
-            self._db_click_timer.start()
-            event = 'wait'
-        elif self._db_click:
-            event = search_function(events)
-            if not self._db_click_timer.is_timeout() and event:
-                # Double press
-                if convert_to:
-                    event = convert_to
-                self._db_click = None
-            elif not self._db_click_timer.is_timeout():
-                event = 'wait'
-            else:
-                event = self._db_click
-                self._db_click = None
-        return event
-
     def find_quit_event(self, events):
         """Return the first found event if found in the list.
         """
@@ -487,12 +457,23 @@ class PiApplication(object):
                 return event
         return None
 
-    def find_settings_event(self, events):
+    def find_settings_event(self, events, type_filter=None):
         """Return the first found event if found in the list.
         """
+        event_picture = None
+        event_print = None
         for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and\
+                    (type_filter is None or type_filter == event.type):
                 return event
+            if event.type == BUTTON_DOWN:
+                if event.pin == self.button_picture and (type_filter is None or type_filter == event.type):
+                    event_picture = event
+                elif event.pin == self.button_print and (type_filter is None or type_filter == event.type):
+                    event_print = event
+            if event_picture and event_print:
+                return event_picture  # One of both (return != None is enough)
+
         return None
 
     def find_fullscreen_event(self, events):
@@ -584,6 +565,7 @@ class PiApplication(object):
 
             while True:
                 events = list(pygame.event.get())
+
                 if self.find_quit_event(events):
                     break
 
@@ -600,6 +582,8 @@ class PiApplication(object):
 
                 if menu and menu.is_shown():
                     # Convert HW button events to keyboard events for menu
+                    if self.find_settings_event(events, BUTTON_DOWN):
+                        events.insert(0, menu.create_back_event())
                     if self.find_picture_event(events, BUTTON_DOWN):
                         events.insert(0, menu.create_next_event())
                     elif self.find_print_event(events, BUTTON_DOWN):
