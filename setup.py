@@ -18,6 +18,7 @@ def main():
         version=pibooth.__version__,
         description=pibooth.__doc__,
         long_description=open(osp.join(HERE, 'README.rst'), encoding='utf-8').read(),
+        long_description_content_type='text/x-rst',
         classifiers=[
             'Development Status :: 5 - Production/Stable',
             'Environment :: Other Environment',

@@ -28,7 +28,13 @@ Release ``pibooth`` for Pypi
 
         $ python setup.py bdist_wheel
 
-6. Upload the package on Pypi (replace XXXXXX by username and password of your Pypi account):
+6. Check the package integrity:
+
+   ::
+
+        $ twine check dist/*
+
+7. Upload the package on Pypi (replace XXXXXX by username and password of your Pypi account):
 
    ::
 

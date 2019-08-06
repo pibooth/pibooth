@@ -96,7 +96,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
              dependencies by yourself)
 
 .. note:: an editable/customizable version of ``pibooth`` can be installed by following
-          `these instructions <https://github.com/werdeil/pibooth/blob/master/docs/dev.rst>`_ .
+          `instructions <https://github.com/werdeil/pibooth/blob/master/docs/dev.rst>`_ .
           Be aware that the code on the `master` branch may be unstable.
 
 Run
