@@ -84,13 +84,54 @@ def set_config_value(camera, section, option, value):
         write_log('   -> unsupported setting {}/{}={} (nothing configured on DSLR)'.format(section, option, value))
 
 
+def get_config_value(camera, section, option):
+    """Get camera configuration option.
+    """
+    try:
+        config = camera.get_config()
+        child = config.get_child_by_name(section).get_child_by_name(option)
+        value = child.get_value()
+        write_log('Getting option {}/{}={}'.format(section, option, value))
+        return value
+    except gp.GPhoto2Error:
+        write_log('Unknown option {}/{}'.format(section, option))
+
+
+def gp_camera_connected():
+    """Return True if a camera compatible with gPhoto2 is found.
+    """
+    if not gp:
+        return False  # gPhoto2 is not installed
+    if hasattr(gp, 'gp_camera_autodetect'):
+        # gPhoto2 version 2.5+
+        cameras = gp.check_result(gp.gp_camera_autodetect())
+    else:
+        port_info_list = gp.PortInfoList()
+        port_info_list.load()
+        abilities_list = gp.CameraAbilitiesList()
+        abilities_list.load()
+        cameras = abilities_list.detect(port_info_list)
+    if cameras:
+        return True
+
+    return False
+
+
 if __name__ == '__main__':
 
     logging.basicConfig(
         format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
     gp.check_result(gp.use_python_logging())
 
-    write_log("Listing all connected DSLR camera", True)
+    try:
+        import pibooth
+        pibooth_version = pibooth.__version__
+    except ImportError:
+        pibooth_version = "not installed"
+
+    write_log("Pibooth version installed: {}".format(pibooth_version), True)
+    write_log("Camera(s) detected: {}".format(gp_camera_connected()))
+    write_log("Listing all connected DSLR camera")
     if hasattr(gp, 'gp_camera_autodetect'):
         # gphoto2 version 2.5+
         cameras_list = gp.check_result(gp.gp_camera_autodetect())
@@ -120,11 +161,13 @@ if __name__ == '__main__':
         set_config_value(camera, 'imgsettings', 'iso', '100')
         set_config_value(camera, 'settings', 'capturetarget', 'Memory card')
 
-        write_log("Take capture preview")
-        config = camera.get_config()
+        prev_viewfinder_value = get_config_value(camera, 'actions', 'viewfinder')
         set_config_value(camera, 'actions', 'viewfinder', 1)
+
+        write_log("Take capture preview")
         camera.capture_preview()
-        set_config_value(camera, 'actions', 'viewfinder', 0)
+
+        set_config_value(camera, 'actions', 'viewfinder', prev_viewfinder_value)
 
         write_log("Take a capture")
         gp_path = camera.capture(gp.GP_CAPTURE_IMAGE)
