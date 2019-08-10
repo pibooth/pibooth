@@ -93,7 +93,7 @@ class StateWait(State):
         self.app.window.show_image(None)
 
     def validate_transition(self, events):
-        if self.app.find_picture_event(events):
+        if self.app.find_capture_event(events):
             if len(self.app.capture_choices) > 1:
                 return 'choose'
             else:
@@ -149,7 +149,7 @@ class StateChosen(State):
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
-        with timeit("Show picture choice ({} pictures selected)".format(self.app.nbr_captures)):
+        with timeit("Show picture choice ({} captures selected)".format(self.app.nbr_captures)):
             self.app.window.show_choice(self.app.capture_choices, selected=self.app.nbr_captures)
         self.timer.start()
 
@@ -169,7 +169,7 @@ class StateCapture(State):
         self.count = 0
 
     def entry_actions(self):
-        LOGGER.info("Start new pictures sequence")
+        LOGGER.info("Start new captures sequence")
         self.app.nbr_printed = 0
         self.app.previous_picture = None
         self.app.previous_picture_file = None
@@ -207,7 +207,7 @@ class StateCapture(State):
             raise ValueError("Not enough effects defined for {} captures {}".format(
                 self.app.nbr_captures, effects))
 
-        with timeit("Take picture and save it in {}".format(capture_path)):
+        with timeit("Take a capture and save it in {}".format(capture_path)):
             if self.app.config.getboolean('WINDOW', 'flash'):
                 with self.app.window.flash(2):
                     self.app.camera.capture(capture_path, effect)
@@ -238,7 +238,7 @@ class StateProcessing(State):
         self.app.window.show_work_in_progress()
 
     def do_actions(self, events):
-        with timeit("Creating merged picture"):
+        with timeit("Creating the final picture"):
             footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
                             self.app.config.get('PICTURE', 'footer_text2')]
             bg_color = self.app.config.gettyped('PICTURE', 'bg_color')
@@ -264,7 +264,7 @@ class StateProcessing(State):
 
         self.app.previous_picture_file = osp.join(
             self.app.savedir, osp.basename(self.app.dirname) + "_pibooth.jpg")
-        with timeit("Save the merged picture in {}".format(self.app.previous_picture_file)):
+        with timeit("Save the final picture in {}".format(self.app.previous_picture_file)):
             self.app.previous_picture.save(self.app.previous_picture_file)
 
     def validate_transition(self, events):
@@ -283,7 +283,7 @@ class StatePrint(State):
 
     def entry_actions(self):
         self.printed = False
-        with timeit("Display the merged picture"):
+        with timeit("Display the final picture"):
             self.app.window.set_print_number(len(self.app.printer.get_all_tasks()))
             self.app.window.show_print(self.app.previous_picture)
         self.app.led_print.blink()
@@ -460,7 +460,7 @@ class PiApplication(object):
     def find_settings_event(self, events, type_filter=None):
         """Return the first found event if found in the list.
         """
-        event_picture = None
+        event_capture = None
         event_print = None
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and\
@@ -468,11 +468,11 @@ class PiApplication(object):
                 return event
             if event.type == BUTTON_DOWN:
                 if event.pin == self.button_capture and (type_filter is None or type_filter == event.type):
-                    event_picture = event
+                    event_capture = event
                 elif event.pin == self.button_print and (type_filter is None or type_filter == event.type):
                     event_print = event
-            if event_picture and event_print:
-                return event_picture  # One of both (return != None is enough)
+            if event_capture and event_print:
+                return event_capture  # One of both (return != None is enough)
 
         return None
 
@@ -493,7 +493,7 @@ class PiApplication(object):
                 return event
         return None
 
-    def find_picture_event(self, events, type_filter=None):
+    def find_capture_event(self, events, type_filter=None):
         """Return the first found event if found in the list.
         """
         for event in events:
@@ -584,7 +584,7 @@ class PiApplication(object):
                     # Convert HW button events to keyboard events for menu
                     if self.find_settings_event(events, BUTTON_DOWN):
                         events.insert(0, menu.create_back_event())
-                    if self.find_picture_event(events, BUTTON_DOWN):
+                    if self.find_capture_event(events, BUTTON_DOWN):
                         events.insert(0, menu.create_next_event())
                     elif self.find_print_event(events, BUTTON_DOWN):
                         events.insert(0, menu.create_click_event())
