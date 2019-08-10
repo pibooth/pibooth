@@ -38,7 +38,7 @@ class PtbWindow(object):
         self._current_background = None
         self._current_foreground = None
         self._print_number = 0
-        self._picture_number = (0, 4)  # (current, max)
+        self._capture_number = (0, 4)  # (current, max)
         self._default_cursor = pygame.mouse.get_cursor()
 
         self._pos_map = {self.CENTER: self._center_pos,
@@ -77,24 +77,24 @@ class PtbWindow(object):
         self._current_background = self._buffered_images.setdefault(str(bkgd), bkgd)
         self._current_background.resize(self.surface)
         self._current_background.paint(self.surface)
-        self._update_picture_number()
+        self._update_capture_number()
         self._update_print_number()
 
-    def _update_picture_number(self):
-        """Update the pictures counter displayed.
+    def _update_capture_number(self):
+        """Update the captures counter displayed.
         """
-        if not self._picture_number[0]:
+        if not self._capture_number[0]:
             return  # Dont show counter: no picture taken
 
         center = self.surface.get_rect().center
         radius = 10
         border = 20
         color = (255, 255, 255)
-        x = center[0] - (2 * radius * self._picture_number[1] + border * (self._picture_number[1] - 1)) // 2
+        x = center[0] - (2 * radius * self._capture_number[1] + border * (self._capture_number[1] - 1)) // 2
         y = self.size[1] - radius - border
-        for nbr in range(self._picture_number[1]):
+        for nbr in range(self._capture_number[1]):
             gfxdraw.aacircle(self.surface, x, y, radius, color)
-            if self._picture_number[0] > nbr:
+            if self._capture_number[0] > nbr:
                 # Because anti-aliased filled circle doesn't exist
                 gfxdraw.aacircle(self.surface, x, y, radius - 3, color)
                 gfxdraw.filled_circle(self.surface, x, y, radius - 3, color)
@@ -166,7 +166,7 @@ class PtbWindow(object):
         if self._current_background:
             self._update_background(self._current_background)
         else:
-            self._update_picture_number()
+            self._update_capture_number()
             self._update_print_number()
         if self._current_foreground:
             self._update_foreground(*self._current_foreground)
@@ -174,13 +174,13 @@ class PtbWindow(object):
     def show_oops(self):
         """Show failure view in case of exception.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._capture_number = (0, self._capture_number[1])
         self._update_background(background.OopsBackground())
 
     def show_intro(self, pil_image=None, with_print=True):
         """Show introduction view.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._capture_number = (0, self._capture_number[1])
         if with_print and pil_image:
             self._update_background(background.IntroWithPrintBackground(self.arrow_location, self.arrow_offset))
         else:
@@ -192,7 +192,7 @@ class PtbWindow(object):
     def show_choice(self, choices, selected=None):
         """Show the choice view.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._capture_number = (0, self._capture_number[1])
         if not selected:
             self._update_background(background.ChooseBackground(choices, self.arrow_location, self.arrow_offset))
         else:
@@ -212,13 +212,13 @@ class PtbWindow(object):
     def show_work_in_progress(self):
         """Show wait view.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._capture_number = (0, self._capture_number[1])
         self._update_background(background.ProcessingBackground())
 
     def show_print(self, pil_image=None):
         """Show print view.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._capture_number = (0, self._capture_number[1])
         self._update_background(background.PrintBackground(self.arrow_location,
                                                            self.arrow_offset))
         if pil_image:
@@ -227,7 +227,7 @@ class PtbWindow(object):
     def show_finished(self):
         """Show finished view.
         """
-        self._picture_number = (0, self._picture_number[1])
+        self._capture_number = (0, self._capture_number[1])
         self._update_background(background.FinishedBackground())
 
     @contextlib.contextmanager
@@ -256,13 +256,13 @@ class PtbWindow(object):
                 pygame.display.update()
                 time.sleep(0.02)
 
-    def set_picture_number(self, current_nbr, total_nbr):
-        """Set the current number of pictures taken.
+    def set_capture_number(self, current_nbr, total_nbr):
+        """Set the current number of captures taken.
         """
         if total_nbr < 1:
             raise ValueError("Total number of captures shall be greater than 0")
 
-        self._picture_number = (current_nbr, total_nbr)
+        self._capture_number = (current_nbr, total_nbr)
         self._update_background(background.CaptureBackground())
         if self._current_foreground:
             self._update_foreground(*self._current_foreground)
@@ -294,7 +294,7 @@ class PtbWindow(object):
 
     def drop_cache(self):
         """Drop all cached background and foreground to force
-        refreshing pictures.
+        refreshing the view.
         """
         self._current_background = None
         self._current_foreground = None

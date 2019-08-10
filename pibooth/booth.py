@@ -55,7 +55,7 @@ class StateWait(State):
     def entry_actions(self):
         self.app.window.show_intro(self.app.previous_picture, self.app.printer.is_installed() and
                                    self.app.nbr_printed < self.app.config.getint('PRINTER', 'max_duplicates'))
-        self.app.led_picture.blink()
+        self.app.led_capture.blink()
         if self.app.previous_picture_file and self.app.printer.is_installed():
             self.app.led_print.blink()
 
@@ -86,7 +86,7 @@ class StateWait(State):
             self.app.window.set_print_number(len(event.tasks))
 
     def exit_actions(self):
-        self.app.led_picture.switch_off()
+        self.app.led_capture.switch_off()
         self.app.led_print.switch_off()
 
         # Clear currently displayed image
@@ -112,7 +112,7 @@ class StateChoose(State):
             self.app.window.set_print_number(0)  # Hide printer status
             self.app.window.show_choice(self.app.capture_choices)
         self.app.nbr_captures = None
-        self.app.led_picture.blink()
+        self.app.led_capture.blink()
         self.app.led_print.blink()
         self.timer.start()
 
@@ -126,14 +126,14 @@ class StateChoose(State):
 
     def exit_actions(self):
         if self.app.nbr_captures == self.app.capture_choices[0]:
-            self.app.led_picture.switch_on()
+            self.app.led_capture.switch_on()
             self.app.led_print.switch_off()
         elif self.app.nbr_captures == self.app.capture_choices[1]:
             self.app.led_print.switch_on()
-            self.app.led_picture.switch_off()
+            self.app.led_capture.switch_off()
         else:
             self.app.led_print.switch_off()
-            self.app.led_picture.switch_off()
+            self.app.led_capture.switch_off()
 
     def validate_transition(self, events):
         if self.app.nbr_captures:
@@ -154,7 +154,7 @@ class StateChosen(State):
         self.timer.start()
 
     def exit_actions(self):
-        self.app.led_picture.switch_off()
+        self.app.led_capture.switch_off()
         self.app.led_print.switch_off()
 
     def validate_transition(self, events):
@@ -178,11 +178,11 @@ class StateCapture(State):
         self.app.led_preview.switch_on()
 
         self.count = 0
-        self.app.window.set_picture_number(self.count, self.app.nbr_captures)
+        self.app.window.set_capture_number(self.count, self.app.nbr_captures)
         self.app.camera.preview(self.app.window)
 
     def do_actions(self, events):
-        self.app.window.set_picture_number(self.count + 1, self.app.nbr_captures)
+        self.app.window.set_capture_number(self.count + 1, self.app.nbr_captures)
         pygame.event.pump()
 
         if self.app.config.getboolean('WINDOW', 'preview_countdown'):
@@ -380,8 +380,8 @@ class PiApplication(object):
                                 config.getboolean('CAMERA', 'flip'))
 
         # Initialize the hardware buttons
-        self.led_picture = PtbLed(config.getint('CONTROLS', 'picture_led_pin'))
-        self.button_picture = PtbButton(config.getint('CONTROLS', 'picture_btn_pin'),
+        self.led_capture = PtbLed(config.getint('CONTROLS', 'picture_led_pin'))
+        self.button_capture = PtbButton(config.getint('CONTROLS', 'picture_btn_pin'),
                                         config.getfloat('CONTROLS', 'debounce_delay'))
 
         self.led_print = PtbLed(config.getint('CONTROLS', 'print_led_pin'))
@@ -467,7 +467,7 @@ class PiApplication(object):
                     (type_filter is None or type_filter == event.type):
                 return event
             if event.type == BUTTON_DOWN:
-                if event.pin == self.button_picture and (type_filter is None or type_filter == event.type):
+                if event.pin == self.button_capture and (type_filter is None or type_filter == event.type):
                     event_picture = event
                 elif event.pin == self.button_print and (type_filter is None or type_filter == event.type):
                     event_print = event
@@ -498,7 +498,7 @@ class PiApplication(object):
         """
         for event in events:
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_p) or \
-                    (event.type == BUTTON_DOWN and event.pin == self.button_picture):
+                    (event.type == BUTTON_DOWN and event.pin == self.button_capture):
                 if type_filter is None or type_filter == event.type:
                     return event
             elif event.type == pygame.MOUSEBUTTONUP:
@@ -537,7 +537,7 @@ class PiApplication(object):
         """
         for event in events:
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT) or \
-                    (event.type == BUTTON_DOWN and event.pin == self.button_picture):
+                    (event.type == BUTTON_DOWN and event.pin == self.button_capture):
                 event.key = pygame.K_LEFT
                 return event
             elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT) or \
@@ -602,7 +602,7 @@ class PiApplication(object):
         finally:
             self.led_startup.quit()
             self.led_preview.quit()
-            self.led_picture.quit()
+            self.led_capture.quit()
             self.led_print.quit()
             GPIO.cleanup()
             self.camera.quit()

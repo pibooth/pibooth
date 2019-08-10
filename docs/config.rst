@@ -24,7 +24,7 @@ Default configuration
     # The (width, height) of the display window or 'fullscreen'
     size = (800, 480)
 
-    # Blinking background when picture is taken
+    # Blinking background when a capture is taken
     flash = True
 
     # Show arrows to indicate physical buttons ('bottom', 'top' or 'hidden')
@@ -39,7 +39,7 @@ Default configuration
     # Show a countdown timer during the preview
     preview_countdown = True
 
-    # Stop the preview before taking the picture
+    # Stop the preview before taking the capture
     preview_stop_on_capture = False
 
     [PICTURE]
@@ -71,7 +71,7 @@ Default configuration
     # Adjust for lighting issues, normal is 100 or 200 and dark is 800 max
     iso = 100
 
-    # Flip horizontally the captured picture
+    # Flip horizontally the capture
     flip = False
 
     # Rotation of the camera (0, 90, 180 or 270)
