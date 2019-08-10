@@ -2,7 +2,10 @@
 
 import time
 import subprocess
-import picamera
+try:
+    import picamera
+except ImportError:
+    picamera = None  # picamera is optional
 from pibooth.config.parser import PiConfigParser
 from pibooth.controls.camera.base import BaseCamera, LANGUAGES
 
@@ -10,6 +13,8 @@ from pibooth.controls.camera.base import BaseCamera, LANGUAGES
 def rpi_camera_connected():
     """Return True if a RPi camera is found.
     """
+    if not picamera:
+        return False  # picamera is not installed
     try:
         process = subprocess.Popen(['vcgencmd', 'get_camera'],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -26,7 +31,10 @@ class RpiCamera(BaseCamera):
     """Camera management
     """
 
-    IMAGE_EFFECTS = list(picamera.PiCamera.IMAGE_EFFECTS.keys())
+    if picamera:
+        IMAGE_EFFECTS = list(picamera.PiCamera.IMAGE_EFFECTS.keys())
+    else:
+        IMAGE_EFFECTS = []
 
     def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False):
         BaseCamera.__init__(self, resolution)
