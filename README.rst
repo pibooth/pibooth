@@ -282,8 +282,6 @@ Credits
 
 Icons from the Noun Project
 
-- Thumb up by Symbolon
 - Polaroid by icon 54
-- Cat by Внталий Плут
 - Up hand drawn arrow by Kid A
 - Cameraman and Friends Posing For Camera by Gan Khoon Lay
