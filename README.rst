@@ -35,13 +35,8 @@ Software
 
 * Raspbian ``Buster with desktop and recommended software``
 * Python ``3.5.3``
-* RPi.GPIO ``0.6.3``
-* picamera ``1.13``
-* Pillow ``5.0.0``
-* pygame ``1.9.4``
-* pygame-menu ``2.0.1``
-* gphoto2 ``2.5.23`` ( libgphoto2 ``2.5.23`` )
-* pycups ``1.9.73`` ( CUPS ``2.2.1`` )
+* libgphoto2 ``2.5.23``
+* libcups ``2.2.1``
 
 Install
 -------

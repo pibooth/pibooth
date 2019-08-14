@@ -97,11 +97,9 @@ def get_config_value(camera, section, option):
         write_log('Unknown option {}/{}'.format(section, option))
 
 
-def gp_camera_connected():
-    """Return True if a camera compatible with gPhoto2 is found.
+def camera_connected():
+    """Return the list of connected camera compatible with gPhoto2.
     """
-    if not gp:
-        return False  # gPhoto2 is not installed
     if hasattr(gp, 'gp_camera_autodetect'):
         # gPhoto2 version 2.5+
         cameras = gp.check_result(gp.gp_camera_autodetect())
@@ -111,10 +109,7 @@ def gp_camera_connected():
         abilities_list = gp.CameraAbilitiesList()
         abilities_list.load()
         cameras = abilities_list.detect(port_info_list)
-    if cameras:
-        return True
-
-    return False
+    return cameras
 
 
 if __name__ == '__main__':
@@ -130,17 +125,8 @@ if __name__ == '__main__':
         pibooth_version = "not installed"
 
     write_log("Pibooth version installed: {}".format(pibooth_version), True)
-    write_log("Camera(s) detected: {}".format(gp_camera_connected()))
     write_log("Listing all connected DSLR camera")
-    if hasattr(gp, 'gp_camera_autodetect'):
-        # gphoto2 version 2.5+
-        cameras_list = gp.check_result(gp.gp_camera_autodetect())
-    else:
-        port_info_list = gp.PortInfoList()
-        port_info_list.load()
-        abilities_list = gp.CameraAbilitiesList()
-        abilities_list.load()
-        cameras_list = abilities_list.detect(port_info_list)
+    cameras_list = camera_connected()
 
     if not cameras_list:
         write_log('No compatible DSLR camera detected')

@@ -52,13 +52,13 @@ def main():
         },
         include_package_data=True,
         install_requires=[
-            'RPi.GPIO',
-            'picamera',
+            'RPi.GPIO>=0.6.3',
+            'picamera>=1.13',
             'Pillow==5.0.0',
-            'Pygame',
-            'pygame-menu>=2.0.1',
-            'gphoto2',
-            'pycups',
+            'Pygame>=1.9.4',
+            'pygame-menu>=2.0.3',
+            'gphoto2>=2.0.0',
+            'pycups>=1.9.73',
         ],
         options={
             'bdist_wheel':
