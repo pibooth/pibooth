@@ -10,6 +10,16 @@ import time
 import shutil
 
 
+def iter_samples(orientation):
+    i = 0
+    dirname = os.path.join(os.path.dirname(__file__), os.path.pardir, 'captures')
+    samples = sorted([os.path.join(dirname, orientation, img)
+                      for img in os.listdir(os.path.join(dirname, orientation))])
+    while True:
+        yield samples[i % len(samples)]
+        i += 1
+
+
 class PiCamera(object):
 
     IMAGE_EFFECTS = {u'blur': 15,
@@ -36,7 +46,13 @@ class PiCamera(object):
                      u'watercolor': 13}
 
     def __init__(self):
+        self.resolution = (1920, 1080)
         self.preview = None
+
+        if self.resolution[0] > self.resolution[1]:
+            self._samples = iter_samples('landscape')
+        else:
+            self._samples = iter_samples('portrait')
 
     def start_preview(self, *args, **kwargs):
         print("Mock: start preview")
@@ -55,7 +71,7 @@ class PiCamera(object):
 
     def capture(self, filename):
         print("Mock: capture picture")
-        shutil.copy2(os.path.join(os.path.dirname(__file__), 'capture.png'), filename)
+        shutil.copy2(next(self._samples), filename)
         time.sleep(0.5)
 
     def close(self, *args, **kwargs):
