@@ -111,15 +111,6 @@ class PiConfigMenu(object):
         self._main_menu.disable()
         self.config.save()
 
-    def get_selected_widget(self):
-        """
-        Return the currently selected widget.
-
-        :return: Widget object
-        :rtype: pygameMenu.widgets.widget.Widget
-        """
-        return self._main_menu._top._actual._option[self._main_menu._top._actual._index]
-
     def show(self):
         """Show the menu.
         """
@@ -135,7 +126,7 @@ class PiConfigMenu(object):
         widget on the menu. If the widget is a button, ENTER event
         is created, else LEFT event is created.
         """
-        if isinstance(self.get_selected_widget(), pgm.widgets.Button):
+        if isinstance(self._main_menu.get_selected_widget(), pgm.widgets.Button):
             return pygame.event.Event(pygame.KEYDOWN, key=pgmctrl.KEY_APPLY,
                                       unicode='\r', mod=0, scancode=36,
                                       window=None, test=True)
