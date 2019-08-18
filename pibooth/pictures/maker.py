@@ -48,7 +48,6 @@ class PictureMaker(object):
         self._texts = []
         self._texts_height = 0
         self._final = None
-        self._margin = None
         self._images = images
         self._background_color = (255, 255, 255)
         self._background_image = None
@@ -56,6 +55,8 @@ class PictureMaker(object):
         self.width = width
         self.height = height
         self.is_portrait = self.width < self.height
+        # Calculate margin considering that all images have the same size
+        self._margin = max((i.size[1] for i in self._images)) // 20
 
     def _build_background(self):
         """Create an image with the given background.
@@ -96,37 +97,30 @@ class PictureMaker(object):
                 text_x += (max_width - text_width)
             draw.text((text_x - offset_x // 2, text_y - offset_y // 2), text, color, font=font)
 
-    def _build_raw_matrix_layout(self, margin=None):
+    def _build_raw_matrix_layout(self):
         """Return matrix dimensions based on input images and margin
         between images.
 
         `raw` because the matrix does not fit to the final size.
-
-        :param margin: margin between images in pixel
-        :type margin: int
         """
         widths, heights = zip(*(i.size for i in self._images))
 
-        # Considering that all images have the same height and widths
-        if margin is None:
-            margin = max(heights) // 20
-
         if len(self._images) == 1:
-            matrix_width = max(widths) + margin * 2
-            matrix_height = max(heights) + margin * 2
+            matrix_width = max(widths) + self._margin * 2
+            matrix_height = max(heights) + self._margin * 2
         elif len(self._images) == 2:
-            matrix_width = max(widths) + margin * 2 if self.is_portrait else max(widths) * 2 + margin * 3
-            matrix_height = max(heights) * 2 + margin * 3 if self.is_portrait else max(heights) + margin * 2
+            matrix_width = max(widths) + self._margin * 2 if self.is_portrait else max(widths) * 2 + self._margin * 3
+            matrix_height = max(heights) * 2 + self._margin * 3 if self.is_portrait else max(heights) + self._margin * 2
         elif len(self._images) == 3:
-            matrix_width = max(widths) + margin * 2 if self.is_portrait else max(widths) * 3 + margin * 4
-            matrix_height = max(heights) * 3 + margin * 4 if self.is_portrait else max(heights) + margin * 2
+            matrix_width = max(widths) + self._margin * 2 if self.is_portrait else max(widths) * 3 + self._margin * 4
+            matrix_height = max(heights) * 3 + self._margin * 4 if self.is_portrait else max(heights) + self._margin * 2
         elif len(self._images) == 4:
-            matrix_width = max(widths) * 2 + margin * 3
-            matrix_height = max(heights) * 2 + margin * 3
+            matrix_width = max(widths) * 2 + self._margin * 3
+            matrix_height = max(heights) * 2 + self._margin * 3
         else:
             raise ValueError("List of max 4 images expected, got {}".format(len(self._images)))
 
-        return matrix_width, matrix_height, margin
+        return matrix_width, matrix_height
 
     def _get_font(self, text, font_name, max_width, max_height):
         """Create the font object which fit the given rectangle.
@@ -154,86 +148,77 @@ class PictureMaker(object):
                 start = k + 1
         return ImageFont.truetype(font_name, start)
 
-    def _iter_raw_matrix_position(self, margin=None):
+    def _iter_raw_matrix_position(self):
         """Yield offset coordinates for each image.
 
         `raw` because the matrix does not fit to the final size.
 
-        :param margin: margin between images in pixel
-        :type margin: int
-
         :return: (image_x, image_y)
         :rtype: tuple
         """
-        # Considering that all images have the same height and widths
-        if margin is None:
-            _, heights = zip(*(i.size for i in self._images))
-            margin = max(heights) // 20
-
-        x_offset = margin
-        y_offset = margin
+        x_offset = self._margin
+        y_offset = self._margin
 
         yield x_offset, y_offset
 
         if 2 <= len(self._images) < 4:
             if self.is_portrait:
-                y_offset += (self._images[0].size[1] + margin)
+                y_offset += (self._images[0].size[1] + self._margin)
             else:
-                x_offset += (self._images[0].size[0] + margin)
+                x_offset += (self._images[0].size[0] + self._margin)
             yield x_offset, y_offset
 
         if 3 <= len(self._images) < 4:
             if self.is_portrait:
-                y_offset += (self._images[1].size[1] + margin)
+                y_offset += (self._images[1].size[1] + self._margin)
             else:
-                x_offset += (self._images[1].size[0] + margin)
+                x_offset += (self._images[1].size[0] + self._margin)
             yield x_offset, y_offset
 
         if len(self._images) == 4:
-            x_offset += (self._images[0].size[0] + margin)
+            x_offset += (self._images[0].size[0] + self._margin)
             yield x_offset, y_offset
-            y_offset += (self._images[1].size[1] + margin)
-            x_offset = margin
+            y_offset += (self._images[1].size[1] + self._margin)
+            x_offset = self._margin
             yield x_offset, y_offset
-            x_offset += (self._images[2].size[0] + margin)
+            x_offset += (self._images[2].size[0] + self._margin)
             yield x_offset, y_offset
 
     def _iter_texts_position(self, margin=None):
         """Yield top-left coordinates and size rectangle for each text.
 
-        :param margin: margin between texts in pixel
-        :type margin: int
-
         :return: (text_x, text_y, text_width, text_height)
         :rtype: tuple
         """
-        if margin is None:
-            margin = 20
+        if not margin:
+            margin = 40
 
-        text_x, text_y = margin, self.height - self._texts_height
+        text_x = margin
+        text_y = self.height - self._texts_height - self._margin // 3
+        total_width = self.width - 2 * self._margin
+        total_height = self._texts_height + self._margin // 3
 
         if self.is_portrait:
-            text_width = self.width - 2 * margin
-            text_height = (self._texts_height - margin * (len(self._texts) + 1)) // (len(self._texts) + 1)
+            text_height = (total_height - margin * (len(self._texts) + 1)) // (len(self._texts) + 1)
             for i in range(len(self._texts)):
                 if i == 0:
                     text_y += margin
-                    yield text_x, text_y, text_width, 2 * text_height
+                    yield text_x, text_y, total_width, 2 * text_height
                 elif i == 1:
                     text_y += margin + 2 * text_height
-                    yield text_x, text_y, text_width, text_height
+                    yield text_x, text_y, total_width, text_height
                 else:
                     text_y += margin + text_height
-                    yield text_x, text_y, text_width, text_height
+                    yield text_x, text_y, total_width, text_height
         else:
             text_width = (self.width - margin * (len(self._texts) + 1)) // len(self._texts)
-            text_height = (self._texts_height - 2 * margin) // 2
+            text_height = (total_height - 2 * margin) // 2
             for i in range(len(self._texts)):
                 if i == 0:
                     yield text_x, text_y + margin, text_width, 2 * text_height
                 else:
                     text_x += margin + text_width
-                    yield text_x, text_y + (self._texts_height - text_height) // 2, text_width, text_height
+                    yield text_x, text_y + (total_height - text_height) // 2, text_width, text_height
 
     def add_text(self, text, font_name, color, align=CENTER):
         """Add a new text.
@@ -339,10 +324,10 @@ class PilPictureMaker(PictureMaker):
     def _build_matrix(self, image):
         """See upper class description.
         """
-        raw_matrix_width, raw_matrix_height, margin = self._build_raw_matrix_layout(self._margin)
+        raw_matrix_width, raw_matrix_height = self._build_raw_matrix_layout()
         matrix = Image.new('RGBA', (raw_matrix_width, raw_matrix_height))
 
-        offset_generator = self._iter_raw_matrix_position(margin)
+        offset_generator = self._iter_raw_matrix_position()
 
         for pil_image in self._images:
             matrix.paste(pil_image, next(offset_generator))
@@ -404,14 +389,14 @@ class OpenCvPictureMaker(PictureMaker):
     def _build_matrix(self, image):
         """See upper class description.
         """
-        raw_matrix_width, raw_matrix_height, margin = self._build_raw_matrix_layout(self._margin)
+        raw_matrix_width, raw_matrix_height = self._build_raw_matrix_layout()
 
         pics_scaling_factor = min(float(self.width) / raw_matrix_width,
                                   (float(self.height) - self._texts_height) / raw_matrix_height)
         pics_x_offset = int(self.width - raw_matrix_width * pics_scaling_factor) // 2
         pics_y_offset = int((self.height - self._texts_height) - raw_matrix_height * pics_scaling_factor) // 2
 
-        offset_generator = self._iter_raw_matrix_position(margin)
+        offset_generator = self._iter_raw_matrix_position()
 
         for pil_image in self._images:
             cv_image = np.array(pil_image.convert('RGB'))

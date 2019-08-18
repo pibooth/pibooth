@@ -14,25 +14,37 @@ def setup_maker(m, fond):
     m.set_background(fond)
 
 
-def test_maker_pil_portrait(benchmark, captures_portrait, fond):
+def test_benchmark_pil_portrait(benchmark, captures_portrait, fond):
     maker = PilPictureMaker(2400, 3600, *captures_portrait)
     setup_maker(maker, fond)
     benchmark(maker.build)
 
 
-def test_maker_pil_landscape(benchmark, captures_landscape, fond):
+def test_benchmark_pil_landscape(benchmark, captures_landscape, fond):
     maker = PilPictureMaker(3600, 2400, *captures_landscape)
     setup_maker(maker, fond)
     benchmark(maker.build)
 
 
-def test_maker_cv2_portrait(benchmark, captures_portrait, fond):
+def test_benchmark_cv2_portrait(benchmark, captures_portrait, fond):
     maker = OpenCvPictureMaker(2400, 3600, *captures_portrait)
     setup_maker(maker, fond)
     benchmark(maker.build)
 
 
-def test_maker_cv2_landscape(benchmark, captures_landscape, fond):
+def test_benchmark_cv2_landscape(benchmark, captures_landscape, fond):
     maker = OpenCvPictureMaker(3600, 2400, *captures_landscape)
     setup_maker(maker, fond)
     benchmark(maker.build)
+
+
+def test_save_cv2_portrait(captures_portrait, fond):
+    maker = OpenCvPictureMaker(2400, 3600, *captures_portrait)
+    setup_maker(maker, fond)
+    maker.save("OpenCV-portrait.jpg")
+
+
+def test_save_cv2_landscape(captures_landscape, fond):
+    maker = OpenCvPictureMaker(3600, 2400, *captures_landscape)
+    setup_maker(maker, fond)
+    maker.save("OpenCV-landscape.jpg")
