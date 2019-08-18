@@ -18,10 +18,19 @@ except ImportError:
     # Python 2.x fallback
     from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from pibooth.utils import LOGGER
-from pibooth.pictures.concatenate import concatenate_pictures
+from pibooth.pictures import get_picture_maker
 
 
 PRINTER_TASKS_UPDATED = pygame.USEREVENT + 2
+
+PAPER_FORMATS = {
+    '2x6': (2, 6),      # 2x6 pouces - 5x15 cm - 51x152 mm
+    '3,5x5': (3.5, 5),  # 3,5x5 pouces - 9x13 cm - 89x127 mm
+    '4x6': (4, 6),      # 4x6 pouces - 10x15 cm - 101x152 mm
+    '5x7': (5, 7),      # 5x7 pouces - 13x18 cm - 127x178 mm
+    '6x8': (6, 8),      # 6x8 pouces - 15x20 cm - 152x203 mm
+    '6x9': (6, 9),      # 6x9 pouces - 15x23 cm - 152x229 mm
+}
 
 
 class NotificationHandler(BaseHTTPRequestHandler):
@@ -178,7 +187,10 @@ class PtbPrinter(object):
         if copies > 1:
             with tempfile.NamedTemporaryFile(suffix=osp.basename(filename)) as fp:
                 picture = Image.open(filename)
-                concatenate_pictures((picture,) * copies, orientation='auto', inter_width=2).save(fp.name)
+                maker = get_picture_maker((picture,) * copies)
+                maker.set_margin(2)
+                maker.save(fp.name)
+                print(fp.name)
                 self._conn.printFile(self.name, fp.name, osp.basename(filename), {})
         else:
             self._conn.printFile(self.name, filename, osp.basename(filename), {})

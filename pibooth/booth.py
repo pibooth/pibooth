@@ -15,14 +15,14 @@ from RPi import GPIO
 from PIL import Image
 import pibooth
 from pibooth.utils import (LOGGER, timeit, PoolingTimer,
-                           configure_logging, print_columns_words)
+                           configure_logging, print_columns_words, zip_longest)
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
 from pibooth.config.parser import PiConfigParser, get_supported_languages
 from pibooth.config.menu import PiConfigMenu
 from pibooth.controls import camera
 from pibooth.fonts import get_available_fonts
-from pibooth.pictures.concatenate import concatenate_pictures
+from pibooth.pictures import get_picture_maker
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
 from pibooth.controls.printer import PRINTER_TASKS_UPDATED, PtbPrinter
@@ -242,30 +242,32 @@ class StateProcessing(State):
             footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
                             self.app.config.get('PICTURE', 'footer_text2')]
             bg_color = self.app.config.gettyped('PICTURE', 'bg_color')
-
             if not isinstance(bg_color, (tuple, list)):
                 # Path to a background image
-                bg_color = Image.open(self.app.config.getpath('PICTURE', 'bg_color'))
+                bg_color = self.app.config.getpath('PICTURE', 'bg_color')
             text_color = self.app.config.gettyped('PICTURE', 'text_color')
-            orientation = self.app.config.get('PICTURE', 'orientation')
+            assert isinstance(text_color, (tuple, list)), "Invalid text color '{}'".format(text_color)
+            if len(text_color) == 3 and all(isinstance(elem, int) for elem in text_color):
+                # Apply same color on all footers
+                text_color = (text_color,) * len(footer_texts)
 
             footer_fonts = self.app.config.gettyped('PICTURE', 'fonts')
-            if isinstance(footer_fonts, str):
-                # Apply same font on both footers
-                footer_fonts = (footer_fonts, footer_fonts)
-            elif len(footer_fonts) < 2:
-                # Apply same font on both footers
-                footer_fonts = (footer_fonts[0], footer_fonts[0])
-            self.app.previous_picture = concatenate_pictures(self.app.camera.get_captures(),
-                                                             footer_texts,
-                                                             footer_fonts,
-                                                             bg_color, text_color,
-                                                             orientation)
+            if isinstance(footer_fonts, str) or len(footer_fonts) < 2:
+                # Apply same font on all footers
+                footer_fonts = (footer_fonts,) * len(footer_texts)
 
-        self.app.previous_picture_file = osp.join(
-            self.app.savedir, osp.basename(self.app.dirname) + "_pibooth.jpg")
+            maker = get_picture_maker(self.app.camera.get_captures(),
+                                      self.app.config.get('PICTURE', 'orientation'))
+            maker.set_background(bg_color)
+            if any(elem != '' for elem in footer_texts):
+                for params in zip_longest(footer_texts, footer_fonts, text_color):
+                    maker.add_text(*params)
+            self.app.previous_picture = maker.build()
+
         with timeit("Save the final picture in {}".format(self.app.previous_picture_file)):
-            self.app.previous_picture.save(self.app.previous_picture_file)
+            self.app.previous_picture_file = osp.join(
+                self.app.savedir, osp.basename(self.app.dirname) + "_pibooth.jpg")
+            maker.save(self.app.previous_picture_file)
 
     def validate_transition(self, events):
         if self.app.printer.is_installed() and self.app.config.getfloat('PRINTER', 'printer_delay') > 0:
