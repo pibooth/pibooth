@@ -19,20 +19,6 @@ except ImportError:
 LOGGER = logging.getLogger("pibooth")
 
 
-def take(n, iterable):
-    """Return first n items of the iterable as a list"""
-    return list(islice(iterable, n))
-
-
-def print_columns_words(words, column_count=3):
-    """Print a list of words into columns"""
-    columns, dangling = divmod(len(words), column_count)
-    columns = [take(columns + (dangling > i), iter(words)) for i in range(column_count)]
-    paddings = [max(map(len, column)) for column in columns]
-    for row in zip_longest(*columns, fillvalue=''):
-        print('  '.join(word.ljust(pad) for word, pad in zip(row, paddings)))
-
-
 class BlockConsoleHandler(logging.StreamHandler):
 
     pattern_indent = '+< '
@@ -73,48 +59,6 @@ class BlockConsoleHandler(logging.StreamHandler):
         """
         if cls.is_debug():
             cls.current_indent = (cls.current_indent[:-len(cls.pattern_blocks)] + cls.pattern_dedent)
-
-
-def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=None, filename=None):
-    """Configure root logger for console printing.
-    """
-    root = logging.getLogger()
-
-    if not root.handlers:
-        # Set lower level to be sure that all handlers receive the logs
-        root.setLevel(logging.DEBUG)
-
-        if filename:
-            # Create a file handler, all levels are printed
-            filename = osp.abspath(osp.expanduser(filename))
-            dirname = osp.dirname(filename)
-            if not osp.isdir(dirname):
-                os.makedirs(dirname)
-            hdlr = logging.FileHandler(filename)
-            hdlr.setFormatter(logging.Formatter(msgfmt, datefmt))
-            hdlr.setLevel(logging.DEBUG)
-            root.addHandler(hdlr)
-
-        # Create a console handler
-        hdlr = BlockConsoleHandler(sys.stdout)
-        hdlr.setFormatter(logging.Formatter(msgfmt, datefmt))
-        if level is not None:
-            hdlr.setLevel(level)
-        root.addHandler(hdlr)
-
-
-@contextlib.contextmanager
-def timeit(description):
-    """Measure time execution.
-    """
-    BlockConsoleHandler.indent()
-    LOGGER.info(description)
-    start = time.time()
-    try:
-        yield
-    finally:
-        BlockConsoleHandler.dedent()
-        LOGGER.debug("took %0.3f seconds", time.time() - start)
 
 
 class PoolingTimer(object):
@@ -174,3 +118,62 @@ class PoolingTimer(object):
             raise RuntimeError("PoolingTimer has never been started")
         else:
             return (time.time() - self.time) > self.timeout
+
+
+def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=None, filename=None):
+    """Configure root logger for console printing.
+    """
+    root = logging.getLogger()
+
+    if not root.handlers:
+        # Set lower level to be sure that all handlers receive the logs
+        root.setLevel(logging.DEBUG)
+
+        if filename:
+            # Create a file handler, all levels are printed
+            filename = osp.abspath(osp.expanduser(filename))
+            dirname = osp.dirname(filename)
+            if not osp.isdir(dirname):
+                os.makedirs(dirname)
+            hdlr = logging.FileHandler(filename)
+            hdlr.setFormatter(logging.Formatter(msgfmt, datefmt))
+            hdlr.setLevel(logging.DEBUG)
+            root.addHandler(hdlr)
+
+        # Create a console handler
+        hdlr = BlockConsoleHandler(sys.stdout)
+        hdlr.setFormatter(logging.Formatter(msgfmt, datefmt))
+        if level is not None:
+            hdlr.setLevel(level)
+        root.addHandler(hdlr)
+
+
+@contextlib.contextmanager
+def timeit(description):
+    """Measure time execution.
+    """
+    BlockConsoleHandler.indent()
+    LOGGER.info(description)
+    start = time.time()
+    try:
+        yield
+    finally:
+        BlockConsoleHandler.dedent()
+        LOGGER.debug("took %0.3f seconds", time.time() - start)
+
+
+def take(n, iterable):
+    """Return first n items of the iterable as a list.
+    """
+    return list(islice(iterable, n))
+
+
+def print_columns_words(words, column_count=3):
+    """Print a list of words into columns.
+    """
+    columns, dangling = divmod(len(words), column_count)
+    iter_words = iter(words)
+    columns = [take(columns + (dangling > i), iter_words) for i in range(column_count)]
+    paddings = [max(map(len, column)) for column in columns]
+    for row in zip_longest(*columns, fillvalue=''):
+        print('  '.join(word.ljust(pad) for word, pad in zip(row, paddings)))
