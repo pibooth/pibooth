@@ -14,8 +14,8 @@ import pygame
 from RPi import GPIO
 from PIL import Image
 import pibooth
-from pibooth.utils import (LOGGER, timeit, PoolingTimer,
-                           configure_logging, print_columns_words, zip_longest)
+from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging,
+                           print_columns_words, zip_longest, pkill)
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
 from pibooth.config.parser import PiConfigParser, get_supported_languages
@@ -366,11 +366,14 @@ class PiApplication(object):
         self.state_machine.add_state(StatePrint())
         self.state_machine.add_state(StateFinish(0.5))
 
-        # Initialize the camera
+        # Initialize the camera. If gPhoto2 camera is used, try to kill
+        # any process using gPhoto2 as it may block camera access
         if camera.gp_camera_connected() and camera.rpi_camera_connected():
             cam_class = camera.HybridCamera
+            pkill('*gphoto2*')
         elif camera.gp_camera_connected():
             cam_class = camera.GpCamera
+            pkill('*gphoto2*')
         elif camera.rpi_camera_connected():
             cam_class = camera.RpiCamera
         else:

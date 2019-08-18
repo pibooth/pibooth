@@ -8,6 +8,8 @@ import sys
 import time
 import os.path as osp
 import logging
+import psutil
+from fnmatch import fnmatchcase
 import contextlib
 try:
     from itertools import zip_longest, islice
@@ -177,3 +179,19 @@ def print_columns_words(words, column_count=3):
     paddings = [max(map(len, column)) for column in columns]
     for row in zip_longest(*columns, fillvalue=''):
         print('  '.join(word.ljust(pad) for word, pad in zip(row, paddings)))
+
+
+def pkill(pattern):
+    """Kill all process matching the given pattern.
+
+    :param pattern: pattern used to match processes
+    :type pattern: str
+    """
+    for proc in psutil.process_iter():
+        if fnmatchcase(proc.name(), pattern):
+            LOGGER.debug("Try to kill process '%s'", proc.name())
+            try:
+                proc.kill()
+            except psutil.AccessDenied:
+                raise EnvironmentError("Can not kill '{}', root access is required. "
+                                       "(kill it manually before starting pibooth)".format(proc.name()))

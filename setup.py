@@ -56,9 +56,10 @@ def main():
             'picamera>=1.13',
             'Pillow==5.0.0',
             'Pygame>=1.9.4',
-            'pygame-menu>=2.0.3',
+            'pygame-menu>=2.0.4',
             'gphoto2>=2.0.0',
             'pycups>=1.9.73',
+            'psutil>=5.5.1'
         ],
         options={
             'bdist_wheel':

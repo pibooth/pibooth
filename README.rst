@@ -101,12 +101,6 @@ Start the photobooth application using the command::
 
     $ pibooth
 
-.. hint:: The error ``gphoto2.GPhoto2Error: [-53] Could not claim the USB device`` may be
-          raised because of the ``gvfs-gphoto2-volume-monitor`` process running in the
-          background. Kill it before starting ``pibooth`` using the command::
-
-              $ pkill -f gphoto2
-
 All pictures taken are stored in the folder defined in ``[GENERAL][directory]``. They are named
 **YYYY-mm-dd-hh-mm-ss_pibooth.jpg** which is the time when first capture of the sequence was taken.
 A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is created to store the single raw captures.
