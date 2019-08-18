@@ -15,7 +15,7 @@ from RPi import GPIO
 from PIL import Image
 import pibooth
 from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging,
-                           print_columns_words, zip_longest, pkill)
+                           print_columns_words, pkill)
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
 from pibooth.config.parser import PiConfigParser, get_supported_languages
@@ -239,28 +239,23 @@ class StateProcessing(State):
 
     def do_actions(self, events):
         with timeit("Creating the final picture"):
-            footer_texts = [self.app.config.get('PICTURE', 'footer_text1'),
-                            self.app.config.get('PICTURE', 'footer_text2')]
-            bg_color = self.app.config.gettyped('PICTURE', 'bg_color')
-            if not isinstance(bg_color, (tuple, list)):
-                # Path to a background image
-                bg_color = self.app.config.getpath('PICTURE', 'bg_color')
-            text_color = self.app.config.gettyped('PICTURE', 'text_color')
-            assert isinstance(text_color, (tuple, list)), "Invalid text color '{}'".format(text_color)
-            if len(text_color) == 3 and all(isinstance(elem, int) for elem in text_color):
-                # Apply same color on all footers
-                text_color = (text_color,) * len(footer_texts)
+            backgrounds = self.app.config.gettuple('PICTURE', 'backgrounds', ('color', 'path'), 2)
+            if self.app.nbr_captures == self.app.capture_choices[0]:
+                background = backgrounds[0]
+            else:
+                background = backgrounds[1]
 
-            footer_fonts = self.app.config.gettyped('PICTURE', 'fonts')
-            if isinstance(footer_fonts, str) or len(footer_fonts) < 2:
-                # Apply same font on all footers
-                footer_fonts = (footer_fonts,) * len(footer_texts)
+            texts = [self.app.config.get('PICTURE', 'footer_text1'),
+                     self.app.config.get('PICTURE', 'footer_text2')]
+            colors = self.app.config.gettuple('PICTURE', 'text_colors', 'color', len(texts))
+            fonts = self.app.config.gettuple('PICTURE', 'text_fonts', str, len(texts))
+            alignments = self.app.config.gettuple('PICTURE', 'text_alignments', str, len(texts))
 
             maker = get_picture_maker(self.app.camera.get_captures(),
                                       self.app.config.get('PICTURE', 'orientation'))
-            maker.set_background(bg_color)
-            if any(elem != '' for elem in footer_texts):
-                for params in zip_longest(footer_texts, footer_fonts, text_color):
+            maker.set_background(background)
+            if any(elem != '' for elem in texts):
+                for params in zip(texts, fonts, colors, alignments):
                     maker.add_text(*params)
             self.app.previous_picture = maker.build()
 
@@ -420,9 +415,7 @@ class PiApplication(object):
             PiConfigParser.language = language
 
         # Set the captures choices
-        choices = self.config.gettyped('PICTURE', 'captures')
-        if isinstance(choices, int):
-            choices = (choices,)
+        choices = self.config.gettuple('PICTURE', 'captures', int)
         for chx in choices:
             if chx not in [1, 2, 3, 4]:
                 LOGGER.warning("Invalid captures number '%s' in config, fallback to '%s'",

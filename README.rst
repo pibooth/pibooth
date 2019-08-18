@@ -194,7 +194,7 @@ The fonts used on the final picture can be customized using the configuration ke
     [PICTURE]
 
     # Same font applied on footer_text1 and footer_text2
-    fonts = Amatic-Bold
+    text_fonts = Amatic-Bold
 
 This key can take two name/path/url:
 
@@ -203,7 +203,7 @@ This key can take two name/path/url:
     [PICTURE]
 
     # 'arial' font applied on footer_text1, 'Roboto-BoldItalic' font on footer_text2
-    fonts = ('arial', 'Roboto-BoldItalic')
+    text_fonts = ('arial', 'Roboto-BoldItalic')
 
 The available fonts can be listed using the following the command::
 

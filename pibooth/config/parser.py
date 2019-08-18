@@ -39,7 +39,7 @@ DEFAULT = odict((
         odict((
             ("language",
                 ("en",
-                 "User interface language ({})".format(values_list_repr(get_supported_languages())),
+                 "User interface language: {}".format(values_list_repr(get_supported_languages())),
                  "UI language", get_supported_languages())),
             ("directory",
                 ("~/Pictures/pibooth",
@@ -71,7 +71,7 @@ DEFAULT = odict((
                  "Flash on capture", ['True', 'False'])),
             ("arrows",
                 ('bottom',
-                 "Show arrows to indicate physical buttons ('bottom', 'top' or 'hidden')",
+                 "Show arrows to indicate physical buttons: 'bottom', 'top' or 'hidden'",
                  "Show button arrows", ['bottom', 'top', 'hidden'])),
             ("arrows_x_offset",
                 (0,
@@ -103,7 +103,7 @@ DEFAULT = odict((
                  "Orientation", ['auto', 'portrait', 'landscape'])),
             ("effect",
                 ("none",
-                 "Effect applied to the captures (a list of quoted names can be given)",
+                 "Effect applied to the captures (list of quoted names accepted)",
                  None, None)),
             ("footer_text1",
                 ("Footer 1",
@@ -113,17 +113,21 @@ DEFAULT = odict((
                 ("Footer 2",
                  "Secondary text displayed",
                  "Sub-title : ", "")),
-            ("text_color",
+            ("text_colors",
                 ((0, 0, 0),
-                 "Footer text RGB color",
+                 "RGB colors used for footer texts (list accepted)",
                  None, None)),
-            ("bg_color",
-                ((255, 255, 255),
-                 "Background RGB color or path to a background image",
-                 None, None)),
-            ("fonts",
+            ("text_fonts",
                 (('Amatic-Bold', 'AmaticSC-Regular'),
-                 "Font name/path/url to be used for footer texts (1 or 2 names/paths)",
+                 "Fonts name or file path used for footer texts (list accepted)",
+                 None, None)),
+            ("text_alignments",
+                ('center',
+                 "Alignments used for footer texts: 'left', 'center' or 'right' (list accepted)",
+                 None, None)),
+            ("backgrounds",
+                ((255, 255, 255),
+                 "Background RGB color or image path (list accepted)",
                  None, None)),
         ))
      ),
@@ -139,7 +143,7 @@ DEFAULT = odict((
                  None, None)),
             ("rotation",
                 (0,
-                 "Rotation of the camera (0, 90, 180 or 270)",
+                 "Rotation of the camera: 0, 90, 180 or 270",
                  None, None)),
             ("resolution",
                 ((1934, 2464),
@@ -223,6 +227,15 @@ class PiConfigParser(ConfigParser):
 
         self.read(self.filename)
 
+    def _get_abs_path(self, path):
+        """Return absolute path. In case of relative path given, the absolute
+        one is created using config file path as reference path.
+        """
+        path = osp.expanduser(path)
+        if not osp.isabs(path):
+            path = osp.join(osp.relpath(osp.dirname(self.filename), '.'), path)
+        return path
+
     def save(self, default=False):
         """Save the current or default values into the configuration file.
         """
@@ -276,6 +289,11 @@ class PiConfigParser(ConfigParser):
     def get(self, section, option, **kwargs):
         """Override the default function of ConfigParser to add a
         default value if section or option is not found.
+
+        :param section: config section name
+        :type section: str
+        :param option: option name
+        :type option: str
         """
         if self.has_section(section) and self.has_option(section, option):
             return ConfigParser.get(self, section, option, **kwargs)
@@ -284,6 +302,11 @@ class PiConfigParser(ConfigParser):
     def gettyped(self, section, option):
         """Get a value from config and try to convert it in a native Python
         type (using the :py:mod:`ast` module).
+
+        :param section: config section name
+        :type section: str
+        :param option: option name
+        :type option: str
         """
         value = self.get(section, option)
         try:
@@ -294,9 +317,72 @@ class PiConfigParser(ConfigParser):
     def getpath(self, section, option):
         """Get a path from config, evaluate the absolute path from configuration
         file path.
+
+        :param section: config section name
+        :type section: str
+        :param option: option name
+        :type option: str
         """
-        path = self.get(section, option)
-        path = osp.expanduser(path)
-        if not osp.isabs(path):
-            path = osp.join(osp.relpath(osp.dirname(self.filename), '.'), path)
-        return path
+        return self._get_abs_path(self.get(section, option))
+
+    def gettuple(self, section, option, types, extend=0):
+        """Get a list of values from config. The values type shall be in the
+        list of authorized types. This method permits to get severals values
+        from the same configuration option.
+
+        If the option contains one value (with acceptable type), a tuple
+        with one element is created and returned.
+
+        :param section: config section name
+        :type section: str
+        :param option: option name
+        :type option: str
+        :param types: list of authorized types
+        :type types: list
+        :param extend: extend the tuple with the last value until length is reached
+        :type extend: int
+        """
+        values = self.gettyped(section, option)
+        if not isinstance(types, (tuple, list)):
+            types = [types]
+        else:
+            types = list(types)
+
+        color = False
+        if 'color' in types:
+            types.remove('color')
+            types.append(tuple)
+            types.append(list)
+            color = True  # option accept color tuples
+
+        path = False
+        if 'path' in types:
+            types.remove('path')
+            types.append(str)
+            path = True
+
+        types = tuple(types)
+
+        if not isinstance(values, (tuple, list)):
+            if not isinstance(values, types):
+                raise ValueError("Invalid config value [{}][{}]={}".format(section, option, values))
+            values = (values,)
+        else:
+            # Check if one value is given or if it is a list of value
+            if color and len(values) == 3 and all(isinstance(elem, int) for elem in values):
+                values = (values,)
+            elif not all(isinstance(elem, types) for elem in values):
+                raise ValueError("Invalid config value [{}][{}]={}".format(section, option, values))
+
+        if path:
+            new_values = []
+            for v in values:
+                if isinstance(v, str):
+                    new_values.append(self._get_abs_path(v))
+                else:
+                    new_values.append(v)
+            values = tuple(new_values)
+
+        while len(values) < extend:
+            values += (values[-1],)
+        return values

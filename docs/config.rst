@@ -5,7 +5,7 @@ Default configuration
 .. code-block:: ini
 
     [GENERAL]
-    # User interface language ('de', 'en' or 'fr')
+    # User interface language: 'de', 'en' or 'fr'
     language = en
 
     # Path to save pictures
@@ -27,7 +27,7 @@ Default configuration
     # Blinking background when a capture is taken
     flash = True
 
-    # Show arrows to indicate physical buttons ('bottom', 'top' or 'hidden')
+    # Show arrows to indicate physical buttons: 'bottom', 'top' or 'hidden'
     arrows = bottom
 
     # Apply horizontal offset to arrows position
@@ -49,7 +49,7 @@ Default configuration
     # Orientation of the final image ('auto', 'portrait' or 'landscape')
     orientation = auto
 
-    # Effect applied to the captures (a list of quoted names can be given)
+    # Effect applied to the captures (list of quoted names accepted)
     effect = none
 
     # Main text displayed
@@ -58,14 +58,17 @@ Default configuration
     # Secondary text displayed
     footer_text2 = Footer 2
 
-    # Footer text RGB color
-    text_color = (0, 0, 0)
+    # RGB colors used for footer texts (list accepted)
+    text_colors = (0, 0, 0)
 
-    # Background RGB color or path to a background image
-    bg_color = (255, 255, 255)
+    # Fonts name or file path used for footer texts (list accepted)
+    text_fonts = ('Amatic-Bold', 'AmaticSC-Regular')
 
-    # Font name/path/url to be used for footer texts (1 or 2 names/paths)
-    fonts = ('Amatic-Bold', 'AmaticSC-Regular')
+    # Alignments used for footer texts: 'left', 'center' or 'right' (list accepted)
+    text_alignments = center
+
+    # Background RGB color or image path (list accepted)
+    backgrounds = (255, 255, 255)
 
     [CAMERA]
     # Adjust for lighting issues, normal is 100 or 200 and dark is 800 max
@@ -74,7 +77,7 @@ Default configuration
     # Flip horizontally the capture
     flip = False
 
-    # Rotation of the camera (0, 90, 180 or 270)
+    # Rotation of the camera: 0, 90, 180 or 270
     rotation = 0
 
     # Resolution for camera captures (preview will have same aspect ratio)
