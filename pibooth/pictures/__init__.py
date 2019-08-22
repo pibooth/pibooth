@@ -109,7 +109,7 @@ def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6)):
     # Consider a resolution of 600 dpi
     size = (paper_format[0] * 600, paper_format[1] * 600)
     if orientation == LANDSCAPE:
-        size = tuple(reversed(size))
+        size = (size[1], size[0])
 
     if not maker.cv2:
         return maker.PilPictureMaker(size[0], size[1], *captures)

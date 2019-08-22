@@ -32,9 +32,9 @@ def new_size_keep_aspect_ratio(original_size, target_size, resize_type='inner'):
 
 
 def new_size_by_croping(original_size, target_size, crop_type='middle'):
-    """Return a tuple representing a rectangle (x, y, width, height) coresponding
-    to a crop of the original size. The position of the rectangle can be defined
-    by the crop_type parameter:
+    """Return a tuple of top-left and bottom-right points (x1, y1, x2, y2) coresponding
+    to a crop of the original size. The position of the rectangle can be defined by the
+    crop_type parameter:
 
        * top-left
        * top-middle
@@ -66,9 +66,13 @@ def new_size_by_croping(original_size, target_size, crop_type='middle'):
 
 
 def new_size_by_croping_ratio(original_size, target_size, crop_type='middle'):
-    """Return a tuple representing a rectangle (x, y, width, height) coresponding
-    to a crop of the original size. The position of the rectangle can be defined
-    by the crop_type parameter:
+    """Return a tuple of top-left and bottom-right points (x1, y1, x2, y2) coresponding
+    to a crop of the original size keeping the same aspect ration of the target size.
+
+    Note: target_size is only used to calculate aspect ratio, the returned coordinates
+          doesn't fit to it.
+
+    The position of the rectangle can be defined by the crop_type parameter:
 
        * top-left
        * top-middle

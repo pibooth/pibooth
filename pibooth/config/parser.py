@@ -97,11 +97,7 @@ DEFAULT = odict((
                 ((4, 1),
                  "Possible choice(s) of captures numbers (numbers between 1 to 4 max)",
                  "Number of captures", ['1', '2', '3', '4'] + [str(val) for val in itertools.permutations(range(1, 5), 2)])),
-            ("orientation",
-                ("auto",
-                 "Orientation of the final image ('auto', 'portrait' or 'landscape')",
-                 "Orientation", ['auto', 'portrait', 'landscape'])),
-            ("effect",
+            ("captures_effects",
                 ("none",
                  "Effect applied to the captures (list of quoted names accepted)",
                  None, None)),
@@ -115,19 +111,27 @@ DEFAULT = odict((
                  "Sub-title : ", "")),
             ("text_colors",
                 ((0, 0, 0),
-                 "RGB colors used for footer texts (list accepted)",
+                 "RGB colors used for footer texts (list of tuple accepted)",
                  None, None)),
             ("text_fonts",
                 (('Amatic-Bold', 'AmaticSC-Regular'),
-                 "Fonts name or file path used for footer texts (list accepted)",
+                 "Fonts name or file path used for footer texts (list of quoted names accepted)",
                  None, None)),
             ("text_alignments",
                 ('center',
-                 "Alignments used for footer texts: 'left', 'center' or 'right' (list accepted)",
+                 "Alignments used for footer texts: 'left', 'center' or 'right' (list of quoted names accepted)",
                  None, None)),
+            ("orientation",
+                ("auto",
+                 "Orientation of the final image: 'auto', 'portrait' or 'landscape'",
+                 "Orientation", ['auto', 'portrait', 'landscape'])),
+            ("cropping",
+                (False,
+                 "Crop each capture borders in order to fit the paper size",
+                 "Crop captures",  ['True', 'False'])),
             ("backgrounds",
                 ((255, 255, 255),
-                 "Background RGB color or image path (list accepted)",
+                 "Background RGB color or image path (list of tuple or path accepted)",
                  None, None)),
         ))
      ),
@@ -353,13 +357,13 @@ class PiConfigParser(ConfigParser):
             types.remove('color')
             types.append(tuple)
             types.append(list)
-            color = True  # option accept color tuples
+            color = True  # Option accept color tuples
 
         path = False
         if 'path' in types:
             types.remove('path')
             types.append(str)
-            path = True
+            path = True  # Option accept file path
 
         types = tuple(types)
 

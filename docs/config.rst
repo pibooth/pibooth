@@ -46,11 +46,8 @@ Default configuration
     # Possible choice(s) of captures numbers (numbers between 1 to 4 max)
     captures = (4, 1)
 
-    # Orientation of the final image ('auto', 'portrait' or 'landscape')
-    orientation = auto
-
     # Effect applied to the captures (list of quoted names accepted)
-    effect = none
+    captures_effects = none
 
     # Main text displayed
     footer_text1 = Footer 1
@@ -58,16 +55,22 @@ Default configuration
     # Secondary text displayed
     footer_text2 = Footer 2
 
-    # RGB colors used for footer texts (list accepted)
+    # RGB colors used for footer texts (list of tuple accepted)
     text_colors = (0, 0, 0)
 
-    # Fonts name or file path used for footer texts (list accepted)
+    # Fonts name or file path used for footer texts (list of quoted names accepted)
     text_fonts = ('Amatic-Bold', 'AmaticSC-Regular')
 
-    # Alignments used for footer texts: 'left', 'center' or 'right' (list accepted)
+    # Alignments used for footer texts: 'left', 'center' or 'right' (list of quoted names accepted)
     text_alignments = center
 
-    # Background RGB color or image path (list accepted)
+    # Orientation of the final image: 'auto', 'portrait' or 'landscape'
+    orientation = auto
+
+    # Crop each capture borders in order to fit paper size
+    cropping = False
+
+    # Background RGB color or image path (list of tuple or path accepted)
     backgrounds = (255, 255, 255)
 
     [CAMERA]

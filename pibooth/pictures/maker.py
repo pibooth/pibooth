@@ -48,6 +48,9 @@ class PictureMaker(object):
         self._texts = []
         self._texts_height = 0
         self._final = None
+        self._margin = 50
+        self._crop = False
+        self._outline = False  # For debug purpose
         self._images = images
         self._background_color = (255, 255, 255)
         self._background_image = None
@@ -55,72 +58,6 @@ class PictureMaker(object):
         self.width = width
         self.height = height
         self.is_portrait = self.width < self.height
-        # Calculate margin considering that all images have the same size
-        self._margin = max((i.size[1] for i in self._images)) // 20
-
-    def _build_background(self):
-        """Create an image with the given background.
-
-        :return: image object which depends on the child class implementation.
-        :rtype: object
-        """
-        raise NotImplementedError
-
-    def _build_matrix(self, image):
-        """Draw the images matrix on the given image.
-
-        :return: image object which depends on the child class implementation.
-        :rtype: object
-        """
-        raise NotImplementedError
-
-    def _build_final_image(self, image):
-        """Create the final PIL image and set it to the _final attribute.
-        """
-        raise NotImplementedError
-
-    def _build_texts(self):
-        """Draw texts on a PIL image (PIL is used instead of OpenCV
-        because it is able to draw any fonts without ext).
-        """
-        offset_generator = self._iter_texts_position()
-        draw = ImageDraw.Draw(self._final)
-        for text, font_name, color, align in self._texts:
-            text_x, text_y, max_width, max_height = next(offset_generator)
-            if not text:  # Empty string: go to next text position
-                continue
-            font = self._get_font(text, font_name, max_width, max_height)
-            (text_width, _baseline), (offset_x, offset_y) = font.font.getsize(text)
-            if align == self.CENTER:
-                text_x += (max_width - text_width) // 2
-            elif align == self.RIGHT:
-                text_x += (max_width - text_width)
-            draw.text((text_x - offset_x // 2, text_y - offset_y // 2), text, color, font=font)
-
-    def _build_raw_matrix_layout(self):
-        """Return matrix dimensions based on input images and margin
-        between images.
-
-        `raw` because the matrix does not fit to the final size.
-        """
-        widths, heights = zip(*(i.size for i in self._images))
-
-        if len(self._images) == 1:
-            matrix_width = max(widths) + self._margin * 2
-            matrix_height = max(heights) + self._margin * 2
-        elif len(self._images) == 2:
-            matrix_width = max(widths) + self._margin * 2 if self.is_portrait else max(widths) * 2 + self._margin * 3
-            matrix_height = max(heights) * 2 + self._margin * 3 if self.is_portrait else max(heights) + self._margin * 2
-        elif len(self._images) == 3:
-            matrix_width = max(widths) + self._margin * 2 if self.is_portrait else max(widths) * 3 + self._margin * 4
-            matrix_height = max(heights) * 3 + self._margin * 4 if self.is_portrait else max(heights) + self._margin * 2
-        elif len(self._images) == 4:
-            matrix_width = max(widths) * 2 + self._margin * 3
-            matrix_height = max(heights) * 2 + self._margin * 3
-        else:
-            raise ValueError("List of max 4 images expected, got {}".format(len(self._images)))
-
-        return matrix_width, matrix_height
 
     def _get_font(self, text, font_name, max_width, max_height):
         """Create the font object which fit the given rectangle.
@@ -148,80 +85,208 @@ class PictureMaker(object):
                 start = k + 1
         return ImageFont.truetype(font_name, start)
 
-    def _iter_raw_matrix_position(self):
-        """Yield offset coordinates for each image.
+    def _image_resize_keep_ratio(self, image, max_w, max_h, crop=False):
+        """Resize an image to fixed dimensions while keeping its aspect ratio.
+        If crop = True, the image will be cropped to fit in the target dimensions.
 
-        `raw` because the matrix does not fit to the final size.
-
-        :return: (image_x, image_y)
+        :return: image object, new width, new height
         :rtype: tuple
         """
-        x_offset = self._margin
-        y_offset = self._margin
+        raise NotImplementedError
 
-        yield x_offset, y_offset
+    def _image_paste(self, image, dest_image, pos_x, pos_y):
+        """Paste the given image on the destination one.
+        """
+        raise NotImplementedError
+
+    def _build_background(self):
+        """Create an image with the given background.
+
+        :return: image object which depends on the child class implementation.
+        :rtype: object
+        """
+        raise NotImplementedError
+
+    def _build_matrix(self, image):
+        """Draw the images matrix on the given image.
+
+        :param image: image object which depends on the child class implementation.
+        :type image: object
+
+        :return: image object which depends on the child class implementation.
+        :rtype: object
+        """
+        offset_generator = self._iter_images_rect()
+        count = 1
+        for src_image in self._iter_src_image():
+            pos_x, pos_y, max_w, max_h = next(offset_generator)
+            src_image, width, height = self._image_resize_keep_ratio(src_image, max_w, max_h, self._crop)
+
+            # Adjuste position to have identical margin between borders and images
+            if len(self._images) < 4:
+                pos_x, pos_y = pos_x + (max_w - width) // 2, pos_y + (max_h - height) // 2
+            elif count == 1:
+                pos_x, pos_y = pos_x + (max_w - width) * 2 // 3, pos_y + (max_h - height) * 2 // 3
+            elif count == 2:
+                pos_x, pos_y = pos_x + (max_w - width) // 3, pos_y + (max_h - height) * 2 // 3
+            elif count == 3:
+                pos_x, pos_y = pos_x + (max_w - width) * 2 // 3, pos_y + (max_h - height) // 3
+            else:
+                pos_x, pos_y = pos_x + (max_w - width) // 3, pos_y + (max_h - height) // 3
+
+            self._image_paste(src_image, image, pos_x, pos_y)
+            count += 1
+        return image
+
+    def _build_final_image(self, image):
+        """Create the final PIL image and set it to the _final attribute.
+
+        :param image: image object which depends on the child class implementation.
+        :type image: object
+
+        :return: PIL.Image instance
+        :rtype: object
+        """
+        raise NotImplementedError
+
+    def _build_texts(self, image):
+        """Draw texts on a PIL image (PIL is used instead of OpenCV
+        because it is able to draw any fonts without ext).
+
+        :param image: PIL.Image instance
+        :type image: object
+        """
+        offset_generator = self._iter_texts_rect()
+        draw = ImageDraw.Draw(image)
+        for text, font_name, color, align in self._texts:
+            text_x, text_y, max_width, max_height = next(offset_generator)
+            if not text:  # Empty string: go to next text position
+                continue
+            font = self._get_font(text, font_name, max_width, max_height)
+            (text_width, _baseline), (offset_x, offset_y) = font.font.getsize(text)
+            if align == self.CENTER:
+                text_x += (max_width - text_width) // 2
+            elif align == self.RIGHT:
+                text_x += (max_width - text_width)
+            draw.text((text_x - offset_x // 2, text_y - offset_y // 2), text, color, font=font)
+
+    def _build_borders(self, image):
+        """Build rectangle around each elements. This method is only for
+        debuging purpose.
+
+        :param image: PIL.Image instance
+        :type image: object
+        """
+        draw = ImageDraw.Draw(image)
+        for x, y, w, h in self._iter_images_rect():
+            draw.rectangle(((x, y), (x + w, y + h)), outline='black')
+        for x, y, w, h in self._iter_texts_rect():
+            draw.rectangle(((x, y), (x + w, y + h)), outline='black')
+
+    def _iter_src_image(self):
+        """Yield source images to concatenate.
+        """
+        raise NotImplementedError
+
+    def _iter_images_rect(self):
+        """Yield top-left coordinates and max size rectangle for each image.
+
+        :return: (image_x, image_y, image_width, image_height)
+        :rtype: tuple
+        """
+        image_x = self._margin
+        image_y = self._margin
+        total_width = self.width - 2 * self._margin
+        total_height = self.height - self._texts_height - 2 * self._margin
+
+        if len(self._images) == 1:
+            image_width = total_width
+            image_height = total_height
+        elif 2 <= len(self._images) < 4:
+            if self.is_portrait:
+                image_width = total_width
+                image_height = (total_height - (len(self._images) - 1) * self._margin) // len(self._images)
+            else:
+                image_width = (total_width - (len(self._images) - 1) * self._margin) // len(self._images)
+                image_height = total_height
+        else:
+            image_width = (total_width - self._margin) // 2
+            image_height = (total_height - self._margin) // 2
+
+        yield image_x, image_y, image_width, image_height
 
         if 2 <= len(self._images) < 4:
             if self.is_portrait:
-                y_offset += (self._images[0].size[1] + self._margin)
+                image_y += image_height + self._margin
             else:
-                x_offset += (self._images[0].size[0] + self._margin)
-            yield x_offset, y_offset
+                image_x += image_width + self._margin
+            yield image_x, image_y, image_width, image_height
 
         if 3 <= len(self._images) < 4:
             if self.is_portrait:
-                y_offset += (self._images[1].size[1] + self._margin)
+                image_y += image_height + self._margin
             else:
-                x_offset += (self._images[1].size[0] + self._margin)
-            yield x_offset, y_offset
+                image_x += image_width + self._margin
+            yield image_x, image_y, image_width, image_height
 
         if len(self._images) == 4:
-            x_offset += (self._images[0].size[0] + self._margin)
-            yield x_offset, y_offset
-            y_offset += (self._images[1].size[1] + self._margin)
-            x_offset = self._margin
-            yield x_offset, y_offset
-            x_offset += (self._images[2].size[0] + self._margin)
-            yield x_offset, y_offset
+            image_x += image_width + self._margin
+            yield image_x, image_y, image_width, image_height
+            image_y += image_height + self._margin
+            image_x = self._margin
+            yield image_x, image_y, image_width, image_height
+            image_x += image_width + self._margin
+            yield image_x, image_y, image_width, image_height
 
-    def _iter_texts_position(self, margin=None):
-        """Yield top-left coordinates and size rectangle for each text.
+    def _iter_texts_rect(self, interline=None):
+        """Yield top-left coordinates and max size rectangle for each text.
+
+        :param interline: margin between each text line
+        :type interline: int
 
         :return: (text_x, text_y, text_width, text_height)
         :rtype: tuple
         """
-        if not margin:
-            margin = 40
+        if not interline:
+            interline = 20
 
-        text_x = margin
-        text_y = self.height - self._texts_height - self._margin // 3
+        text_x = self._margin
+        text_y = self.height - self._texts_height
         total_width = self.width - 2 * self._margin
-        total_height = self._texts_height + self._margin // 3
+        total_height = self._texts_height - self._margin
 
         if self.is_portrait:
-            text_height = (total_height - margin * (len(self._texts) + 1)) // (len(self._texts) + 1)
+            text_height = (total_height - interline * (len(self._texts) - 1)) // (len(self._texts) + 1)
             for i in range(len(self._texts)):
                 if i == 0:
-                    text_y += margin
                     yield text_x, text_y, total_width, 2 * text_height
                 elif i == 1:
-                    text_y += margin + 2 * text_height
+                    text_y += interline + 2 * text_height
                     yield text_x, text_y, total_width, text_height
                 else:
-                    text_y += margin + text_height
+                    text_y += interline + text_height
                     yield text_x, text_y, total_width, text_height
         else:
-            text_width = (self.width - margin * (len(self._texts) + 1)) // len(self._texts)
-            text_height = (total_height - 2 * margin) // 2
+            text_width = (total_width - interline * (len(self._texts) - 1)) // len(self._texts)
+            text_height = total_height // 2
             for i in range(len(self._texts)):
                 if i == 0:
-                    yield text_x, text_y + margin, text_width, 2 * text_height
+                    yield text_x, text_y, text_width, 2 * text_height
                 else:
-                    text_x += margin + text_width
+                    text_x += interline + text_width
                     yield text_x, text_y + (total_height - text_height) // 2, text_width, text_height
 
     def add_text(self, text, font_name, color, align=CENTER):
         """Add a new text.
+
+        :param text: text to draw
+        :type text: str
+        :param font_name: name or path to font file
+        :type font_name: str
+        :param color: RGB tuple
+        :type color: tuple
+        :param align: text alignment: left, right or center
+        :type align: str
         """
         assert align in [self.CENTER, self.RIGHT, self.LEFT], "Unknown aligment '{}'".format(align)
         self._texts.append((text, fonts.get_filename(font_name), color, align))
@@ -256,6 +321,15 @@ class PictureMaker(object):
         """
         self._margin = margin
 
+    def set_cropping(self, crop=True):
+        """Enable the cropping of source images it order to fit to the final
+        size. However some parts of the images will be lost.
+
+        :param crop: enable / disable cropping
+        :type crop: bool
+        """
+        self._crop = crop
+
     def build(self, rebuild=False):
         """Build the final image or doas nothing if the final image
         has already been built previously.
@@ -275,12 +349,14 @@ class PictureMaker(object):
                 image = self._build_matrix(image)
 
             with timeit("{}: assemble final image".format(self.__class__.__name__)):
-                self._build_final_image(image)
-
-            assert self._final is not None, "_build_final_image() have to set the _final attribute"
+                self._final = self._build_final_image(image)
 
             with timeit("{}: draw texts".format(self.__class__.__name__)):
-                self._build_texts()
+                self._build_texts(self._final)
+
+            if self._outline:
+                with timeit("{}: draw rectangle borders".format(self.__class__.__name__)):
+                    self._build_borders(self._final)
 
         return self._final
 
@@ -304,78 +380,96 @@ class PictureMaker(object):
 
 class PilPictureMaker(PictureMaker):
 
+    def _image_resize_keep_ratio(self, image, max_w, max_h, crop=False):
+        """See upper class description.
+        """
+        if crop:
+            width, height = sizing.new_size_keep_aspect_ratio(image.size, (max_w, max_h), 'outer')
+            image = image.resize((width, height), Image.ANTIALIAS)
+            image = image.crop(sizing.new_size_by_croping(image.size, (max_w, max_h)))
+        else:
+            width, height = sizing.new_size_keep_aspect_ratio(image.size, (max_w, max_h), 'inner')
+            image = image.resize((width, height), Image.ANTIALIAS)
+        return image, image.size[0], image.size[1]
+
+    def _image_paste(self, image, dest_image, pos_x, pos_y):
+        """See upper class description.
+        """
+        dest_image.paste(image, (pos_x, pos_y))
+
+    def _iter_src_image(self):
+        """See upper class description.
+        """
+        for image in self._images:
+            yield image
+
     def _build_final_image(self, image):
         """See upper class description.
         """
-        self._final = image
+        return image
 
     def _build_background(self):
         """See upper class description.
         """
         if self._background_image:
-            image = Image.new('RGB', (self.width, self.height))
             bg = Image.open(self._background_image)
-            image.paste(bg.resize(sizing.new_size_keep_aspect_ratio(bg.size, image.size, 'outer')))
+            image, _, _ = self._image_resize_keep_ratio(bg, self.width, self.height, True)
         else:
             image = Image.new('RGB', (self.width, self.height), color=self._background_color)
-
-        return image
-
-    def _build_matrix(self, image):
-        """See upper class description.
-        """
-        raw_matrix_width, raw_matrix_height = self._build_raw_matrix_layout()
-        matrix = Image.new('RGBA', (raw_matrix_width, raw_matrix_height))
-
-        offset_generator = self._iter_raw_matrix_position()
-
-        for pil_image in self._images:
-            matrix.paste(pil_image, next(offset_generator))
-
-        matrix = matrix.resize(sizing.new_size_keep_aspect_ratio(
-            matrix.size, (self.width, self.height - self._texts_height)), Image.ANTIALIAS)
-
-        image.paste(matrix, ((self.width - matrix.size[0]) // 2,
-                             (self.height - self._texts_height - matrix.size[1]) // 2), mask=matrix)
-
         return image
 
 
 class OpenCvPictureMaker(PictureMaker):
 
-    def _image_resize_keep_aspect_ratio_opencv(self, image, width, height, inter=None):
-        """Resize an image to fixed dimensions while keeping its aspect ratio. The
-        image will be cropped to fit in the target dimensions.
+    def _image_resize_keep_ratio(self, image, max_w, max_h, crop=False):
+        """See upper class description.
         """
-        if not inter:
-            inter = cv2.INTER_AREA
-        h, w = image.shape[:2]
+        inter = cv2.INTER_AREA
+        height, width = image.shape[:2]
 
-        source_aspect_ratio = float(w) / h
-        target_aspect_ratio = float(width) / height
+        source_aspect_ratio = float(width) / height
+        target_aspect_ratio = float(max_w) / max_h
 
-        if source_aspect_ratio <= target_aspect_ratio:
-            h_cropped = int(w / target_aspect_ratio)
-            y_offset = int((float(h) - h_cropped) / 2)
-            cropped = image[y_offset:(y_offset + h_cropped), 0:w]
+        if crop:
+            if source_aspect_ratio <= target_aspect_ratio:
+                h_cropped = int(width / target_aspect_ratio)
+                x_offset = 0
+                y_offset = int((float(height) - h_cropped) / 2)
+                cropped = image[y_offset:(y_offset + h_cropped), x_offset:width]
+            else:
+                w_cropped = int(height * target_aspect_ratio)
+                x_offset = int((float(width) - w_cropped) / 2)
+                y_offset = 0
+                cropped = image[y_offset:height, x_offset:(x_offset + w_cropped)]
+            image = cv2.resize(cropped, (max_w, max_h), interpolation=inter)
         else:
-            w_cropped = int(h * target_aspect_ratio)
-            x_offset = int((float(w) - w_cropped) / 2)
-            cropped = image[0:h, x_offset:(x_offset + w_cropped)]
+            width, height = sizing.new_size_keep_aspect_ratio((width, height), (max_w, max_h), 'inner')
+            image = cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
+        return image, image.shape[1], image.shape[0]
 
-        return cv2.resize(cropped, (width, height), interpolation=inter)
+    def _image_paste(self, image, dest_image, pos_x, pos_y):
+        """See upper class description.
+        """
+        height, width = image.shape[:2]
+        dest_image[pos_y:(pos_y + height), pos_x:(pos_x + width)] = image
+
+    def _iter_src_image(self):
+        """See upper class description.
+        """
+        for image in self._images:
+            yield np.array(image.convert('RGB'))
 
     def _build_final_image(self, image):
         """See upper class description.
         """
-        self._final = Image.fromarray(image)
+        return Image.fromarray(image)
 
     def _build_background(self):
         """See upper class description.
         """
         if self._background_image:
             bg = cv2.cvtColor(cv2.imread(self._background_image), cv2.COLOR_BGR2RGB)
-            image = self._image_resize_keep_aspect_ratio_opencv(bg, self.width, self.height)
+            image, _, _ = self._image_resize_keep_ratio(bg, self.width, self.height, True)
         else:
             # Small optimization for all white or all black (or all grey...) background
             if self._background_color[0] == self._background_color[1] and self._background_color[1] == self._background_color[2]:
@@ -383,30 +477,5 @@ class OpenCvPictureMaker(PictureMaker):
             else:
                 image = np.zeros((self.height, self.width, 3), np.uint8)
                 image[:] = (self._background_color[0], self._background_color[1], self._background_color[2])
-
-        return image
-
-    def _build_matrix(self, image):
-        """See upper class description.
-        """
-        raw_matrix_width, raw_matrix_height = self._build_raw_matrix_layout()
-
-        pics_scaling_factor = min(float(self.width) / raw_matrix_width,
-                                  (float(self.height) - self._texts_height) / raw_matrix_height)
-        pics_x_offset = int(self.width - raw_matrix_width * pics_scaling_factor) // 2
-        pics_y_offset = int((self.height - self._texts_height) - raw_matrix_height * pics_scaling_factor) // 2
-
-        offset_generator = self._iter_raw_matrix_position()
-
-        for pil_image in self._images:
-            cv_image = np.array(pil_image.convert('RGB'))
-            if pics_scaling_factor > 0:
-                cv_image = cv2.resize(cv_image, None, fx=pics_scaling_factor,
-                                      fy=pics_scaling_factor, interpolation=cv2.INTER_AREA)
-            height, width = cv_image.shape[:2]
-            x_raw_offset, y_raw_offset = next(offset_generator)
-            x_offset = pics_x_offset + int(pics_scaling_factor * x_raw_offset)
-            y_offset = pics_y_offset + int(pics_scaling_factor * y_raw_offset)
-            image[y_offset:(y_offset + height), x_offset:(x_offset + width)] = cv_image
 
         return image

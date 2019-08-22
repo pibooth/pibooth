@@ -195,7 +195,7 @@ class StateCapture(State):
         if self.app.config.getboolean('WINDOW', 'preview_stop_on_capture'):
             self.app.camera.stop_preview()
 
-        effects = self.app.config.gettyped('PICTURE', 'effect')
+        effects = self.app.config.gettyped('PICTURE', 'captures_effects')
         if not isinstance(effects, (list, tuple)):
             # Same effect for all captures
             effect = effects
@@ -257,6 +257,9 @@ class StateProcessing(State):
             if any(elem != '' for elem in texts):
                 for params in zip(texts, fonts, colors, alignments):
                     maker.add_text(*params)
+            if self.app.config.getboolean('PICTURE', 'cropping'):
+                maker.set_cropping()
+
             self.app.previous_picture = maker.build()
 
         with timeit("Save the final picture in {}".format(self.app.previous_picture_file)):
