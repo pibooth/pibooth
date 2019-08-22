@@ -55,6 +55,7 @@ class PictureMaker(object):
         self._background_color = (255, 255, 255)
         self._background_image = None
 
+        self.name = self.__class__.__name__
         self.width = width
         self.height = height
         self.is_portrait = self.width < self.height
@@ -121,7 +122,6 @@ class PictureMaker(object):
         for src_image in self._iter_src_image():
             pos_x, pos_y, max_w, max_h = next(offset_generator)
             src_image, width, height = self._image_resize_keep_ratio(src_image, max_w, max_h, self._crop)
-
             # Adjuste position to have identical margin between borders and images
             if len(self._images) < 4:
                 pos_x, pos_y = pos_x + (max_w - width) // 2, pos_y + (max_h - height) // 2
@@ -342,20 +342,20 @@ class PictureMaker(object):
         """
         if not self._final or rebuild:
 
-            with timeit("{}: create background".format(self.__class__.__name__)):
+            with timeit("{}: create background".format(self.name)):
                 image = self._build_background()
 
-            with timeit("{}: concatenate images".format(self.__class__.__name__)):
+            with timeit("{}: concatenate images".format(self.name)):
                 image = self._build_matrix(image)
 
-            with timeit("{}: assemble final image".format(self.__class__.__name__)):
+            with timeit("{}: assemble final image".format(self.name)):
                 self._final = self._build_final_image(image)
 
-            with timeit("{}: draw texts".format(self.__class__.__name__)):
+            with timeit("{}: draw texts".format(self.name)):
                 self._build_texts(self._final)
 
             if self._outline:
-                with timeit("{}: draw rectangle borders".format(self.__class__.__name__)):
+                with timeit("{}: draw rectangle borders".format(self.name)):
                     self._build_borders(self._final)
 
         return self._final

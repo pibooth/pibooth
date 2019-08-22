@@ -9,6 +9,7 @@ import time
 import shutil
 import logging
 import argparse
+import itertools
 import os.path as osp
 import pygame
 from RPi import GPIO
@@ -23,6 +24,7 @@ from pibooth.config.menu import PiConfigMenu
 from pibooth.controls import camera
 from pibooth.fonts import get_available_fonts
 from pibooth.pictures import get_picture_maker
+from pibooth.pictures.pool import PicturesMakersPool
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
 from pibooth.controls.printer import PRINTER_TASKS_UPDATED, PtbPrinter
@@ -38,6 +40,7 @@ class StateFailSafe(State):
         self.app.dirname = None
         self.app.nbr_captures = None
         self.app.nbr_printed = 0
+        self.app.previous_animated = []
         self.app.camera.drop_captures()  # Flush previous captures
         self.app.window.show_oops()
         self.timer.start()
@@ -49,12 +52,20 @@ class StateFailSafe(State):
 
 class StateWait(State):
 
-    def __init__(self):
+    def __init__(self, timeout):
         State.__init__(self, 'wait')
+        self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
-        self.app.window.show_intro(self.app.previous_picture, self.app.printer.is_installed() and
+        if self.app.config.getboolean('WINDOW', 'animate') and self.app.nbr_captures and self.app.nbr_captures > 1:
+            self.app.previous_animated = itertools.cycle(self.app.makers_pool.get())
+            picture = next(self.app.previous_animated)
+            self.timer.start()
+        else:
+            picture = self.app.previous_picture
+        self.app.window.show_intro(picture, self.app.printer.is_installed() and
                                    self.app.nbr_printed < self.app.config.getint('PRINTER', 'max_duplicates'))
+
         self.app.led_capture.blink()
         if self.app.previous_picture_file and self.app.printer.is_installed():
             self.app.led_print.blink()
@@ -76,7 +87,6 @@ class StateWait(State):
             self.app.nbr_printed += 1
 
             if self.app.nbr_printed >= self.app.config.getint('PRINTER', 'max_duplicates'):
-                self.app.window.show_intro(self.app.previous_picture, False)
                 self.app.led_print.switch_off()
             else:
                 self.app.led_print.blink()
@@ -84,6 +94,12 @@ class StateWait(State):
         event = self.app.find_print_status_event(events)
         if event:
             self.app.window.set_print_number(len(event.tasks))
+
+        if self.app.config.getboolean('WINDOW', 'animate') and self.app.nbr_captures \
+                and self.app.nbr_captures > 1 and self.timer.is_timeout():
+            self.app.window.show_intro(next(self.app.previous_animated), self.app.printer.is_installed() and
+                                       self.app.nbr_printed < self.app.config.getint('PRINTER', 'max_duplicates'))
+            self.timer.start()
 
     def exit_actions(self):
         self.app.led_capture.switch_off()
@@ -239,6 +255,8 @@ class StateProcessing(State):
 
     def do_actions(self, events):
         with timeit("Creating the final picture"):
+            captures = self.app.camera.get_captures()
+
             backgrounds = self.app.config.gettuple('PICTURE', 'backgrounds', ('color', 'path'), 2)
             if self.app.nbr_captures == self.app.capture_choices[0]:
                 background = backgrounds[0]
@@ -251,21 +269,30 @@ class StateProcessing(State):
             fonts = self.app.config.gettuple('PICTURE', 'text_fonts', str, len(texts))
             alignments = self.app.config.gettuple('PICTURE', 'text_alignments', str, len(texts))
 
-            maker = get_picture_maker(self.app.camera.get_captures(),
-                                      self.app.config.get('PICTURE', 'orientation'))
-            maker.set_background(background)
-            if any(elem != '' for elem in texts):
-                for params in zip(texts, fonts, colors, alignments):
-                    maker.add_text(*params)
-            if self.app.config.getboolean('PICTURE', 'cropping'):
-                maker.set_cropping()
+            def _setup_maker(m):
+                m.set_background(background)
+                if any(elem != '' for elem in texts):
+                    for params in zip(texts, fonts, colors, alignments):
+                        m.add_text(*params)
+                if self.app.config.getboolean('PICTURE', 'captures_cropping'):
+                    m.set_cropping()
 
+            maker = get_picture_maker(captures, self.app.config.get('PICTURE', 'orientation'))
+            _setup_maker(maker)
             self.app.previous_picture = maker.build()
 
         with timeit("Save the final picture in {}".format(self.app.previous_picture_file)):
             self.app.previous_picture_file = osp.join(
                 self.app.savedir, osp.basename(self.app.dirname) + "_pibooth.jpg")
             maker.save(self.app.previous_picture_file)
+
+        if self.app.config.getboolean('WINDOW', 'animate') and self.app.nbr_captures > 1:
+            with timeit("Asyncronously generate pictures for animation"):
+                self.app.makers_pool.clear()
+                for capture in captures:
+                    maker = get_picture_maker((capture,), self.app.config.get('PICTURE', 'orientation'), force_pil=True)
+                    _setup_maker(maker)
+                    self.app.makers_pool.add(maker)
 
     def validate_transition(self, events):
         if self.app.printer.is_installed() and self.app.config.getfloat('PRINTER', 'printer_delay') > 0:
@@ -356,7 +383,7 @@ class PiApplication(object):
             self.window = PtbWindow('Pibooth')
 
         self.state_machine = StateMachine(self)
-        self.state_machine.add_state(StateWait())
+        self.state_machine.add_state(StateWait(1))  # 1s between each frame in case of animated picture
         self.state_machine.add_state(StateChoose(30))  # 30s before going back to the start
         self.state_machine.add_state(StateChosen(4))
         self.state_machine.add_state(StateCapture())
@@ -399,10 +426,12 @@ class PiApplication(object):
 
         # Variables shared between states
         self.dirname = None
+        self.makers_pool = PicturesMakersPool()
         self.nbr_captures = None
         self.capture_choices = (4, 1)
         self.nbr_printed = 0
         self.previous_picture = None
+        self.previous_animated = []
         self.previous_picture_file = None
 
     def initialize(self):
@@ -601,6 +630,7 @@ class PiApplication(object):
                 clock.tick(fps)  # Ensure the program will never run at more than x frames per second
 
         finally:
+            self.makers_pool.quit()
             self.led_startup.quit()
             self.led_preview.quit()
             self.led_capture.quit()

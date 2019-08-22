@@ -18,7 +18,8 @@ install:
   - sudo apt-get install cups libcups2-dev
   - sudo apt-get install python-opencv
   - sudo apt-get install python3-opencv
-  - pip install codecov
+  - pip install pytest-benchmark
+  - pip install pytest-cov
   - pip install -e .
 
 env:
@@ -28,7 +29,7 @@ env:
 
 # Run scripts
 script:
-  - pytest tests/ -v --with-coverage
+  - pytest tests/ -v --cov pibooth/ --cov-report term
 
 # Push the results back to codecov
 after_success:

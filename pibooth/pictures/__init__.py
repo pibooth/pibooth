@@ -88,7 +88,7 @@ def get_best_orientation(captures):
     return orientation
 
 
-def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6)):
+def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6), force_pil=False):
     """Return the picture maker use to concatenate the captures.
 
     :param captures: list of captures to concatenate
@@ -97,6 +97,8 @@ def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6)):
     :type orientation: str
     :param paper_format: paper size in inches
     :type paper_format: tuple
+    :param force_pil: force use PIL implementation
+    :type force_pil: bool
     """
     assert orientation in (AUTO, PORTRAIT, LANDSCAPE), "Unknown orientation '{}'".format(orientation)
     if orientation == AUTO:
@@ -111,7 +113,7 @@ def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6)):
     if orientation == LANDSCAPE:
         size = (size[1], size[0])
 
-    if not maker.cv2:
+    if not maker.cv2 or force_pil:
         return maker.PilPictureMaker(size[0], size[1], *captures)
     else:
         return maker.OpenCvPictureMaker(size[0], size[1], *captures)
