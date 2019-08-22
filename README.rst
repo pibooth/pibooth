@@ -91,7 +91,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
              dependencies by yourself)
 
 .. note:: an editable/customizable version of ``pibooth`` can be installed by following
-          `instructions <https://github.com/werdeil/pibooth/blob/master/docs/dev.rst>`_ .
+          these `instructions <https://github.com/werdeil/pibooth/blob/master/docs/dev.rst>`_ .
           Be aware that the code on the `master` branch may be unstable.
 
 Run
@@ -154,7 +154,7 @@ configuration.
     [PICTURE]
 
     # Effect applied on all captures
-    effect = film
+    captures_effects = film
 
 Instead of one effect name, a list of names can be provided. In this case, the effects are applied
 sequentially on the captures sequence.
@@ -164,7 +164,7 @@ sequentially on the captures sequence.
     [PICTURE]
 
     # Define a rolling sequence of effects. For each capture the corresponding effect is applied.
-    effect = ('film', 'cartoon', 'washedout', 'film')
+    captures_effects = ('film', 'cartoon', 'washedout', 'film')
 
 Have a look to the predefined effects available depending on the camera used:
 
