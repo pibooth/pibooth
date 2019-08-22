@@ -52,9 +52,9 @@ class StateFailSafe(State):
 
 class StateWait(State):
 
-    def __init__(self, timeout):
+    def __init__(self):
         State.__init__(self, 'wait')
-        self.timer = PoolingTimer(timeout)
+        self.timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'animate_delay'))
 
     def entry_actions(self):
         if self.app.config.getboolean('WINDOW', 'animate') and self.app.nbr_captures and self.app.nbr_captures > 1:
@@ -383,7 +383,7 @@ class PiApplication(object):
             self.window = PtbWindow('Pibooth')
 
         self.state_machine = StateMachine(self)
-        self.state_machine.add_state(StateWait(1))  # 1s between each frame in case of animated picture
+        self.state_machine.add_state(StateWait())
         self.state_machine.add_state(StateChoose(30))  # 30s before going back to the start
         self.state_machine.add_state(StateChosen(4))
         self.state_machine.add_state(StateCapture())
