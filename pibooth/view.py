@@ -38,6 +38,7 @@ class PtbWindow(object):
         self._current_background = None
         self._current_foreground = None
         self._print_number = 0
+        self._print_failure = False
         self._capture_number = (0, 4)  # (current, max)
         self._default_cursor = pygame.mouse.get_cursor()
 
@@ -110,7 +111,10 @@ class PtbWindow(object):
         side = int(smaller * 0.05)  # 5% of the window
 
         if side > 0:
-            image = pictures.get_image('printer.png', (side, side))
+            if self._print_failure:
+                image = pictures.get_image('printer_failure.png', (side, side))
+            else:
+                image = pictures.get_image('printer.png', (side, side))
             y = self.surface.get_rect().height - image.get_rect().height - 10
             self.surface.blit(image, (10, y))
             font = pygame.font.Font(fonts.get_filename("Amatic-Bold"), side)
@@ -268,11 +272,20 @@ class PtbWindow(object):
             self._update_foreground(*self._current_foreground)
         pygame.display.update()
 
-    def set_print_number(self, current_nbr):
+    def set_print_number(self, current_nbr=None, failure=None):
         """Set the current number of tasks in the printer queue.
         """
-        if self._print_number != current_nbr:
+        update = False
+
+        if current_nbr is not None and self._print_number != current_nbr:
             self._print_number = current_nbr
+            update = True
+
+        if failure is not None and self._print_failure != failure:
+            self._print_failure = failure
+            update = True
+
+        if update:
             self._update_background(self._current_background)
             if self._current_foreground:
                 self._update_foreground(*self._current_foreground)

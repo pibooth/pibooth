@@ -146,6 +146,7 @@ class PtbPrinter(object):
         self._conn = cups.Connection() if cups else None
         self._notif_server = NotificationServer(self._conn, self._on_event)
         self.name = None
+        self.nbr_printed = 0
         if not cups:
             LOGGER.warning("No printer found (pycups not installed)")
             return  # CUPS is not installed
@@ -190,11 +191,11 @@ class PtbPrinter(object):
                 maker = get_picture_maker((picture,) * copies)
                 maker.set_margin(2)
                 maker.save(fp.name)
-                print(fp.name)
                 self._conn.printFile(self.name, fp.name, osp.basename(filename), {})
         else:
             self._conn.printFile(self.name, filename, osp.basename(filename), {})
         LOGGER.debug("File '%s' sent to the printer", filename)
+        self.nbr_printed += 1
 
     def cancel_all_tasks(self):
         """Cancel all tasks in the queue.

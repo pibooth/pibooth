@@ -170,7 +170,7 @@ class PictureMaker(object):
                 text_x += (max_width - text_width)
             draw.text((text_x - offset_x // 2, text_y - offset_y // 2), text, color, font=font)
 
-    def _build_borders(self, image):
+    def _build_outlines(self, image):
         """Build rectangle around each elements. This method is only for
         debuging purpose.
 
@@ -179,9 +179,9 @@ class PictureMaker(object):
         """
         draw = ImageDraw.Draw(image)
         for x, y, w, h in self._iter_images_rect():
-            draw.rectangle(((x, y), (x + w, y + h)), outline='black')
+            draw.rectangle(((x, y), (x + w, y + h)), outline='red')
         for x, y, w, h in self._iter_texts_rect():
-            draw.rectangle(((x, y), (x + w, y + h)), outline='black')
+            draw.rectangle(((x, y), (x + w, y + h)), outline='red')
 
     def _iter_src_image(self):
         """Yield source images to concatenate.
@@ -355,8 +355,8 @@ class PictureMaker(object):
                 self._build_texts(self._final)
 
             if self._outline:
-                with timeit("{}: draw rectangle borders".format(self.name)):
-                    self._build_borders(self._final)
+                with timeit("{}: outline boundary borders".format(self.name)):
+                    self._build_outlines(self._final)
 
         return self._final
 

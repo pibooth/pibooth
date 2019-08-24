@@ -13,7 +13,6 @@ import itertools
 import os.path as osp
 import pygame
 from RPi import GPIO
-from PIL import Image
 import pibooth
 from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging,
                            print_columns_words, pkill)
@@ -39,7 +38,7 @@ class StateFailSafe(State):
     def entry_actions(self):
         self.app.dirname = None
         self.app.nbr_captures = None
-        self.app.nbr_printed = 0
+        self.app.nbr_duplicates = 0
         self.app.previous_animated = []
         self.app.camera.drop_captures()  # Flush previous captures
         self.app.window.show_oops()
@@ -60,46 +59,60 @@ class StateWait(State):
         if self.app.config.getboolean('WINDOW', 'animate') and self.app.nbr_captures and self.app.nbr_captures > 1:
             self.app.previous_animated = itertools.cycle(self.app.makers_pool.get())
             picture = next(self.app.previous_animated)
+            self.timer.timeout = self.app.config.getfloat('WINDOW', 'animate_delay')
             self.timer.start()
         else:
             picture = self.app.previous_picture
+
         self.app.window.show_intro(picture, self.app.printer.is_installed() and
-                                   self.app.nbr_printed < self.app.config.getint('PRINTER', 'max_duplicates'))
+                                   self.app.nbr_duplicates < self.app.config.getint('PRINTER', 'max_duplicates') and
+                                   not self.app.printer_failure)
+        self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_failure)
 
         self.app.led_capture.blink()
-        if self.app.previous_picture_file and self.app.printer.is_installed():
+        if self.app.previous_picture_file and self.app.printer.is_installed() and not self.app.printer_failure:
             self.app.led_print.blink()
 
     def do_actions(self, events):
+        if self.app.config.getboolean('WINDOW', 'animate') and self.app.nbr_captures \
+                and self.app.nbr_captures > 1 and self.timer.is_timeout():
+            previous_picture = next(self.app.previous_animated)
+            self.app.window.show_intro(previous_picture, self.app.printer.is_installed() and
+                                       self.app.nbr_duplicates < self.app.config.getint('PRINTER', 'max_duplicates') and
+                                       not self.app.printer_failure)
+            self.timer.start()
+        else:
+            previous_picture = self.app.previous_picture
+
         if self.app.find_print_event(events) and self.app.previous_picture_file and self.app.printer.is_installed():
 
-            if self.app.nbr_printed >= self.app.config.getint('PRINTER', 'max_duplicates'):
+            if self.app.nbr_duplicates >= self.app.config.getint('PRINTER', 'max_duplicates'):
                 LOGGER.warning("Too many duplicates sent to the printer (%s max)",
                                self.app.config.getint('PRINTER', 'max_duplicates'))
+                return
+
+            elif self.app.printer_failure:
+                LOGGER.warning("Maximum number of printed pages reached (%s/%s max)", self.app.printer.nbr_printed,
+                               self.app.config.getint('PRINTER', 'max_pages'))
                 return
 
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
                 self.app.printer.print_file(self.app.previous_picture_file,
-                                            self.app.config.getint('PRINTER', 'nbr_copies'))
+                                            self.app.config.getint('PRINTER', 'pictures_per_page'))
 
             time.sleep(1)  # Just to let the LED switched on
-            self.app.nbr_printed += 1
+            self.app.nbr_duplicates += 1
 
-            if self.app.nbr_printed >= self.app.config.getint('PRINTER', 'max_duplicates'):
+            if self.app.nbr_duplicates >= self.app.config.getint('PRINTER', 'max_duplicates') or self.app.printer_failure:
+                self.app.window.show_intro(previous_picture, False)
                 self.app.led_print.switch_off()
             else:
                 self.app.led_print.blink()
 
         event = self.app.find_print_status_event(events)
         if event:
-            self.app.window.set_print_number(len(event.tasks))
-
-        if self.app.config.getboolean('WINDOW', 'animate') and self.app.nbr_captures \
-                and self.app.nbr_captures > 1 and self.timer.is_timeout():
-            self.app.window.show_intro(next(self.app.previous_animated), self.app.printer.is_installed() and
-                                       self.app.nbr_printed < self.app.config.getint('PRINTER', 'max_duplicates'))
-            self.timer.start()
+            self.app.window.set_print_number(len(event.tasks), self.app.printer_failure)
 
     def exit_actions(self):
         self.app.led_capture.switch_off()
@@ -186,7 +199,7 @@ class StateCapture(State):
 
     def entry_actions(self):
         LOGGER.info("Start new captures sequence")
-        self.app.nbr_printed = 0
+        self.app.nbr_duplicates = 0
         self.app.previous_picture = None
         self.app.previous_picture_file = None
         self.app.dirname = osp.join(self.app.savedir, "raw", time.strftime("%Y-%m-%d-%H-%M-%S"))
@@ -295,7 +308,8 @@ class StateProcessing(State):
                     self.app.makers_pool.add(maker)
 
     def validate_transition(self, events):
-        if self.app.printer.is_installed() and self.app.config.getfloat('PRINTER', 'printer_delay') > 0:
+        if self.app.printer.is_installed() and self.app.config.getfloat('PRINTER', 'printer_delay') > 0 \
+                and not self.app.printer_failure:
             return 'print'
         else:
             return 'finish'  # Can not print
@@ -310,9 +324,11 @@ class StatePrint(State):
 
     def entry_actions(self):
         self.printed = False
+
         with timeit("Display the final picture"):
-            self.app.window.set_print_number(len(self.app.printer.get_all_tasks()))
+            self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_failure)
             self.app.window.show_print(self.app.previous_picture)
+
         self.app.led_print.blink()
         # Reset timeout in case of settings changed
         self.timer.timeout = self.app.config.getfloat('PRINTER', 'printer_delay')
@@ -324,17 +340,17 @@ class StatePrint(State):
             with timeit("Send final picture to printer"):
                 self.app.led_print.switch_on()
                 self.app.printer.print_file(self.app.previous_picture_file,
-                                            self.app.config.getint('PRINTER', 'nbr_copies'))
+                                            self.app.config.getint('PRINTER', 'pictures_per_page'))
 
             time.sleep(1)  # Just to let the LED switched on
-            self.app.nbr_printed += 1
+            self.app.nbr_duplicates += 1
             self.app.led_print.blink()
             self.printed = True
 
     def validate_transition(self, events):
         if self.timer.is_timeout() or self.printed:
             if self.printed:
-                self.app.window.set_print_number(len(self.app.printer.get_all_tasks()))
+                self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_failure)
             return 'finish'
 
 
@@ -429,7 +445,7 @@ class PiApplication(object):
         self.makers_pool = PicturesMakersPool()
         self.nbr_captures = None
         self.capture_choices = (4, 1)
-        self.nbr_printed = 0
+        self.nbr_duplicates = 0
         self.previous_picture = None
         self.previous_animated = []
         self.previous_picture_file = None
@@ -456,6 +472,9 @@ class PiApplication(object):
                 break
         self.capture_choices = choices
 
+        # Reset printed pages number
+        self.printer.nbr_printed = 0
+
         # Handle autostart of the application
         self.config.enable_autostart(self.config.getboolean('GENERAL', 'autostart'))
 
@@ -479,6 +498,14 @@ class PiApplication(object):
             self.state_machine.remove_state('failsafe')
         self.state_machine.set_state('wait')
 
+    @property
+    def printer_failure(self):
+        """Return True is paper/ink counter is reached.
+        """
+        if self.config.getint('PRINTER', 'max_pages') <= 0:  # No limit
+            return False
+        return self.printer.nbr_printed >= self.config.getint('PRINTER', 'max_pages')
+
     def find_quit_event(self, events):
         """Return the first found event if found in the list.
         """
@@ -493,7 +520,7 @@ class PiApplication(object):
         event_capture = None
         event_print = None
         for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and\
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and \
                     (type_filter is None or type_filter == event.type):
                 return event
             if event.type == BUTTON_DOWN:
@@ -510,7 +537,7 @@ class PiApplication(object):
         """Return the first found event if found in the list.
         """
         for event in events:
-            if  event.type == pygame.KEYDOWN and\
+            if event.type == pygame.KEYDOWN and \
                     event.key == pygame.K_f and pygame.key.get_mods() & pygame.KMOD_CTRL:
                 return event
         return None
