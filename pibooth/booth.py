@@ -37,7 +37,7 @@ class StateFailSafe(State):
 
     def entry_actions(self):
         self.app.dirname = None
-        self.app.nbr_captures = None
+        self.app.capture_nbr = None
         self.app.nbr_duplicates = 0
         self.app.previous_animated = []
         self.app.camera.drop_captures()  # Flush previous captures
@@ -56,15 +56,16 @@ class StateWait(State):
         self.timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'animate_delay'))
 
     def entry_actions(self):
-        if self.app.config.getboolean('WINDOW', 'animate') and self.app.nbr_captures and self.app.nbr_captures > 1:
-            self.app.previous_animated = itertools.cycle(self.app.makers_pool.get())
-            picture = next(self.app.previous_animated)
+        animated = self.app.makers_pool.get()
+        if self.app.config.getboolean('WINDOW', 'animate') and animated:
+            self.app.previous_animated = itertools.cycle(animated)
+            previous_picture = next(self.app.previous_animated)
             self.timer.timeout = self.app.config.getfloat('WINDOW', 'animate_delay')
             self.timer.start()
         else:
-            picture = self.app.previous_picture
+            previous_picture = self.app.previous_picture
 
-        self.app.window.show_intro(picture, self.app.printer.is_installed() and
+        self.app.window.show_intro(previous_picture, self.app.printer.is_installed() and
                                    self.app.nbr_duplicates < self.app.config.getint('PRINTER', 'max_duplicates') and
                                    not self.app.printer_failure)
         self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_failure)
@@ -74,8 +75,7 @@ class StateWait(State):
             self.app.led_print.blink()
 
     def do_actions(self, events):
-        if self.app.config.getboolean('WINDOW', 'animate') and self.app.nbr_captures \
-                and self.app.nbr_captures > 1 and self.timer.is_timeout():
+        if self.app.config.getboolean('WINDOW', 'animate') and self.app.previous_animated and self.timer.is_timeout():
             previous_picture = next(self.app.previous_animated)
             self.app.window.show_intro(previous_picture, self.app.printer.is_installed() and
                                        self.app.nbr_duplicates < self.app.config.getint('PRINTER', 'max_duplicates') and
@@ -126,7 +126,7 @@ class StateWait(State):
             if len(self.app.capture_choices) > 1:
                 return 'choose'
             else:
-                self.app.nbr_captures = self.app.capture_choices[0]
+                self.app.capture_nbr = self.app.capture_choices[0]
                 return 'capture'
 
 
@@ -140,7 +140,7 @@ class StateChoose(State):
         with timeit("Show picture choice (nothing selected)"):
             self.app.window.set_print_number(0)  # Hide printer status
             self.app.window.show_choice(self.app.capture_choices)
-        self.app.nbr_captures = None
+        self.app.capture_nbr = None
         self.app.led_capture.blink()
         self.app.led_print.blink()
         self.timer.start()
@@ -149,15 +149,15 @@ class StateChoose(State):
         event = self.app.find_choice_event(events)
         if event:
             if event.key == pygame.K_LEFT:
-                self.app.nbr_captures = self.app.capture_choices[0]
+                self.app.capture_nbr = self.app.capture_choices[0]
             elif event.key == pygame.K_RIGHT:
-                self.app.nbr_captures = self.app.capture_choices[1]
+                self.app.capture_nbr = self.app.capture_choices[1]
 
     def exit_actions(self):
-        if self.app.nbr_captures == self.app.capture_choices[0]:
+        if self.app.capture_nbr == self.app.capture_choices[0]:
             self.app.led_capture.switch_on()
             self.app.led_print.switch_off()
-        elif self.app.nbr_captures == self.app.capture_choices[1]:
+        elif self.app.capture_nbr == self.app.capture_choices[1]:
             self.app.led_print.switch_on()
             self.app.led_capture.switch_off()
         else:
@@ -165,7 +165,7 @@ class StateChoose(State):
             self.app.led_capture.switch_off()
 
     def validate_transition(self, events):
-        if self.app.nbr_captures:
+        if self.app.capture_nbr:
             return 'chosen'
         elif self.timer.is_timeout():
             return 'wait'
@@ -178,8 +178,8 @@ class StateChosen(State):
         self.timer = PoolingTimer(timeout)
 
     def entry_actions(self):
-        with timeit("Show picture choice ({} captures selected)".format(self.app.nbr_captures)):
-            self.app.window.show_choice(self.app.capture_choices, selected=self.app.nbr_captures)
+        with timeit("Show picture choice ({} captures selected)".format(self.app.capture_nbr)):
+            self.app.window.show_choice(self.app.capture_choices, selected=self.app.capture_nbr)
         self.timer.start()
 
     def exit_actions(self):
@@ -207,11 +207,11 @@ class StateCapture(State):
         self.app.led_preview.switch_on()
 
         self.count = 0
-        self.app.window.set_capture_number(self.count, self.app.nbr_captures)
+        self.app.window.set_capture_number(self.count, self.app.capture_nbr)
         self.app.camera.preview(self.app.window)
 
     def do_actions(self, events):
-        self.app.window.set_capture_number(self.count + 1, self.app.nbr_captures)
+        self.app.window.set_capture_number(self.count + 1, self.app.capture_nbr)
         pygame.event.pump()
 
         if self.app.config.getboolean('WINDOW', 'preview_countdown'):
@@ -228,13 +228,13 @@ class StateCapture(State):
         if not isinstance(effects, (list, tuple)):
             # Same effect for all captures
             effect = effects
-        elif len(effects) >= self.app.nbr_captures:
+        elif len(effects) >= self.app.capture_nbr:
             # Take the effect corresponding to the current capture
             effect = effects[self.count]
         else:
             # Not possible
             raise ValueError("Not enough effects defined for {} captures {}".format(
-                self.app.nbr_captures, effects))
+                self.app.capture_nbr, effects))
 
         with timeit("Take a capture and save it in {}".format(capture_path)):
             if self.app.config.getboolean('WINDOW', 'flash'):
@@ -245,7 +245,7 @@ class StateCapture(State):
 
         self.count += 1
 
-        if self.app.config.getboolean('WINDOW', 'preview_stop_on_capture') and self.count < self.app.nbr_captures:
+        if self.app.config.getboolean('WINDOW', 'preview_stop_on_capture') and self.count < self.app.capture_nbr:
             # Restart preview only if other captures needed
             self.app.camera.preview(self.app.window)
 
@@ -254,7 +254,7 @@ class StateCapture(State):
         self.app.led_preview.switch_off()
 
     def validate_transition(self, events):
-        if self.count >= self.app.nbr_captures:
+        if self.count >= self.app.capture_nbr:
             return 'processing'
 
 
@@ -271,7 +271,7 @@ class StateProcessing(State):
             captures = self.app.camera.get_captures()
 
             backgrounds = self.app.config.gettuple('PICTURE', 'backgrounds', ('color', 'path'), 2)
-            if self.app.nbr_captures == self.app.capture_choices[0]:
+            if self.app.capture_nbr == self.app.capture_choices[0]:
                 background = backgrounds[0]
             else:
                 background = backgrounds[1]
@@ -299,7 +299,7 @@ class StateProcessing(State):
                 self.app.savedir, osp.basename(self.app.dirname) + "_pibooth.jpg")
             maker.save(self.app.previous_picture_file)
 
-        if self.app.config.getboolean('WINDOW', 'animate') and self.app.nbr_captures > 1:
+        if self.app.config.getboolean('WINDOW', 'animate') and self.app.capture_nbr > 1:
             with timeit("Asyncronously generate pictures for animation"):
                 self.app.makers_pool.clear()
                 for capture in captures:
@@ -443,7 +443,7 @@ class PiApplication(object):
         # Variables shared between states
         self.dirname = None
         self.makers_pool = PicturesMakersPool()
-        self.nbr_captures = None
+        self.capture_nbr = None
         self.capture_choices = (4, 1)
         self.nbr_duplicates = 0
         self.previous_picture = None
