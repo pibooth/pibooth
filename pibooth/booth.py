@@ -265,6 +265,8 @@ class StateProcessing(State):
 
     def entry_actions(self):
         self.app.window.show_work_in_progress()
+        self.app.makers_pool.clear()
+        self.app.previous_animated = []
 
     def do_actions(self, events):
         with timeit("Creating the final picture"):
@@ -301,7 +303,6 @@ class StateProcessing(State):
 
         if self.app.config.getboolean('WINDOW', 'animate') and self.app.capture_nbr > 1:
             with timeit("Asyncronously generate pictures for animation"):
-                self.app.makers_pool.clear()
                 for capture in captures:
                     maker = get_picture_maker((capture,), self.app.config.get('PICTURE', 'orientation'), force_pil=True)
                     _setup_maker(maker)
