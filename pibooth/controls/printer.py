@@ -209,7 +209,7 @@ class PtbPrinter(object):
         in the queue.
         """
         if not self.name:
-            raise EnvironmentError("No printer found (check config file or CUPS config)")
+            return []  # No printer found
         return self._conn.getJobs(my_jobs=True, requested_attributes=["job-id", "job-name",
                                                                       "job-uri", "job-state"])
 
