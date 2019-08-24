@@ -276,8 +276,8 @@ class StateProcessing(State):
             else:
                 background = backgrounds[1]
 
-            texts = [self.app.config.get('PICTURE', 'footer_text1'),
-                     self.app.config.get('PICTURE', 'footer_text2')]
+            texts = [self.app.config.get('PICTURE', 'footer_text1').strip('"'),
+                     self.app.config.get('PICTURE', 'footer_text2').strip('"')]
             colors = self.app.config.gettuple('PICTURE', 'text_colors', 'color', len(texts))
             fonts = self.app.config.gettuple('PICTURE', 'text_fonts', str, len(texts))
             alignments = self.app.config.gettuple('PICTURE', 'text_alignments', str, len(texts))

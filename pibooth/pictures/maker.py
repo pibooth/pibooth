@@ -163,12 +163,16 @@ class PictureMaker(object):
             if not text:  # Empty string: go to next text position
                 continue
             font = self._get_font(text, font_name, max_width, max_height)
+            _, text_height = font.getsize(text)
             (text_width, _baseline), (offset_x, offset_y) = font.font.getsize(text)
             if align == self.CENTER:
                 text_x += (max_width - text_width) // 2
             elif align == self.RIGHT:
                 text_x += (max_width - text_width)
-            draw.text((text_x - offset_x // 2, text_y - offset_y // 2), text, color, font=font)
+
+            draw.text((text_x - offset_x // 2,
+                       text_y + (max_height - text_height) // 2 - offset_y // 2),
+                      text, color, font=font)
 
     def _build_outlines(self, image):
         """Build rectangle around each elements. This method is only for

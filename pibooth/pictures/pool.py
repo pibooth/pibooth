@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import multiprocessing
 
 
@@ -15,7 +14,6 @@ class PicturesMakersPool(object):
         """
         if not self._pool:
             self._pool = multiprocessing.Pool(processes=min(multiprocessing.cpu_count(), 4))
-        maker.name = "{}/{}".format(maker.name, os.getpid())
         self._async_results.append(self._pool.apply_async(maker.build))
 
     def get(self):
