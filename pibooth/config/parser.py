@@ -139,7 +139,7 @@ DEFAULT = odict((
                  None, None)),
             ("overlays",
                 ('',
-                 "Overlay image path, best is a PNG file with transparency (list of path accepted)",
+                 "Overlay path (PNG file) with same aspect ratio than final picture (list of path accepted)",
                  None, None)),
             ("backgrounds",
                 ((255, 255, 255),
