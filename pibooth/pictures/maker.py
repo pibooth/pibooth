@@ -52,6 +52,7 @@ class PictureMaker(object):
         self._crop = False
         self._outline = False  # For debug purpose
         self._images = images
+        self._overlay_image = None
         self._background_color = (255, 255, 255)
         self._background_image = None
 
@@ -317,6 +318,18 @@ class PictureMaker(object):
             self._background_image = color_or_path
         self._final = None  # Force rebuild
 
+    def set_overlay(self, image_path):
+        """Set an image that will be paste over the final picture.
+
+        :param image_path: image path
+        :type image_path: str
+        """
+        image_path = osp.abspath(image_path)
+        if not osp.isfile(image_path):
+            raise ValueError("Invalid background image '{}'".format(image_path))
+        self._overlay_image = image_path
+        self._final = None  # Force rebuild
+
     def set_margin(self, margin):
         """Set margin between concatenated images.
 
@@ -410,6 +423,10 @@ class PilPictureMaker(PictureMaker):
     def _build_final_image(self, image):
         """See upper class description.
         """
+        if self._overlay_image:
+            overlay = Image.open(self._overlay_image)
+            overlay, _, _ = self._image_resize_keep_ratio(overlay, self.width, self.height, True)
+            image.paste(overlay, (0, 0), overlay)
         return image
 
     def _build_background(self):
@@ -466,6 +483,36 @@ class OpenCvPictureMaker(PictureMaker):
     def _build_final_image(self, image):
         """See upper class description.
         """
+        if self._overlay_image:
+            overlay = cv2.cvtColor(cv2.imread(self._overlay_image, cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2RGBA)
+            overlay, _, _ = self._image_resize_keep_ratio(overlay, self.width, self.height, True)
+
+            # Fix the overlay. Why we have to do this? If we don't, pixels are marked
+            # as opaque when they shouldn't be. See:
+            # https://www.pyimagesearch.com/2016/04/25/watermarking-images-with-opencv-and-python
+            RR, GG, BB, A = cv2.split(overlay)
+            RR = cv2.bitwise_and(RR, RR, mask=A)
+            GG = cv2.bitwise_and(GG, GG, mask=A)
+            BB = cv2.bitwise_and(BB, BB, mask=A)
+            overlay = cv2.merge([RR, GG, BB, A])
+
+            # Add an extra dimension to the image (i.e., the alpha transparency)
+            if image.shape[2] == 3:
+                image = cv2.cvtColor(image, cv2.COLOR_RGB2RGBA)
+
+            # Now create a mask of overlay and create its inverse mask also
+            img2gray = cv2.cvtColor(overlay, cv2.COLOR_RGB2GRAY)
+            _ret, mask = cv2.threshold(img2gray, 127, 255, cv2.THRESH_BINARY)
+            mask_inv = cv2.bitwise_not(mask)
+            # Now black-out the area of overlay in ROI (ie image)
+            img1_bg = cv2.bitwise_and(image, image, mask=mask_inv)
+            # Take only region of overlay from overlay image
+            img2_fg = cv2.bitwise_and(overlay, overlay, mask=mask)
+            # Generate the main image
+            image = cv2.add(img1_bg, img2_fg)
+            # Remove alpha dimension
+            image = cv2.cvtColor(image, cv2.COLOR_RGBA2RGB)
+
         return Image.fromarray(image)
 
     def _build_background(self):

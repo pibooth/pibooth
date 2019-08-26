@@ -137,6 +137,10 @@ DEFAULT = odict((
                 ('center',
                  "Alignments used for footer texts: 'left', 'center' or 'right' (list of quoted names accepted)",
                  None, None)),
+            ("overlays",
+                ('',
+                 "Overlay image path, best is a PNG file with transparency (list of path accepted)",
+                 None, None)),
             ("backgrounds",
                 ((255, 255, 255),
                  "Background RGB color or image path (list of tuple or path accepted)",
@@ -393,7 +397,7 @@ class PiConfigParser(ConfigParser):
         if path:
             new_values = []
             for v in values:
-                if isinstance(v, str):
+                if isinstance(v, str) and v != '':
                     new_values.append(self._get_abs_path(v))
                 else:
                     new_values.append(v)

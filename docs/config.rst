@@ -76,6 +76,9 @@ Default configuration
     # Alignments used for footer texts: 'left', 'center' or 'right' (list of quoted names accepted)
     text_alignments = center
 
+    # Overlay image path, best is a PNG file with transparency (list of path accepted)
+    overlays =
+
     # Background RGB color or image path (list of tuple or path accepted)
     backgrounds = (255, 255, 255)
 

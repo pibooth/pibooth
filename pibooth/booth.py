@@ -278,6 +278,12 @@ class StateProcessing(State):
             else:
                 background = backgrounds[1]
 
+            overlays = self.app.config.gettuple('PICTURE', 'overlays', 'path', 2)
+            if self.app.capture_nbr == self.app.capture_choices[0]:
+                overlay = overlays[0]
+            else:
+                overlay = overlays[1]
+
             texts = [self.app.config.get('PICTURE', 'footer_text1').strip('"'),
                      self.app.config.get('PICTURE', 'footer_text2').strip('"')]
             colors = self.app.config.gettuple('PICTURE', 'text_colors', 'color', len(texts))
@@ -291,6 +297,8 @@ class StateProcessing(State):
                         m.add_text(*params)
                 if self.app.config.getboolean('PICTURE', 'captures_cropping'):
                     m.set_cropping()
+                if overlay:
+                    m.set_overlay(overlay)
 
             maker = get_picture_maker(captures, self.app.config.get('PICTURE', 'orientation'))
             _setup_maker(maker)
