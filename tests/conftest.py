@@ -23,3 +23,8 @@ def captures_landscape():
 @pytest.fixture(scope='session')
 def fond():
     return os.path.join(CAPTURES_DIR, 'fond.jpg')
+
+
+@pytest.fixture(scope='session')
+def overlay():
+    return os.path.join(CAPTURES_DIR, 'overlay.png')

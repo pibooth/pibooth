@@ -502,7 +502,7 @@ class OpenCvPictureMaker(PictureMaker):
 
             # Now create a mask of overlay and create its inverse mask also
             img2gray = cv2.cvtColor(overlay, cv2.COLOR_RGB2GRAY)
-            _ret, mask = cv2.threshold(img2gray, 127, 255, cv2.THRESH_BINARY)
+            _ret, mask = cv2.threshold(img2gray, 30, 255, cv2.THRESH_BINARY)
             mask_inv = cv2.bitwise_not(mask)
             # Now black-out the area of overlay in ROI (ie image)
             img1_bg = cv2.bitwise_and(image, image, mask=mask_inv)
