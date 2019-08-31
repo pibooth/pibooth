@@ -61,32 +61,6 @@ class PictureMaker(object):
         self.height = height
         self.is_portrait = self.width < self.height
 
-    def _get_font(self, text, font_name, max_width, max_height):
-        """Create the font object which fit the given rectangle.
-
-        :param text: text to draw
-        :type text: str
-        :param font_name: name or path to font definition file
-        :type font_name: str
-        :param max_width: width of the rect to fit
-        :type max_width: int
-        :param max_height: height of the rect to fit
-        :type max_height: int
-
-        :return: PIL.Font instance
-        :rtype: object
-        """
-        start, end = 0, self._texts_height
-        while start < end:
-            k = (start + end) // 2
-            font = ImageFont.truetype(font_name, k)
-            font_size = font.getsize(text)
-            if font_size[0] > max_width or font_size[1] > max_height:
-                end = k
-            else:
-                start = k + 1
-        return ImageFont.truetype(font_name, start)
-
     def _image_resize_keep_ratio(self, image, max_w, max_h, crop=False):
         """Resize an image to fixed dimensions while keeping its aspect ratio.
         If crop = True, the image will be cropped to fit in the target dimensions.
@@ -163,7 +137,8 @@ class PictureMaker(object):
             text_x, text_y, max_width, max_height = next(offset_generator)
             if not text:  # Empty string: go to next text position
                 continue
-            font = self._get_font(text, font_name, max_width, max_height)
+            # Use PIL to draw text because better support for fonts than OpenCV
+            font = fonts.get_pil_font(text, font_name, max_width, max_height)
             _, text_height = font.getsize(text)
             (text_width, _baseline), (offset_x, offset_y) = font.font.getsize(text)
             if align == self.CENTER:

@@ -112,9 +112,9 @@ class PtbWindow(object):
 
         if side > 0:
             if self._print_failure:
-                image = pictures.get_image('printer_failure.png', (side, side))
+                image = pictures.get_pygame_image('printer_failure.png', (side, side))
             else:
-                image = pictures.get_image('printer.png', (side, side))
+                image = pictures.get_pygame_image('printer.png', (side, side))
             y = self.surface.get_rect().height - image.get_rect().height - 10
             self.surface.blit(image, (10, y))
             font = pygame.font.Font(fonts.get_filename("Amatic-Bold"), side)

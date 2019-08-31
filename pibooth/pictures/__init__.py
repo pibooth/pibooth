@@ -29,7 +29,7 @@ def get_filename(name):
     return path
 
 
-def get_image(name, size=None, antialiasing=True, hflip=False, vflip=False):
+def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False):
     """Return a Pygame image. If a size is given, the image is
     resized keeping the original image's aspect ratio.
 
