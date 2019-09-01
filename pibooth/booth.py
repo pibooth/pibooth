@@ -12,7 +12,6 @@ import argparse
 import itertools
 import os.path as osp
 import pygame
-from RPi import GPIO
 import pibooth
 from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging,
                            print_columns_words, pkill)
@@ -20,7 +19,7 @@ from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
 from pibooth.config.parser import PiConfigParser, get_supported_languages
 from pibooth.config.menu import PiConfigMenu
-from pibooth.controls import camera
+from pibooth.controls import GPIO, camera
 from pibooth.fonts import get_available_fonts
 from pibooth.pictures import get_picture_maker
 from pibooth.pictures.pool import PicturesMakersPool

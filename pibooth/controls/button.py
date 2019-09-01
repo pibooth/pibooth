@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pygame
-from RPi import GPIO
+from pibooth.controls import GPIO
 
 
 BUTTON_DOWN = pygame.USEREVENT + 1

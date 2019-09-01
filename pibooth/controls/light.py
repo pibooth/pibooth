@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import threading
-from RPi import GPIO
+from pibooth.controls import GPIO
 
 
 class BlinkingThread(threading.Thread):

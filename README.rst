@@ -25,7 +25,7 @@ Hardware
 * 1 Raspberry Pi 2 Model B (or higher)
 * 1 Camera (Raspberry Pi Camera v2.1 8 MP 1080p
             or any DSLR camera `compatible with gPhoto2 <http://www.gphoto.org/proj/libgphoto2/support.php>`_
-            or any webcam `compatible with OpenCV <https://opencv.org`_ )
+            or any webcam `compatible with OpenCV <https://opencv.org>`_ )
 * 2 push buttons
 * 4 LEDs
 * 4 resistors of 100 Ohm
