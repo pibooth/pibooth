@@ -114,7 +114,7 @@ class RpiCamera(BaseCamera):
         self._window = None
 
     def capture(self, filename, effect=None):
-        """Capture a picture in a file.
+        """Capture a new picture in a file.
         """
         effect = str(effect).lower()
         if effect not in self.IMAGE_EFFECTS:

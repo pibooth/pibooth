@@ -86,6 +86,14 @@ class GpCamera(BaseCamera):
             rect = self.get_rect()
             self._overlay = self.build_overlay((rect.width, rect.height), str(text), alpha)
 
+    def _fit_to_resolution(self, image):
+        """Resize and crop to fit the desired resolution.
+        """
+        # Same process as RPI camera (almost), this is for keeping
+        # final rendering sizing (see pibooth.picutres.maker)
+        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
+        return image.crop(sizing.new_size_by_croping(image.size, self.resolution))
+
     def _get_preview_image(self):
         """Capture a new preview image.
         """
@@ -93,13 +101,11 @@ class GpCamera(BaseCamera):
         if self._preview_compatible:
             cam_file = self._cam.capture_preview()
             image = Image.open(io.BytesIO(cam_file.get_data_and_size()))
+
             if self._preview_hflip:
                 image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
-            # Same process as RPI camera (almost), this is for keeping
-            # final rendering sizing (see pibooth.picutres.concatenate)
-            image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
-            image = image.crop(sizing.new_size_by_croping(image.size, self.resolution))
+            image = self._fit_to_resolution(image)
 
             # Resize to fit the available space in the window
             image = image.resize(sizing.new_size_keep_aspect_ratio(image.size,  (rect.width, rect.height), 'outer'))
@@ -116,10 +122,11 @@ class GpCamera(BaseCamera):
         gp_path, effect = self._captures[capture_path]
         camera_file = self._cam.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
         image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
-        image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
 
         if self._capture_hflip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
+        image = self._fit_to_resolution(image)
 
         if effect != 'none':
             image = image.filter(getattr(ImageFilter, effect.upper()))
@@ -228,7 +235,7 @@ class GpCamera(BaseCamera):
         self._window = None
 
     def capture(self, filename, effect=None):
-        """Capture a picture in a file.
+        """Capture a new picture.
         """
         if self._preview_compatible:
             self.set_config_value('actions', 'viewfinder', self._viewfinder_init_value)
@@ -238,7 +245,7 @@ class GpCamera(BaseCamera):
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
         self._captures[filename] = (self._cam.capture(gp.GP_CAPTURE_IMAGE), effect)
-        time.sleep(1)  # Necessary to let the time for the camera to save the image
+        time.sleep(0.5)  # Necessary to let the time for the camera to save the image
 
         self._hide_overlay()  # If stop_preview() has not been called
 

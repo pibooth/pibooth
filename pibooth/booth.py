@@ -426,8 +426,10 @@ class PiApplication(object):
             pkill('*gphoto2*')
         elif camera.rpi_camera_connected():
             cam_class = camera.RpiCamera
+        elif camera.cv_camera_connected():
+            cam_class = camera.CvCamera
         else:
-            raise EnvironmentError("Neither PiCamera nor GPhoto2 camera detected")
+            raise EnvironmentError("Neither Raspberry Pi nor GPhoto2 nor OpenCV camera detected")
 
         self.camera = cam_class(config.getint('CAMERA', 'iso'),
                                 config.gettyped('CAMERA', 'resolution'),

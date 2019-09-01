@@ -334,20 +334,20 @@ class PictureMaker(object):
         """
         if not self._final or rebuild:
 
-            with timeit("{}: create background".format(self.name)):
+            with timeit("Use {} to create background".format(self.name)):
                 image = self._build_background()
 
-            with timeit("{}: concatenate images".format(self.name)):
+            with timeit("Use {} to concatenate images".format(self.name)):
                 image = self._build_matrix(image)
 
-            with timeit("{}: assemble final image".format(self.name)):
+            with timeit("Use {} to assemble final image".format(self.name)):
                 self._final = self._build_final_image(image)
 
-            with timeit("{}: draw texts".format(self.name)):
+            with timeit("Use {} to draw texts".format(self.name)):
                 self._build_texts(self._final)
 
             if self._outline:
-                with timeit("{}: outline boundary borders".format(self.name)):
+                with timeit("Use {} to outline boundary borders".format(self.name)):
                     self._build_outlines(self._final)
 
         return self._final

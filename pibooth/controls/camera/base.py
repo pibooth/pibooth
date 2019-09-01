@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pygame
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageDraw
 from pibooth import fonts
 from pibooth.pictures import sizing
 
@@ -37,7 +37,7 @@ class BaseCamera(object):
     def _hide_overlay(self):
         """Remove any existing overlay.
         """
-        if self._overlay:
+        if self._overlay is not None:
             self._overlay = None
 
     def _post_process_capture(self, capture_path):
@@ -60,16 +60,40 @@ class BaseCamera(object):
         """
         image = Image.new('RGBA', size)
         draw = ImageDraw.Draw(image)
-        txt_width = size[0] + 1
-        i = 10
-        while txt_width > size[0]:
-            font = ImageFont.truetype(fonts.get_filename("Amatic-Bold.ttf"), size[1] * i // 10)
-            txt_width, txt_height = draw.textsize(text, font=font)
-            i -= 1
+
+        font = fonts.get_pil_font(text, fonts.get_filename("Amatic-Bold"), size[0], size[1])
+        txt_width, txt_height = draw.textsize(text, font=font)
 
         position = ((size[0] - txt_width) // 2, (size[1] - txt_height) // 2 - size[1] // 10)
         draw.text(position, text, (255, 255, 255, alpha), font=font)
         return image
+
+    def preview(self, window, flip=True):
+        """Setup the preview.
+        """
+        raise NotImplementedError
+
+    def preview_countdown(self, timeout, alpha=60):
+        """Show a countdown of `timeout` seconds on the preview.
+        Returns when the countdown is finished.
+        """
+        raise NotImplementedError
+
+    def preview_wait(self, timeout, alpha=60):
+        """Wait the given time and let doing the job.
+        Returns when the timeout is reached.
+        """
+        raise NotImplementedError
+
+    def stop_preview(self):
+        """Stop the preview.
+        """
+        raise NotImplementedError
+
+    def capture(self, filename, effect=None):
+        """Capture a new picture.
+        """
+        raise NotImplementedError
 
     def get_captures(self):
         """Return all buffered captures as PIL images (buffer dropped after call).
@@ -84,3 +108,8 @@ class BaseCamera(object):
         """Delete all buffered captures.
         """
         self._captures.clear()
+
+    def quit(self):
+        """Close the camera driver, it's definitive.
+        """
+        raise NotImplementedError
