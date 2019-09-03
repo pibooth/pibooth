@@ -197,14 +197,16 @@ class GpCamera(BaseCamera):
                 timeout = remaining
                 shown = False
 
+            updated_rect = None
             if self._preview_compatible:
-                self._window.show_image(self._get_preview_image())
+                updated_rect = self._window.show_image(self._get_preview_image())
             elif not shown:
-                self._window.show_image(self._get_preview_image())
+                updated_rect = self._window.show_image(self._get_preview_image())
                 shown = True  # Do not update dummy preview until next overlay update
 
             pygame.event.pump()
-            pygame.display.update()
+            if updated_rect:
+                pygame.display.update(updated_rect)
 
         self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
         self._window.show_image(self._get_preview_image())
@@ -219,9 +221,10 @@ class GpCamera(BaseCamera):
         timer = PoolingTimer(timeout)
         if self._preview_compatible:
             while not timer.is_timeout():
-                self._window.show_image(self._get_preview_image())
+                updated_rect = self._window.show_image(self._get_preview_image())
                 pygame.event.pump()
-                pygame.display.update()
+                if updated_rect:
+                    pygame.display.update(updated_rect)
         else:
             time.sleep(timer.remaining())
 

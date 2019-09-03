@@ -157,10 +157,10 @@ class CvCamera(BaseCamera):
                 self._show_overlay(str(remaining), alpha)
                 timeout = remaining
 
-            self._window.show_image(self._get_preview_image())
-
+            updated_rect = self._window.show_image(self._get_preview_image())
             pygame.event.pump()
-            pygame.display.update()
+            if updated_rect:
+                pygame.display.update(updated_rect)
 
         self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
         self._window.show_image(self._get_preview_image())
@@ -174,9 +174,10 @@ class CvCamera(BaseCamera):
 
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
-            self._window.show_image(self._get_preview_image())
+            updated_rect = self._window.show_image(self._get_preview_image())
             pygame.event.pump()
-            pygame.display.update()
+            if updated_rect:
+                pygame.display.update(updated_rect)
 
         self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
         self._window.show_image(self._get_preview_image())

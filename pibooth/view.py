@@ -70,7 +70,7 @@ class PtbWindow(object):
             self._buffered_images[image_name] = (image_size_max, image)
 
         self._current_foreground = (pil_image, pos, resize)
-        self.surface.blit(image, self._pos_map[pos](image))
+        return self.surface.blit(image, self._pos_map[pos](image))
 
     def _update_background(self, bkgd):
         """Show image on the background.
@@ -208,10 +208,13 @@ class PtbWindow(object):
         if not pil_image:
             # Clear the currently displayed image
             if self._current_foreground:
-                self._buffered_images.pop(id(self._current_foreground[0]), None)
+                data = self._buffered_images.pop(id(self._current_foreground[0]), None)
                 self._current_foreground = None
+                if data:
+                    pos = self._pos_map[pos](data[1])
+                    return pygame.Rect(pos[0], pos[1], pos[0] + data[1].width, pos[1] + data[1].height)
         else:
-            self._update_foreground(pil_image, pos, False)
+            return self._update_foreground(pil_image, pos, False)
 
     def show_work_in_progress(self):
         """Show wait view.
