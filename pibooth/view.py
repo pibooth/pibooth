@@ -208,11 +208,11 @@ class PtbWindow(object):
         if not pil_image:
             # Clear the currently displayed image
             if self._current_foreground:
-                data = self._buffered_images.pop(id(self._current_foreground[0]), None)
+                _, image = self._buffered_images.pop(id(self._current_foreground[0]))
+                _, pos, _ = self._current_foreground
                 self._current_foreground = None
-                if data:
-                    pos = self._pos_map[pos](data[1])
-                    return pygame.Rect(pos[0], pos[1], pos[0] + data[1].width, pos[1] + data[1].height)
+                image.fill((0, 0, 0))
+                return self.surface.blit(image, self._pos_map[pos](image))
         else:
             return self._update_foreground(pil_image, pos, False)
 
