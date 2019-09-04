@@ -12,6 +12,9 @@ to discover some realizations from GitHub users.
    :align: center
    :alt: Settings
 
+.. note:: Even if designed for a Raspberry Pi, this software may be installed on any Unix/Linux
+          based computer (tested on Ubuntu 16 and Mac OSX).
+
 Requirements
 ------------
 
@@ -91,7 +94,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
              the ``--no-deps`` option to avoid installation failures (you may need to install Python
              dependencies by yourself)
 
-.. note:: an editable/customizable version of ``pibooth`` can be installed by following
+.. note:: An editable/customizable version of ``pibooth`` can be installed by following
           these `instructions <https://github.com/werdeil/pibooth/blob/master/docs/dev.rst>`_ .
           Be aware that the code on the `master` branch may be unstable.
 

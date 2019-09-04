@@ -52,9 +52,9 @@ def main():
         },
         include_package_data=True,
         install_requires=[
-            'RPi.GPIO>=0.6.3',
-            'picamera>=1.13',
-            'Pillow==5.0.0',
+            'RPi.GPIO>=0.6.3 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
+            'picamera>=1.13 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
+            'Pillow==6.1.0',
             'Pygame>=1.9.4',
             'pygame-menu>=2.0.4',
             'gphoto2>=2.0.0',
