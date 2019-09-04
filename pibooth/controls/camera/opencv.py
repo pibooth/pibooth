@@ -78,18 +78,6 @@ class CvCamera(BaseCamera):
             # Remove alpha from overlay
             self._overlay = cv2.cvtColor(overlay, cv2.COLOR_RGBA2RGB)
 
-    def _fit_to_resolution(self, image):
-        """Resize and crop to fit the desired resolution.
-        """
-        # Same process as RPI camera (almost), this is for keeping
-        # final rendering sizing (see pibooth.picutres.maker)
-        height, width = image.shape[:2]
-        size = sizing.new_size_keep_aspect_ratio((width, height), self.resolution, 'outer')
-        image = cv2.resize(image, size, interpolation=cv2.INTER_AREA)
-        height, width = image.shape[:2]
-        cropped = sizing.new_size_by_croping((width, height), self.resolution)
-        return image[cropped[1]:cropped[3], cropped[0]:cropped[2]]
-
     def _get_preview_image(self):
         """Capture a new preview image.
         """
@@ -97,18 +85,20 @@ class CvCamera(BaseCamera):
 
         ret, image = self._cam.read()
         if not ret:
-            return
+            raise IOError("Can not get camera preview image")
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = self._fit_to_resolution(image)
+        # Crop to keep aspect ratio of the resolution
+        height, width = image.shape[:2]
+        cropped = sizing.new_size_by_croping_ratio((width, height), self.resolution)
+        image = image[cropped[1]:cropped[3], cropped[0]:cropped[2]]
+        # Resize to fit the available space in the window
+        height, width = image.shape[:2]
+        size = sizing.new_size_keep_aspect_ratio((width, height), (rect.width, rect.height), 'outer')
+        image = cv2.resize(image, size, interpolation=cv2.INTER_AREA)
 
         if self._preview_hflip:
             image = cv2.flip(image, 1)
-
-        # Resize to fit the available space in the window
-        height, width = image.shape[:2]
-        size = sizing.new_size_keep_aspect_ratio((width, height),  (rect.width, rect.height), 'outer')
-        image = cv2.resize(image, size, interpolation=cv2.INTER_AREA)
 
         if self._overlay is not None:
             # Mask out the pixels that you want to overlay
@@ -123,10 +113,17 @@ class CvCamera(BaseCamera):
         image, effect = self._captures[capture_path]
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = self._fit_to_resolution(image)
+        # Crop to keep aspect ratio of the resolution
+        height, width = image.shape[:2]
+        cropped = sizing.new_size_by_croping_ratio((width, height), self.resolution)
+        image = image[cropped[1]:cropped[3], cropped[0]:cropped[2]]
+        # Resize to fit the resolution
+        height, width = image.shape[:2]
+        size = sizing.new_size_keep_aspect_ratio((width, height), self.resolution, 'outer')
+        image = cv2.resize(image, size, interpolation=cv2.INTER_AREA)
 
         if self._capture_hflip:
-            image = cv2.flip(image, 0)
+            image = cv2.flip(image, 1)
 
         if effect != 'none':
             pass  # To be implemented

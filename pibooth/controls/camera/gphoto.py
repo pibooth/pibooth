@@ -114,13 +114,13 @@ class GpCamera(BaseCamera):
         camera_file = self._cam.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
         image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
 
-        if self._capture_hflip:
-            image = image.transpose(Image.FLIP_LEFT_RIGHT)
-
         # Crop to keep aspect ratio of the resolution
         image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
-        # Resize to fit the available space in the resolution
+        # Resize to fit the resolution
         image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
+
+        if self._capture_hflip:
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
         if effect != 'none':
             image = image.filter(getattr(ImageFilter, effect.upper()))
