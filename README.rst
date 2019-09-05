@@ -13,7 +13,7 @@ to discover some realizations from GitHub users.
    :alt: Settings
 
 .. note:: Even if designed for a Raspberry Pi, this software may be installed on any Unix/Linux
-          based computer (tested on Ubuntu 16 and Mac OSX).
+          based OS (tested on Ubuntu 16 and Mac OSX 10.14.6).
 
 Requirements
 ------------
