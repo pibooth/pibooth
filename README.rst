@@ -205,6 +205,7 @@ Have a look to the predefined effects available depending on the camera used:
 
 Texts can be defined by setting the option ``[PICTURE][footer_text1]`` and ``[PICTURE][footer_text2]``
 (lets them empty to hide any text). For each one, the font, the color and the alignment can be chosen.
+For instance:
 
 .. code-block:: ini
 

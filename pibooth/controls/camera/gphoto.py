@@ -184,6 +184,7 @@ class GpCamera(BaseCamera):
             raise ValueError("Start time shall be greater than 0")
 
         shown = False
+        first_loop = True
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
             remaining = int(timer.remaining() + 1)
@@ -199,6 +200,10 @@ class GpCamera(BaseCamera):
             elif not shown:
                 updated_rect = self._window.show_image(self._get_preview_image())
                 shown = True  # Do not update dummy preview until next overlay update
+
+            if first_loop:
+                timer.start()  # Because first preview capture is longer than others
+                first_loop = False
 
             pygame.event.pump()
             if updated_rect:
@@ -244,7 +249,7 @@ class GpCamera(BaseCamera):
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
         self._captures[filename] = (self._cam.capture(gp.GP_CAPTURE_IMAGE), effect)
-        time.sleep(0.5)  # Necessary to let the time for the camera to save the image
+        time.sleep(0.3)  # Necessary to let the time for the camera to save the image
 
         self._hide_overlay()  # If stop_preview() has not been called
 
