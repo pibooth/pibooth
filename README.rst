@@ -15,6 +15,22 @@ to discover some realizations from GitHub users.
 .. note:: Even if designed for a Raspberry Pi, this software may be installed on any Unix/Linux
           based OS (tested on Ubuntu 16 and Mac OSX 10.14.6).
 
+Features
+--------
+
+* Capture from 1 to 4 photos and concatenate them in a final picture
+* Support all cameras compatible with gPhoto2, OpenCV and Raspberry Pi
+* Support for hardware buttons and lamps on Raspberry Pi GPIO
+* Fully driven from hardware buttons or Raspberry Pi touchsceen
+* Preview during countdown
+* Auto-start at the Raspberry Pi startup
+* Animate last pictures during idle time
+* Store final pictures and the individual captures
+* Printing final pictures using CUPS server (printing queue indication)
+* Custom texts can be added on the final pictures (customizable fonts, colors, alignments)
+* Custom background(s) and overlay(s) can be added on final pictures
+* All settings available in a configuration file (most common options in a graphical interface)
+
 Requirements
 ------------
 
@@ -78,7 +94,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
         $ sudo apt-get install cups libcups2-dev
 
-6. Optionally install ``OpenCV`` to improve images generation efficiency:
+6. Optionally install ``OpenCV`` to improve images generation efficiency or if a Webcam is used:
 
    ::
 
@@ -147,8 +163,20 @@ Select option           UP or DOWN       Button 1
 Change option value     LEFT or RIGHT    Button 2
 ======================= ================ =====================
 
-A word about capture effects
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Final picture rendering
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``pibooth`` application  handle the rendering of the final picture using 2 variables defined in
+the configuration (see `Configuration`_ below):
+
+* ``[CAMERA][resolution] = (width, height)`` is the resolution of the captured picture in pixels.
+  As explained in the configuration file, the preview size is directly dependent from this parameter.
+* ``[PICTURE][orientation] = auto/landscape/portrait`` is the orientation of the final picture
+  (after concatenation of all captures). If the value is **auto**, the orientation is automatically
+  chosen depending on the resolution.
+
+.. note:: The resolution is an important parameter, it is responsible for the quality of the final
+          picture. Have a look to `picamera possible resolutions <http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes>`_ .
 
 Image effects can be applied on the capture using the ``[PICTURE][effect]`` variable defined in the
 configuration.
@@ -175,23 +203,8 @@ Have a look to the predefined effects available depending on the camera used:
 * `picamera effects <https://picamera.readthedocs.io/en/latest/api_camera.html#picamera.PiCamera.image_effect>`_
 * `gPhoto2 effects (PIL based) <https://pillow.readthedocs.io/en/latest/reference/ImageFilter.html>`_
 
-
-Final picture rendering
-^^^^^^^^^^^^^^^^^^^^^^^
-
-The ``pibooth`` application  handle the rendering of the final picture using 2 variables defined in
-the configuration (see `Configuration`_ below):
-
-* ``[CAMERA][resolution] = (width, height)`` is the resolution of the captured picture in pixels.
-  As explained in the configuration file, the preview size is directly dependent from this parameter.
-* ``[PICTURE][orientation] = auto/landscape/portrait`` is the orientation of the final picture
-  (after concatenation of all captures). If the value is **auto**, the orientation is automatically
-  chosen depending on the resolution.
-
-.. note:: The resolution is an important parameter, it is responsible for the quality of the final
-          picture. Have a look to `picamera possible resolutions <http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes>`_ .
-
-The fonts used on the final picture can be customized using the configuration key ``[PICTURE][fonts]``.
+Texts can be defined by setting the option ``[PICTURE][footer_text1]`` and ``[PICTURE][footer_text2]``
+(lets them empty to hide any text). For each one, the font, the color and the alignment can be chosen.
 
 .. code-block:: ini
 
@@ -200,7 +213,7 @@ The fonts used on the final picture can be customized using the configuration ke
     # Same font applied on footer_text1 and footer_text2
     text_fonts = Amatic-Bold
 
-This key can take two name/path/url:
+This key can also take two names or TTF file paths:
 
 .. code-block:: ini
 
@@ -238,8 +251,21 @@ upgrading ``pibooth``)::
 See the `default configuration file <https://github.com/werdeil/pibooth/blob/master/docs/config.rst>`_
 for further details.
 
-Printer configuration
----------------------
+Printer
+-------
+
+The print button (see `Commands`_) and print states are automatically deactivated if:
+
+* `pycups <https://pypi.python.org/pypi/pycups>`_ is not installed
+* no printer configured in ``CUPS``
+
+To avoid paper waste, set the option ``[PRINTER][max_duplicates]`` to the maximum
+of identical pictures that can be sent to the printer.
+
+Set the option ``[PRINTER][max_pages]`` to the number of paper sheets available on the
+printer. When this number is reached, the print function will be disabled and an icon
+indicates the printer failure. To reset the counter, open then close the settings
+graphical interface (see `Commands`_).
 
 Here is the default configuration used in CUPS, this may depend on the printer used:
 
@@ -253,11 +279,6 @@ Resolution       Automatic
 2-Sided Printing Off
 Shrink page ...  Shrink (print the whole page)
 ================ =============================
-
-.. note:: The print button (see `Commands`_) and print states are automatically deactivated if:
-
-            * `pycups <https://pypi.python.org/pypi/pycups>`_ is not installed
-            * no printer configured in ``CUPS``
 
 Circuit diagram
 ---------------
