@@ -49,7 +49,7 @@ class NotificationHandler(BaseHTTPRequestHandler):
         return data
 
     def log_request(self, code='-', size='-'):
-        """Don't print requests.
+        """Don't print HTTP requests.
         """
         pass
 
@@ -63,7 +63,7 @@ class NotificationHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_PUT(self):
-        """Serve a PUT request and trasfert event to server callback.
+        """Serve a PUT request and trasfert event to the callback.
         """
         chunk_size = self.get_chunk_size()
         if chunk_size == 0:
@@ -74,6 +74,9 @@ class NotificationHandler(BaseHTTPRequestHandler):
             for channel in root.iterfind('channel'):
                 for item in reversed([e for e in channel.iterfind('item')]):
                     txt = ElementTree.tostring(item, encoding='utf8')
+
+                    # CUPS send the last X notifs thus same notif can be
+                    # received multiple time. Avoid redundency by filtering.
                     if txt not in NotificationHandler._last_notif:
                         NotificationHandler._last_notif.append(txt)
                         self.server.callback(dict((elem.tag, elem.text) for elem in item.iter() if elem.text.strip()))
@@ -158,13 +161,16 @@ class PtbPrinter(object):
             self.name = name
 
         if not self.name:
-            LOGGER.warning("No printer found (nothing defined in CUPS)")
+            if name.lower() == 'default':
+                LOGGER.warning("No printer configured in CUPS (see http://localhost:631)")
+            else:
+                LOGGER.warning("No printer named '%s' in CUPS (see http://localhost:631)", name)
         else:
             LOGGER.info("Connected to printer '%s'", self.name)
 
     def _on_event(self, event):
         """
-        Call for each new print event.
+        Call for each new printer event.
         """
         LOGGER.info("%s - %s", event.get('pubDate', '?'), event.get('title', '?'))
         pygame.event.post(pygame.event.Event(PRINTER_TASKS_UPDATED,
@@ -209,7 +215,7 @@ class PtbPrinter(object):
         in the queue.
         """
         if not self.name:
-            return []  # No printer found
+            return {}  # No printer found
         return self._conn.getJobs(my_jobs=True, requested_attributes=["job-id", "job-name",
                                                                       "job-uri", "job-state"])
 

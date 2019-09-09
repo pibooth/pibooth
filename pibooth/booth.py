@@ -415,29 +415,10 @@ class PiApplication(object):
         self.state_machine.add_state(StatePrint())
         self.state_machine.add_state(StateFinish(0.5))
 
-        # Initialize the camera. If gPhoto2 camera is used, try to kill
-        # any process using gPhoto2 as it may block camera access
-        if camera.gp_camera_connected() and camera.rpi_camera_connected():
-            LOGGER.info("Configuring hybrid camera (Picamera + gPhoto2) ...")
-            cam_class = camera.HybridCamera
-            pkill('*gphoto2*')
-        elif camera.gp_camera_connected():
-            LOGGER.info("Configuring gPhoto2 camera ...")
-            cam_class = camera.GpCamera
-            pkill('*gphoto2*')
-        elif camera.rpi_camera_connected():
-            LOGGER.info("Configuring Picamera camera ...")
-            cam_class = camera.RpiCamera
-        elif camera.cv_camera_connected():
-            LOGGER.info("Configuring OpenCV camera ...")
-            cam_class = camera.CvCamera
-        else:
-            raise EnvironmentError("Neither Raspberry Pi nor GPhoto2 nor OpenCV camera detected")
-
-        self.camera = cam_class(config.getint('CAMERA', 'iso'),
-                                config.gettyped('CAMERA', 'resolution'),
-                                config.getint('CAMERA', 'rotation'),
-                                config.getboolean('CAMERA', 'flip'))
+        self.camera = camera.get_camera(config.getint('CAMERA', 'iso'),
+                                        config.gettyped('CAMERA', 'resolution'),
+                                        config.getint('CAMERA', 'rotation'),
+                                        config.getboolean('CAMERA', 'flip'))
 
         # Initialize the hardware buttons
         self.led_capture = PtbLed(config.getint('CONTROLS', 'picture_led_pin'))

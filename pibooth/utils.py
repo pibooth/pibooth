@@ -9,6 +9,7 @@ import time
 import os.path as osp
 import logging
 import psutil
+import functools
 from fnmatch import fnmatchcase
 import contextlib
 try:
@@ -195,3 +196,18 @@ def pkill(pattern):
             except psutil.AccessDenied:
                 raise EnvironmentError("Can not kill '{}', root access is required. "
                                        "(kill it manually before starting pibooth)".format(proc.name()))
+
+
+def memorize(func):
+    """Decorator to memorize and return the latest result
+    of a function.
+    """
+    cache = {}
+
+    @functools.wraps(func)
+    def memorized_func_wrapper(*args, **kwargs):
+        if func not in cache:
+            cache[func] = func(*args, **kwargs)
+        return cache[func]
+
+    return memorized_func_wrapper

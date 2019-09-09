@@ -8,12 +8,14 @@ try:
 except ImportError:
     gp = None  # gphoto2 is optional
 from PIL import Image, ImageFilter
+from pibooth.utils import memorize
 from pibooth.pictures import sizing
 from pibooth.config.parser import PiConfigParser
 from pibooth.utils import LOGGER, PoolingTimer
 from pibooth.controls.camera.base import BaseCamera, LANGUAGES
 
 
+@memorize
 def gp_camera_connected():
     """Return True if a camera compatible with gPhoto2 is found.
     """

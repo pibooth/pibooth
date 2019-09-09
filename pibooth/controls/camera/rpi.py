@@ -6,10 +6,12 @@ try:
     import picamera
 except ImportError:
     picamera = None  # picamera is optional
+from pibooth.utils import memorize
 from pibooth.config.parser import PiConfigParser
 from pibooth.controls.camera.base import BaseCamera, LANGUAGES
 
 
+@memorize
 def rpi_camera_connected():
     """Return True if a RPi camera is found.
     """

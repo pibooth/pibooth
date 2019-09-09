@@ -6,8 +6,26 @@ import signal
 import subprocess
 from PIL import Image
 from pibooth.config.parser import PiConfigParser
-from pibooth.utils import PoolingTimer
-from pibooth.controls.camera.gphoto import gp, GpCamera, LANGUAGES
+from pibooth.utils import PoolingTimer, memorize
+from pibooth.controls.camera.gphoto import gp, gp_camera_connected, GpCamera, LANGUAGES
+
+
+@memorize
+def gpomx_camera_connected():
+    """Return True if a camera compatible with gPhoto2 is found.
+    """
+    return False  # This camera is not yet implemented
+
+    try:
+        process = subprocess.Popen(['omxplayer', '--version'],
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process.communicate()
+        if process.returncode != 0:
+            return False
+    except OSError:
+        return False
+
+    return gp_camera_connected()
 
 
 class GpOmxCamera(GpCamera):
@@ -45,7 +63,6 @@ class GpOmxCamera(GpCamera):
         """Setup the preview.
         """
         self._window = window
-        self.gphoto2_process = True  # hack to avoid the preview
         if not self.gphoto2_process:
             rect = self.get_rect()
             if flip:
