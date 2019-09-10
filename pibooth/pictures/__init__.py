@@ -3,7 +3,7 @@
 import os.path as osp
 from PIL import Image
 import pygame
-from pibooth.config.parser import PiConfigParser
+from pibooth.config import PiConfigParser
 from pibooth.pictures import maker
 from pibooth.pictures import sizing
 

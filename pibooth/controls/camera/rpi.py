@@ -7,7 +7,7 @@ try:
 except ImportError:
     picamera = None  # picamera is optional
 from pibooth.utils import memorize
-from pibooth.config.parser import PiConfigParser
+from pibooth.config import PiConfigParser
 from pibooth.controls.camera.base import BaseCamera, LANGUAGES
 
 

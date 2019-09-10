@@ -5,7 +5,7 @@ import time
 import signal
 import subprocess
 from PIL import Image
-from pibooth.config.parser import PiConfigParser
+from pibooth.config import PiConfigParser
 from pibooth.utils import PoolingTimer, memorize
 from pibooth.controls.camera.gphoto import gp, gp_camera_connected, GpCamera, LANGUAGES
 

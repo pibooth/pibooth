@@ -10,7 +10,7 @@ except ImportError:
 from PIL import Image
 from pibooth.utils import memorize
 from pibooth.pictures import sizing
-from pibooth.config.parser import PiConfigParser
+from pibooth.config import PiConfigParser
 from pibooth.utils import PoolingTimer
 from pibooth.controls.camera.base import BaseCamera, LANGUAGES
 
