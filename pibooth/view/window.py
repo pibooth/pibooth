@@ -9,7 +9,7 @@ import pygame
 from pygame import gfxdraw
 from PIL import Image
 from pibooth import pictures, fonts
-from pibooth.pictures import background
+from pibooth.view import background
 from pibooth.utils import LOGGER
 from pibooth.pictures import sizing
 

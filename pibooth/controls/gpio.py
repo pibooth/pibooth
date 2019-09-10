@@ -27,7 +27,7 @@ class GpioMock(object):
     def __init__(self):
         self._last_signal_time = {}
 
-    def _on_receive_signal(self, pin, frame, callback, bouncetime):
+    def _on_signal(self, pin, frame, callback, bouncetime):
         last = self._last_signal_time.setdefault(pin, 0)
         if abs(time.time() - last) * 1000 >= bouncetime:
             LOGGER.debug('GPIO Mock: pin %s triggered', pin)
@@ -49,8 +49,7 @@ class GpioMock(object):
         bouncetime = kwargs.get('bouncetime', 0)
         if callback:
             LOGGER.info("GPIO Mock: trigger pin %s by typing 'kill -%s %s'", pin, pin, os.getpid())
-            signal.signal(pin, partial(self._on_receive_signal, callback=callback,
-                                       bouncetime=bouncetime))
+            signal.signal(pin, partial(self._on_signal, callback=callback, bouncetime=bouncetime))
 
     def cleanup(self):
         LOGGER.debug("GPIO Mock: quit")

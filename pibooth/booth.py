@@ -13,8 +13,7 @@ import itertools
 import os.path as osp
 import pygame
 import pibooth
-from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging,
-                           print_columns_words, pkill)
+from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging, print_columns_words)
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
 from pibooth.config.parser import PiConfigParser, get_supported_languages
