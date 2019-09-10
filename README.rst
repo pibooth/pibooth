@@ -21,7 +21,7 @@ Features
 * Capture from 1 to 4 photos and concatenate them in a final picture
 * Support all cameras compatible with gPhoto2, OpenCV and Raspberry Pi
 * Support for hardware buttons and lamps on Raspberry Pi GPIO
-* Fully driven from hardware buttons or Raspberry Pi touchsceen
+* Fully driven from hardware buttons / keyboard / mouse / touchsceen
 * Preview during countdown
 * Auto-start at the Raspberry Pi startup
 * Animate last pictures during idle time
@@ -41,7 +41,7 @@ the application can be entirely controlled using a keyboard, a mouse or a touchs
 Hardware
 ^^^^^^^^
 
-* 1 Raspberry Pi 2 Model B (or higher)
+* 1 Raspberry Pi 3 Model B (or higher)
 * 1 Camera (Raspberry Pi Camera v2.1 8 MP 1080p
   or any DSLR camera `compatible with gPhoto2 <http://www.gphoto.org/proj/libgphoto2/support.php>`_
   or any webcam `compatible with OpenCV <https://opencv.org>`_ )

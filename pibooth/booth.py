@@ -303,10 +303,8 @@ class StateProcessing(State):
             _setup_maker(maker)
             self.app.previous_picture = maker.build()
 
-        with timeit("Save the final picture in {}".format(self.app.previous_picture_file)):
-            self.app.previous_picture_file = osp.join(
-                self.app.savedir, osp.basename(self.app.dirname) + "_pibooth.jpg")
-            maker.save(self.app.previous_picture_file)
+        self.app.previous_picture_file = osp.join(self.app.savedir, osp.basename(self.app.dirname) + "_pibooth.jpg")
+        maker.save(self.app.previous_picture_file)
 
         if self.app.config.getboolean('WINDOW', 'animate') and self.app.capture_nbr > 1:
             with timeit("Asyncronously generate pictures for animation"):

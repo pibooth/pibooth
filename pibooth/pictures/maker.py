@@ -5,7 +5,7 @@ import os.path as osp
 from pibooth import fonts
 from pibooth.utils import timeit
 from pibooth.pictures import sizing
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 
 try:
     import cv2

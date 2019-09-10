@@ -53,7 +53,7 @@ class CvCamera(BaseCamera):
         self._capture_hflip = flip
         self._rotation = rotation
         self._iso = iso
-        self._overlay_mask = None
+        self._overlay_alpha = 255
 
         self._cam = cv2.VideoCapture(0)
         self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
@@ -65,20 +65,10 @@ class CvCamera(BaseCamera):
         """
         if self._window:  # No window means no preview displayed
             rect = self.get_rect()
-            pil_image = self.build_overlay((rect.width, rect.height), str(text), alpha)
-            overlay = np.array(pil_image)
-
-            # Detect which pixels in the overlay have something in them
-            # and make a binary mask out of it
-            overlay_mask = cv2.cvtColor(overlay, cv2.COLOR_RGBA2GRAY)
-            res, overlay_mask = cv2.threshold(overlay_mask, 10, 1, cv2.THRESH_BINARY_INV)
-
-            # Expand the mask from 1-channel to 3-channel
-            height, width = overlay_mask.shape
-            self._overlay_mask = np.repeat(overlay_mask, 3).reshape((height, width, 3))
-
+            self._overlay_alpha = alpha
+            pil_image = self.build_overlay((rect.width, rect.height), str(text), 255)
             # Remove alpha from overlay
-            self._overlay = cv2.cvtColor(overlay, cv2.COLOR_RGBA2RGB)
+            self._overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGBA2RGB)
 
     def _get_preview_image(self):
         """Capture a new preview image.
@@ -103,10 +93,8 @@ class CvCamera(BaseCamera):
             image = cv2.flip(image, 1)
 
         if self._overlay is not None:
-            # Mask out the pixels that you want to overlay
-            image *= self._overlay_mask
-            # Put the overlay on
-            image += self._overlay
+            image = cv2.addWeighted(image, 1, self._overlay, self._overlay_alpha / 255., 0)
+
         return Image.fromarray(image)
 
     def _post_process_capture(self, capture_path):
