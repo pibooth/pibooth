@@ -286,7 +286,7 @@ class PtbWindow(object):
             self._print_number = current_nbr
             update = True
 
-        if failure is not None and self._print_failure != failure and max_nbr > 0:
+        if failure is not None and self._print_failure != failure:
             self._print_failure = failure
             update = True
 
