@@ -64,11 +64,11 @@ class StateWait(State):
 
         self.app.window.show_intro(previous_picture, self.app.printer.is_installed() and
                                    self.app.nbr_duplicates < self.app.config.getint('PRINTER', 'max_duplicates') and
-                                   not self.app.printer_failure)
-        self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_failure)
+                                   not self.app.printer_unavailable)
+        self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_unavailable)
 
         self.app.led_capture.blink()
-        if self.app.previous_picture_file and self.app.printer.is_installed() and not self.app.printer_failure:
+        if self.app.previous_picture_file and self.app.printer.is_installed() and not self.app.printer_unavailable:
             self.app.led_print.blink()
 
     def do_actions(self, events):
@@ -76,7 +76,7 @@ class StateWait(State):
             previous_picture = next(self.app.previous_animated)
             self.app.window.show_intro(previous_picture, self.app.printer.is_installed() and
                                        self.app.nbr_duplicates < self.app.config.getint('PRINTER', 'max_duplicates') and
-                                       not self.app.printer_failure)
+                                       not self.app.printer_unavailable)
             self.timer.start()
         else:
             previous_picture = self.app.previous_picture
@@ -88,7 +88,7 @@ class StateWait(State):
                                self.app.config.getint('PRINTER', 'max_duplicates'))
                 return
 
-            elif self.app.printer_failure:
+            elif self.app.printer_unavailable:
                 LOGGER.warning("Maximum number of printed pages reached (%s/%s max)", self.app.printer.nbr_printed,
                                self.app.config.getint('PRINTER', 'max_pages'))
                 return
@@ -101,7 +101,7 @@ class StateWait(State):
             time.sleep(1)  # Just to let the LED switched on
             self.app.nbr_duplicates += 1
 
-            if self.app.nbr_duplicates >= self.app.config.getint('PRINTER', 'max_duplicates') or self.app.printer_failure:
+            if self.app.nbr_duplicates >= self.app.config.getint('PRINTER', 'max_duplicates') or self.app.printer_unavailable:
                 self.app.window.show_intro(previous_picture, False)
                 self.app.led_print.switch_off()
             else:
@@ -109,7 +109,7 @@ class StateWait(State):
 
         event = self.app.find_print_status_event(events)
         if event:
-            self.app.window.set_print_number(len(event.tasks), self.app.printer_failure)
+            self.app.window.set_print_number(len(event.tasks), self.app.printer_unavailable)
 
     def exit_actions(self):
         self.app.led_capture.switch_off()
@@ -313,7 +313,7 @@ class StateProcessing(State):
 
     def validate_transition(self, events):
         if self.app.printer.is_installed() and self.app.config.getfloat('PRINTER', 'printer_delay') > 0 \
-                and not self.app.printer_failure:
+                and not self.app.printer_unavailable:
             return 'print'
         else:
             return 'finish'  # Can not print
@@ -330,7 +330,7 @@ class StatePrint(State):
         self.printed = False
 
         with timeit("Display the final picture"):
-            self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_failure)
+            self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_unavailable)
             self.app.window.show_print(self.app.previous_picture)
 
         self.app.led_print.blink()
@@ -354,7 +354,7 @@ class StatePrint(State):
     def validate_transition(self, events):
         if self.timer.is_timeout() or self.printed:
             if self.printed:
-                self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_failure)
+                self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_unavailable)
             return 'finish'
 
 
@@ -490,10 +490,10 @@ class PiApplication(object):
         self.state_machine.set_state('wait')
 
     @property
-    def printer_failure(self):
-        """Return True is paper/ink counter is reached.
+    def printer_unavailable(self):
+        """Return True is paper/ink counter is reached or printing is disabled
         """
-        if self.config.getint('PRINTER', 'max_pages') <= 0:  # No limit
+        if self.config.getint('PRINTER', 'max_pages') < 0:  # No limit
             return False
         return self.printer.nbr_printed >= self.config.getint('PRINTER', 'max_pages')
 

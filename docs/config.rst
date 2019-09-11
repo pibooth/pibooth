@@ -102,8 +102,8 @@ Default configuration
     # How long is the print view in seconds (0 to skip it)
     printer_delay = 10
 
-    # Maximum number of printed pages before warning on paper/ink levels (0 = infinite)
-    max_pages = 0
+    # Maximum number of printed pages before warning on paper/ink levels (-1 = infinite)
+    max_pages = -1
 
     # Maximum number of duplicate pages sent to the printer (avoid paper waste)
     max_duplicates = 3
