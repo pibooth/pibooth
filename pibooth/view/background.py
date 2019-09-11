@@ -10,8 +10,10 @@ ARROW_HIDDEN = 'hidden'
 
 class Background(object):
 
-    def __init__(self, image_name):
+    def __init__(self, image_name, color=(0, 0, 0)):
         self._rect = None
+        self._need_update = False
+        self.color = color
         self.image_name = image_name
         self.background = None
 
@@ -27,20 +29,30 @@ class Background(object):
         """
         return self.background.get_rect(center=self._rect.center)
 
+    def set_color(self, color):
+        """Set the RGB color of the background.
+
+        :param color: RGB color
+        :type color: tuple
+        """
+        if color != self.color:
+            self.color = color
+            self._need_update = True
+
     def resize(self, screen):
         """Resize objects to fit to the screen.
         """
         if self._rect != screen.get_rect():
             self._rect = screen.get_rect()
             self.background = pictures.get_pygame_image(self.image_name, (self._rect.width, self._rect.height))
-            return True
-        return False
+            self._need_update = True
 
     def paint(self, screen):
         """Paint and animate the surfaces on the screen.
         """
-        screen.fill((0, 0, 0))  # Clear background
+        screen.fill(self.color)  # Clear background
         screen.blit(self.background, self.get_rect())
+        self._need_update = False
 
 
 class IntroBackground(Background):
@@ -53,7 +65,8 @@ class IntroBackground(Background):
         self.left_arrow_pos = None
 
     def resize(self, screen):
-        if Background.resize(self, screen):
+        Background.resize(self, screen)
+        if self._need_update:
             if self.arrow_location != ARROW_HIDDEN:
                 size = (self.get_rect().width * 0.3, self.get_rect().height * 0.3)
 
@@ -68,8 +81,6 @@ class IntroBackground(Background):
                     y = int(self.get_rect().top + 2 * self.get_rect().height // 3)
 
                 self.left_arrow_pos = (x - self.arrow_offset, y)
-            return True
-        return False
 
     def paint(self, screen):
         Background.paint(self, screen)
@@ -101,7 +112,8 @@ class ChooseBackground(Background):
         self.right_arrow_pos = None
 
     def resize(self, screen):
-        if Background.resize(self, screen):
+        Background.resize(self, screen)
+        if self._need_update:
             size = (self.get_rect().width * 0.6, self.get_rect().height * 0.6)
             self.layout0 = pictures.get_pygame_image("layout{}.png".format(self.choices[0]), size)
             self.layout1 = pictures.get_pygame_image("layout{}.png".format(self.choices[1]), size)
@@ -137,9 +149,6 @@ class ChooseBackground(Background):
                 self.left_arrow_pos = (x0 - self.arrow_offset, y)
                 self.right_arrow_pos = (x1 + self.arrow_offset, y)
 
-            return True
-        return False
-
     def paint(self, screen):
         Background.paint(self, screen)
         screen.blit(self.layout0, self.layout0_pos)
@@ -162,7 +171,8 @@ class ChosenBackground(Background):
         return "chosen{}.png".format(self.selected)
 
     def resize(self, screen):
-        if Background.resize(self, screen):
+        Background.resize(self, screen)
+        if self._need_update:
             size = (self.get_rect().width * 0.6, self.get_rect().height * 0.6)
 
             self.layout = pictures.get_pygame_image("layout{}.png".format(self.selected), size)
@@ -171,8 +181,6 @@ class ChosenBackground(Background):
             y = int(self.get_rect().top + self.get_rect().height * 0.3)
 
             self.layout_pos = (x, y)
-            return True
-        return False
 
     def paint(self, screen):
         Background.paint(self, screen)
@@ -201,7 +209,8 @@ class PrintBackground(Background):
         self.right_arrow_pos = None
 
     def resize(self, screen):
-        if Background.resize(self, screen):
+        Background.resize(self, screen)
+        if self._need_update:
             if self.arrow_location != ARROW_HIDDEN:
                 size = (self.get_rect().width * 0.3, self.get_rect().height * 0.3)
 
@@ -217,8 +226,6 @@ class PrintBackground(Background):
                     y = int(self.get_rect().top + 2 * self.get_rect().height // 3)
 
                 self.right_arrow_pos = (x + self.arrow_offset, y)
-            return True
-        return False
 
     def paint(self, screen):
         Background.paint(self, screen)

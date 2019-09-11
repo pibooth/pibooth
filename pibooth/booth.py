@@ -397,10 +397,11 @@ class PiApplication(object):
 
         # Create window of (width, height)
         init_size = self.config.gettyped('WINDOW', 'size')
+        init_color = self.config.gettuple('WINDOW', 'color', 'color')
         if not isinstance(init_size, str):
-            self.window = PtbWindow('Pibooth', init_size)
+            self.window = PtbWindow('Pibooth', init_size, color=init_color)
         else:
-            self.window = PtbWindow('Pibooth')
+            self.window = PtbWindow('Pibooth', color=init_color)
 
         self.state_machine = StateMachine(self)
         self.state_machine.add_state(StateWait())

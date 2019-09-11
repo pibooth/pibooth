@@ -20,9 +20,10 @@ class PtbWindow(object):
     RIGHT = 'right'
     LEFT = 'left'
 
-    def __init__(self, title, size=(800, 480), arrow_location=background.ARROW_BOTTOM, arrow_offset=0):
+    def __init__(self, title, size=(800, 480), color=(0, 0, 0), arrow_location=background.ARROW_BOTTOM, arrow_offset=0):
         self.__size = size
 
+        self.color = color
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
 
@@ -76,6 +77,7 @@ class PtbWindow(object):
         """Show image on the background.
         """
         self._current_background = self._buffered_images.setdefault(str(bkgd), bkgd)
+        self._current_background.set_color(self.color)
         self._current_background.resize(self.surface)
         self._current_background.paint(self.surface)
         self._update_capture_number()

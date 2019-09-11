@@ -24,6 +24,9 @@ Default configuration
     # The (width, height) of the display window or 'fullscreen'
     size = (800, 480)
 
+    # The RGB color of the window background
+    color = (0, 0, 0)
+
     # Blinking background when a capture is taken
     flash = True
 
