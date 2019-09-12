@@ -397,7 +397,9 @@ class PiApplication(object):
 
         # Create window of (width, height)
         init_size = self.config.gettyped('WINDOW', 'size')
-        init_color = self.config.gettuple('WINDOW', 'color', 'color')
+        init_color = self.config.gettyped('WINDOW', 'background')
+        if not isinstance(init_color, (tuple, list)):
+            init_color = self.config.getpath('WINDOW', 'background')
         if not isinstance(init_size, str):
             self.window = PtbWindow('Pibooth', init_size, color=init_color)
         else:

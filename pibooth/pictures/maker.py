@@ -287,7 +287,6 @@ class PictureMaker(object):
             assert len(color_or_path) == 3, "Length of 3 is required for RGB tuple"
             self._background_color = color_or_path
         else:
-            color_or_path = osp.abspath(color_or_path)
             if not osp.isfile(color_or_path):
                 raise ValueError("Invalid background image '{}'".format(color_or_path))
             self._background_image = color_or_path
@@ -299,7 +298,6 @@ class PictureMaker(object):
         :param image_path: image path
         :type image_path: str
         """
-        image_path = osp.abspath(image_path)
         if not osp.isfile(image_path):
             raise ValueError("Invalid background image '{}'".format(image_path))
         self._overlay_image = image_path

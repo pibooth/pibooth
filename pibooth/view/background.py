@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os.path as osp
 from pibooth import pictures
 
 
@@ -13,45 +14,63 @@ class Background(object):
     def __init__(self, image_name, color=(0, 0, 0)):
         self._rect = None
         self._need_update = False
-        self.color = color
-        self.image_name = image_name
-        self.background = None
+
+        self._background = None
+        self._background_color = color
+        self._background_image = None
+
+        self._overlay = None
+        self._overlay_image = image_name
 
     def __str__(self):
         """Return background final name.
         """
-        return self.image_name
+        return self._overlay_image
 
     def get_rect(self):
         """Return the Rect object of the background image. As aspect ratio
         is kept, the size of the background may be different from the
         screen size.
         """
-        return self.background.get_rect(center=self._rect.center)
+        return self._overlay.get_rect(center=self._rect.center)
 
-    def set_color(self, color):
-        """Set the RGB color of the background.
+    def set_color(self, color_or_path):
+        """Set background color (RGB tuple) or path to an image that used to
+        fill the background.
 
-        :param color: RGB color
-        :type color: tuple
+        :param color_or_path: RGB color tuple or image path
+        :type color_or_path: tuple or str
         """
-        if color != self.color:
-            self.color = color
-            self._need_update = True
+        if isinstance(color_or_path, (tuple, list)):
+            assert len(color_or_path) == 3, "Length of 3 is required for RGB tuple"
+            if color_or_path != self._background_color:
+                self._background_color = color_or_path
+                self._need_update = True
+        else:
+            assert osp.isfile(color_or_path), "Invalid image for window background: '{}'".format(color_or_path)
+            if color_or_path != self._background_image:
+                self._background_image = color_or_path
+                self._need_update = True
 
     def resize(self, screen):
         """Resize objects to fit to the screen.
         """
         if self._rect != screen.get_rect():
             self._rect = screen.get_rect()
-            self.background = pictures.get_pygame_image(self.image_name, (self._rect.width, self._rect.height))
+            self._overlay = pictures.get_pygame_image(self._overlay_image, (self._rect.width, self._rect.height))
+            if self._background_image:
+                self._background = pictures.get_pygame_image(
+                    self._background_image, (self._rect.width, self._rect.height), crop=True)
             self._need_update = True
 
     def paint(self, screen):
         """Paint and animate the surfaces on the screen.
         """
-        screen.fill(self.color)  # Clear background
-        screen.blit(self.background, self.get_rect())
+        if self._background:
+            screen.blit(self._background, (0, 0))
+        else:
+            screen.fill(self._background_color)
+        screen.blit(self._overlay, self.get_rect())
         self._need_update = False
 
 
@@ -92,7 +111,7 @@ class IntroWithPrintBackground(IntroBackground):
 
     def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
         IntroBackground.__init__(self, arrow_location, arrow_offset)
-        self.image_name = "intro_with_print.png"
+        self._overlay_image = "intro_with_print.png"
 
 
 class ChooseBackground(Background):

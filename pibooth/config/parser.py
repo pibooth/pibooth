@@ -65,9 +65,9 @@ DEFAULT = odict((
                 ((800, 480),
                  "The (width, height) of the display window or 'fullscreen'",
                  'Startup size', ['(800, 480)', 'fullscreen'])),
-            ("color",
+            ("background",
                 ((0, 0, 0),
-                 "The RGB color of the window background",
+                 "Background RGB color or image path",
                  None, None)),
             ("flash",
                 (True,
@@ -258,7 +258,7 @@ class PiConfigParser(ConfigParser):
         path = osp.expanduser(path)
         if not osp.isabs(path):
             path = osp.join(osp.relpath(osp.dirname(self.filename), '.'), path)
-        return path
+        return osp.abspath(path)
 
     def save(self, default=False):
         """Save the current or default values into the configuration file.
