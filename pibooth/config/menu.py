@@ -77,7 +77,7 @@ class PiConfigMenu(object):
                 if isinstance(option[3], str):
                     menu.add_text_input(option[2],
                                         onchange=self._on_text_changed,
-                                        default=self.config.get(section, name),
+                                        default=self.config.get(section, name).strip('"'),
                                         # Additional parameters:
                                         section=section,
                                         option=name)
@@ -103,7 +103,7 @@ class PiConfigMenu(object):
         """Called after each text input changed.
         """
         if self._main_menu.is_enabled():
-            self.config.set(kwargs['section'], kwargs['option'], str(value))
+            self.config.set(kwargs['section'], kwargs['option'], '"{}"'.format(str(value)))
 
     def _on_close(self):
         """Called when the menu is closed.
