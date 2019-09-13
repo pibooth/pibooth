@@ -62,10 +62,11 @@ class PiConfigMenu(object):
         menu = pgm.Menu(self.window.surface,
                         width,
                         height,
-                        fonts.get_filename("Amatic-Bold"),
+                        fonts.get_filename("Roboto-BoldItalic"),
                         section.capitalize(),
-                        font_size=30,
+                        font_size=22,
                         font_color=(255, 255, 255),
+                        font_title = fonts.get_filename("Amatic-Bold"),
                         color_selected=(38, 139, 100),
                         menu_color=(0, 0, 51),
                         menu_color_title=(60, 90, 140),
@@ -76,6 +77,7 @@ class PiConfigMenu(object):
             if option[2]:
                 if isinstance(option[3], str):
                     menu.add_text_input(option[2],
+                                        cursor_color=(255, 255, 255),
                                         onchange=self._on_text_changed,
                                         default=self.config.get(section, name).strip('"'),
                                         # Additional parameters:
