@@ -48,7 +48,7 @@ class PictureMaker(object):
         self._texts = []
         self._texts_height = 0
         self._final = None
-        self._margin = 50
+        self._margin = 100
         self._crop = False
         self._outline = False  # For debug purpose
         self._images = images

@@ -255,10 +255,10 @@ for further details.
 Printer
 -------
 
-The print button (see `Commands`_) and print states are automatically deactivated if:
+The print button (see `Commands`_) and print states are automatically activated/shown if:
 
-* `pycups <https://pypi.python.org/pypi/pycups>`_ is not installed
-* no printer configured in ``CUPS``
+* `pycups <https://pypi.python.org/pypi/pycups>`_ is installed
+* at least one printer is configured in ``CUPS``
 
 To avoid paper waste, set the option ``[PRINTER][max_duplicates]`` to the maximum
 of identical pictures that can be sent to the printer.
@@ -268,7 +268,8 @@ printer. When this number is reached, the print function will be disabled and an
 indicates the printer failure. To reset the counter, open then close the settings
 graphical interface (see `Commands`_).
 
-Here is the default configuration used in CUPS, this may depend on the printer used:
+Here is the default configuration used for this project in CUPS, it may depend on
+the printer used:
 
 ================ =============================
 Options          Value
