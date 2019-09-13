@@ -21,7 +21,7 @@ Features
 * Capture from 1 to 4 photos and concatenate them in a final picture
 * Support all cameras compatible with gPhoto2, OpenCV and Raspberry Pi
 * Support for hardware buttons and lamps on Raspberry Pi GPIO
-* Fully driven from hardware buttons / keyboard / mouse / touchsceen
+* Fully driven from hardware buttons / keyboard / mouse / touchscreen
 * Preview during countdown
 * Auto-start at the Raspberry Pi startup
 * Animate last pictures during idle time
@@ -36,7 +36,7 @@ Requirements
 
 The requirements listed below are the ones used for the development of ``pibooth``, but
 other configuration may work fine. **All hardware buttons, lights and printer are optional**,
-the application can be entirely controlled using a keyboard, a mouse or a touchsceen.
+the application can be entirely controlled using a keyboard, a mouse or a touchscreen.
 
 Hardware
 ^^^^^^^^
