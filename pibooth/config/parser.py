@@ -46,7 +46,7 @@ DEFAULT = odict((
                  "Path to save pictures",
                  None, None)),
             ("clear_on_startup",
-                (True,
+                (False,
                  "Cleanup the 'directory' before start",
                  "Clear on startup", ['True', 'False'])),
             ("autostart",

@@ -12,7 +12,7 @@ Default configuration
     directory = ~/Pictures/pibooth
 
     # Cleanup the 'directory' before start
-    clear_on_startup = True
+    clear_on_startup = False
 
     # Start pibooth at Raspberry Pi startup
     autostart = False
