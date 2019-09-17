@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+Give a clear and concise description of what the bug is.
 
 **Steps to reproduce the bug**
 1. Go to '...'
@@ -16,9 +16,9 @@ A clear and concise description of what the bug is.
 3. Scroll down to '....'
 4. See error.
 
-**Logs**
-Start Pibooth in verbose mode (add **-v** to the command line).
-Reproduce the error an copy-paste here all the logs from the console.
+**Logs*
+1. Post your config file
+2. Copy-paste all the logs from the console (start pibooth with verbose mode by adding **-v** to the command line).
 
 **Environment**
  - OS: [e.g. Raspbian Buster]
