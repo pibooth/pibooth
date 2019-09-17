@@ -16,7 +16,7 @@ Give a clear and concise description of what the bug is.
 3. Scroll down to '....'
 4. See error.
 
-**Logs*
+**Logs**
 1. Post your config file
 2. Copy-paste all the logs from the console (start pibooth with verbose mode by adding **-v** to the command line).
 
