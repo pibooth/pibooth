@@ -50,7 +50,7 @@ class PictureMaker(object):
         self._final = None
         self._margin = 100
         self._crop = False
-        self._outline = False  # For debug purpose
+        self._outlines = False
         self._images = images
         self._overlay_image = None
         self._background_color = (255, 255, 255)
@@ -322,6 +322,16 @@ class PictureMaker(object):
         self._crop = crop
         self._final = None  # Force rebuild
 
+    def set_outlines(self, outlines=True):
+        """Draw outlines for each rectangle available for drawing
+        images and texts.
+
+        :param outlines: enable / disable outlines
+        :type outlines: bool
+        """
+        self._outlines = outlines
+        self._final = None  # Force rebuild
+
     def build(self, rebuild=False):
         """Build the final image or doas nothing if the final image
         has already been built previously.
@@ -346,7 +356,7 @@ class PictureMaker(object):
             with timeit("Use {} to draw texts".format(self.name)):
                 self._build_texts(self._final)
 
-            if self._outline:
+            if self._outlines:
                 with timeit("Use {} to outline boundary borders".format(self.name)):
                     self._build_outlines(self._final)
 

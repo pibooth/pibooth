@@ -24,6 +24,7 @@ LOGGER = logging.getLogger("pibooth")
 
 class BlockConsoleHandler(logging.StreamHandler):
 
+    default_level = logging.INFO
     pattern_indent = '+< '
     pattern_blocks = '|  '
     pattern_dedent = '+> '
@@ -151,7 +152,7 @@ def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=N
         root.setLevel(logging.DEBUG)
 
         if filename:
-            # Create a file handler, all levels are printed
+            # Create a file handler, all levels are logged
             filename = osp.abspath(osp.expanduser(filename))
             dirname = osp.dirname(filename)
             if not osp.isdir(dirname):
@@ -166,7 +167,16 @@ def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=N
         hdlr.setFormatter(logging.Formatter(msgfmt, datefmt))
         if level is not None:
             hdlr.setLevel(level)
+            BlockConsoleHandler.default_level = level
         root.addHandler(hdlr)
+
+
+def set_logging_level(level=BlockConsoleHandler.default_level):
+    """Set/restore the log level of the concole.
+    """
+    for hdlr in logging.getLogger().handlers:
+        if isinstance(hdlr, BlockConsoleHandler):
+            hdlr.setLevel(level)
 
 
 @contextlib.contextmanager

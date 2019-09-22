@@ -13,7 +13,8 @@ import itertools
 import os.path as osp
 import pygame
 import pibooth
-from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging, print_columns_words)
+from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging,
+                           set_logging_level, print_columns_words)
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu, get_supported_languages
@@ -296,6 +297,8 @@ class StateProcessing(State):
                     m.set_cropping()
                 if overlay:
                     m.set_overlay(overlay)
+                if self.app.config.getboolean('GENERAL', 'debug'):
+                    m.set_outlines()
 
             maker = get_picture_maker(captures, self.app.config.get('PICTURE', 'orientation'))
             _setup_maker(maker)
@@ -485,11 +488,15 @@ class PiApplication(object):
             if self.window.is_fullscreen:
                 self.window.toggle_fullscreen()
 
-        # Initialize state machine
-        if self.config.getboolean('GENERAL', 'failsafe'):
+        # Handle debug mode
+        if not self.config.getboolean('GENERAL', 'debug'):
+            set_logging_level()  # Restore default level
             self.state_machine.add_failsafe_state(StateFailSafe(2))
         else:
+            set_logging_level(logging.DEBUG)
             self.state_machine.remove_state('failsafe')
+
+        # Initialize state machine
         self.state_machine.set_state('wait')
 
     @property
@@ -680,7 +687,7 @@ def main():
                         help=u"display all available fonts")
 
     parser.add_argument("--log", default=None,
-                        help=u"save console output to the given file")
+                        help=u"save logs output to the given file")
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-v", "--verbose", dest='logging', action='store_const', const=logging.DEBUG,

@@ -17,8 +17,8 @@ Default configuration
     # Start pibooth at Raspberry Pi startup
     autostart = False
 
-    # Show fail message and go back to wait state in case of exception
-    failsafe = True
+    # In debug mode, exceptions are not caught, logs are more verbose
+    debug = False
 
     [WINDOW]
     # The (width, height) of the display window or 'fullscreen'
