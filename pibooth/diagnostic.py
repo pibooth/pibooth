@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import io
@@ -7,10 +6,10 @@ import sys
 import logging
 from PIL import Image
 import gphoto2 as gp
-
+import pibooth
 
 LOGFILE = None
-APPNAME = os.path.basename(os.path.abspath(__file__))
+APPNAME = 'diagnostic'
 GP_WIDGET_TYPES = {gp.GP_WIDGET_WINDOW: "Window toplevel",
                    gp.GP_WIDGET_SECTION: "Section (or Tab)",
                    gp.GP_WIDGET_TEXT: "Text",
@@ -112,19 +111,15 @@ def camera_connected():
     return cameras
 
 
-if __name__ == '__main__':
-
+def main():
     logging.basicConfig(
         format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
     gp.check_result(gp.use_python_logging())
 
-    try:
-        import pibooth
-        pibooth_version = pibooth.__version__
-    except ImportError:
-        pibooth_version = "not installed"
+    write_log("", True)
+    write_log("STARTING DIAGNOSTIC OF DSLR CAMERA")
 
-    write_log("Pibooth version installed: {}".format(pibooth_version), True)
+    write_log("Pibooth version installed: {}".format(pibooth.__version__), True)
     write_log("Listing all connected DSLR camera")
     cameras_list = camera_connected()
 
@@ -147,13 +142,13 @@ if __name__ == '__main__':
         set_config_value(camera, 'imgsettings', 'iso', '100')
         set_config_value(camera, 'settings', 'capturetarget', 'Memory card')
 
-        prev_viewfinder_value = get_config_value(camera, 'actions', 'viewfinder')
+        get_config_value(camera, 'actions', 'viewfinder')
         set_config_value(camera, 'actions', 'viewfinder', 1)
 
         write_log("Take capture preview")
         camera.capture_preview()
 
-        set_config_value(camera, 'actions', 'viewfinder', prev_viewfinder_value)
+        set_config_value(camera, 'actions', 'viewfinder', 0)
 
         write_log("Take a capture")
         gp_path = camera.capture(gp.GP_CAPTURE_IMAGE)
