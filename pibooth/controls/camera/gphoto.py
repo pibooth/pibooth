@@ -57,7 +57,6 @@ class GpCamera(BaseCamera):
         BaseCamera.__init__(self, resolution)
         gp.check_result(gp.use_python_logging())
         self._preview_compatible = True
-        self._viewfinder_init_value = 0
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation
@@ -73,7 +72,7 @@ class GpCamera(BaseCamera):
         self._cam.init()
 
         try:
-            self._viewfinder_init_value = self.get_config_value('actions', 'viewfinder')
+            self.get_config_value('actions', 'viewfinder')
             self._preview_compatible = True
         except ValueError:
             LOGGER.warning("The connected DSLR camera is not compatible with preview")
@@ -242,7 +241,7 @@ class GpCamera(BaseCamera):
         """Capture a new picture.
         """
         if self._preview_compatible:
-            self.set_config_value('actions', 'viewfinder', self._viewfinder_init_value)
+            self.set_config_value('actions', 'viewfinder', 0)
 
         effect = str(effect).lower()
         if effect not in self.IMAGE_EFFECTS:
