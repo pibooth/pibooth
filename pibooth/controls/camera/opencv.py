@@ -47,8 +47,13 @@ class CvCamera(BaseCamera):
                      u'smooth_more',
                      u'sharpen']
 
-    def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False):
-        BaseCamera.__init__(self, resolution)
+    def __init__(self,
+                 iso=200,
+                 resolution=(1920, 1080),
+                 rotation=0,
+                 flip=False,
+                 delete_internal_memory=False):
+        BaseCamera.__init__(self, resolution, delete_internal_memory)
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation

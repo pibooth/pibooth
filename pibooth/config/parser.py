@@ -169,6 +169,10 @@ DEFAULT = odict((
                 ((1934, 2464),
                  "Resolution for camera captures (preview will have same aspect ratio)",
                  None, None)),
+            ("delete_internal_memory",
+                (False,
+                 "Delete captures from camera internal memory (when applicable)",
+                 None, None)),
         ))
      ),
     ("PRINTER",

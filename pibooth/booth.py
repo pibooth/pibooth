@@ -421,7 +421,8 @@ class PiApplication(object):
         self.camera = camera.get_camera(config.getint('CAMERA', 'iso'),
                                         config.gettyped('CAMERA', 'resolution'),
                                         config.getint('CAMERA', 'rotation'),
-                                        config.getboolean('CAMERA', 'flip'))
+                                        config.getboolean('CAMERA', 'flip'),
+                                        config.getboolean('CAMERA', 'delete_internal_memory'))
 
         # Initialize the hardware buttons
         self.led_capture = PtbLed(config.getint('CONTROLS', 'picture_led_pin'))
@@ -710,8 +711,10 @@ def main():
         config.open_editor()
         config.enable_autostart(config.getboolean('GENERAL', 'autostart'))
     elif options.fonts:
+        LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
     elif options.diagnostic:
+        LOGGER.info("Starting diagnostic of DSLR camera...")
         diagnostic.main()
     elif not options.reset:
         LOGGER.info("Starting the photo booth application...")

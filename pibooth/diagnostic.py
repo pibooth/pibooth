@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import io
-import os
 import sys
-import logging
 from PIL import Image
 import gphoto2 as gp
 import pibooth
@@ -112,14 +110,9 @@ def camera_connected():
 
 
 def main():
-    logging.basicConfig(
-        format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
     gp.check_result(gp.use_python_logging())
 
-    write_log("", True)
-    write_log("STARTING DIAGNOSTIC OF DSLR CAMERA")
-
-    write_log("Pibooth version installed: {}".format(pibooth.__version__), True)
+    write_log("Pibooth version installed: {}".format(pibooth.__version__))
     write_log("Listing all connected DSLR camera")
     cameras_list = camera_connected()
 
@@ -161,9 +154,9 @@ def main():
         image.save(APPNAME + '.jpg')
 
     except Exception as ex:
-        write_log("ABORT  : exception occures: {}".format(ex), True)
+        write_log("ABORT   : exception occures: {}".format(ex), True)
     else:
-        write_log("SUCCESS: diagnostic completed", True)
+        write_log("SUCCESS : diagnostic completed", True)
 
     camera.exit()
 

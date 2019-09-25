@@ -8,7 +8,7 @@ from pibooth.controls.camera.opencv import CvCamera, cv_camera_connected
 from pibooth.controls.camera.hybrid import HybridCamera
 
 
-def get_camera(iso, resolution, rotation, flip):
+def get_camera(iso, resolution, rotation, flip, delete_internal_memory):
     """Initialize the camera depending of the connected one. If a gPhoto2 camera
     is used, try to kill any process using gPhoto2 as it may block camera access.
 
@@ -36,4 +36,4 @@ def get_camera(iso, resolution, rotation, flip):
     else:
         raise EnvironmentError("Neither Raspberry Pi nor GPhoto2 nor OpenCV camera detected")
 
-    return cam_class(iso, resolution, rotation, flip)
+    return cam_class(iso, resolution, rotation, flip, delete_internal_memory)

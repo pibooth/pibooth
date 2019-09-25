@@ -4,8 +4,8 @@
    :alt: Pibooth
 
 
-The ``pibooth`` project attempts to provide a photobooth application *out-of-the-box*
-in pure Python for Raspberry Pi. Have a look to the `wiki <https://github.com/werdeil/pibooth/wiki>`_
+The ``pibooth`` project provides a photobooth application *out-of-the-box* in pure Python
+for Raspberry Pi. Have a look to the `wiki <https://github.com/werdeil/pibooth/wiki>`_
 to discover some realizations from GitHub users.
 
 .. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/background_samples.png

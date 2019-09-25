@@ -98,6 +98,9 @@ Default configuration
     # Resolution for camera captures (preview will have same aspect ratio)
     resolution = (1934, 2464)
 
+    # Delete captures from camera internal memory (when applicable)
+    delete_internal_memory = False
+
     [PRINTER]
     # Name of the printer defined in CUPS (or use the 'default' one)
     printer_name = default

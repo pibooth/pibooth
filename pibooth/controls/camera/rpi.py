@@ -38,8 +38,13 @@ class RpiCamera(BaseCamera):
     else:
         IMAGE_EFFECTS = []
 
-    def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False):
-        BaseCamera.__init__(self, resolution)
+    def __init__(self,
+                 iso=200,
+                 resolution=(1920, 1080),
+                 rotation=0,
+                 flip=False,
+                 delete_internal_memory=False):
+        BaseCamera.__init__(self, resolution, delete_internal_memory)
         self._cam = picamera.PiCamera()
         self._cam.framerate = 15  # Slower is necessary for high-resolution
         self._cam.video_stabilization = True

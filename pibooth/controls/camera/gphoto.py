@@ -53,8 +53,14 @@ class GpCamera(BaseCamera):
                      u'smooth_more',
                      u'sharpen']
 
-    def __init__(self, iso=200, resolution=(1920, 1080), rotation=0, flip=False, init=True):
-        BaseCamera.__init__(self, resolution)
+    def __init__(self,
+                 iso=200,
+                 resolution=(1920, 1080),
+                 rotation=0,
+                 flip=False,
+                 delete_internal_memory=False,
+                 init=True):
+        BaseCamera.__init__(self, resolution, delete_internal_memory)
         gp.check_result(gp.use_python_logging())
         self._preview_compatible = True
         self._preview_hflip = False
@@ -113,6 +119,9 @@ class GpCamera(BaseCamera):
         """
         gp_path, effect = self._captures[capture_path]
         camera_file = self._cam.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
+        if self.delete_internal_memory:
+            LOGGER.debug("Delete capture '%s' from internal memory", gp_path.name)
+            self._cam.file_delete(gp_path.folder, gp_path.name)
         image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
 
         # Crop to keep aspect ratio of the resolution
