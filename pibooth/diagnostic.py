@@ -3,21 +3,14 @@
 import io
 import sys
 from PIL import Image
-import gphoto2 as gp
+try:
+    import gphoto2 as gp
+except ImportError:
+    gp = None  # gphoto2 is optional
 import pibooth
 
 LOGFILE = None
 APPNAME = 'diagnostic'
-GP_WIDGET_TYPES = {gp.GP_WIDGET_WINDOW: "Window toplevel",
-                   gp.GP_WIDGET_SECTION: "Section (or Tab)",
-                   gp.GP_WIDGET_TEXT: "Text",
-                   gp.GP_WIDGET_RANGE: "Slider",
-                   gp.GP_WIDGET_TOGGLE: "Toggle button (or check box)",
-                   gp.GP_WIDGET_RADIO: "Radio button",
-                   gp.GP_WIDGET_MENU: "Menu widget (same as Radio)",
-                   gp.GP_WIDGET_BUTTON: "Button press",
-                   gp.GP_WIDGET_DATE: "Date entering",
-                   }
 
 
 def write_log(text, new_section=False):
@@ -39,6 +32,18 @@ def write_log(text, new_section=False):
 
 def print_config(config, parent=''):
     """Print all parameters of the camera"""
+
+    gp_widget_types = {gp.GP_WIDGET_WINDOW: "Window toplevel",
+                       gp.GP_WIDGET_SECTION: "Section (or Tab)",
+                       gp.GP_WIDGET_TEXT: "Text",
+                       gp.GP_WIDGET_RANGE: "Slider",
+                       gp.GP_WIDGET_TOGGLE: "Toggle button (or check box)",
+                       gp.GP_WIDGET_RADIO: "Radio button",
+                       gp.GP_WIDGET_MENU: "Menu widget (same as Radio)",
+                       gp.GP_WIDGET_BUTTON: "Button press",
+                       gp.GP_WIDGET_DATE: "Date entering",
+                       }
+
     for child in config.get_children():
         path = '/'.join((parent, child.get_name()))
         if child.get_type() == gp.GP_WIDGET_SECTION:
@@ -48,7 +53,7 @@ def print_config(config, parent=''):
             write_log('  Label       : {}'.format(child.get_label()))
             write_log('  Readonly    : {}'.format('yes' if child.get_readonly() else 'no'))
             write_log('  Data type   : {}'.format(type(child.get_value())))
-            write_log('  Widget type : {}'.format(GP_WIDGET_TYPES[child.get_type()]))
+            write_log('  Widget type : {}'.format(gp_widget_types[child.get_type()]))
             write_log('  Current     : {}'.format(child.get_value()))
             if child.get_type() == gp.GP_WIDGET_RADIO:
                 write_log('  Choices     : {}'.format([c for c in child.get_choices()]))
@@ -110,6 +115,10 @@ def camera_connected():
 
 
 def main():
+    if not gp:
+        write_log("gPhoto2 not installed, cannot diagnose connected DSLR")
+        sys.exit(1)
+
     gp.check_result(gp.use_python_logging())
 
     write_log("Pibooth version installed: {}".format(pibooth.__version__))
