@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os.path as osp
+
+from pibooth import fonts
 from pibooth import pictures
 
+from pibooth.language import get_translated_text
 
 ARROW_TOP = 'top'
 ARROW_BOTTOM = 'bottom'
@@ -20,7 +23,11 @@ class Background(object):
         self._background_image = None
 
         self._overlay = None
-        self._overlay_image = image_name
+        self._overlay_image = "{0}.png".format(image_name)
+        self.text = get_translated_text(image_name)
+        self.text_size = 72
+        self.text_x = 0
+        self.text_y = 0
 
     def __str__(self):
         """Return background final name.
@@ -57,6 +64,7 @@ class Background(object):
         """
         if self._rect != screen.get_rect():
             self._rect = screen.get_rect()
+            self.text_size = 72*self._rect.height//400
             self._overlay = pictures.get_pygame_image(self._overlay_image, (self._rect.width, self._rect.height))
             if self._background_image:
                 self._background = pictures.get_pygame_image(
@@ -71,13 +79,26 @@ class Background(object):
         else:
             screen.fill(self._background_color)
         screen.blit(self._overlay, self.get_rect())
+        self.write_text(screen)
         self._need_update = False
 
+    def write_text(self, screen):
+        """Add the text to the screen
+        """
+        text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), self.text_size)
+        text = text_font.render(self.text, True, (255, 255, 255), (0, 0, 0))
+        textrect = text.get_rect()
+        textrect.centerx = self.text_x
+        textrect.centery = self.text_y
+        black = (0, 0, 0)
+        text.set_colorkey(black)  # Black colors will not be blit.
+        screen.blit(text, textrect)
+        self._need_update = False
 
 class IntroBackground(Background):
 
     def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
-        Background.__init__(self, "intro.png")
+        Background.__init__(self, "intro")
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
         self.left_arrow = None
@@ -85,6 +106,8 @@ class IntroBackground(Background):
 
     def resize(self, screen):
         Background.resize(self, screen)
+        self.text_x = screen.get_rect().centerx/2
+        self.text_y = screen.get_rect().centery
         if self._need_update:
             if self.arrow_location != ARROW_HIDDEN:
                 size = (self.get_rect().width * 0.3, self.get_rect().height * 0.3)
@@ -111,13 +134,51 @@ class IntroWithPrintBackground(IntroBackground):
 
     def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
         IntroBackground.__init__(self, arrow_location, arrow_offset)
-        self._overlay_image = "intro_with_print.png"
+        self._overlay_image = "intro_print"
+        self.right_arrow = None
+        self.right_arrow_pos = None
 
+    def write_text(self, screen):
+        IntroBackground.write_text(self, screen)
+        text_size = 20*screen.get_rect().height//400
+        text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), text_size)
+        text_strings = get_translated_text("intro_print").splitlines()
+        delta_y = 0
+        for text_string in text_strings:
+            text = text_font.render(text_string, True, (255, 255, 255), (0, 0, 0))
+            textrect = text.get_rect()
+            textrect.centerx = self.get_rect().width * 45/100
+            textrect.centery = self.get_rect().height * 2/3 + delta_y
+            black = (0, 0, 0)
+            text.set_colorkey(black)  # Black colors will not be blit.
+            screen.blit(text, textrect)
+            delta_y += text.get_height()
+        self._need_update = False
+
+    def resize(self, screen):
+        IntroBackground.resize(self, screen)
+        if self.arrow_location != ARROW_HIDDEN:
+            size = (self.get_rect().width * 0.1, self.get_rect().height * 0.1)
+            vflip = True if self.arrow_location == ARROW_TOP else False
+            self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=True, vflip=vflip)
+
+            x = int(self.get_rect().left + self.get_rect().width // 2
+                    - self.right_arrow.get_rect().width // 2)
+            if self.arrow_location == ARROW_TOP:
+                y = self.get_rect().top + 10
+            else:
+                y = int(self.get_rect().top + 8 * self.get_rect().height // 9)
+            self.right_arrow_pos = (x - self.arrow_offset, y)
+
+    def paint(self, screen):
+        IntroBackground.paint(self, screen)
+        if self.arrow_location != ARROW_HIDDEN:
+            screen.blit(self.right_arrow, self.right_arrow_pos)
 
 class ChooseBackground(Background):
 
     def __init__(self, choices, arrow_location=ARROW_BOTTOM, arrow_offset=0):
-        Background.__init__(self, "choose.png")
+        Background.__init__(self, "choose")
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
         self.choices = choices
@@ -132,6 +193,8 @@ class ChooseBackground(Background):
 
     def resize(self, screen):
         Background.resize(self, screen)
+        self.text_x = screen.get_rect().centerx
+        self.text_y = screen.get_rect().height/7
         if self._need_update:
             size = (self.get_rect().width * 0.6, self.get_rect().height * 0.6)
             self.layout0 = pictures.get_pygame_image("layout{}.png".format(self.choices[0]), size)
@@ -180,7 +243,7 @@ class ChooseBackground(Background):
 class ChosenBackground(Background):
 
     def __init__(self, choices, selected):
-        Background.__init__(self, "chosen.png")
+        Background.__init__(self, "chosen")
         self.choices = choices
         self.selected = selected
         self.layout = None
@@ -191,6 +254,8 @@ class ChosenBackground(Background):
 
     def resize(self, screen):
         Background.resize(self, screen)
+        self.text_x = screen.get_rect().centerx
+        self.text_y = screen.get_rect().height/7
         if self._need_update:
             size = (self.get_rect().width * 0.6, self.get_rect().height * 0.6)
 
@@ -209,19 +274,24 @@ class ChosenBackground(Background):
 class CaptureBackground(Background):
 
     def __init__(self):
-        Background.__init__(self, "capture.png")
+        Background.__init__(self, "capture")
 
 
 class ProcessingBackground(Background):
 
     def __init__(self):
-        Background.__init__(self, "processing.png")
+        Background.__init__(self, "processing")
+
+    def resize(self, screen):
+        Background.resize(self, screen)
+        self.text_x = screen.get_rect().centerx
+        self.text_y = screen.get_rect().height*5/6
 
 
 class PrintBackground(Background):
 
     def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
-        Background.__init__(self, "print.png")
+        Background.__init__(self, "print")
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
         self.right_arrow = None
@@ -229,6 +299,8 @@ class PrintBackground(Background):
 
     def resize(self, screen):
         Background.resize(self, screen)
+        self.text_x = screen.get_rect().centerx*3/2
+        self.text_y = screen.get_rect().centery
         if self._need_update:
             if self.arrow_location != ARROW_HIDDEN:
                 size = (self.get_rect().width * 0.3, self.get_rect().height * 0.3)
@@ -255,10 +327,20 @@ class PrintBackground(Background):
 class FinishedBackground(Background):
 
     def __init__(self):
-        Background.__init__(self, "finished.png")
+        Background.__init__(self, "finished")
+
+    def resize(self, screen):
+        Background.resize(self, screen)
+        self.text_x = screen.get_rect().centerx
+        self.text_y = screen.get_rect().height*3/4
 
 
 class OopsBackground(Background):
 
     def __init__(self):
-        Background.__init__(self, "oops.png")
+        Background.__init__(self, "oops")
+
+    def resize(self, screen):
+        Background.resize(self, screen)
+        self.text_x = screen.get_rect().centerx
+        self.text_y = screen.get_rect().centery
