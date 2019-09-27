@@ -25,7 +25,7 @@ def get_filename(name):
     path = osp.join(osp.dirname(osp.abspath(__file__)), PiConfigParser.language, name)
     if not osp.isfile(path):
         # Look for common image
-        return osp.join(osp.dirname(osp.abspath(__file__)), 'com', name)
+        path = osp.join(osp.dirname(osp.abspath(__file__)), 'com', name)
     return path
 
 
@@ -49,15 +49,19 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
     :return: pygame.Surface with image
     :rtype: object
     """
+    path = get_filename(name)
     if not size:
-        image = pygame.image.load(get_filename(name)).convert()
+        image = pygame.image.load(path).convert()
     else:
-        image = Image.open(get_filename(name))
+        if osp.isfile(path):
+            pil_image = Image.open(path)
+        else:
+            pil_image = Image.new('RGBA', size, (255, 0, 0, 0))
         if crop:
-            image = image.crop(sizing.new_size_by_croping_ratio(image.size, size))
-        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, size),
+            pil_image = pil_image.crop(sizing.new_size_by_croping_ratio(pil_image.size, size))
+        pil_image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, size),
                              Image.ANTIALIAS if antialiasing else Image.NEAREST)
-        image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+        image = pygame.image.fromstring(pil_image.tobytes(), pil_image.size, pil_image.mode)
 
     if hflip or vflip:
         image = pygame.transform.flip(image, hflip, vflip)
