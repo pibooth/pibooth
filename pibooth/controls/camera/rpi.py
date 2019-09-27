@@ -7,8 +7,8 @@ try:
 except ImportError:
     picamera = None  # picamera is optional
 from pibooth.utils import memorize
-from pibooth.config import PiConfigParser
-from pibooth.controls.camera.base import BaseCamera, LANGUAGES
+from pibooth.language import get_translated_text
+from pibooth.controls.camera.base import BaseCamera
 
 
 @memorize
@@ -105,13 +105,13 @@ class RpiCamera(BaseCamera):
             timeout -= 1
             self._hide_overlay()
 
-        self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
+        self._show_overlay(get_translated_text('smile_message'), alpha)
 
     def preview_wait(self, timeout, alpha=60):
         """Wait the given time.
         """
         time.sleep(timeout)
-        self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
+        self._show_overlay(get_translated_text('smile_message'), alpha)
 
     def stop_preview(self):
         """Stop the preview.

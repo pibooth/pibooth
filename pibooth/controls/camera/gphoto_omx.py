@@ -5,9 +5,9 @@ import time
 import signal
 import subprocess
 from PIL import Image
-from pibooth.config import PiConfigParser
 from pibooth.utils import PoolingTimer, memorize
-from pibooth.controls.camera.gphoto import gp, gp_camera_connected, GpCamera, LANGUAGES
+from pibooth.language import get_translated_text
+from pibooth.controls.camera.gphoto import gp, gp_camera_connected, GpCamera
 
 
 @memorize
@@ -95,13 +95,13 @@ class GpOmxCamera(GpCamera):
                 self._show_overlay(str(remaining), alpha)
                 timeout = remaining
 
-        self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
+        self._show_overlay(get_translated_text('smile_message'), alpha)
 
     def preview_wait(self, timeout, alpha=60):
         """Wait the given time.
         """
         time.sleep(timeout)
-        self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
+        self._show_overlay(get_translated_text('smile_message'), alpha)
 
     def stop_preview(self):
         """Stop the preview.

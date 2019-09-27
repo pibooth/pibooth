@@ -10,9 +10,9 @@ except ImportError:
 from PIL import Image
 from pibooth.utils import memorize
 from pibooth.pictures import sizing
-from pibooth.config import PiConfigParser
 from pibooth.utils import PoolingTimer
-from pibooth.controls.camera.base import BaseCamera, LANGUAGES
+from pibooth.language import get_translated_text
+from pibooth.controls.camera.base import BaseCamera
 
 
 @memorize
@@ -154,7 +154,7 @@ class CvCamera(BaseCamera):
             if updated_rect:
                 pygame.display.update(updated_rect)
 
-        self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
+        self._show_overlay(get_translated_text('smile_message'), alpha)
         self._window.show_image(self._get_preview_image())
 
     def preview_wait(self, timeout, alpha=80):
@@ -171,7 +171,7 @@ class CvCamera(BaseCamera):
             if updated_rect:
                 pygame.display.update(updated_rect)
 
-        self._show_overlay(LANGUAGES.get(PiConfigParser.language, LANGUAGES['en']).get('smile_message'), alpha)
+        self._show_overlay(get_translated_text('smile_message'), alpha)
         self._window.show_image(self._get_preview_image())
 
     def stop_preview(self):

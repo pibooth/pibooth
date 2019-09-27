@@ -2,21 +2,9 @@
 
 import pygame
 from PIL import Image, ImageDraw
+
 from pibooth import fonts
 from pibooth.pictures import sizing
-
-
-LANGUAGES = {
-    'fr': {
-        'smile_message': "Souriez !"
-    },
-    'en': {
-        'smile_message': "Smile !"
-    },
-    'de': {
-        'smile_message': "Bitte lächeln !"
-    }
-}
 
 
 class BaseCamera(object):
