@@ -8,7 +8,7 @@ Release ``pibooth`` for Pypi
 
         $ sudo pip install twine
 
-2. Update the version number in the ``pibooth/__ini__.py`` file.
+2. Update the version number in the ``pibooth/__init__.py`` file.
 
 3. Check the rendering of the README by generating the HTML page:
 
