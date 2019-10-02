@@ -97,12 +97,10 @@ class Background(object):
         """Add the text to the screen
         """
         text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), self.text_size)
-        text = text_font.render(self.text, True, self._text_color, (0, 0, 0))
+        text = text_font.render(self.text, True, self._text_color)
         textrect = text.get_rect()
         textrect.centerx = self.text_x
         textrect.centery = self.text_y
-        black = (0, 0, 0)
-        text.set_colorkey(black)  # Black colors will not be blit.
         screen.blit(text, textrect)
         self._need_update = False
 
@@ -156,12 +154,10 @@ class IntroWithPrintBackground(IntroBackground):
         text_strings = get_translated_text("intro_print").splitlines()
         delta_y = 0
         for text_string in text_strings:
-            text = text_font.render(text_string, True, (255, 255, 255), (0, 0, 0))
+            text = text_font.render(text_string, True, (255, 255, 255))
             textrect = text.get_rect()
             textrect.centerx = self.get_rect().width * 45/100
             textrect.centery = self.get_rect().height * 2/3 + delta_y
-            black = (0, 0, 0)
-            text.set_colorkey(black)  # Black colors will not be blit.
             screen.blit(text, textrect)
             delta_y += text.get_height()
         self._need_update = False
