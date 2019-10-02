@@ -27,6 +27,9 @@ Default configuration
     # Background RGB color or image path
     background = (0, 0, 0)
 
+    # Text RGB color
+    text_color = (0, 0, 0)
+
     # Blinking background when a capture is taken
     flash = True
 

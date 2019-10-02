@@ -14,7 +14,7 @@ ARROW_HIDDEN = 'hidden'
 
 class Background(object):
 
-    def __init__(self, image_name, color=(0, 0, 0)):
+    def __init__(self, image_name, color=(0, 0, 0), text_color=(255, 255, 255)):
         self._rect = None
         self._need_update = False
 
@@ -28,6 +28,7 @@ class Background(object):
         self.text_size = 72
         self.text_x = 0
         self.text_y = 0
+        self._text_color = text_color
 
     def __str__(self):
         """Return background final name.
@@ -59,6 +60,16 @@ class Background(object):
                 self._background_image = color_or_path
                 self._need_update = True
 
+    def set_text_color(self, color):
+        """Set text color (RGB tuple) used to write the texts.
+        :param color: RGB color tuple
+        :type color: tuple
+        """
+        assert len(color) == 3, "Length of 3 is required for RGB tuple"
+        if color != self._text_color:
+            self._text_color = color
+            self._need_update = True
+
     def resize(self, screen):
         """Resize objects to fit to the screen.
         """
@@ -86,7 +97,7 @@ class Background(object):
         """Add the text to the screen
         """
         text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), self.text_size)
-        text = text_font.render(self.text, True, (255, 255, 255), (0, 0, 0))
+        text = text_font.render(self.text, True, self._text_color, (0, 0, 0))
         textrect = text.get_rect()
         textrect.centerx = self.text_x
         textrect.centery = self.text_y
