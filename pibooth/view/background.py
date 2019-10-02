@@ -16,6 +16,7 @@ class Background(object):
 
     def __init__(self, image_name, color=(0, 0, 0), text_color=(255, 255, 255)):
         self._rect = None
+        self._image_name = image_name
         self._need_update = False
 
         self._background = None
@@ -24,10 +25,9 @@ class Background(object):
 
         self._overlay = None
         self._overlay_image = "{0}.png".format(image_name)
-        self.text = get_translated_text(image_name)
-        self.text_size = 72
-        self.text_x = 0
-        self.text_y = 0
+
+        self._texts = []  # list of (surface, rect)
+        self._text_size = 72
         self._text_color = text_color
 
     def __str__(self):
@@ -75,11 +75,15 @@ class Background(object):
         """
         if self._rect != screen.get_rect():
             self._rect = screen.get_rect()
-            self.text_size = 72*self._rect.height//400
+
             self._overlay = pictures.get_pygame_image(self._overlay_image, (self._rect.width, self._rect.height))
             if self._background_image:
                 self._background = pictures.get_pygame_image(
                     self._background_image, (self._rect.width, self._rect.height), crop=True)
+
+            self._text_size = 72 * self._rect.height // 400
+            self.write_text(screen)
+
             self._need_update = True
 
     def paint(self, screen):
@@ -90,19 +94,22 @@ class Background(object):
         else:
             screen.fill(self._background_color)
         screen.blit(self._overlay, self.get_rect())
-        self.write_text(screen)
+        for text_surface, pos in self._texts:
+            screen.blit(text_surface, pos)
         self._need_update = False
 
-    def write_text(self, screen):
-        """Add the text to the screen
+    def write_text(self, screen, pos=None):
+        """Update text surfaces
         """
-        text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), self.text_size)
-        text = text_font.render(self.text, True, self._text_color)
-        textrect = text.get_rect()
-        textrect.centerx = self.text_x
-        textrect.centery = self.text_y
-        screen.blit(text, textrect)
-        self._need_update = False
+        self._texts = []
+        text = get_translated_text(self._image_name)
+        if text:
+            text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), self._text_size)
+            surface = text_font.render(text, True, self._text_color)
+            if not pos:
+                pos = screen.get_rect().center
+            self._texts.append((surface, surface.get_rect(center=pos)))
+
 
 class IntroBackground(Background):
 
@@ -115,8 +122,6 @@ class IntroBackground(Background):
 
     def resize(self, screen):
         Background.resize(self, screen)
-        self.text_x = screen.get_rect().centerx/2
-        self.text_y = screen.get_rect().centery
         if self._need_update:
             if self.arrow_location != ARROW_HIDDEN:
                 size = (self.get_rect().width * 0.3, self.get_rect().height * 0.3)
@@ -138,6 +143,12 @@ class IntroBackground(Background):
         if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.left_arrow, self.left_arrow_pos)
 
+    def write_text(self, screen):
+        """Update text surfaces
+        """
+        pos = (screen.get_rect().centerx / 2, screen.get_rect().centery)
+        Background.write_text(self, screen, pos)
+
 
 class IntroWithPrintBackground(IntroBackground):
 
@@ -146,21 +157,6 @@ class IntroWithPrintBackground(IntroBackground):
         self._overlay_image = "intro_print"
         self.right_arrow = None
         self.right_arrow_pos = None
-
-    def write_text(self, screen):
-        IntroBackground.write_text(self, screen)
-        text_size = 20*screen.get_rect().height//400
-        text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), text_size)
-        text_strings = get_translated_text("intro_print").splitlines()
-        delta_y = 0
-        for text_string in text_strings:
-            text = text_font.render(text_string, True, (255, 255, 255))
-            textrect = text.get_rect()
-            textrect.centerx = self.get_rect().width * 45/100
-            textrect.centery = self.get_rect().height * 2/3 + delta_y
-            screen.blit(text, textrect)
-            delta_y += text.get_height()
-        self._need_update = False
 
     def resize(self, screen):
         IntroBackground.resize(self, screen)
@@ -182,6 +178,21 @@ class IntroWithPrintBackground(IntroBackground):
         if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.right_arrow, self.right_arrow_pos)
 
+    def write_text(self, screen):
+        """Update text surfaces
+        """
+        IntroBackground.write_text(self, screen)
+        text_size = 20 * screen.get_rect().height // 400
+        text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), text_size)
+        text_strings = get_translated_text("intro_print").splitlines()
+        delta_y = 0
+        for text_string in text_strings:
+            surface = text_font.render(text_string, True, (255, 255, 255))
+            pos = (self.get_rect().width * 45 / 100, self.get_rect().height * 2 / 3 + delta_y)
+            self._texts.append((surface, surface.get_rect(center=pos)))
+            delta_y += surface.get_height()
+
+
 class ChooseBackground(Background):
 
     def __init__(self, choices, arrow_location=ARROW_BOTTOM, arrow_offset=0):
@@ -200,8 +211,6 @@ class ChooseBackground(Background):
 
     def resize(self, screen):
         Background.resize(self, screen)
-        self.text_x = screen.get_rect().centerx
-        self.text_y = screen.get_rect().height/7
         if self._need_update:
             size = (self.get_rect().width * 0.6, self.get_rect().height * 0.6)
             self.layout0 = pictures.get_pygame_image("layout{}.png".format(self.choices[0]), size)
@@ -246,6 +255,12 @@ class ChooseBackground(Background):
             screen.blit(self.left_arrow, self.left_arrow_pos)
             screen.blit(self.right_arrow, self.right_arrow_pos)
 
+    def write_text(self, screen):
+        """Update text surfaces
+        """
+        pos = (screen.get_rect().centerx, screen.get_rect().height / 7)
+        Background.write_text(self, screen, pos)
+
 
 class ChosenBackground(Background):
 
@@ -261,8 +276,6 @@ class ChosenBackground(Background):
 
     def resize(self, screen):
         Background.resize(self, screen)
-        self.text_x = screen.get_rect().centerx
-        self.text_y = screen.get_rect().height/7
         if self._need_update:
             size = (self.get_rect().width * 0.6, self.get_rect().height * 0.6)
 
@@ -277,6 +290,12 @@ class ChosenBackground(Background):
         Background.paint(self, screen)
         screen.blit(self.layout, self.layout_pos)
 
+    def write_text(self, screen):
+        """Update text surfaces
+        """
+        pos = (screen.get_rect().centerx, screen.get_rect().height / 7)
+        Background.write_text(self, screen, pos)
+
 
 class CaptureBackground(Background):
 
@@ -289,10 +308,11 @@ class ProcessingBackground(Background):
     def __init__(self):
         Background.__init__(self, "processing")
 
-    def resize(self, screen):
-        Background.resize(self, screen)
-        self.text_x = screen.get_rect().centerx
-        self.text_y = screen.get_rect().height*5/6
+    def write_text(self, screen):
+        """Update text surfaces
+        """
+        pos = (screen.get_rect().centerx, screen.get_rect().height * 5 / 6)
+        Background.write_text(self, screen, pos)
 
 
 class PrintBackground(Background):
@@ -306,8 +326,6 @@ class PrintBackground(Background):
 
     def resize(self, screen):
         Background.resize(self, screen)
-        self.text_x = screen.get_rect().centerx*3/2
-        self.text_y = screen.get_rect().centery
         if self._need_update:
             if self.arrow_location != ARROW_HIDDEN:
                 size = (self.get_rect().width * 0.3, self.get_rect().height * 0.3)
@@ -330,24 +348,26 @@ class PrintBackground(Background):
         if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.right_arrow, self.right_arrow_pos)
 
+    def write_text(self, screen):
+        """Update text surfaces
+        """
+        pos = (screen.get_rect().centerx * 3 / 2, screen.get_rect().centery)
+        Background.write_text(self, screen, pos)
+
 
 class FinishedBackground(Background):
 
     def __init__(self):
         Background.__init__(self, "finished")
 
-    def resize(self, screen):
-        Background.resize(self, screen)
-        self.text_x = screen.get_rect().centerx
-        self.text_y = screen.get_rect().height*3/4
+    def write_text(self, screen):
+        """Update text surfaces
+        """
+        pos = (screen.get_rect().centerx, screen.get_rect().height * 3 / 4)
+        Background.write_text(self, screen, pos)
 
 
 class OopsBackground(Background):
 
     def __init__(self):
         Background.__init__(self, "oops")
-
-    def resize(self, screen):
-        Background.resize(self, screen)
-        self.text_x = screen.get_rect().centerx
-        self.text_y = screen.get_rect().centery

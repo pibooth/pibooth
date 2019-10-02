@@ -41,6 +41,7 @@ LANGUAGES = {
     }
 }
 
+
 def get_translated_text(key):
     """Return the text corresponding to the key in the language defined in the config
     """
