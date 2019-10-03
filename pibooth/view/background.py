@@ -82,7 +82,7 @@ class Background(object):
                     self._background_image, (self._rect.width, self._rect.height), crop=True)
 
             self._text_size = 72 * self._rect.height // 400
-            self.write_text(screen)
+            self.write_text()
 
             self._need_update = True
 
@@ -98,7 +98,7 @@ class Background(object):
             screen.blit(text_surface, pos)
         self._need_update = False
 
-    def write_text(self, screen, pos=None):
+    def write_text(self, pos=None):
         """Update text surfaces
         """
         self._texts = []
@@ -107,7 +107,7 @@ class Background(object):
             text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), self._text_size)
             surface = text_font.render(text, True, self._text_color)
             if not pos:
-                pos = screen.get_rect().center
+                pos = self._rect.center
             self._texts.append((surface, surface.get_rect(center=pos)))
 
 
@@ -143,11 +143,11 @@ class IntroBackground(Background):
         if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.left_arrow, self.left_arrow_pos)
 
-    def write_text(self, screen):
+    def write_text(self):
         """Update text surfaces
         """
-        pos = (screen.get_rect().centerx / 2, screen.get_rect().centery)
-        Background.write_text(self, screen, pos)
+        pos = (self._rect.centerx / 2, self._rect.centery)
+        Background.write_text(self, pos)
 
 
 class IntroWithPrintBackground(IntroBackground):
@@ -160,7 +160,7 @@ class IntroWithPrintBackground(IntroBackground):
 
     def resize(self, screen):
         IntroBackground.resize(self, screen)
-        if self.arrow_location != ARROW_HIDDEN:
+        if self._need_update and self.arrow_location != ARROW_HIDDEN:
             size = (self.get_rect().width * 0.1, self.get_rect().height * 0.1)
             vflip = True if self.arrow_location == ARROW_TOP else False
             self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=True, vflip=vflip)
@@ -178,17 +178,17 @@ class IntroWithPrintBackground(IntroBackground):
         if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.right_arrow, self.right_arrow_pos)
 
-    def write_text(self, screen):
+    def write_text(self):
         """Update text surfaces
         """
-        IntroBackground.write_text(self, screen)
-        text_size = 20 * screen.get_rect().height // 400
+        IntroBackground.write_text(self)
+        text_size = 20 * self._rect.height // 400
         text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), text_size)
         text_strings = get_translated_text("intro_print").splitlines()
         delta_y = 0
         for text_string in text_strings:
             surface = text_font.render(text_string, True, (255, 255, 255))
-            pos = (self.get_rect().width * 45 / 100, self.get_rect().height * 2 / 3 + delta_y)
+            pos = (self._rect.width * 45 / 100, self._rect.height * 2 / 3 + delta_y)
             self._texts.append((surface, surface.get_rect(center=pos)))
             delta_y += surface.get_height()
 
@@ -255,11 +255,11 @@ class ChooseBackground(Background):
             screen.blit(self.left_arrow, self.left_arrow_pos)
             screen.blit(self.right_arrow, self.right_arrow_pos)
 
-    def write_text(self, screen):
+    def write_text(self):
         """Update text surfaces
         """
-        pos = (screen.get_rect().centerx, screen.get_rect().height / 7)
-        Background.write_text(self, screen, pos)
+        pos = (self._rect.centerx, self._rect.height / 7)
+        Background.write_text(self, pos)
 
 
 class ChosenBackground(Background):
@@ -290,11 +290,11 @@ class ChosenBackground(Background):
         Background.paint(self, screen)
         screen.blit(self.layout, self.layout_pos)
 
-    def write_text(self, screen):
+    def write_text(self):
         """Update text surfaces
         """
-        pos = (screen.get_rect().centerx, screen.get_rect().height / 7)
-        Background.write_text(self, screen, pos)
+        pos = (self._rect.centerx, self._rect.height / 7)
+        Background.write_text(self, pos)
 
 
 class CaptureBackground(Background):
@@ -308,11 +308,11 @@ class ProcessingBackground(Background):
     def __init__(self):
         Background.__init__(self, "processing")
 
-    def write_text(self, screen):
+    def write_text(self):
         """Update text surfaces
         """
-        pos = (screen.get_rect().centerx, screen.get_rect().height * 5 / 6)
-        Background.write_text(self, screen, pos)
+        pos = (self._rect.centerx, self._rect.height * 5 / 6)
+        Background.write_text(self, pos)
 
 
 class PrintBackground(Background):
@@ -348,11 +348,11 @@ class PrintBackground(Background):
         if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.right_arrow, self.right_arrow_pos)
 
-    def write_text(self, screen):
+    def write_text(self):
         """Update text surfaces
         """
-        pos = (screen.get_rect().centerx * 3 / 2, screen.get_rect().centery)
-        Background.write_text(self, screen, pos)
+        pos = (self._rect.centerx * 3 / 2, self._rect.centery)
+        Background.write_text(self, pos)
 
 
 class FinishedBackground(Background):
@@ -360,11 +360,11 @@ class FinishedBackground(Background):
     def __init__(self):
         Background.__init__(self, "finished")
 
-    def write_text(self, screen):
+    def write_text(self):
         """Update text surfaces
         """
-        pos = (screen.get_rect().centerx, screen.get_rect().height * 3 / 4)
-        Background.write_text(self, screen, pos)
+        pos = (self._rect.centerx, self._rect.height * 3 / 4)
+        Background.write_text(self, pos)
 
 
 class OopsBackground(Background):
