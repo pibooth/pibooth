@@ -78,3 +78,29 @@ def get_pil_font(text, font_name, max_width, max_height):
         else:
             start = k + 1
     return ImageFont.truetype(font_name, start)
+
+def get_pygame_font(text, font_name, max_width, max_height):
+    """Create the pygame font object which fit the text to the given rectangle.
+
+    :param text: text to draw
+    :type text: str
+    :param font_name: name or path to font definition file
+    :type font_name: str
+    :param max_width: width of the rect to fit
+    :type max_width: int
+    :param max_height: height of the rect to fit
+    :type max_height: int
+
+    :return: pygame.Font instance
+    :rtype: object
+    """
+    start, end = 0, int(max_height * 2)
+    while start < end:
+        k = (start + end) // 2
+        font = pygame.font.Font(font_name, k)
+        font_size = font.size(text)
+        if font_size[0] > max_width or font_size[1] > max_height:
+            end = k
+        else:
+            start = k + 1
+    return pygame.font.Font(font_name, start)

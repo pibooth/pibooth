@@ -5,6 +5,7 @@ import os.path as osp
 from pibooth import fonts
 from pibooth import pictures
 
+from pibooth.fonts import get_pygame_font
 from pibooth.language import get_translated_text
 
 ARROW_TOP = 'top'
@@ -27,7 +28,6 @@ class Background(object):
         self._overlay_image = "{0}.png".format(image_name)
 
         self._texts = []  # list of (surface, rect)
-        self._text_size = 72
         self._text_color = text_color
 
     def __str__(self):
@@ -81,7 +81,6 @@ class Background(object):
                 self._background = pictures.get_pygame_image(
                     self._background_image, (self._rect.width, self._rect.height), crop=True)
 
-            self._text_size = 72 * self._rect.height // 400
             self.write_text()
 
             self._need_update = True
@@ -104,10 +103,12 @@ class Background(object):
         self._texts = []
         text = get_translated_text(self._image_name)
         if text:
-            text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), self._text_size)
-            surface = text_font.render(text, True, self._text_color)
             if not pos:
                 pos = self._rect.center
+            rect_x = 0.9*min(2*pos[0], 2*(self._rect.width - pos[0]))
+            rect_y = 0.9*min(2*pos[1], 2*(self._rect.height - pos[1]))
+            text_font = get_pygame_font(text, fonts.get_filename("Amatic-Bold"), rect_x, rect_y)
+            surface = text_font.render(text, True, self._text_color)
             self._texts.append((surface, surface.get_rect(center=pos)))
 
 
@@ -363,7 +364,7 @@ class FinishedBackground(Background):
     def write_text(self):
         """Update text surfaces
         """
-        pos = (self._rect.centerx, self._rect.height * 3 / 4)
+        pos = (self._rect.centerx, self._rect.height * 4 / 5)
         Background.write_text(self, pos)
 
 
