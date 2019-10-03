@@ -187,9 +187,9 @@ class IntroWithPrintBackground(IntroBackground):
         text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), text_size)
         text_strings = get_translated_text("intro_print").splitlines()
         delta_y = 0
-        for text_string in text_strings:
+        for text_string in reversed(text_strings):
             surface = text_font.render(text_string, True, self._text_color)
-            pos = (self._rect.width * 45 / 100, self._rect.height * 2 / 3 + delta_y)
+            pos = (self._rect.width * 45 / 100, self._rect.height * 85 / 100 - delta_y)
             self._texts.append((surface, surface.get_rect(center=pos)))
             delta_y += surface.get_height()
 
