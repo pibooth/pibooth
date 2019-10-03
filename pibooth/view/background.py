@@ -187,7 +187,7 @@ class IntroWithPrintBackground(IntroBackground):
         text_strings = get_translated_text("intro_print").splitlines()
         delta_y = 0
         for text_string in text_strings:
-            surface = text_font.render(text_string, True, (255, 255, 255))
+            surface = text_font.render(text_string, True, self._text_color)
             pos = (self._rect.width * 45 / 100, self._rect.height * 2 / 3 + delta_y)
             self._texts.append((surface, surface.get_rect(center=pos)))
             delta_y += surface.get_height()
