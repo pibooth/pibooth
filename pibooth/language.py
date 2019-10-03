@@ -3,7 +3,10 @@
 """Pibooth language handling.
 """
 
-from pibooth.config import PiConfigParser
+from pibooth.utils import LOGGER
+
+
+CURRENT = 'en'  # Set dynamically at startup
 
 LANGUAGES = {
     'fr': {
@@ -42,10 +45,17 @@ LANGUAGES = {
 }
 
 
+def get_supported_languages():
+    """Return the list of supported language.
+    """
+    return list(LANGUAGES.keys())
+
+
 def get_translated_text(key):
     """Return the text corresponding to the key in the language defined in the config
     """
     try:
-        return LANGUAGES[PiConfigParser.language].get(key)
+        return LANGUAGES[CURRENT].get(key)
     except KeyError:
+        LOGGER.warning("Unsupported language '%s', fallback to English", CURRENT)
         return LANGUAGES['en'].get(key)

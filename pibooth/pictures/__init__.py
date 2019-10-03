@@ -6,6 +6,7 @@ import pygame
 from pibooth.config import PiConfigParser
 from pibooth.pictures import maker
 from pibooth.pictures import sizing
+from pibooth import language
 
 
 AUTO = 'auto'
@@ -22,7 +23,7 @@ def get_filename(name):
     :return: absolute image path
     :rtype: str
     """
-    path = osp.join(osp.dirname(osp.abspath(__file__)), PiConfigParser.language, name)
+    path = osp.join(osp.dirname(osp.abspath(__file__)), language.CURRENT, name)
     if not osp.isfile(path):
         # Look for common image
         path = osp.join(osp.dirname(osp.abspath(__file__)), 'com', name)
@@ -60,7 +61,7 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
         if crop:
             pil_image = pil_image.crop(sizing.new_size_by_croping_ratio(pil_image.size, size))
         pil_image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, size),
-                             Image.ANTIALIAS if antialiasing else Image.NEAREST)
+                                     Image.ANTIALIAS if antialiasing else Image.NEAREST)
         image = pygame.image.fromstring(pil_image.tobytes(), pil_image.size, pil_image.mode)
 
     if hflip or vflip:

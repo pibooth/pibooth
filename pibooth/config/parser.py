@@ -10,22 +10,15 @@ import errno
 import subprocess
 import itertools
 from collections import OrderedDict as odict
-import pibooth
 from pibooth.utils import LOGGER
+from pibooth import language
+
 
 try:
     from configparser import ConfigParser
 except ImportError:
     # Python 2.x fallback
     from ConfigParser import ConfigParser
-
-
-def get_supported_languages():
-    """Return the list of supported language.
-    """
-    path = osp.join(osp.dirname(osp.abspath(pibooth.__file__)), 'pictures')
-    return [name for name in os.listdir(path) if osp.isdir(osp.join(path, name))
-            and not name.startswith('.') and not name.startswith('__') and name != 'com']
 
 
 def values_list_repr(values):
@@ -39,8 +32,8 @@ DEFAULT = odict((
         odict((
             ("language",
                 ("en",
-                 "User interface language: {}".format(values_list_repr(get_supported_languages())),
-                 "UI language", get_supported_languages())),
+                 "User interface language: {}".format(values_list_repr(language.get_supported_languages())),
+                 "UI language", language.get_supported_languages())),
             ("directory",
                 ("~/Pictures/pibooth",
                  "Path to save pictures",
@@ -243,7 +236,6 @@ class PiConfigParser(ConfigParser):
     """Enhenced configuration file parser.
     """
 
-    language = 'en'
     editors = ['leafpad', 'vi', 'emacs']
 
     def __init__(self, filename, clear=False):

@@ -13,12 +13,13 @@ import itertools
 import os.path as osp
 import pygame
 import pibooth
+from pibooth import language
 from pibooth import diagnostic
 from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging,
                            set_logging_level, print_columns_words)
 from pibooth.states import StateMachine, State
 from pibooth.view import PtbWindow
-from pibooth.config import PiConfigParser, PiConfigMenu, get_supported_languages
+from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth.controls import GPIO, camera
 from pibooth.fonts import get_available_fonts
 from pibooth.pictures import get_picture_maker
@@ -455,12 +456,8 @@ class PiApplication(object):
         configuration file.
         Only parameters that can be changed at runtime are restored.
         """
-        # Handle the language configuration, save it as a class attribute for easy access
-        language = self.config.get('GENERAL', 'language')
-        if language not in get_supported_languages():
-            LOGGER.warning("Unsupported language '%s', fallback to English", language)
-        else:
-            PiConfigParser.language = language
+        # Handle the language configuration
+        language.CURRENT = self.config.get('GENERAL', 'language')
 
         # Set the captures choices
         choices = self.config.gettuple('PICTURE', 'captures', int)
