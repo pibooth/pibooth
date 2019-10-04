@@ -131,7 +131,7 @@ def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6), force_pil
 def get_layout_image(text_color, layout_number, size):
     """Generate the layout image with the corresponding text
     """
-    layout_image = get_pygame_image("layout.png", size)
+    layout_image = get_pygame_image("layout{0}.png".format(layout_number), size)
     text = language.get_translated_text(str(layout_number))
     pos = (size[0]/2, size[1]*0.85)
     if text:
