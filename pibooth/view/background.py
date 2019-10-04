@@ -71,8 +71,8 @@ class Background(object):
 
             overlay_name = "{}.png".format(self._name)
             if osp.isfile(pictures.get_filename(overlay_name)):
-                self._overlay = pictures.get_pygame_image(pictures.get_filename(overlay_name),
-                                                          (self._rect.width, self._rect.height))
+                self._overlay = pictures.get_pygame_image(
+                    pictures.get_filename(overlay_name), (self._rect.width, self._rect.height))
 
             if self._background_image:
                 self._background = pictures.get_pygame_image(
@@ -159,7 +159,7 @@ class IntroWithPrintBackground(IntroBackground):
         """Return background final name.
         It is used in the main window to distinguish background in the cache.
         """
-        return "{}({})".format(self.__class__.__name__, "intro")
+        return "{}({})".format(self.__class__.__name__, "intro_print")
 
     def resize(self, screen):
         IntroBackground.resize(self, screen)
@@ -267,7 +267,7 @@ class ChooseBackground(Background):
     def write_text(self):
         """Update text surfaces
         """
-        pos = (self._rect.centerx, self._rect.height / 7)
+        pos = (self._rect.centerx, self._rect.height / 8)
         Background.write_text(self, pos)
 
 
@@ -305,7 +305,7 @@ class ChosenBackground(Background):
     def write_text(self):
         """Update text surfaces
         """
-        pos = (self._rect.centerx, self._rect.height / 7)
+        pos = (self._rect.centerx, self._rect.height / 8)
         Background.write_text(self, pos)
 
 
