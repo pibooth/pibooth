@@ -7,9 +7,8 @@ from difflib import SequenceMatcher
 import pygame
 from PIL import ImageFont
 
-
 EMBEDDED_FONT_PATH = osp.dirname(osp.abspath(__file__))
-CURRENT = "Amatic-Bold"
+
 
 def get_available_fonts():
     """Return the list of available fonts.
@@ -79,6 +78,7 @@ def get_pil_font(text, font_name, max_width, max_height):
             start = k + 1
     return ImageFont.truetype(font_name, start)
 
+
 def get_pygame_font(text, font_name, max_width, max_height):
     """Create the pygame font object which fit the text to the given rectangle.
 
@@ -104,3 +104,6 @@ def get_pygame_font(text, font_name, max_width, max_height):
         else:
             start = k + 1
     return pygame.font.Font(get_filename(font_name), start)
+
+
+CURRENT = get_filename('Amatic-Bold')  # Dynamically set at startup

@@ -6,7 +6,7 @@
 from pibooth.utils import LOGGER
 
 
-CURRENT = 'en'  # Set dynamically at startup
+CURRENT = 'en'  # Dynamically set at startup
 
 LANGUAGES = {
     'fr': {

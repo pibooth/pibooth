@@ -459,8 +459,7 @@ class PiApplication(object):
         """
         # Handle the language configuration
         language.CURRENT = self.config.get('GENERAL', 'language')
-        fonts.CURRENT = self.config.gettuple('PICTURE', 'text_fonts', str)[0]
-
+        fonts.CURRENT = fonts.get_filename(self.config.gettuple('PICTURE', 'text_fonts', str)[0])
 
         # Set the captures choices
         choices = self.config.gettuple('PICTURE', 'captures', int)
