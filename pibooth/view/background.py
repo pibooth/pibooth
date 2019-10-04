@@ -164,7 +164,8 @@ class IntroWithPrintBackground(IntroBackground):
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
             size = (self.get_rect().width * 0.1, self.get_rect().height * 0.1)
             vflip = True if self.arrow_location == ARROW_TOP else False
-            self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=False, vflip=vflip, angle=70)
+            angle = -70 if self.arrow_location == ARROW_TOP else 70
+            self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=False, vflip=vflip, angle=angle)
             x = int(self.get_rect().left + self.get_rect().width // 2
                     - self.right_arrow.get_rect().width // 2)
             if self.arrow_location == ARROW_TOP:
@@ -186,9 +187,15 @@ class IntroWithPrintBackground(IntroBackground):
         text_font = pictures.pygame.font.Font(fonts.get_filename(fonts.CURRENT), text_size)
         text_strings = get_translated_text("intro_print").splitlines()
         delta_y = 0
-        for text_string in reversed(text_strings):
+        if self.arrow_location == ARROW_BOTTOM:
+            text_strings = reversed(text_strings)
+        for text_string in text_strings:
             surface = text_font.render(text_string, True, self._text_color)
-            pos = (self._rect.width * 45 / 100, self._rect.height * 87 / 100 - delta_y)
+            if self.arrow_location == ARROW_BOTTOM:
+                pos_y = self._rect.height * 87 / 100 - delta_y
+            else:
+                pos_y = self._rect.height * 13 / 100 + delta_y
+            pos = (self._rect.width * 45 / 100, pos_y)
             self._texts.append((surface, surface.get_rect(center=pos)))
             delta_y += surface.get_height()
 
@@ -227,9 +234,9 @@ class ChooseBackground(Background):
 
             if self.arrow_location != ARROW_HIDDEN:
                 if self.arrow_location == ARROW_TOP:
-                    y = self.get_rect().top + 5
+                    y = 5
                     x_offset = 30
-                    size = (self.get_rect().width * 0.1, self.layout0_pos[1] - y - 10)
+                    size = (self.get_rect().width * 0.1, self.get_rect().top + y + 30)
                 else:
                     x_offset = 0
                     y = self.layout0_pos[1] + self.layout0.get_rect().height + 5
