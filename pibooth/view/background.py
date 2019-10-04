@@ -164,14 +164,13 @@ class IntroWithPrintBackground(IntroBackground):
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
             size = (self.get_rect().width * 0.1, self.get_rect().height * 0.1)
             vflip = True if self.arrow_location == ARROW_TOP else False
-            self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=True, vflip=vflip)
-
+            self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=False, vflip=vflip, angle=70)
             x = int(self.get_rect().left + self.get_rect().width // 2
                     - self.right_arrow.get_rect().width // 2)
             if self.arrow_location == ARROW_TOP:
                 y = self.get_rect().top + 10
             else:
-                y = int(self.get_rect().top + 8 * self.get_rect().height // 9)
+                y = int(self.get_rect().bottom - self.right_arrow.get_rect().height*1.1)
             self.right_arrow_pos = (x - self.arrow_offset, y)
 
     def paint(self, screen):
@@ -189,7 +188,7 @@ class IntroWithPrintBackground(IntroBackground):
         delta_y = 0
         for text_string in reversed(text_strings):
             surface = text_font.render(text_string, True, self._text_color)
-            pos = (self._rect.width * 45 / 100, self._rect.height * 85 / 100 - delta_y)
+            pos = (self._rect.width * 45 / 100, self._rect.height * 87 / 100 - delta_y)
             self._texts.append((surface, surface.get_rect(center=pos)))
             delta_y += surface.get_height()
 

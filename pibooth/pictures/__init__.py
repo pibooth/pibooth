@@ -31,7 +31,7 @@ def get_filename(name):
     return path
 
 
-def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False, crop=False):
+def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False, crop=False, angle=0):
     """Return a Pygame image. If a size is given, the image is
     resized keeping the original image's aspect ratio.
 
@@ -47,6 +47,8 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
     :type vflip: bool
     :param crop: crop image to fit aspect ration of the size
     :type crop: bool
+    :param angle: angle of rotation of the image
+    :type angle: int
 
     :return: pygame.Surface with image
     :rtype: object
@@ -67,6 +69,8 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
 
     if hflip or vflip:
         image = pygame.transform.flip(image, hflip, vflip)
+    if angle != 0:
+        image = pygame.transform.rotate(image, angle)
     return image
 
 
