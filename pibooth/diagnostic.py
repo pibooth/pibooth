@@ -9,6 +9,7 @@ except ImportError:
     gp = None  # gphoto2 is optional
 import pibooth
 
+
 LOGFILE = None
 APPNAME = 'diagnostic'
 

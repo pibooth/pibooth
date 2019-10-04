@@ -3,11 +3,10 @@
 import os.path as osp
 from PIL import Image
 import pygame
-from pibooth.config import PiConfigParser
-from pibooth.pictures import maker
-from pibooth.pictures import sizing
 from pibooth import language
 from pibooth import fonts
+from pibooth.pictures import maker
+from pibooth.pictures import sizing
 
 
 AUTO = 'auto'
@@ -24,11 +23,7 @@ def get_filename(name):
     :return: absolute image path
     :rtype: str
     """
-    path = osp.join(osp.dirname(osp.abspath(__file__)), language.CURRENT, name)
-    if not osp.isfile(path):
-        # Look for common image
-        path = osp.join(osp.dirname(osp.abspath(__file__)), 'com', name)
-    return path
+    return osp.join(osp.dirname(osp.abspath(__file__)), 'assets', name)
 
 
 def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False, crop=False, angle=0):
@@ -129,8 +124,8 @@ def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6), force_pil
 
     if not maker.cv2 or force_pil:
         return maker.PilPictureMaker(size[0], size[1], *captures)
-    else:
-        return maker.OpenCvPictureMaker(size[0], size[1], *captures)
+
+    return maker.OpenCvPictureMaker(size[0], size[1], *captures)
 
 
 def get_layout_image(text_color, layout_number, size):

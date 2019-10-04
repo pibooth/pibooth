@@ -17,7 +17,7 @@ class Background(object):
 
     def __init__(self, image_name, color=(0, 0, 0), text_color=(255, 255, 255)):
         self._rect = None
-        self._image_name = image_name
+        self._name = image_name
         self._need_update = False
 
         self._background = None
@@ -25,22 +25,15 @@ class Background(object):
         self._background_image = None
 
         self._overlay = None
-        self._overlay_image = "{0}.png".format(image_name)
 
-        self._texts = []  # list of (surface, rect)
+        self._texts = []  # List of (surface, rect)
         self._text_color = text_color
 
     def __str__(self):
         """Return background final name.
+        It is used in the main window to distinguish background in the cache.
         """
-        return self._overlay_image
-
-    def get_rect(self):
-        """Return the Rect object of the background image. As aspect ratio
-        is kept, the size of the background may be different from the
-        screen size.
-        """
-        return self._overlay.get_rect(center=self._rect.center)
+        return "{}({})".format(self.__class__.__name__, self._name)
 
     def set_color(self, color_or_path):
         """Set background color (RGB tuple) or path to an image that used to
@@ -76,7 +69,11 @@ class Background(object):
         if self._rect != screen.get_rect():
             self._rect = screen.get_rect()
 
-            self._overlay = pictures.get_pygame_image(self._overlay_image, (self._rect.width, self._rect.height))
+            overlay_name = "{}.png".format(self._name)
+            if osp.isfile(pictures.get_filename(overlay_name)):
+                self._overlay = pictures.get_pygame_image(pictures.get_filename(overlay_name),
+                                                          (self._rect.width, self._rect.height))
+
             if self._background_image:
                 self._background = pictures.get_pygame_image(
                     self._background_image, (self._rect.width, self._rect.height), crop=True)
@@ -92,7 +89,8 @@ class Background(object):
             screen.blit(self._background, (0, 0))
         else:
             screen.fill(self._background_color)
-        screen.blit(self._overlay, self.get_rect())
+        if self._overlay:
+            screen.blit(self._overlay, self._overlay.get_rect(center=self._rect.center))
         for text_surface, pos in self._texts:
             screen.blit(text_surface, pos)
         self._need_update = False
@@ -101,7 +99,7 @@ class Background(object):
         """Update text surfaces
         """
         self._texts = []
-        text = get_translated_text(self._image_name)
+        text = get_translated_text(self._name)
         if text:
             if not pos:
                 pos = self._rect.center
@@ -123,21 +121,20 @@ class IntroBackground(Background):
 
     def resize(self, screen):
         Background.resize(self, screen)
-        if self._need_update:
-            if self.arrow_location != ARROW_HIDDEN:
-                size = (self.get_rect().width * 0.3, self.get_rect().height * 0.3)
+        if self._need_update and self.arrow_location != ARROW_HIDDEN:
+            size = (self._rect.width * 0.3, self._rect.height * 0.3)
 
-                vflip = True if self.arrow_location == ARROW_TOP else False
-                self.left_arrow = pictures.get_pygame_image("arrow.png", size, vflip=vflip)
+            vflip = True if self.arrow_location == ARROW_TOP else False
+            self.left_arrow = pictures.get_pygame_image("arrow.png", size, vflip=vflip)
 
-                x = int(self.get_rect().left + self.get_rect().width // 4
-                        - self.left_arrow.get_rect().width // 2)
-                if self.arrow_location == ARROW_TOP:
-                    y = self.get_rect().top + 10
-                else:
-                    y = int(self.get_rect().top + 2 * self.get_rect().height // 3)
+            x = int(self._rect.left + self._rect.width // 4
+                    - self.left_arrow.get_rect().width // 2)
+            if self.arrow_location == ARROW_TOP:
+                y = self._rect.top + 10
+            else:
+                y = int(self._rect.top + 2 * self._rect.height // 3)
 
-                self.left_arrow_pos = (x - self.arrow_offset, y)
+            self.left_arrow_pos = (x - self.arrow_offset, y)
 
     def paint(self, screen):
         Background.paint(self, screen)
@@ -155,23 +152,28 @@ class IntroWithPrintBackground(IntroBackground):
 
     def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
         IntroBackground.__init__(self, arrow_location, arrow_offset)
-        self._overlay_image = "intro_print"
         self.right_arrow = None
         self.right_arrow_pos = None
+
+    def __str__(self):
+        """Return background final name.
+        It is used in the main window to distinguish background in the cache.
+        """
+        return "{}({})".format(self.__class__.__name__, "intro")
 
     def resize(self, screen):
         IntroBackground.resize(self, screen)
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
-            size = (self.get_rect().width * 0.1, self.get_rect().height * 0.1)
+            size = (self._rect.width * 0.1, self._rect.height * 0.1)
             vflip = True if self.arrow_location == ARROW_TOP else False
             angle = -70 if self.arrow_location == ARROW_TOP else 70
             self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=False, vflip=vflip, angle=angle)
-            x = int(self.get_rect().left + self.get_rect().width // 2
+            x = int(self._rect.left + self._rect.width // 2
                     - self.right_arrow.get_rect().width // 2)
             if self.arrow_location == ARROW_TOP:
-                y = self.get_rect().top + 10
+                y = self._rect.top + 10
             else:
-                y = int(self.get_rect().bottom - self.right_arrow.get_rect().height * 1.1)
+                y = int(self._rect.bottom - self.right_arrow.get_rect().height * 1.1)
             self.right_arrow_pos = (x - self.arrow_offset, y)
 
     def paint(self, screen):
@@ -219,15 +221,15 @@ class ChooseBackground(Background):
     def resize(self, screen):
         Background.resize(self, screen)
         if self._need_update:
-            size = (self.get_rect().width * 0.6, self.get_rect().height * 0.6)
+            size = (self._rect.width * 0.6, self._rect.height * 0.6)
             self.layout0 = pictures.get_layout_image((0, 0, 0), self.choices[0], size)
             self.layout1 = pictures.get_layout_image((0, 0, 0), self.choices[1], size)
 
-            inter = (self.get_rect().width - 2 * self.layout0.get_rect().width) // 3
+            inter = (self._rect.width - 2 * self.layout0.get_rect().width) // 3
 
-            x0 = int(self.get_rect().left + inter)
-            x1 = int(self.get_rect().left + 2 * inter + self.layout0.get_rect().width)
-            y = int(self.get_rect().top + self.get_rect().height * 0.3)
+            x0 = int(self._rect.left + inter)
+            x1 = int(self._rect.left + 2 * inter + self.layout0.get_rect().width)
+            y = int(self._rect.top + self._rect.height * 0.3)
 
             self.layout0_pos = (x0, y)
             self.layout1_pos = (x1, y)
@@ -236,20 +238,20 @@ class ChooseBackground(Background):
                 if self.arrow_location == ARROW_TOP:
                     y = 5
                     x_offset = 30
-                    size = (self.get_rect().width * 0.1, self.get_rect().top + y + 30)
+                    size = (self._rect.width * 0.1, self._rect.top + y + 30)
                 else:
                     x_offset = 0
                     y = self.layout0_pos[1] + self.layout0.get_rect().height + 5
-                    size = (self.get_rect().width * 0.1, self.get_rect().bottom - y - 5)
+                    size = (self._rect.width * 0.1, self._rect.bottom - y - 5)
 
                 vflip = True if self.arrow_location == ARROW_TOP else False
                 self.left_arrow = pictures.get_pygame_image("arrow.png", size, vflip=vflip)
                 self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=True, vflip=vflip)
 
-                inter = (self.get_rect().width - 2 * self.left_arrow.get_rect().width) // 4
+                inter = (self._rect.width - 2 * self.left_arrow.get_rect().width) // 4
 
-                x0 = int(self.get_rect().left + inter) - x_offset
-                x1 = int(self.get_rect().left + 3 * inter + self.left_arrow.get_rect().width) + x_offset
+                x0 = int(self._rect.left + inter) - x_offset
+                x1 = int(self._rect.left + 3 * inter + self.left_arrow.get_rect().width) + x_offset
 
                 self.left_arrow_pos = (x0 - self.arrow_offset, y)
                 self.right_arrow_pos = (x1 + self.arrow_offset, y)
@@ -279,18 +281,20 @@ class ChosenBackground(Background):
         self.layout_pos = None
 
     def __str__(self):
-        return "chosen{}.png".format(self.selected)
+        """Return background final name.
+        It is used in the main window to distinguish background in the cache.
+        """
+        return "{}({}{})".format(self.__class__.__name__, self._name, self.selected)
 
     def resize(self, screen):
         Background.resize(self, screen)
         if self._need_update:
-            size = (self.get_rect().width * 0.6, self.get_rect().height * 0.6)
+            size = (self._rect.width * 0.6, self._rect.height * 0.6)
 
-            # self.layout = pictures.get_pygame_image("layout{}.png".format(self.selected), size)
             self.layout = pictures.get_layout_image((0, 0, 0), self.selected, size)
 
-            x = self.layout.get_rect(center=self.get_rect().center).left
-            y = int(self.get_rect().top + self.get_rect().height * 0.3)
+            x = self.layout.get_rect(center=self._rect.center).left
+            y = int(self._rect.top + self._rect.height * 0.3)
 
             self.layout_pos = (x, y)
 
@@ -334,22 +338,21 @@ class PrintBackground(Background):
 
     def resize(self, screen):
         Background.resize(self, screen)
-        if self._need_update:
-            if self.arrow_location != ARROW_HIDDEN:
-                size = (self.get_rect().width * 0.3, self.get_rect().height * 0.3)
+        if self._need_update and self.arrow_location != ARROW_HIDDEN:
+            size = (self._rect.width * 0.3, self._rect.height * 0.3)
 
-                vflip = True if self.arrow_location == ARROW_TOP else False
-                self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=True, vflip=vflip)
+            vflip = True if self.arrow_location == ARROW_TOP else False
+            self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=True, vflip=vflip)
 
-                x = int(self.get_rect().left + self.get_rect().width * 0.75
-                        - self.right_arrow.get_rect().width // 2)
+            x = int(self._rect.left + self._rect.width * 0.75
+                    - self.right_arrow.get_rect().width // 2)
 
-                if self.arrow_location == ARROW_TOP:
-                    y = self.get_rect().top + 10
-                else:
-                    y = int(self.get_rect().top + 2 * self.get_rect().height // 3)
+            if self.arrow_location == ARROW_TOP:
+                y = self._rect.top + 10
+            else:
+                y = int(self._rect.top + 2 * self._rect.height // 3)
 
-                self.right_arrow_pos = (x + self.arrow_offset, y)
+            self.right_arrow_pos = (x + self.arrow_offset, y)
 
     def paint(self, screen):
         Background.paint(self, screen)
