@@ -18,7 +18,11 @@ LANGUAGES = {
         'choose': "Choisis ton format",
         'chosen': "C'est parti !",
         'processing': "Préparation du montage",
-        'print': "Imprimer la photo ?"
+        'print': "Imprimer la photo ?",
+        '1': "1 photo",
+        '2': "2 photos",
+        '3': "3 photos",
+        '4': "4 photos"
     },
     'en': {
         'smile_message': "Smile !",
@@ -29,7 +33,11 @@ LANGUAGES = {
         'choose': "Choose your layout",
         'chosen': "Let's go!",
         'processing': "Processing...",
-        'print': "Print the photo?"
+        'print': "Print the photo?",
+        '1': "1 photo",
+        '2': "2 photos",
+        '3': "3 photos",
+        '4': "4 photos"
     },
     'de': {
         'smile_message': "Bitte lächeln !",
@@ -40,7 +48,11 @@ LANGUAGES = {
         'choose': "Wähle dein Layout",
         'chosen': "Los gehts!",
         'processing': "Bearbeitung...",
-        'print': "Foto drucken?"
+        'print': "Foto drucken?",
+        '1': "1 foto",
+        '2': "2 fotos",
+        '3': "3 fotos",
+        '4': "4 fotos"
     }
 }
 

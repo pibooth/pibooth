@@ -7,6 +7,7 @@ from pibooth.config import PiConfigParser
 from pibooth.pictures import maker
 from pibooth.pictures import sizing
 from pibooth import language
+from pibooth import fonts
 
 
 AUTO = 'auto'
@@ -126,3 +127,18 @@ def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6), force_pil
         return maker.PilPictureMaker(size[0], size[1], *captures)
     else:
         return maker.OpenCvPictureMaker(size[0], size[1], *captures)
+
+def get_layout_image(text_color, layout_number, size):
+    """Generate the layout image with the corresponding text
+    """
+    layout_image = get_pygame_image("layout.png", size)
+    text = language.get_translated_text(str(layout_number))
+    pos = (size[0]/2, size[1]*0.85)
+    if text:
+        rect_x = 0.7*min(2*pos[0], 2*(size[0] - pos[0]))
+        rect_y = 0.7*min(2*pos[1], 2*(size[1] - pos[1]))
+        text_font = fonts.get_pygame_font(text, fonts.get_filename(fonts.CURRENT), rect_x, rect_y)
+        surface = text_font.render(text, True, text_color)
+        pos = (pos[0]/2, pos[1])
+        layout_image.blit(surface, surface.get_rect(center=pos))
+    return layout_image
