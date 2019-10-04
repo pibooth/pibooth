@@ -40,7 +40,9 @@ class StateFailSafe(State):
         self.app.dirname = None
         self.app.capture_nbr = None
         self.app.nbr_duplicates = 0
+        self.app.previous_picture = None
         self.app.previous_animated = []
+        self.app.previous_picture_file = None
         self.app.camera.drop_captures()  # Flush previous captures
         self.app.window.show_oops()
         self.timer.start()
