@@ -13,6 +13,7 @@ import itertools
 import os.path as osp
 import pygame
 import pibooth
+from pibooth import fonts
 from pibooth import language
 from pibooth import diagnostic
 from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging,
@@ -287,13 +288,13 @@ class StateProcessing(State):
             texts = [self.app.config.get('PICTURE', 'footer_text1').strip('"'),
                      self.app.config.get('PICTURE', 'footer_text2').strip('"')]
             colors = self.app.config.gettuple('PICTURE', 'text_colors', 'color', len(texts))
-            fonts = self.app.config.gettuple('PICTURE', 'text_fonts', str, len(texts))
+            text_fonts = self.app.config.gettuple('PICTURE', 'text_fonts', str, len(texts))
             alignments = self.app.config.gettuple('PICTURE', 'text_alignments', str, len(texts))
 
             def _setup_maker(m):
                 m.set_background(background)
                 if any(elem != '' for elem in texts):
-                    for params in zip(texts, fonts, colors, alignments):
+                    for params in zip(texts, text_fonts, colors, alignments):
                         m.add_text(*params)
                 if self.app.config.getboolean('PICTURE', 'captures_cropping'):
                     m.set_cropping()
@@ -458,6 +459,8 @@ class PiApplication(object):
         """
         # Handle the language configuration
         language.CURRENT = self.config.get('GENERAL', 'language')
+        fonts.CURRENT = self.config.gettuple('PICTURE', 'text_fonts', str)[0]
+
 
         # Set the captures choices
         choices = self.config.gettuple('PICTURE', 'captures', int)

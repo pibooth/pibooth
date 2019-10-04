@@ -50,7 +50,7 @@ class BaseCamera(object):
         image = Image.new('RGBA', size)
         draw = ImageDraw.Draw(image)
 
-        font = fonts.get_pil_font(text, fonts.get_filename("Amatic-Bold"), size[0], size[1])
+        font = fonts.get_pil_font(text, fonts.get_filename(fonts.CURRENT), size[0], size[1])
         txt_width, txt_height = draw.textsize(text, font=font)
 
         position = ((size[0] - txt_width) // 2, (size[1] - txt_height) // 2 - size[1] // 10)

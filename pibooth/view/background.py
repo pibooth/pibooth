@@ -107,7 +107,7 @@ class Background(object):
                 pos = self._rect.center
             rect_x = 0.9*min(2*pos[0], 2*(self._rect.width - pos[0]))
             rect_y = 0.9*min(2*pos[1], 2*(self._rect.height - pos[1]))
-            text_font = get_pygame_font(text, fonts.get_filename("Amatic-Bold"), rect_x, rect_y)
+            text_font = get_pygame_font(text, fonts.get_filename(fonts.CURRENT), rect_x, rect_y)
             surface = text_font.render(text, True, self._text_color)
             self._texts.append((surface, surface.get_rect(center=pos)))
 
@@ -184,7 +184,7 @@ class IntroWithPrintBackground(IntroBackground):
         """
         IntroBackground.write_text(self)
         text_size = 20 * self._rect.height // 400
-        text_font = pictures.pygame.font.Font(fonts.get_filename("Amatic-Bold"), text_size)
+        text_font = pictures.pygame.font.Font(fonts.get_filename(fonts.CURRENT), text_size)
         text_strings = get_translated_text("intro_print").splitlines()
         delta_y = 0
         for text_string in reversed(text_strings):

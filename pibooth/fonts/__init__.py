@@ -9,7 +9,7 @@ from PIL import ImageFont
 
 
 EMBEDDED_FONT_PATH = osp.dirname(osp.abspath(__file__))
-
+CURRENT = "Amatic-Bold"
 
 def get_available_fonts():
     """Return the list of available fonts.
@@ -97,10 +97,10 @@ def get_pygame_font(text, font_name, max_width, max_height):
     start, end = 0, int(max_height * 2)
     while start < end:
         k = (start + end) // 2
-        font = pygame.font.Font(font_name, k)
+        font = pygame.font.Font(get_filename(font_name), k)
         font_size = font.size(text)
         if font_size[0] > max_width or font_size[1] > max_height:
             end = k
         else:
             start = k + 1
-    return pygame.font.Font(font_name, start)
+    return pygame.font.Font(get_filename(font_name), start)

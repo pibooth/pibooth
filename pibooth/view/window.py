@@ -121,7 +121,7 @@ class PtbWindow(object):
                 image = pictures.get_pygame_image('printer.png', (side, side))
             y = self.surface.get_rect().height - image.get_rect().height - 10
             self.surface.blit(image, (10, y))
-            font = pygame.font.Font(fonts.get_filename("Amatic-Bold"), side)
+            font = pygame.font.Font(fonts.get_filename(fonts.CURRENT), side)
             label = font.render(str(self._print_number), True, self.text_color)
             self.surface.blit(label, (side + 20, y))
 
