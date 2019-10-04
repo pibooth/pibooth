@@ -12,6 +12,8 @@ import psutil
 import functools
 from fnmatch import fnmatchcase
 import contextlib
+import errno
+import subprocess
 try:
     from itertools import zip_longest, islice
 except ImportError:
@@ -239,3 +241,20 @@ def memorize(func):
         return cache[func]
 
     return memorized_func_wrapper
+
+
+def open_text_editor(filename):
+    """Open a text editor to edit the configuration file.
+    """
+    editors = ['leafpad', 'vi', 'emacs']
+    for editor in editors:
+        try:
+            process = subprocess.Popen([editor, filename])
+            process.communicate()
+            return True
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                # Something else went wrong while trying to run the editor
+                raise
+    LOGGER.critical("Can't find installed text editor among %s", editors)
+    return False

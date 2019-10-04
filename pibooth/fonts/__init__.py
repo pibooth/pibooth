@@ -7,6 +7,7 @@ from difflib import SequenceMatcher
 import pygame
 from PIL import ImageFont
 
+
 EMBEDDED_FONT_PATH = osp.dirname(osp.abspath(__file__))
 
 

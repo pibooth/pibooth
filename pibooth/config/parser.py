@@ -3,14 +3,13 @@
 """Pibooth configuration.
 """
 
+import io
 import ast
 import os
 import os.path as osp
-import errno
-import subprocess
 import itertools
 from collections import OrderedDict as odict
-from pibooth.utils import LOGGER
+from pibooth.utils import LOGGER, open_text_editor
 from pibooth import language
 
 
@@ -236,8 +235,6 @@ class PiConfigParser(ConfigParser):
     """Enhenced configuration file parser.
     """
 
-    editors = ['leafpad', 'vi', 'emacs']
-
     def __init__(self, filename, clear=False):
         ConfigParser.__init__(self)
         self.filename = osp.abspath(osp.expanduser(filename))
@@ -249,7 +246,7 @@ class PiConfigParser(ConfigParser):
             self.save(True)
             self.enable_autostart(DEFAULT['GENERAL']['autostart'][0])
 
-        self.read(self.filename)
+        self.read(self.filename, encoding="utf-8")
 
     def _get_abs_path(self, path):
         """Return absolute path. In case of relative path given, the absolute
@@ -264,7 +261,7 @@ class PiConfigParser(ConfigParser):
         """Save the current or default values into the configuration file.
         """
         LOGGER.info("Generate the configuration file in '%s'", self.filename)
-        with open(self.filename, 'w') as fp:
+        with io.open(self.filename, 'w', encoding="utf-8") as fp:
             for section, options in DEFAULT.items():
                 fp.write("[{}]\n".format(section))
                 for name, value in options.items():
@@ -273,6 +270,14 @@ class PiConfigParser(ConfigParser):
                     else:
                         val = self.get(section, name)
                     fp.write("# {}\n{} = {}\n\n".format(value[1], name, val))
+
+    def edit(self):
+        """Open a text editor to edit the configuration.
+        """
+        if open_text_editor(self.filename):
+            # Reload config to check if autostart has changed
+            self.read(self.filename, encoding="utf-8")
+            self.enable_autostart(self.getboolean('GENERAL', 'autostart'))
 
     def enable_autostart(self, enable=True):
         """Auto-start pibooth at the Raspberry Pi startup.
@@ -294,21 +299,6 @@ class PiConfigParser(ConfigParser):
         elif not enable and osp.isfile(filename):
             LOGGER.info("Remove the auto-startup file in '%s'", dirname)
             os.remove(filename)
-
-    def open_editor(self):
-        """Open a text editor to edit the configuration file.
-        """
-        for editor in self.editors:
-            try:
-                process = subprocess.Popen([editor, self.filename])
-                process.communicate()
-                self.read(self.filename)
-                return
-            except OSError as e:
-                if e.errno != errno.ENOENT:
-                    # Something else went wrong while trying to run the editor
-                    raise
-        LOGGER.critical("Can't find installed text editor among %s", self.editors)
 
     def get(self, section, option, **kwargs):
         """Override the default function of ConfigParser to add a

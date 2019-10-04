@@ -3,12 +3,22 @@
 """Pibooth language handling.
 """
 
-from pibooth.utils import LOGGER
+import io
+import os
+import os.path as osp
+from pibooth.utils import LOGGER, open_text_editor
 
+try:
+    from configparser import ConfigParser
+except ImportError:
+    # Python 2.x fallback
+    from ConfigParser import ConfigParser
+
+PARSER = ConfigParser()
 
 CURRENT = 'en'  # Dynamically set at startup
 
-LANGUAGES = {
+DEFAULT = {
     'fr': {
         'smile_message': "Souriez !",
         'intro': "Faire une photo",
@@ -57,17 +67,56 @@ LANGUAGES = {
 }
 
 
+def init(filename, clear=False):
+    """Initialize the translation system.
+    """
+    PARSER.filename = osp.abspath(osp.expanduser(filename))
+
+    if not osp.isfile(PARSER.filename) or clear:
+        LOGGER.info("Generate the translation file in '%s'", PARSER.filename)
+        dirname = osp.dirname(PARSER.filename)
+        if not osp.isdir(dirname):
+            os.makedirs(dirname)
+
+        with io.open(PARSER.filename, 'w', encoding="utf-8") as fp:
+            for section, options in DEFAULT.items():
+                fp.write("[{}]\n".format(section))
+                for name, value in options.items():
+                    value = value.splitlines()
+                    fp.write("{} = {}\n".format(name, value[0]))
+                    if len(value) > 1:
+                        for part in value[1:]:
+                            fp.write("    {}\n".format(part))
+                fp.write("\n\n")
+
+    PARSER.read(PARSER.filename, encoding='utf-8')
+
+
+def edit():
+    """Open a text editor to edit the translations.
+    """
+    if not getattr(PARSER, 'filename', None):
+        raise EnvironmentError("Translation system is not initialized")
+
+    open_text_editor(PARSER.filename)
+
+
 def get_supported_languages():
     """Return the list of supported language.
     """
-    return list(LANGUAGES.keys())
+    if getattr(PARSER, 'filename', None):
+        return [lang for lang in PARSER.sections()]
+    return list(DEFAULT.keys())
 
 
 def get_translated_text(key):
     """Return the text corresponding to the key in the language defined in the config
     """
-    try:
-        return LANGUAGES[CURRENT].get(key)
-    except KeyError:
+    if not getattr(PARSER, 'filename', None):
+        raise EnvironmentError("Translation system is not initialized")
+
+    if PARSER.has_section(CURRENT) and PARSER.has_option(CURRENT, key):
+        return PARSER.get(CURRENT, key)
+    elif PARSER.has_option('en', key):
         LOGGER.warning("Unsupported language '%s', fallback to English", CURRENT)
-        return LANGUAGES['en'].get(key)
+        return PARSER.get('en', key)

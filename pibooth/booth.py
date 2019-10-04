@@ -680,10 +680,13 @@ def main():
                         help=u"show program's version number and exit")
 
     parser.add_argument("--config", action='store_true',
-                        help=u"edit the current configuration")
+                        help=u"edit the current configuration and exit")
+
+    parser.add_argument("--translate", action='store_true',
+                        help=u"edit the GUI translations and exit")
 
     parser.add_argument("--reset", action='store_true',
-                        help=u"restore the default configuration")
+                        help=u"restore the default configuration/translations and exit")
 
     parser.add_argument("--fonts", action='store_true',
                         help=u"display all available fonts and exit")
@@ -705,11 +708,14 @@ def main():
     configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=options.log)
 
     config = PiConfigParser("~/.config/pibooth/pibooth.cfg", options.reset)
+    language.init("~/.config/pibooth/translations.cfg", options.reset)
 
     if options.config:
-        LOGGER.info("Editing the photo booth configuration...")
-        config.open_editor()
-        config.enable_autostart(config.getboolean('GENERAL', 'autostart'))
+        LOGGER.info("Editing the pibooth configuration...")
+        config.edit()
+    elif options.translate:
+        LOGGER.info("Editing the GUI translations...")
+        language.edit()
     elif options.fonts:
         LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
