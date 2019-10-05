@@ -5,7 +5,7 @@ Default configuration
 .. code-block:: ini
 
     [GENERAL]
-    # User interface language: 'de', 'en' or 'fr'
+    # User interface language: 'en', 'fr' or 'de'
     language = en
 
     # Path to save pictures
@@ -28,7 +28,7 @@ Default configuration
     background = (0, 0, 0)
 
     # Text RGB color
-    text_color = (0, 0, 0)
+    text_color = (255, 255, 255)
 
     # Blinking background when a capture is taken
     flash = True

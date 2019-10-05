@@ -253,6 +253,16 @@ upgrading ``pibooth``)::
 See the `default configuration file <https://github.com/werdeil/pibooth/blob/master/docs/config.rst>`_
 for further details.
 
+GUI translations
+----------------
+
+The graphical interface texts are available in 3 languages by default: English, French and
+German. The default translations can be easily edited using the command::
+
+    $ pibooth --translate
+
+A new language can be added by adding a new section (``[alpha-2-code]``).
+
 Printer
 -------
 
