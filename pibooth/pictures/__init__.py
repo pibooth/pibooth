@@ -129,16 +129,26 @@ def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6), force_pil
 
 
 def get_layout_image(text_color, layout_number, size):
-    """Generate the layout image with the corresponding text
+    """Generate the layout image with the corresponding text.
+
+    :param text_color: RGB color for texts
+    :type text_color: tuple
+    :param layout_number: number of captures on the layout
+    :type layout_number: int
+    :param size: maximum size of the layout surface
+    :type size: tuple
+
+    :return: surface
+    :rtype: pygame.Surface
     """
     layout_image = get_pygame_image("layout{0}.png".format(layout_number), size)
     text = language.get_translated_text(str(layout_number))
-    pos = (size[0] / 2, size[1] * 0.85)
     if text:
-        rect_x = 0.7 * min(2 * pos[0], 2 * (size[0] - pos[0]))
-        rect_y = 0.7 * min(2 * pos[1], 2 * (size[1] - pos[1]))
-        text_font = fonts.get_pygame_font(text, fonts.CURRENT, rect_x, rect_y)
+        rect = layout_image.get_rect()
+        rect = pygame.Rect(rect.x + rect.width * 0.3 / 2,
+                           rect.y + rect.height * 0.76,
+                           rect.width * 0.7, rect.height * 0.20)
+        text_font = fonts.get_pygame_font(text, fonts.CURRENT, rect.width, rect.height)
         surface = text_font.render(text, True, text_color)
-        pos = (pos[0] / 2, pos[1])
-        layout_image.blit(surface, surface.get_rect(center=pos))
+        layout_image.blit(surface, surface.get_rect(center=rect.center))
     return layout_image
