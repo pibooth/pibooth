@@ -217,7 +217,7 @@ class GpCamera(BaseCamera):
             if updated_rect:
                 pygame.display.update(updated_rect)
 
-        self._show_overlay(get_translated_text('smile_message'), alpha)
+        self._show_overlay(get_translated_text('smile'), alpha)
         self._window.show_image(self._get_preview_image())
 
     def preview_wait(self, timeout, alpha=80):
@@ -237,7 +237,7 @@ class GpCamera(BaseCamera):
         else:
             time.sleep(timer.remaining())
 
-        self._show_overlay(get_translated_text('smile_message'), alpha)
+        self._show_overlay(get_translated_text('smile'), alpha)
         self._window.show_image(self._get_preview_image())
 
     def stop_preview(self):

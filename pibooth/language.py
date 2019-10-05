@@ -19,56 +19,61 @@ PARSER = ConfigParser()
 CURRENT = 'en'  # Dynamically set at startup
 
 DEFAULT = {
-    'fr': {
-        'smile_message': "Souriez !",
-        'intro': "Faire une photo",
-        'intro_print': 'Ou sinon\ntu peux toujours\nimprimer\ncette photo',
-        'oops': "Oops quelque chose s'est mal passé",
-        'finished': "Merci",
-        'choose': "Choisis ton format",
-        'chosen': "C'est parti !",
-        'processing': "Préparation du montage",
-        'print': "Imprimer la photo ?",
-        '1': "1 photo",
-        '2': "2 photos",
-        '3': "3 photos",
-        '4': "4 photos"
-    },
     'en': {
-        'smile_message': "Smile !",
         'intro': "Take a photo",
         'intro_print': 'Or you can\nstill print\nthis photo',
-        'oops': "Oops something went wrong",
-        'finished': "Thanks",
         'choose': "Choose your layout",
-        'chosen': "Let's go!",
-        'processing': "Processing...",
-        'print': "Print the photo?",
         '1': "1 photo",
         '2': "2 photos",
         '3': "3 photos",
-        '4': "4 photos"
+        '4': "4 photos",
+        'chosen': "Let's go!",
+        'smile': "Smile !",
+        'processing': "Processing...",
+        'print': "Print the photo?",
+        'finished': "Thanks",
+        'oops': "Oops something went wrong",
+    },
+    'fr': {
+        'intro': "Faire une photo",
+        'intro_print': 'Ou sinon\ntu peux toujours\nimprimer\ncette photo',
+        'choose': "Choisis ton format",
+        '1': "1 photo",
+        '2': "2 photos",
+        '3': "3 photos",
+        '4': "4 photos",
+        'chosen': "C'est parti !",
+        'smile': "Souriez !",
+        'processing': "Préparation du montage",
+        'print': "Imprimer la photo ?",
+        'finished': "Merci",
+        'oops': "Oops quelque chose s'est mal passé",
     },
     'de': {
-        'smile_message': "Bitte lächeln !",
         'intro': "Foto aufnehmen",
         'intro_print': 'Sie können dieses\nfoto immer noch\nausdrucken',
-        'oops': "Ups Irgendwas lief schief",
-        'finished': "Danke",
         'choose': "Wähle dein Layout",
-        'chosen': "Los gehts!",
-        'processing': "Bearbeitung...",
-        'print': "Foto drucken?",
         '1': "1 foto",
         '2': "2 fotos",
         '3': "3 fotos",
-        '4': "4 fotos"
+        '4': "4 fotos",
+        'chosen': "Los gehts!",
+        'smile': "Bitte lächeln !",
+        'processing': "Bearbeitung...",
+        'print': "Foto drucken?",
+        'finished': "Danke",
+        'oops': "Ups Irgendwas lief schief",
     }
 }
 
 
 def init(filename, clear=False):
     """Initialize the translation system.
+
+    :param filename: path to the translations file
+    :type filename: str
+    :param clear: restore default translations
+    :type clear: bool
     """
     PARSER.filename = osp.abspath(osp.expanduser(filename))
 
@@ -110,7 +115,10 @@ def get_supported_languages():
 
 
 def get_translated_text(key):
-    """Return the text corresponding to the key in the language defined in the config
+    """Return the text corresponding to the key in the language defined in the config.
+
+    :param key: key in the translation file
+    :type key: str
     """
     if not getattr(PARSER, 'filename', None):
         raise EnvironmentError("Translation system is not initialized")
@@ -120,3 +128,6 @@ def get_translated_text(key):
     elif PARSER.has_option('en', key):
         LOGGER.warning("Unsupported language '%s', fallback to English", CURRENT)
         return PARSER.get('en', key)
+
+    LOGGER.debug("No translation defined for '%s/%s' key", CURRENT, key)
+    return None
