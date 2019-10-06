@@ -123,7 +123,7 @@ class CvCamera(BaseCamera):
         if effect != 'none':
             pass  # To be implemented
 
-        cv2.imwrite(capture_path, image)
+        cv2.imwrite(capture_path, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
         return Image.fromarray(image)
 
     def preview(self, window, flip=True):
