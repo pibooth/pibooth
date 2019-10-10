@@ -105,11 +105,10 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
    ::
 
-        $ sudo pip3 install pibooth
+        $ sudo pip3 install pibooth[dslr,printer]
 
-   .. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/or 6. skipped), use
-             the ``--no-deps`` option to avoid installation failures (you may need to install Python
-             dependencies by yourself)
+   .. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/or 6. skipped), remove
+             printer or dslr under the []
 
 .. note:: An editable/customizable version of ``pibooth`` can be installed by following
           these `instructions <https://github.com/werdeil/pibooth/blob/master/docs/dev.rst>`_ .
