@@ -55,7 +55,7 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
         if osp.isfile(path):
             pil_image = Image.open(path)
         else:
-            pil_image = Image.new('RGBA', size, (255, 0, 0, 0))
+            pil_image = Image.new('RGBA', size, (0, 0, 0, 0))
         if inverted:
             # Generating a RGB image as a RGBA cannot be not inverted
             r,g,b,a = pil_image.split()
