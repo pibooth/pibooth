@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pygame
+from pibooth.utils import LOGGER
 from pibooth.controls import GPIO
 
 
@@ -32,5 +33,6 @@ class PtbButton(object):
     def on_button_down(self, pin):
         """Post a pygame event when the button is pressed.
         """
+        LOGGER.debug('Hardware button (pin %s) triggered', pin)
         event = pygame.event.Event(BUTTON_DOWN, pin=pin)
         pygame.event.post(event)

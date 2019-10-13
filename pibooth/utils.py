@@ -173,11 +173,17 @@ def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=N
         root.addHandler(hdlr)
 
 
-def set_logging_level(level=BlockConsoleHandler.default_level):
+def set_logging_level(level=None):
     """Set/restore the log level of the concole.
+
+    :param level: level as defined in the logging package
+    :type level: int
     """
     for hdlr in logging.getLogger().handlers:
         if isinstance(hdlr, BlockConsoleHandler):
+            if level is None:
+                # Restore the default level
+                level = BlockConsoleHandler.default_level
             hdlr.setLevel(level)
 
 
