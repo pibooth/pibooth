@@ -56,6 +56,7 @@ class Background(object):
 
     def set_text_color(self, color):
         """Set text color (RGB tuple) used to write the texts.
+
         :param color: RGB color tuple
         :type color: tuple
         """
@@ -64,8 +65,9 @@ class Background(object):
             self._text_color = color
             self._need_update = True
 
-    def set_inverted_images(self, invert):
+    def set_inverted_colors(self, invert):
         """Set invert parameter used for all images in the window.
+
         :param invert: value of the inversion
         :type invert: bool
         """

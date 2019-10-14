@@ -407,14 +407,15 @@ class PiApplication(object):
         init_size = self.config.gettyped('WINDOW', 'size')
         init_color = self.config.gettyped('WINDOW', 'background')
         init_text_color = self.config.gettyped('WINDOW', 'text_color')
-        invert_images = self.config.getboolean('WINDOW', 'invert_images')
+        init_images_colors = self.config.getboolean('WINDOW', 'invert_images_colors')
         if not isinstance(init_color, (tuple, list)):
             init_color = self.config.getpath('WINDOW', 'background')
         if not isinstance(init_size, str):
-            self.window = PtbWindow('Pibooth', init_size, color=init_color,
-                                    text_color=init_text_color, invert=invert_images)
+            self.window = PtbWindow('Pibooth', init_size, color=init_color, text_color=init_text_color,
+                                    invert_colors=init_images_colors)
         else:
-            self.window = PtbWindow('Pibooth', color=init_color, text_color=init_text_color, invert=invert_images)
+            self.window = PtbWindow('Pibooth', color=init_color, text_color=init_text_color,
+                                    invert_colors=init_images_colors)
 
         self.state_machine = StateMachine(self)
         self.state_machine.add_state(StateWait())
@@ -481,7 +482,7 @@ class PiApplication(object):
         # Handle autostart of the application
         self.config.enable_autostart(self.config.getboolean('GENERAL', 'autostart'))
 
-        self.window.invert = self.config.getboolean('WINDOW', 'invert_images')
+        self.window.invert_colors = self.config.getboolean('WINDOW', 'invert_images_colors')
         self.window.arrow_location = self.config.get('WINDOW', 'arrows')
         self.window.arrow_offset = self.config.getint('WINDOW', 'arrows_x_offset')
         self.window.drop_cache()
