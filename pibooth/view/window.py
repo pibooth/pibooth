@@ -20,10 +20,11 @@ class PtbWindow(object):
     RIGHT = 'right'
     LEFT = 'left'
 
-    def __init__(self, title, size=(800, 480), color=(0, 0, 0), text_color=(255, 255, 255), arrow_location=background.ARROW_BOTTOM, arrow_offset=0):
+    def __init__(self, title, size=(800, 480), color=(0, 0, 0), text_color=(255, 255, 255), arrow_location=background.ARROW_BOTTOM, arrow_offset=0, invert=False):
         self.__size = size
 
         self.color = color
+        self.invert = invert
         self.text_color = text_color
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
@@ -80,6 +81,7 @@ class PtbWindow(object):
         self._current_background = self._buffered_images.setdefault(str(bkgd), bkgd)
         self._current_background.set_color(self.color)
         self._current_background.set_text_color(self.text_color)
+        self._current_background.set_inverted_images(self.invert)
         self._current_background.resize(self.surface)
         self._current_background.paint(self.surface)
         self._update_capture_number()
