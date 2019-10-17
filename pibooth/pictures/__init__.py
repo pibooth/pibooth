@@ -163,3 +163,16 @@ def get_layout_image(text_color, layout_number, size, invert=False):
         surface = text_font.render(text, True, text_color)
         layout_image.blit(surface, surface.get_rect(center=rect.center))
     return layout_image
+
+def set_picto_color(picto_pil_image, color):
+    """Convert a picto in white to the corresponding color
+    param picto_pil_image: Picto image to be colorized
+    type picto_pil_image: PIL.image
+    param color: RGB color to convert the picot
+    type color: tuple
+    """
+    _, _, _, alpha = picto_pil_image.split()
+    gray_pil_image = picto_pil_image.convert('L')
+    colorize_pil_image = ImageOps.colorize(gray_pil_image, black="white", white=color)
+    colorize_pil_image.putalpha(alpha)
+    return colorize_pil_image
