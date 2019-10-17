@@ -57,7 +57,7 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
         else:
             pil_image = Image.new('RGBA', size, (0, 0, 0, 0))
 
-        if color != (255, 255, 255):
+        if color != None:
             pil_image = set_picto_color(pil_image, color, bg_color)
 
         if crop:

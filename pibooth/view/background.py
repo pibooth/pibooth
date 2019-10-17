@@ -78,7 +78,7 @@ class Background(object):
 
             if self._background_image:
                 self._background = pictures.get_pygame_image(
-                    self._background_image, (self._rect.width, self._rect.height), crop=True)
+                    self._background_image, (self._rect.width, self._rect.height), crop=True, color=None)
 
             self.write_text()
 
