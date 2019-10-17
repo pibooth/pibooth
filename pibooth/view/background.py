@@ -51,6 +51,7 @@ class Background(object):
             assert osp.isfile(color_or_path), "Invalid image for window background: '{}'".format(color_or_path)
             if color_or_path != self._background_image:
                 self._background_image = color_or_path
+                self._background_color = pictures.get_main_color(color_or_path)
                 self._need_update = True
 
     def set_text_color(self, color):
@@ -73,7 +74,7 @@ class Background(object):
             overlay_name = "{}.png".format(self._name)
             if osp.isfile(pictures.get_filename(overlay_name)):
                 self._overlay = pictures.get_pygame_image(
-                    pictures.get_filename(overlay_name), (self._rect.width, self._rect.height), color=self._text_color)
+                    pictures.get_filename(overlay_name), (self._rect.width, self._rect.height), color=self._text_color, bg_color=self._background_color)
 
             if self._background_image:
                 self._background = pictures.get_pygame_image(
@@ -224,8 +225,8 @@ class ChooseBackground(Background):
         Background.resize(self, screen)
         if self._need_update:
             size = (self._rect.width * 0.6, self._rect.height * 0.6)
-            self.layout0 = pictures.get_layout_image(self._text_color, self.choices[0], size)
-            self.layout1 = pictures.get_layout_image(self._text_color, self.choices[1], size)
+            self.layout0 = pictures.get_layout_image(self._text_color, self._background_color, self.choices[0], size)
+            self.layout1 = pictures.get_layout_image(self._text_color, self._background_color, self.choices[1], size)
 
             inter = (self._rect.width - 2 * self.layout0.get_rect().width) // 3
 
@@ -294,7 +295,7 @@ class ChosenBackground(Background):
         if self._need_update:
             size = (self._rect.width * 0.6, self._rect.height * 0.6)
 
-            self.layout = pictures.get_layout_image(self._text_color, self.selected, size)
+            self.layout = pictures.get_layout_image(self._text_color, self._background_color, self.selected, size)
 
             x = self.layout.get_rect(center=self._rect.center).left
             y = int(self._rect.top + self._rect.height * 0.3)
