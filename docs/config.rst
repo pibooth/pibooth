@@ -30,9 +30,6 @@ Default configuration
     # Text RGB color
     text_color = (255, 255, 255)
 
-    # Invert pictograms colors in the window for better rendering
-    invert_images_colors = False
-
     # Blinking background when a capture is taken
     flash = True
 

@@ -26,7 +26,7 @@ def get_filename(name):
     return osp.join(osp.dirname(osp.abspath(__file__)), 'assets', name)
 
 
-def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False, crop=False, angle=0, invert=False):
+def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False, crop=False, angle=0, color=(255, 255, 255)):
     """Return a Pygame image. If a size is given, the image is
     resized keeping the original image's aspect ratio.
 
@@ -56,13 +56,9 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
             pil_image = Image.open(path)
         else:
             pil_image = Image.new('RGBA', size, (0, 0, 0, 0))
-        if invert:
-            # Generating a RGB image as a RGBA cannot be not inverted
-            r,g,b,a = pil_image.split()
-            rgb_image = Image.merge('RGB', (r,g,b))
-            inverted_image = ImageOps.invert(rgb_image)
-            r2,g2,b2 = inverted_image.split()
-            pil_image = Image.merge('RGBA', (r2,g2,b2,a))
+
+        if color != (255, 255, 255):
+            pil_image = set_picto_color(pil_image, color)
 
         if crop:
             pil_image = pil_image.crop(sizing.new_size_by_croping_ratio(pil_image.size, size))
@@ -137,7 +133,7 @@ def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6), force_pil
     return maker.OpenCvPictureMaker(size[0], size[1], *captures)
 
 
-def get_layout_image(text_color, layout_number, size, invert=False):
+def get_layout_image(text_color, layout_number, size):
     """Generate the layout image with the corresponding text.
 
     :param text_color: RGB color for texts
@@ -150,7 +146,7 @@ def get_layout_image(text_color, layout_number, size, invert=False):
     :return: surface
     :rtype: pygame.Surface
     """
-    layout_image = get_pygame_image("layout{0}.png".format(layout_number), size, invert=invert)
+    layout_image = get_pygame_image("layout{0}.png".format(layout_number), size, color=text_color)
     text = language.get_translated_text(str(layout_number))
     if text:
         rect = layout_image.get_rect()
@@ -158,9 +154,8 @@ def get_layout_image(text_color, layout_number, size, invert=False):
                            rect.y + rect.height * 0.76,
                            rect.width * 0.7, rect.height * 0.20)
         text_font = fonts.get_pygame_font(text, fonts.CURRENT, rect.width, rect.height)
-        if invert:
-            text_color = (abs(text_color[0]-255), abs(text_color[1]-255), abs(text_color[2]-255))
-        surface = text_font.render(text, True, text_color)
+        inverted_text_color = (abs(text_color[0]-255), abs(text_color[1]-255), abs(text_color[2]-255))
+        surface = text_font.render(text, True, inverted_text_color)
         layout_image.blit(surface, surface.get_rect(center=rect.center))
     return layout_image
 
@@ -171,8 +166,9 @@ def set_picto_color(picto_pil_image, color):
     param color: RGB color to convert the picot
     type color: tuple
     """
+    opposite_color = (abs(color[0]-255), abs(color[1]-255), abs(color[2]-255))
     _, _, _, alpha = picto_pil_image.split()
     gray_pil_image = picto_pil_image.convert('L')
-    colorize_pil_image = ImageOps.colorize(gray_pil_image, black="white", white=color)
+    colorize_pil_image = ImageOps.colorize(gray_pil_image, black=opposite_color, white=color)
     colorize_pil_image.putalpha(alpha)
     return colorize_pil_image

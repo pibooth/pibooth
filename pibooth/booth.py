@@ -407,15 +407,12 @@ class PiApplication(object):
         init_size = self.config.gettyped('WINDOW', 'size')
         init_color = self.config.gettyped('WINDOW', 'background')
         init_text_color = self.config.gettyped('WINDOW', 'text_color')
-        init_images_colors = self.config.getboolean('WINDOW', 'invert_images_colors')
         if not isinstance(init_color, (tuple, list)):
             init_color = self.config.getpath('WINDOW', 'background')
         if not isinstance(init_size, str):
-            self.window = PtbWindow('Pibooth', init_size, color=init_color, text_color=init_text_color,
-                                    invert_colors=init_images_colors)
+            self.window = PtbWindow('Pibooth', init_size, color=init_color, text_color=init_text_color)
         else:
-            self.window = PtbWindow('Pibooth', color=init_color, text_color=init_text_color,
-                                    invert_colors=init_images_colors)
+            self.window = PtbWindow('Pibooth', color=init_color, text_color=init_text_color)
 
         self.state_machine = StateMachine(self)
         self.state_machine.add_state(StateWait())
