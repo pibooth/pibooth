@@ -57,10 +57,12 @@ def main():
             'Pillow>=6.1.0',
             'Pygame>=1.9.4',
             'pygame-menu>=2.0.4',
-            'gphoto2>=2.0.0',
-            'pycups>=1.9.73',
             'psutil>=5.5.1'
         ],
+        extras_require={
+            'dslr' : ['gphoto2>=2.0.0']
+            'printer' : ['pycups>=1.9.73'],
+        },
         options={
             'bdist_wheel':
                 {'universal': True}
