@@ -405,14 +405,17 @@ class PiApplication(object):
 
         # Create window of (width, height)
         init_size = self.config.gettyped('WINDOW', 'size')
+        init_debug = self.config.getboolean('GENERAL', 'debug')
         init_color = self.config.gettyped('WINDOW', 'background')
         init_text_color = self.config.gettyped('WINDOW', 'text_color')
         if not isinstance(init_color, (tuple, list)):
             init_color = self.config.getpath('WINDOW', 'background')
         if not isinstance(init_size, str):
-            self.window = PtbWindow('Pibooth', init_size, color=init_color, text_color=init_text_color)
+            self.window = PtbWindow('Pibooth', init_size, color=init_color,
+                                    text_color=init_text_color, debug=init_debug)
         else:
-            self.window = PtbWindow('Pibooth', color=init_color, text_color=init_text_color)
+            self.window = PtbWindow('Pibooth', color=init_color,
+                                    text_color=init_text_color, debug=init_debug)
 
         self.state_machine = StateMachine(self)
         self.state_machine.add_state(StateWait())
@@ -491,6 +494,7 @@ class PiApplication(object):
         else:
             if self.window.is_fullscreen:
                 self.window.toggle_fullscreen()
+        self.window.debug = self.config.getboolean('GENERAL', 'debug')
 
         # Handle debug mode
         if not self.config.getboolean('GENERAL', 'debug'):

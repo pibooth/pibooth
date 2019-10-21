@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os.path as osp
+import pygame
 
-from pibooth import fonts
-from pibooth import pictures
-
-from pibooth.fonts import get_pygame_font
+from pibooth import fonts, pictures
 from pibooth.language import get_translated_text
 
 ARROW_TOP = 'top'
@@ -13,10 +11,55 @@ ARROW_BOTTOM = 'bottom'
 ARROW_HIDDEN = 'hidden'
 
 
+def multiline_text_to_surfaces(text, color, rect, align='center'):
+    """Return a list of surfaces corresponding to each line of the text.
+    The surfaces are next to each others in torder to fit the given rect.
+
+       * top-left
+       * top-center
+       * top-right
+       * center-left
+       * center
+       * center-right
+       * bottom-left
+       * bottom-center
+       * bottom-right
+    """
+    surfaces = []
+    lines = text.splitlines()
+
+    font = fonts.get_pygame_font(max(lines, key=len), fonts.CURRENT, rect.width, rect.height / len(lines))
+    for i, line in enumerate(lines):
+        surface = font.render(line, True, color)
+
+        if align.endswith('left'):
+            x = rect.left
+        elif align.endswith('center'):
+            x = rect.centerx - surface.get_rect().width / 2
+        elif align.endswith('right'):
+            x = rect.right - surface.get_rect().width / 2
+        else:
+            raise ValueError("Invalid horizontal alignment '{}'".format(align))
+
+        height = surface.get_rect().height
+        if align.startswith('top'):
+            y = rect.top + i * height
+        elif align.startswith('center'):
+            y = rect.centery - len(lines) * height / 2 + i * height
+        elif align.startswith('bottom'):
+            y = rect.bottom - (len(lines) - i) * height
+        else:
+            raise ValueError("Invalid vertical alignment '{}'".format(align))
+
+        surfaces.append((surface, surface.get_rect(x=x, y=y)))
+    return surfaces
+
+
 class Background(object):
 
     def __init__(self, image_name, color=(0, 0, 0), text_color=(255, 255, 255)):
         self._rect = None
+        self._outlines = True
         self._name = image_name
         self._need_update = False
 
@@ -27,6 +70,7 @@ class Background(object):
         self._overlay = None
 
         self._texts = []  # List of (surface, rect)
+        self._text_border = 20  # Distance to other elements
         self._text_color = text_color
 
     def __str__(self):
@@ -34,6 +78,18 @@ class Background(object):
         It is used in the main window to distinguish background in the cache.
         """
         return "{}({})".format(self.__class__.__name__, self._name)
+
+    def _write_text(self, text, rect=None, align='center'):
+        """Write a text in the given rectangle.
+        """
+        if not rect:
+            rect = self._rect.inflate(-self._text_border, -self._text_border)
+        if self._outlines:
+            # Build rectangle around text area for debuging purpose
+            outlines = pygame.Surface(rect.size)
+            pygame.draw.rect(outlines, pygame.Color(255, 0, 0), outlines.get_rect(), 2)
+            self._texts.append((outlines, rect))
+        self._texts.extend(multiline_text_to_surfaces(text, self._text_color, rect, align))
 
     def set_color(self, color_or_path):
         """Set background color (RGB tuple) or path to an image that used to
@@ -65,6 +121,17 @@ class Background(object):
             self._text_color = color
             self._need_update = True
 
+    def set_outlines(self, outlines=True):
+        """Draw outlines for each rectangle available for drawing
+        texts.
+
+        :param outlines: enable / disable outlines
+        :type outlines: bool
+        """
+        if outlines != self._outlines:
+            self._outlines = outlines
+            self._need_update = True
+
     def resize(self, screen):
         """Resize objects to fit to the screen.
         """
@@ -80,9 +147,17 @@ class Background(object):
                 self._background = pictures.get_pygame_image(
                     self._background_image, (self._rect.width, self._rect.height), crop=True, color=None)
 
-            self.write_text()
+            self.resize_texts()
 
             self._need_update = True
+
+    def resize_texts(self, rect=None, align='center'):
+        """Update text surfaces.
+        """
+        self._texts = []
+        text = get_translated_text(self._name)
+        if text:
+            self._write_text(text, rect, align)
 
     def paint(self, screen):
         """Paint and animate the surfaces on the screen.
@@ -96,20 +171,6 @@ class Background(object):
         for text_surface, pos in self._texts:
             screen.blit(text_surface, pos)
         self._need_update = False
-
-    def write_text(self, pos=None):
-        """Update text surfaces
-        """
-        self._texts = []
-        text = get_translated_text(self._name)
-        if text:
-            if not pos:
-                pos = self._rect.center
-            rect_x = 0.9 * min(2 * pos[0], 2 * (self._rect.width - pos[0]))
-            rect_y = 0.9 * min(2 * pos[1], 2 * (self._rect.height - pos[1]))
-            text_font = get_pygame_font(text, fonts.CURRENT, rect_x, rect_y)
-            surface = text_font.render(text, True, self._text_color)
-            self._texts.append((surface, surface.get_rect(center=pos)))
 
 
 class IntroBackground(Background):
@@ -138,16 +199,30 @@ class IntroBackground(Background):
 
             self.left_arrow_pos = (x - self.arrow_offset, y)
 
+    def resize_texts(self):
+        """Update text surfaces.
+        """
+        if self.arrow_location == ARROW_HIDDEN:
+            rect = pygame.Rect(self._text_border, self._text_border,
+                               self._rect.width / 2 - 2 * self._text_border,
+                               self._rect.height - 2 * self._text_border)
+            align = 'center'
+        elif self.arrow_location == ARROW_BOTTOM:
+            rect = pygame.Rect(self._text_border, self._text_border,
+                               self._rect.width / 2 - 2 * self._text_border,
+                               self._rect.height * 0.6 - self._text_border)
+            align = 'bottom-center'
+        else:
+            rect = pygame.Rect(self._text_border, self._rect.height * 0.4,
+                               self._rect.width / 2 - 2 * self._text_border,
+                               self._rect.height * 0.6 - self._text_border)
+            align = 'top-center'
+        Background.resize_texts(self, rect, align)
+
     def paint(self, screen):
         Background.paint(self, screen)
         if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.left_arrow, self.left_arrow_pos)
-
-    def write_text(self):
-        """Update text surfaces
-        """
-        pos = (self._rect.centerx / 2, self._rect.centery)
-        Background.write_text(self, pos)
 
 
 class IntroWithPrintBackground(IntroBackground):
@@ -179,30 +254,26 @@ class IntroWithPrintBackground(IntroBackground):
                 y = int(self._rect.bottom - self.right_arrow.get_rect().height * 1.1)
             self.right_arrow_pos = (x - self.arrow_offset, y)
 
+    def resize_texts(self):
+        """Update text surfaces.
+        """
+        IntroBackground.resize_texts(self)
+        text = get_translated_text("intro_print")
+        if text:
+            if self.arrow_location == ARROW_HIDDEN or self.arrow_location == ARROW_BOTTOM:
+                rect = pygame.Rect(self._rect.width * 0.30 + self._text_border, self._rect.height * 0.7,
+                                   self._rect.width * 0.20 - 2 * self._text_border,
+                                   self._rect.height * 0.3 - 2 * self._text_border)
+            else:
+                rect = pygame.Rect(self._rect.width * 0.30 + self._text_border, self._text_border,
+                                   self._rect.width * 0.20 - 2 * self._text_border,
+                                   self._rect.height * 0.3 - 2 * self._text_border)
+            self._write_text(text, rect)
+
     def paint(self, screen):
         IntroBackground.paint(self, screen)
         if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.right_arrow, self.right_arrow_pos)
-
-    def write_text(self):
-        """Update text surfaces
-        """
-        IntroBackground.write_text(self)
-        text_size = 20 * self._rect.height // 400
-        text_font = pictures.pygame.font.Font(fonts.CURRENT, text_size)
-        text_strings = get_translated_text("intro_print").splitlines()
-        delta_y = 0
-        if self.arrow_location == ARROW_BOTTOM:
-            text_strings = reversed(text_strings)
-        for text_string in text_strings:
-            surface = text_font.render(text_string, True, self._text_color)
-            if self.arrow_location == ARROW_BOTTOM:
-                pos_y = self._rect.height * 87 / 100 - delta_y
-            else:
-                pos_y = self._rect.height * 13 / 100 + delta_y
-            pos = (self._rect.width * 45 / 100, pos_y)
-            self._texts.append((surface, surface.get_rect(center=pos)))
-            delta_y += surface.get_height()
 
 
 class ChooseBackground(Background):
@@ -260,6 +331,13 @@ class ChooseBackground(Background):
                 self.left_arrow_pos = (x0 - self.arrow_offset, y)
                 self.right_arrow_pos = (x1 + self.arrow_offset, y)
 
+    def resize_texts(self):
+        """Update text surfaces.
+        """
+        rect = pygame.Rect(self._text_border, self._text_border,
+                           self._rect.width - 2 * self._text_border, self._rect.height * 0.2)
+        Background.resize_texts(self, rect)
+
     def paint(self, screen):
         Background.paint(self, screen)
         screen.blit(self.layout0, self.layout0_pos)
@@ -267,12 +345,6 @@ class ChooseBackground(Background):
         if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.left_arrow, self.left_arrow_pos)
             screen.blit(self.right_arrow, self.right_arrow_pos)
-
-    def write_text(self):
-        """Update text surfaces
-        """
-        pos = (self._rect.centerx, self._rect.height / 8)
-        Background.write_text(self, pos)
 
 
 class ChosenBackground(Background):
@@ -302,15 +374,16 @@ class ChosenBackground(Background):
 
             self.layout_pos = (x, y)
 
+    def resize_texts(self):
+        """Update text surfaces.
+        """
+        rect = pygame.Rect(self._text_border, self._text_border,
+                           self._rect.width - 2 * self._text_border, self._rect.height * 0.2)
+        Background.resize_texts(self, rect)
+
     def paint(self, screen):
         Background.paint(self, screen)
         screen.blit(self.layout, self.layout_pos)
-
-    def write_text(self):
-        """Update text surfaces
-        """
-        pos = (self._rect.centerx, self._rect.height / 8)
-        Background.write_text(self, pos)
 
 
 class CaptureBackground(Background):
@@ -324,11 +397,12 @@ class ProcessingBackground(Background):
     def __init__(self):
         Background.__init__(self, "processing")
 
-    def write_text(self):
-        """Update text surfaces
+    def resize_texts(self):
+        """Update text surfaces.
         """
-        pos = (self._rect.centerx, self._rect.height * 5 / 6)
-        Background.write_text(self, pos)
+        rect = pygame.Rect(self._text_border, self._rect.height * 0.8 - self._text_border,
+                           self._rect.width - 2 * self._text_border, self._rect.height * 0.2)
+        Background.resize_texts(self, rect)
 
 
 class PrintBackground(Background):
@@ -359,16 +433,30 @@ class PrintBackground(Background):
 
             self.right_arrow_pos = (x + self.arrow_offset, y)
 
+    def resize_texts(self):
+        """Update text surfaces.
+        """
+        if self.arrow_location == ARROW_HIDDEN:
+            rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._text_border,
+                               self._rect.width / 2 - 2 * self._text_border,
+                               self._rect.height - 2 * self._text_border)
+            align = 'center'
+        elif self.arrow_location == ARROW_BOTTOM:
+            rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._text_border,
+                               self._rect.width / 2 - 2 * self._text_border,
+                               self._rect.height * 0.6 - self._text_border)
+            align = 'bottom-center'
+        else:
+            rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._rect.height * 0.4,
+                               self._rect.width / 2 - 2 * self._text_border,
+                               self._rect.height * 0.6 - self._text_border)
+            align = 'top-center'
+        Background.resize_texts(self, rect, align)
+
     def paint(self, screen):
         Background.paint(self, screen)
         if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.right_arrow, self.right_arrow_pos)
-
-    def write_text(self):
-        """Update text surfaces
-        """
-        pos = (self._rect.centerx * 3 / 2, self._rect.centery)
-        Background.write_text(self, pos)
 
 
 class FinishedBackground(Background):
@@ -376,11 +464,12 @@ class FinishedBackground(Background):
     def __init__(self):
         Background.__init__(self, "finished")
 
-    def write_text(self):
-        """Update text surfaces
+    def resize_texts(self):
+        """Update text surfaces.
         """
-        pos = (self._rect.centerx, self._rect.height * 4 / 5)
-        Background.write_text(self, pos)
+        rect = pygame.Rect(self._rect.width * 0.3, self._rect.height * 0.6 - self._text_border,
+                           self._rect.width * 0.4, self._rect.height * 0.4)
+        Background.resize_texts(self, rect)
 
 
 class OopsBackground(Background):

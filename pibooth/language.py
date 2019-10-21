@@ -124,10 +124,10 @@ def get_translated_text(key):
         raise EnvironmentError("Translation system is not initialized")
 
     if PARSER.has_section(CURRENT) and PARSER.has_option(CURRENT, key):
-        return PARSER.get(CURRENT, key)
+        return PARSER.get(CURRENT, key).strip('"')
     elif PARSER.has_option('en', key):
         LOGGER.warning("Unsupported language '%s', fallback to English", CURRENT)
-        return PARSER.get('en', key)
+        return PARSER.get('en', key).strip('"')
 
     LOGGER.debug("No translation defined for '%s/%s' key", CURRENT, key)
     return None
