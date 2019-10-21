@@ -107,7 +107,6 @@ class Background(object):
             assert osp.isfile(color_or_path), "Invalid image for window background: '{}'".format(color_or_path)
             if color_or_path != self._background_image:
                 self._background_image = color_or_path
-                self._background_color = pictures.get_main_color(color_or_path)
                 self._need_update = True
 
     def set_text_color(self, color):
@@ -146,6 +145,7 @@ class Background(object):
             if self._background_image:
                 self._background = pictures.get_pygame_image(
                     self._background_image, (self._rect.width, self._rect.height), crop=True, color=None)
+                self._background_color = pictures.get_pygame_main_color(self._background)
 
             self.resize_texts()
 

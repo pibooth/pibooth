@@ -26,6 +26,13 @@ def get_filename(name):
     return osp.join(osp.dirname(osp.abspath(__file__)), 'assets', name)
 
 
+def get_pygame_main_color(surface):
+    """Return the main color of the given pygame surface.
+    """
+    monopixel_surface = pygame.transform.scale(surface, (1, 1))
+    return tuple(monopixel_surface.get_at((0, 0)))
+
+
 def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False, crop=False, angle=0, color=(255, 255, 255), bg_color=None):
     """Return a Pygame image. If a size is given, the image is
     resized keeping the original image's aspect ratio.
@@ -44,12 +51,16 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
     :type crop: bool
     :param angle: angle of rotation of the image
     :type angle: int
+    :param color: recolorize the image with this RGB color
+    :type color: tuple
+    :param bg_color: recolorize the image background with this RGB color
+    :type bg_color: tuple
 
     :return: pygame.Surface with image
     :rtype: object
     """
     path = get_filename(name)
-    if not size:
+    if not size and not color:
         image = pygame.image.load(path).convert()
     else:
         if osp.isfile(path):
@@ -57,7 +68,7 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
         else:
             pil_image = Image.new('RGBA', size, (0, 0, 0, 0))
 
-        if color != None:
+        if color:
             pil_image = set_picto_color(pil_image, color, bg_color)
 
         if crop:
@@ -158,25 +169,21 @@ def get_layout_image(text_color, bg_color, layout_number, size):
         layout_image.blit(surface, surface.get_rect(center=rect.center))
     return layout_image
 
-def set_picto_color(picto_pil_image, color, bg_color=None):
-    """Convert a picto in white to the corresponding color
-    param picto_pil_image: Picto image to be colorized
-    type picto_pil_image: PIL.image
-    param color: RGB color to convert the picto
-    type color: tuple
-    param bg_color: RGB color to use for the picto's background
-    type bg_color: tuple
+
+def set_picto_color(pil_image, color, bg_color=None):
+    """Convert a picto in white to the corresponding color.
+
+    :param pil_image: Picto image to be colorized
+    :type pil_image: PIL.image
+    :param color: RGB color to convert the picto
+    :type color: tuple
+    :param bg_color: RGB color to use for the picto's background
+    :type bg_color: tuple
     """
     if not bg_color:
-        bg_color = (abs(color[0]-255), abs(color[1]-255), abs(color[2]-255))
-    _, _, _, alpha = picto_pil_image.split()
-    gray_pil_image = picto_pil_image.convert('L')
+        bg_color = (abs(color[0] - 255), abs(color[1] - 255), abs(color[2] - 255))
+    _, _, _, alpha = pil_image.split()
+    gray_pil_image = pil_image.convert('L')
     colorize_pil_image = ImageOps.colorize(gray_pil_image, black=bg_color, white=color)
     colorize_pil_image.putalpha(alpha)
     return colorize_pil_image
-
-def get_main_color(image_path):
-    pil_image = Image.open(image_path)
-    monopixel_image = pil_image.resize((1,1))
-    color = monopixel_image.getpixel((0,0))
-    return color
