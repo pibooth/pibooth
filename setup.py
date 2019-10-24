@@ -60,15 +60,17 @@ def main():
             'psutil>=5.5.1'
         ],
         extras_require={
-            'dslr' : ['gphoto2>=2.0.0']
-            'printer' : ['pycups>=1.9.73'],
+            'dslr': ['gphoto2>=2.0.0'],
+            'printer': ['pycups>=1.9.73'],
         },
         options={
             'bdist_wheel':
                 {'universal': True}
         },
         zip_safe=False,  # Don't install the lib as an .egg zipfile
-        entry_points={'console_scripts': ["pibooth = pibooth.booth:main"]},
+        entry_points={'console_scripts': ["pibooth = pibooth.booth:main",
+                                          "pibooth-diag = pibooth.scripts.diagnostic:main",
+                                          "pibooth-regen = pibooth.scripts.regenerate:main"]},
     )
 
 

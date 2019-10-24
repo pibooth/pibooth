@@ -15,7 +15,6 @@ import pygame
 import pibooth
 from pibooth import fonts
 from pibooth import language
-from pibooth import diagnostic
 from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging,
                            set_logging_level, print_columns_words)
 from pibooth.states import StateMachine, State
@@ -697,9 +696,6 @@ def main():
     parser.add_argument("--fonts", action='store_true',
                         help=u"display all available fonts and exit")
 
-    parser.add_argument("--diagnostic", action='store_true',
-                        help=u"generate a diagnostic report for debugging and exit")
-
     parser.add_argument("--log", default=None,
                         help=u"save logs output to the given file")
 
@@ -725,9 +721,6 @@ def main():
     elif options.fonts:
         LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
-    elif options.diagnostic:
-        LOGGER.info("Starting diagnostic of DSLR camera...")
-        diagnostic.main()
     elif not options.reset:
         LOGGER.info("Starting the photo booth application...")
         app = PiApplication(config)

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+"""Pibooth diagnostic module.
+"""
+
 import io
 import sys
 from PIL import Image
@@ -8,6 +11,7 @@ try:
 except ImportError:
     gp = None  # gphoto2 is optional
 import pibooth
+from pibooth.utils import configure_logging
 
 
 LOGFILE = None
@@ -116,6 +120,7 @@ def camera_connected():
 
 
 def main():
+    configure_logging()
     if not gp:
         write_log("gPhoto2 not installed, cannot diagnose connected DSLR")
         sys.exit(1)
