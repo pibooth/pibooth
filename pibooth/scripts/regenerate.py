@@ -42,14 +42,14 @@ def regenerate_all_images(config):
         if len(captures) == capture_choices[0]:
             overlay = overlays[0]
             background = backgrounds[0]
-        else:
+        elif len(captures) == capture_choices[1]:
             overlay = overlays[1]
             background = backgrounds[1]
         else:
             LOGGER.warning("Folder %s doesn't contain the correct number of pictures", captures_folder_path)
             continue
 
-        maker = get_picture_maker(captures, config.get('PICTURE', 'orientation'))
+        maker = get_picture_maker(captures, config.get('PICTURE', 'orientation'), force_pil=True)
 
         maker.set_background(background)
         if any(elem != '' for elem in texts):
