@@ -14,13 +14,16 @@ from pibooth.pictures import get_picture_maker
 
 
 def get_captures(images_folder):
+    """Get a list of images from the folder given in input
+    """
     captures_paths = os.listdir(images_folder)
     captures = [Image.open(osp.join(images_folder, capture_path)) for capture_path in captures_paths]
     return captures
 
 
 def regenerate_all_images(config):
-
+    """Regenerate the pibboth images from the raw images and the config
+    """
     captures_folders = config.getpath('GENERAL', 'directory')
     capture_choices = config.gettuple('PICTURE', 'captures', int)
 
@@ -37,7 +40,7 @@ def regenerate_all_images(config):
     for captures_folder in os.listdir(osp.join(captures_folders, 'raw')):
         captures_folder_path = osp.join(captures_folders, 'raw', captures_folder)
         captures = get_captures(captures_folder_path)
-        LOGGER.info("Generating image from raws in folder %s" % (captures_folder_path))
+        LOGGER.info("Generating image from raws in folder %s", captures_folder_path)
 
         if len(captures) == capture_choices[0]:
             overlay = overlays[0]
@@ -60,16 +63,16 @@ def regenerate_all_images(config):
         if overlay:
             maker.set_overlay(overlay)
 
-        previous_picture_file = osp.join(captures_folders, captures_folder + "_pibooth.jpg")
-        maker.save(previous_picture_file)
+        picture_file = osp.join(captures_folders, captures_folder + "_pibooth.jpg")
+        maker.save(picture_file)
 
 
 def main():
     """Application entry point.
     """
     configure_logging()
-    CONFIG = PiConfigParser("~/.config/pibooth/pibooth.cfg")
-    regenerate_all_images(CONFIG)
+    config = PiConfigParser("~/.config/pibooth/pibooth.cfg")
+    regenerate_all_images(config)
 
 
 if __name__ == "__main__":
