@@ -255,12 +255,13 @@ for further details.
 GUI translations
 ----------------
 
-The graphical interface texts are available in 3 languages by default: English, French and
-German. The default translations can be easily edited using the command::
+The graphical interface texts are available in 4 languages by default: English, French, 
+German and Spanish. The default translations can be easily edited using the command::
 
     $ pibooth --translate
 
 A new language can be added by adding a new section (``[alpha-2-code]``).
+If you want to have Pibooth in your language feel free to send us the corresponding keywords via a GitHub issue.
 
 Printer
 -------
