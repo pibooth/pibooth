@@ -49,7 +49,7 @@ def regenerate_all_images(config):
             LOGGER.warning("Folder %s doesn't contain the correct number of pictures", captures_folder_path)
             continue
 
-        maker = get_picture_maker(captures, config.get('PICTURE', 'orientation'), force_pil=True)
+        maker = get_picture_maker(captures, config.get('PICTURE', 'orientation'))
 
         maker.set_background(background)
         if any(elem != '' for elem in texts):
