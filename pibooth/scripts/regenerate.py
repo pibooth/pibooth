@@ -39,6 +39,8 @@ def regenerate_all_images(config):
     # Part that fetch the captures
     for captures_folder in os.listdir(osp.join(captures_folders, 'raw')):
         captures_folder_path = osp.join(captures_folders, 'raw', captures_folder)
+        if not osp.isdir(captures_folder_path):
+            continue
         captures = get_captures(captures_folder_path)
         LOGGER.info("Generating image from raws in folder %s", captures_folder_path)
 
