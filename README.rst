@@ -18,7 +18,7 @@ to discover some realizations from GitHub users.
 Features
 --------
 
-* Graphical interface available in English, German and French (customizable)
+* Graphical interface available in English, German, French and Spanish (customizable)
 * Capture from 1 to 4 photos and concatenate them in a final picture
 * Support all cameras compatible with gPhoto2, OpenCV and Raspberry Pi
 * Support for hardware buttons and lamps on Raspberry Pi GPIO
