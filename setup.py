@@ -61,7 +61,7 @@ def main():
         ],
         extras_require={
             'dslr': ['gphoto2>=2.0.0'],
-            'printer': ['pycups>=1.9.73'],
+            'printer': ['pycups>=1.9.73', 'pycups-notify>=0.0.4'],
         },
         options={
             'bdist_wheel':
