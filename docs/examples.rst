@@ -9,6 +9,7 @@ Here some examples of pictures generated with ``pibooth``
    :align: center
    :alt: Default config
    :height: 400px
+   :class: with-border
 
 - With a custom background and text color
 
