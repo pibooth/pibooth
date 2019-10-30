@@ -190,7 +190,7 @@ class PictureMaker(object):
         for src_image in self._iter_images():
             pos_x, pos_y, max_w, max_h = next(offset_generator)
             src_image, width, height = self._image_resize_keep_ratio(src_image, max_w, max_h, self._crop)
-            # Adjuste position to have identical margin between borders and images
+            # Adjust position to have identical margin between borders and images
             if len(self._images) < 4:
                 pos_x, pos_y = pos_x + (max_w - width) // 2, pos_y + (max_h - height) // 2
             elif count == 1:
