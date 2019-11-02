@@ -17,7 +17,13 @@ def get_captures(images_folder):
     """Get a list of images from the folder given in input
     """
     captures_paths = os.listdir(images_folder)
-    captures = [Image.open(osp.join(images_folder, capture_path)) for capture_path in captures_paths]
+    captures = []
+    for capture_path in captures_paths:
+        try:
+            image = Image.open(osp.join(images_folder, capture_path))
+            captures.append(image)
+        except OSError:
+            LOGGER.info("File %s doesn't seem to be an image", capture_path)
     return captures
 
 
