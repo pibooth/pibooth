@@ -21,7 +21,7 @@ CURRENT = 'en'  # Dynamically set at startup
 DEFAULT = {
     'en': {
         'intro': "Take a photo",
-        'intro_print': 'Or you can\nstill print\nthis photo',
+        'intro_print': "Or you can\nstill print\nthis photo",
         'choose': "Choose your layout",
         '1': "1 photo",
         '2': "2 photos",
@@ -36,7 +36,7 @@ DEFAULT = {
     },
     'es': {
         'intro': "Sacate Una Foto",
-        'intro_print': 'O Puedes\nTodavia Imprimir\nEsta Foto',
+        'intro_print': "O Puedes\nTodavia Imprimir\nEsta Foto",
         'choose': "Elige el tipo de foto",
         '1': "1 Foto",
         '2': "2 Fotos",
@@ -51,7 +51,7 @@ DEFAULT = {
     },
     'fr': {
         'intro': "Faire une photo",
-        'intro_print': 'Ou sinon\ntu peux toujours\nimprimer\ncette photo',
+        'intro_print': "Ou sinon\ntu peux toujours\nimprimer\ncette photo",
         'choose': "Choisis ton format",
         '1': "1 photo",
         '2': "2 photos",
@@ -66,7 +66,7 @@ DEFAULT = {
     },
     'de': {
         'intro': "Foto aufnehmen",
-        'intro_print': 'Sie können dieses\nfoto immer noch\nausdrucken',
+        'intro_print': "Sie können dieses\nfoto immer noch\nausdrucken",
         'choose': "Wähle dein Layout",
         '1': "1 foto",
         '2': "2 fotos",
@@ -78,6 +78,21 @@ DEFAULT = {
         'print': "Foto drucken?",
         'finished': "Danke",
         'oops': "Ups Irgendwas lief schief",
+    },
+    'nl': {
+        'intro': "Neem een foto",
+        'intro_print': "Of je kan\nnog altijd \ndeze foto printen",
+        'choose': "Kies een ontwerp",
+        '1': "1 foto",
+        '2': "2 foto’s",
+        '3': "3 foto’s",
+        '4': "4 foto’s",
+        'chosen': "We gaan ervoor!",
+        'smile': "Lachen !",
+        'processing': "Verwerken...",
+        'print': "Print de foto?",
+        'finished': "Bedankt",
+        'oops': "Oeps er ging iets mis",
     }
 }
 

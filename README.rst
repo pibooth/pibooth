@@ -18,7 +18,7 @@ to discover some realizations from GitHub users.
 Features
 --------
 
-* Graphical interface available in English, German, French and Spanish (customizable)
+* Graphical interface available in English, French, German, Dutch and Spanish (customizable)
 * Capture from 1 to 4 photos and concatenate them in a final picture
 * Support all cameras compatible with gPhoto2, OpenCV and Raspberry Pi
 * Support for hardware buttons and lamps on Raspberry Pi GPIO
@@ -258,7 +258,7 @@ GUI translations
 ----------------
 
 The graphical interface texts are available in 4 languages by default: English, French, 
-German and Spanish. The default translations can be easily edited using the command::
+German, Dutch and Spanish. The default translations can be easily edited using the command::
 
     $ pibooth --translate
 
