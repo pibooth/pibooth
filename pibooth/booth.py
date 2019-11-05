@@ -78,6 +78,7 @@ class StateWait(State):
             self.app.led_print.blink()
 
         if previous_picture:
+            self.final_display_timer.timeout = self.app.config.getfloat('WINDOW', 'final_image_delay')
             self.final_display_timer.start()
 
     def do_actions(self, events):
