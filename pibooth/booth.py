@@ -56,6 +56,7 @@ class StateWait(State):
     def __init__(self):
         State.__init__(self, 'wait')
         self.timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'animate_delay'))
+        self.final_display_timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'final_image_delay'))
 
     def entry_actions(self):
         animated = self.app.makers_pool.get()
@@ -75,6 +76,9 @@ class StateWait(State):
         self.app.led_capture.blink()
         if self.app.previous_picture_file and self.app.printer.is_installed() and not self.app.printer_unavailable:
             self.app.led_print.blink()
+
+        if previous_picture:
+            self.final_display_timer.start()
 
     def do_actions(self, events):
         if self.app.config.getboolean('WINDOW', 'animate') and self.app.previous_animated and self.timer.is_timeout():
@@ -115,6 +119,9 @@ class StateWait(State):
         event = self.app.find_print_status_event(events)
         if event:
             self.app.window.set_print_number(len(event.tasks), self.app.printer_unavailable)
+
+        if self.final_display_timer.is_timeout():
+            self.app.window.show_intro(None, False)
 
     def exit_actions(self):
         self.app.led_capture.switch_off()

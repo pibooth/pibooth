@@ -39,6 +39,9 @@ Default configuration
     # How long is displayed the capture in seconds before switching to the next one
     animate_delay = 0.2
 
+    # How long is displayed the preview in seconds before being hidden (-1 if never hidden)
+    final_image_delay = -1
+
     # Show arrows to indicate physical buttons: 'bottom', 'top' or 'hidden'
     arrows = bottom
 

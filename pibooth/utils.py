@@ -74,15 +74,12 @@ class PoolingTimer(object):
     """
 
     def __init__(self, timeout, start=True):
-        if timeout < 0:
-            raise ValueError("PoolingTimer timeout can not be lower than zero")
-        else:
-            self.timeout = timeout
-            self.time = None
-            self._paused_total = 0
-            self._paused_time = None
-            if start:
-                self.start()
+        self.timeout = timeout
+        self.time = None
+        self._paused_total = 0
+        self._paused_time = None
+        if start:
+            self.start()
 
     def __enter__(self):
         """Start timer if used as context manager.
@@ -141,6 +138,8 @@ class PoolingTimer(object):
         """
         if self.time is None:
             raise RuntimeError("PoolingTimer has never been started")
+        elif self.timeout < 0:
+            return False
         return (time.time() - self.time - self.paused()) > self.timeout
 
 
