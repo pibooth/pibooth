@@ -315,7 +315,17 @@ Icons from the Noun Project
 - Up hand drawn arrow by Kid A
 - Cameraman and Friends Posing For Camera by Gan Khoon Lay
 
-## Support on Beerpay
-Hey dude! Help me out for a couple of :beers:!
+Support us on Beerpay
+---------------------
 
-[![Beerpay](https://beerpay.io/werdeil/pibooth/badge.svg?style=beer-square)](https://beerpay.io/werdeil/pibooth)  [![Beerpay](https://beerpay.io/werdeil/pibooth/make-wish.svg?style=flat-square)](https://beerpay.io/werdeil/pibooth?focus=wish)
+If you want to help us you can by clicking on the following links!
+
+|BeerPay| |BeerPay2|
+
+.. |BeerPay| image:: https://beerpay.io/werdeil/pibooth/badge.svg?style=beer-square
+   :align: middle
+   :target: https://beerpay.io/werdeil/pibooth
+
+.. |BeerPay2| image:: https://beerpay.io/werdeil/pibooth/make-wish.svg?style=flat-square
+   :align: middle
+   :target: https://beerpay.io/werdeil/pibooth?focus=wish
