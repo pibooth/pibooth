@@ -314,3 +314,8 @@ Icons from the Noun Project
 - Polaroid by icon 54
 - Up hand drawn arrow by Kid A
 - Cameraman and Friends Posing For Camera by Gan Khoon Lay
+
+## Support on Beerpay
+Hey dude! Help me out for a couple of :beers:!
+
+[![Beerpay](https://beerpay.io/werdeil/pibooth/badge.svg?style=beer-square)](https://beerpay.io/werdeil/pibooth)  [![Beerpay](https://beerpay.io/werdeil/pibooth/make-wish.svg?style=flat-square)](https://beerpay.io/werdeil/pibooth?focus=wish)
