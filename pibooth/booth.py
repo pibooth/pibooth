@@ -60,7 +60,9 @@ class StateWait(State):
 
     def entry_actions(self):
         animated = self.app.makers_pool.get()
-        if self.app.config.getboolean('WINDOW', 'animate') and animated:
+        if self.final_display_timer.timeout == 0:
+            previous_picture = None
+        elif self.app.config.getboolean('WINDOW', 'animate') and animated:
             self.app.previous_animated = itertools.cycle(animated)
             previous_picture = next(self.app.previous_animated)
             self.timer.timeout = self.app.config.getfloat('WINDOW', 'animate_delay')
