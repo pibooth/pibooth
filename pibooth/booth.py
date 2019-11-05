@@ -81,7 +81,8 @@ class StateWait(State):
 
         if previous_picture:
             self.final_display_timer.timeout = self.app.config.getfloat('WINDOW', 'final_image_delay')
-            self.final_display_timer.start()
+            if self.final_display_timer.timeout > 0:
+                self.final_display_timer.start()
 
     def do_actions(self, events):
         if self.app.config.getboolean('WINDOW', 'animate') and self.app.previous_animated and self.timer.is_timeout():
@@ -123,7 +124,7 @@ class StateWait(State):
         if event:
             self.app.window.set_print_number(len(event.tasks), self.app.printer_unavailable)
 
-        if self.final_display_timer.is_timeout():
+        if self.final_display_timer.timeout > 0 and self.final_display_timer.is_timeout():
             self.app.window.show_intro(None, False)
 
     def exit_actions(self):

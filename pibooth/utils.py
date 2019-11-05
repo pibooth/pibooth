@@ -138,8 +138,6 @@ class PoolingTimer(object):
         """
         if self.time is None:
             raise RuntimeError("PoolingTimer has never been started")
-        elif self.timeout < 0:
-            return False
         return (time.time() - self.time - self.paused()) > self.timeout
 
 
