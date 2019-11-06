@@ -56,10 +56,11 @@ class StateWait(State):
     def __init__(self):
         State.__init__(self, 'wait')
         self.timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'animate_delay'))
-        self.final_display_timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'final_image_delay'))
+        self.final_display_timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'final_image_delay'), start=False)
 
     def entry_actions(self):
         animated = self.app.makers_pool.get()
+        self.final_display_timer.timeout = self.app.config.getfloat('WINDOW', 'final_image_delay')
         if self.final_display_timer.timeout == 0:
             previous_picture = None
         elif self.app.config.getboolean('WINDOW', 'animate') and animated:
@@ -80,7 +81,6 @@ class StateWait(State):
             self.app.led_print.blink()
 
         if previous_picture:
-            self.final_display_timer.timeout = self.app.config.getfloat('WINDOW', 'final_image_delay')
             if self.final_display_timer.timeout > 0:
                 self.final_display_timer.start()
 
