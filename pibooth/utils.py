@@ -95,6 +95,8 @@ class PoolingTimer(object):
     def start(self):
         """Start the timer.
         """
+        if self.timeout < 0:
+            raise ValueError("PoolingTimer cannot be started if timeout is lower than zero")
         if self._paused_time:
             self._paused_total += time.time() - self._paused_time
             self._paused_time = None
