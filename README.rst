@@ -32,9 +32,7 @@ Features
 * Custom background(s) and overlay(s) can be added on final pictures
 * All settings available in a configuration file (most common options in a graphical interface)
 
-See some `examples of pictures generated with pibooth <https://github.com/werdeil/pibooth/blob/master/docs/examples.rst>`_.
-
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/pibooth.png
+.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/gallery.png
    :align: center
    :alt: gallery
    :target: https://github.com/werdeil/pibooth/blob/master/docs/examples.rst
