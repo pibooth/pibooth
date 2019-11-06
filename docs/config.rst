@@ -5,7 +5,7 @@ Default configuration
 .. code-block:: ini
 
     [GENERAL]
-    # User interface language: 'en', 'fr', 'de', 'nl' or 'es'
+    # User interface language: 'en', 'es', 'fr', 'de' or 'nl'
     language = en
 
     # Path to save pictures
@@ -39,7 +39,7 @@ Default configuration
     # How long is displayed the capture in seconds before switching to the next one
     animate_delay = 0.2
 
-    # How long is displayed the preview in seconds before being hidden (-1 if never hidden)
+    # How long is displayed the final image in seconds before being hidden (-1 if never hidden)
     final_image_delay = -1
 
     # Show arrows to indicate physical buttons: 'bottom', 'top' or 'hidden'
