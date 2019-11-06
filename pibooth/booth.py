@@ -56,12 +56,19 @@ class StateWait(State):
     def __init__(self):
         State.__init__(self, 'wait')
         self.timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'animate_delay'))
-        self.final_display_timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'final_image_delay'), start=False)
+        if self.app.config.getfloat('WINDOW', 'final_image_delay') < 0:
+            self.final_display_timer = None
+        else:
+            self.final_display_timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'final_image_delay'))
 
     def entry_actions(self):
         animated = self.app.makers_pool.get()
-        self.final_display_timer.timeout = self.app.config.getfloat('WINDOW', 'final_image_delay')
-        if self.final_display_timer.timeout == 0:
+        if self.app.config.getfloat('WINDOW', 'final_image_delay') < 0:
+            self.final_display_timer = None
+        else:
+            self.final_display_timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'final_image_delay'))
+
+        if self.final_display_timer and self.final_display_timer.is_timeout():
             previous_picture = None
         elif self.app.config.getboolean('WINDOW', 'animate') and animated:
             self.app.previous_animated = itertools.cycle(animated)
@@ -80,10 +87,6 @@ class StateWait(State):
         if self.app.previous_picture_file and self.app.printer.is_installed() and not self.app.printer_unavailable:
             self.app.led_print.blink()
 
-        if previous_picture:
-            if self.final_display_timer.timeout > 0:
-                self.final_display_timer.start()
-
     def do_actions(self, events):
         if self.app.config.getboolean('WINDOW', 'animate') and self.app.previous_animated and self.timer.is_timeout():
             previous_picture = next(self.app.previous_animated)
@@ -94,7 +97,8 @@ class StateWait(State):
         else:
             previous_picture = self.app.previous_picture
 
-        if self.app.find_print_event(events) and self.app.previous_picture_file and self.app.printer.is_installed():
+        if self.app.find_print_event(events) and self.app.previous_picture_file and self.app.printer.is_installed()\
+                and not (self.final_display_timer and self.final_display_timer.is_timeout()):
 
             if self.app.nbr_duplicates >= self.app.config.getint('PRINTER', 'max_duplicates'):
                 LOGGER.warning("Too many duplicates sent to the printer (%s max)",
@@ -124,7 +128,7 @@ class StateWait(State):
         if event:
             self.app.window.set_print_number(len(event.tasks), self.app.printer_unavailable)
 
-        if self.final_display_timer.timeout > 0 and self.final_display_timer.is_timeout():
+        if self.final_display_timer and self.final_display_timer.is_timeout():
             self.app.window.show_intro(None, False)
 
     def exit_actions(self):

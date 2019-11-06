@@ -80,7 +80,7 @@ DEFAULT = odict((
             ("final_image_delay",
                 (-1,
                  "How long is displayed the final image in seconds before being hidden (-1 if never hidden)",
-                 "Final image display time", [-1] + [str(i) for i in range(0, 121)])),
+                 "Final image display time", ['-1'] + [str(i) for i in range(0, 121, 5)])),
             ("arrows",
                 ('bottom',
                  "Show arrows to indicate physical buttons: 'bottom', 'top' or 'hidden'",
