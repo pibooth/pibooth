@@ -34,6 +34,11 @@ Features
 
 See some `examples of pictures generated with pibooth <https://github.com/werdeil/pibooth/blob/master/docs/examples.rst>`_.
 
+.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/pibooth.png
+   :align: center
+   :alt: gallery
+   :target: https://github.com/werdeil/pibooth/blob/master/docs/examples.rst
+
 Requirements
 ------------
 
@@ -257,7 +262,7 @@ for further details.
 GUI translations
 ----------------
 
-The graphical interface texts are available in 4 languages by default: English, French, 
+The graphical interface texts are available in 4 languages by default: English, French,
 German, Dutch and Spanish. The default translations can be easily edited using the command::
 
     $ pibooth --translate
