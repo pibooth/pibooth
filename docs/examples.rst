@@ -7,13 +7,13 @@ Note that images size have been reduced for display purpose.
 
 ------
 
+**Made with default config**
+
 .. figure :: https://raw.githubusercontent.com/werdeil/pibooth/master/docs/examples/pibooth_default.jpg
    :align: center
    :alt: Default config
    :height: 400px
    :class: with-border
-   
-   Made with default config
 
 ------
 
