@@ -17,7 +17,7 @@ following actions:
 
 3. Install ``pibooth`` in editable mode ::
 
-    $ sudo pip3 install -e .
+    $ sudo pip3 install -e .[dslr,printer]
 
 4. Start the application exactly in the same way as installed from pypi. All modifications performed
    in the cloned repository are taken into account when the application starts.
