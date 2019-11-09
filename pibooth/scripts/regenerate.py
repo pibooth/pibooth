@@ -31,7 +31,7 @@ def regenerate_all_images(config):
     """Regenerate the pibboth images from the raw images and the config
     """
     captures_folders = config.getpath('GENERAL', 'directory')
-    capture_choices = config.gettuple('PICTURE', 'captures', int)
+    capture_choices = config.gettuple('PICTURE', 'captures', int, 2)
 
     backgrounds = config.gettuple('PICTURE', 'backgrounds', ('color', 'path'), 2)
     overlays = config.gettuple('PICTURE', 'overlays', 'path', 2)
