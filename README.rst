@@ -273,7 +273,7 @@ Printer
 
 The print button (see `Commands`_) and print states are automatically activated/shown if:
 
-* `pycups <https://pypi.python.org/pypi/pycups>`_ is installed
+* `pycups <https://pypi.python.org/pypi/pycups>`_ and `pycups-notify <https://github.com/anxuae/pycups-notify>`_ are installed
 * at least one printer is configured in ``CUPS``
 
 To avoid paper waste, set the option ``[PRINTER][max_duplicates]`` to the maximum
