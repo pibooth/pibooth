@@ -20,6 +20,7 @@ def gp_camera_connected():
     """Return True if a camera compatible with gPhoto2 is found.
     """
     if not gp:
+        LOGGER.warning("gphoto2 lib not found!")
         return False  # gPhoto2 is not installed
     if hasattr(gp, 'gp_camera_autodetect'):
         # gPhoto2 version 2.5+

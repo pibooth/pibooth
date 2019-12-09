@@ -34,6 +34,6 @@ def get_camera(iso, resolution, rotation, flip, delete_internal_memory):
         LOGGER.info("Configuring OpenCV camera ...")
         cam_class = CvCamera
     else:
-        raise EnvironmentError("Neither Raspberry Pi nor GPhoto2 nor OpenCV camera detected")
+        raise EnvironmentError("Neither Raspberry Pi nor GPhoto2 nor OpenCV camera detected. Camera may also be off or disconnected.")
 
     return cam_class(iso, resolution, rotation, flip, delete_internal_memory)
