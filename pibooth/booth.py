@@ -737,6 +737,7 @@ def main():
         LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
     elif not options.reset:
+        LOGGER.info("------------------------------------------------------------------")
         LOGGER.info("Starting the photo booth application...")
         app = PiApplication(config)
         app.main_loop()
