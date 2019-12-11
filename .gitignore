@@ -74,4 +74,9 @@ target/
 
 # pyenv
 .python-version
-
+/pibooth/.\test.jpg
+/pibooth/.\test\qr_link.jpg
+/pibooth/pictures/link.jpg
+/pibooth/test.jpg
+/pibooth/.\test.jpg
+/pibooth/.\test\qr_link.jpg
