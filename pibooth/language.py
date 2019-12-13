@@ -93,6 +93,21 @@ DEFAULT = {
         'print': "Print de foto?",
         'finished': "Bedankt",
         'oops': "Oeps er ging iets mis",
+    },
+    'hu': {
+        'intro': "Akarsz egy képet",
+        'intro_print': 'Vagy\nkinyomtathatja\nezt a fényképet',
+        'choose': "Kérlek válassz",
+        '1': "1 kép",
+        '2': "2 kép",
+        '3': "3 kép",
+        '4': "4 kép",
+        'chosen': "Készülj!",
+        'smile': "Csiizzz !",
+        'processing': "Feldolgozás...",
+        'print': "Nyomtatod a képet?",
+        'finished': "Köszi",
+        'oops': "Sajnos valami hiba történt",
     }
 }
 
@@ -125,6 +140,20 @@ def init(filename, clear=False):
                 fp.write("\n\n")
 
     PARSER.read(PARSER.filename, encoding='utf-8')
+
+    # Complete with missing language
+    changed = False
+    for section, options in DEFAULT.items():
+        if not PARSER.has_section(section):
+            changed = True
+            LOGGER.debug("Add [%s] to available language list", section)
+            PARSER.add_section(section)
+            for option, value in options.items():
+                PARSER.set(section, option, value)
+
+    if changed:
+        with io.open(PARSER.filename, 'w', encoding="utf-8") as fp:
+            PARSER.write(fp)
 
 
 def edit():
