@@ -181,6 +181,8 @@ class IntroBackground(Background):
         self.arrow_offset = arrow_offset
         self.left_arrow = None
         self.left_arrow_pos = None
+        self.qr_download_link = None
+        self.qr_download_link_pos = None
 
     def resize(self, screen):
         Background.resize(self, screen)
@@ -189,7 +191,8 @@ class IntroBackground(Background):
 
             vflip = True if self.arrow_location == ARROW_TOP else False
             self.left_arrow = pictures.get_pygame_image("arrow.png", size, vflip=vflip, color=self._text_color)
-
+            self.qr_download_link = pictures.get_pygame_image("link.jpg", (300,300))
+            
             x = int(self._rect.left + self._rect.width // 4
                     - self.left_arrow.get_rect().width // 2)
             if self.arrow_location == ARROW_TOP:
@@ -198,6 +201,7 @@ class IntroBackground(Background):
                 y = int(self._rect.top + 2 * self._rect.height // 3)
 
             self.left_arrow_pos = (x - self.arrow_offset, y)
+            self.qr_download_link_pos = (50, 50)
 
     def resize_texts(self):
         """Update text surfaces.

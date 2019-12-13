@@ -5,6 +5,8 @@ from pibooth.utils import LOGGER
 
 
 def write_exif(filename, capture_nbr, pic_id):
+	"""Adding Exif data to image files
+	"""
 	try:
 		im = Image.open(filename)
 		exif_dict = piexif.load(filename)
@@ -22,8 +24,7 @@ def write_exif(filename, capture_nbr, pic_id):
 		exif_dict["0th"][piexif.ImageIFD.ImageNumber] = capture_nbr
 		exif_dict["0th"][piexif.ImageIFD.Copyright] = "www.prinsenhof.de"
 		exif_dict["Exif"][piexif.ExifIFD.ImageUniqueID] = str(pic_id)
-		exif_dict["Exif"][piexif.ExifIFD.CameraOwnerName] = "Prinsenhof"	
-		#exif_dict["Exif"][piexif.ExifIFD.UserComment] = "Ein Foto aus der Fotobooth vom Prinsenhof in Porta Westfalica"
+		exif_dict["Exif"][piexif.ExifIFD.CameraOwnerName] = "Prinsenhof"
 		exif_dict["GPS"][piexif.GPSIFD.GPSLatitudeRef] = "N"
 		exif_dict["GPS"][piexif.GPSIFD.GPSLongitudeRef] = "O"		
 		#exif_dict["GPS"][piexif.ImageIFD.GPSLatitude] = ()
