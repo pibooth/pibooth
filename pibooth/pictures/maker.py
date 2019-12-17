@@ -253,8 +253,9 @@ class PictureMaker(object):
         draw = ImageDraw.Draw(image)
         for x, y, w, h in self._iter_images_rects():
             draw.rectangle(((x, y), (x + w, y + h)), outline='red')
-        for x, y, w, h in self._iter_texts_rects():
-            draw.rectangle(((x, y), (x + w, y + h)), outline='red')
+        if self._texts:
+            for x, y, w, h in self._iter_texts_rects():
+                draw.rectangle(((x, y), (x + w, y + h)), outline='red')
 
     def add_text(self, text, font_name, color, align=CENTER):
         """Add a new text.
