@@ -391,6 +391,25 @@ class CaptureBackground(Background):
     def __init__(self):
         Background.__init__(self, "capture")
 
+    def resize(self, screen):
+        Background.resize(self, screen)
+        if self._need_update:
+            images_height = self._rect.height/4
+            size = (3*images_height, images_height)
+
+            self.left_image = pictures.get_pygame_image("capture_left_image.png", size=size)
+            self.right_image = pictures.get_pygame_image("capture_right_image.png", size=size)
+
+            x = int(self._rect.right - 2*self.right_image.get_rect().width)
+            y = int(self._rect.bottom - images_height)
+
+            self.left_image_pos = (0, y)
+            self.right_image_pos = (x, y)
+
+    def paint(self, screen):
+        Background.paint(self, screen)
+        screen.blit(self.left_image, self.left_image_pos)
+        screen.blit(self.right_image, self.right_image_pos)
 
 class ProcessingBackground(Background):
 
