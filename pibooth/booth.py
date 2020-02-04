@@ -657,7 +657,7 @@ class PiApplication(object):
                     self.window.resize(event.size)
 
                 if not menu and self.find_settings_event(events):
-                    menu = PiConfigMenu(self.window, self.config, fps)
+                    menu = PiConfigMenu(self.window, self.config, fps, version=pibooth.__version__)
                     menu.show()
 
                 if menu and menu.is_shown():

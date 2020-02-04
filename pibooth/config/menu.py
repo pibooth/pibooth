@@ -27,7 +27,7 @@ def _find(choices, value):
 
 class PiConfigMenu(object):
 
-    def __init__(self, window, config, fps):
+    def __init__(self, window, config, fps, version):
         self.window = window
         self.config = config
         self._main_menu = None
@@ -39,7 +39,7 @@ class PiConfigMenu(object):
                                    width,
                                    height,
                                    fonts.get_filename("Amatic-Bold"),
-                                   'Settings',
+                                   "Pibooth v{} - Settings".format(version),
                                    draw_region_y=55,
                                    font_color=(255, 255, 255),
                                    font_title = fonts.get_filename("Amatic-Bold"),
