@@ -19,6 +19,21 @@ PARSER = ConfigParser()
 CURRENT = 'en'  # Dynamically set at startup
 
 DEFAULT = {
+    'de': {
+        'intro': "Foto aufnehmen",
+        'intro_print': "Sie können dieses\nfoto immer noch\nausdrucken",
+        'choose': "Wähle dein Layout",
+        '1': "1 foto",
+        '2': "2 fotos",
+        '3': "3 fotos",
+        '4': "4 fotos",
+        'chosen': "Los gehts!",
+        'smile': "Bitte lächeln!",
+        'processing': "Bearbeitung...",
+        'print': "Foto drucken?",
+        'finished': "Danke",
+        'oops': "Ups Irgendwas lief schief",
+    },
     'en': {
         'intro': "Take a photo",
         'intro_print': "Or you can\nstill print\nthis photo",
@@ -64,20 +79,20 @@ DEFAULT = {
         'finished': "Merci",
         'oops': "Oups quelque chose s'est mal passé",
     },
-    'de': {
-        'intro': "Foto aufnehmen",
-        'intro_print': "Sie können dieses\nfoto immer noch\nausdrucken",
-        'choose': "Wähle dein Layout",
-        '1': "1 foto",
-        '2': "2 fotos",
-        '3': "3 fotos",
-        '4': "4 fotos",
-        'chosen': "Los gehts!",
-        'smile': "Bitte lächeln!",
-        'processing': "Bearbeitung...",
-        'print': "Foto drucken?",
-        'finished': "Danke",
-        'oops': "Ups Irgendwas lief schief",
+    'hu': {
+        'intro': "Akarsz egy képet",
+        'intro_print': 'Vagy\nkinyomtathatja\nezt a fényképet',
+        'choose': "Kérlek válassz",
+        '1': "1 kép",
+        '2': "2 kép",
+        '3': "3 kép",
+        '4': "4 kép",
+        'chosen': "Készülj!",
+        'smile': "Csiizzz!",
+        'processing': "Feldolgozás...",
+        'print': "Nyomtatod a képet?",
+        'finished': "Köszi",
+        'oops': "Sajnos valami hiba történt",
     },
     'nl': {
         'intro': "Neem een foto",
@@ -94,21 +109,6 @@ DEFAULT = {
         'finished': "Bedankt",
         'oops': "Oeps er ging iets mis",
     },
-    'hu': {
-        'intro': "Akarsz egy képet",
-        'intro_print': 'Vagy\nkinyomtathatja\nezt a fényképet',
-        'choose': "Kérlek válassz",
-        '1': "1 kép",
-        '2': "2 kép",
-        '3': "3 kép",
-        '4': "4 kép",
-        'chosen': "Készülj!",
-        'smile': "Csiizzz!",
-        'processing': "Feldolgozás...",
-        'print': "Nyomtatod a képet?",
-        'finished': "Köszi",
-        'oops': "Sajnos valami hiba történt",
-    }
 }
 
 
@@ -169,8 +169,8 @@ def get_supported_languages():
     """Return the list of supported language.
     """
     if getattr(PARSER, 'filename', None):
-        return [lang for lang in PARSER.sections()]
-    return list(DEFAULT.keys())
+        return list(sorted(lang for lang in PARSER.sections()))
+    return list(sorted(DEFAULT.keys()))
 
 
 def get_translated_text(key):

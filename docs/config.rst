@@ -5,7 +5,7 @@ Default configuration
 .. code-block:: ini
 
     [GENERAL]
-    # User interface language: 'en', 'es', 'fr', 'de' or 'nl'
+    # User interface language: 'de', 'en', 'es', 'fr', 'hu' or 'nl'
     language = en
 
     # Path to save pictures
