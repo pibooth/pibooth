@@ -338,7 +338,7 @@ class StateProcessing(State):
                 and not self.app.printer_unavailable:
             return 'print'
         else:
-            return 'finish'  # Can not print
+            return 'print'  # Can not print
 
 
 class StatePrint(State):
@@ -347,6 +347,7 @@ class StatePrint(State):
         State.__init__(self, 'print')
         self.timer = PoolingTimer(self.app.config.getfloat('PRINTER', 'printer_delay'))
         self.printed = False
+        self.forget = False
 
     def entry_actions(self):
         self.printed = False
@@ -372,9 +373,15 @@ class StatePrint(State):
             self.app.nbr_duplicates += 1
             self.app.led_print.blink()
             self.printed = True
+        
+        if self.app.find_capture_event(events):
+            self.app.previous_picture = None
+            file_dir, file_name = os.path.split(self.app.previous_picture_file)
+            os.rename(self.app.previous_picture_file, os.path.join(file_dir, 'forget_'+file_name))
+            self.forget = True
 
     def validate_transition(self, events):
-        if self.timer.is_timeout() or self.printed:
+        if self.timer.is_timeout() or self.printed or self.forget:
             if self.printed:
                 self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_unavailable)
             return 'finish'
