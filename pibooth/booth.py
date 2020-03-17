@@ -338,7 +338,7 @@ class StateProcessing(State):
                 and not self.app.printer_unavailable:
             return 'print'
         else:
-            return 'print'  # Can not print
+            return 'finish'  # Can not print
 
 
 class StatePrint(State):
