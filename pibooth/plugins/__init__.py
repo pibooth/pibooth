@@ -15,8 +15,8 @@ def get_plugins(*paths):
     note:: by default hooks are called in LIFO registered order thus
            register order may be important.
     """
-    return [LightsPlugin(),
-            CameraPlugin(),
-            PicturePlugin(),
+    return [ViewPlugin(),  # Last called
             PrinterPlugin(),
-            ViewPlugin()]
+            PicturePlugin(),
+            CameraPlugin(),
+            LightsPlugin()]  # First called

@@ -6,16 +6,16 @@ The ``pibooth`` application is built on the top of
 `pluggy <https://pluggy.readthedocs.io/en/latest/index.html>`_
 that gives users the ability to extend or modify its behavior.
 
-Hook specification
-^^^^^^^^^^^^^^^^^^
+What is a plugin?
+^^^^^^^^^^^^^^^^^
 
 A plugin is a set of functions (called ``hooks``) defined in a python module
 and participating to the ``pibooth`` execution when they are invoked.
 
-The list of available ``hooks`` are defined in the file are defined in the file
+The list of available ``hooks`` are defined in the file
 `hookspecs.py <https://github.com/werdeil/pibooth/blob/master/pibooth/plugins/hookspecs.py>`_.
 
-A plugin implements a subset of the functions defined in this specification.
+A plugin implements a subset of the functions of this specification.
 
 Influencing states
 ^^^^^^^^^^^^^^^^^^
@@ -54,7 +54,6 @@ Example #1 : Upload to FTP
 
     @pibooth.hookimpl
     def state_processing_exit(app):
-
         ftp = FTP()
         ftp.set_debuglevel(0)
         ftp.connect("ftp.pibooth.org", 21)
@@ -67,8 +66,8 @@ Example #1 : Upload to FTP
 
         ftp.close()
 
-Example #2 : Generate a QRCode
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Example #2 : Generate a QR-Code
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``pibooth_qrcode.py``
 
@@ -83,7 +82,8 @@ Example #2 : Generate a QRCode
 
     @pibooth.hookimpl
     def state_processing_exit(app):
-
+        """Generate the QR Code and store it in the application.
+        """
         qr = qrcode.QRCode(version=1,
                            error_correction=qrcode.constants.ERROR_CORRECT_L,
                            box_size=10,
@@ -91,7 +91,7 @@ Example #2 : Generate a QRCode
 
         name = os.path.basename(self.app.previous_picture_file))
 
-        qr.add_data(os.path.join("www.prinsenhof.de/~fotobox", name))
+        qr.add_data(os.path.join("www.pibooth.org/pictures", name))
         qr.make(fit=True)
 
         image = qr.make_image(fill_color="black", back_color="white")
@@ -99,9 +99,13 @@ Example #2 : Generate a QRCode
 
 
     @pibooth.hookimpl
-    def state_print_enter(self, cfg, app):
+    def state_print_enter(app):
+        """Display the QR Code on the print view.
+        """
         app.window.surface.blit(app.previous_qr, (10, 10))
 
     @pibooth.hookimpl
-    def state_wait_enter(self, cfg, app):
+    def state_wait_enter(app):
+        """Display the QR Code on the wait view.
+        """
         app.window.surface.blit(app.previous_qr, (10, 10))
