@@ -39,11 +39,69 @@ the state is switching to an other one. The ``validate``, also invoked in a
 loop, returns the name  of the next state. And finally the ``exit`` hook is
 invoked one time when the state is exited.
 
-Example #1 : blabla
-^^^^^^^^^^^^^^^^^^^
+Example #1 : Upload to FTP
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``pibooth_blabla.py``
+``pibooth_ftp.py``
 
 .. code-block:: python
 
+    import os
+    from ftplib import FTP
+
     import pibooth
+    from pibooth.utils import LOGGER
+
+    @pibooth.hookimpl
+    def state_processing_exit(app):
+
+        ftp = FTP()
+        ftp.set_debuglevel(0)
+        ftp.connect("ftp.pibooth.org", 21)
+        ftp.login("pibooth", "1h!gR4/opK")
+
+        name = os.path.basename(self.app.previous_picture_file))
+
+        with open(self.app.previous_picture_file, 'rb') as fp:
+            ftp.storbinary('STOR {}'.format(name), fp, 1024)
+
+        ftp.close()
+
+Example #2 : Generate a QRCode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``pibooth_qrcode.py``
+
+.. code-block:: python
+
+    import os
+    import qrcode
+    import pygame
+
+    import pibooth
+    from pibooth.utils import LOGGER
+
+    @pibooth.hookimpl
+    def state_processing_exit(app):
+
+        qr = qrcode.QRCode(version=1,
+                           error_correction=qrcode.constants.ERROR_CORRECT_L,
+                           box_size=10,
+                           border=4)
+
+        name = os.path.basename(self.app.previous_picture_file))
+
+        qr.add_data(os.path.join("www.prinsenhof.de/~fotobox", name))
+        qr.make(fit=True)
+
+        image = qr.make_image(fill_color="black", back_color="white")
+        app.previous_qr = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+
+
+    @pibooth.hookimpl
+    def state_print_enter(self, cfg, app):
+        app.window.surface.blit(app.previous_qr, (10, 10))
+
+    @pibooth.hookimpl
+    def state_wait_enter(self, cfg, app):
+        app.window.surface.blit(app.previous_qr, (10, 10))
