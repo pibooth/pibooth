@@ -5,400 +5,33 @@
 """
 
 import os
-import time
 import shutil
 import logging
 import argparse
-import itertools
 import os.path as osp
 import pygame
+import pluggy
 import pibooth
 from pibooth import fonts
 from pibooth import language
-from pibooth.utils import (LOGGER, timeit, PoolingTimer, configure_logging,
+from pibooth.utils import (LOGGER, configure_logging,
                            set_logging_level, print_columns_words)
-from pibooth.states import StateMachine, State
+from pibooth.states import StateMachine
+from pibooth.plugins import hookspecs, get_plugins
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth.controls import GPIO, camera
 from pibooth.fonts import get_available_fonts
-from pibooth.pictures import get_picture_maker
 from pibooth.pictures.pool import PicturesMakersPool
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
 from pibooth.controls.printer import PRINTER_TASKS_UPDATED, PtbPrinter
 
 
-class StateFailSafe(State):
-
-    def __init__(self, timeout):
-        State.__init__(self, 'failsafe')
-        self.timer = PoolingTimer(timeout)
-
-    def entry_actions(self):
-        self.app.dirname = None
-        self.app.capture_nbr = None
-        self.app.nbr_duplicates = 0
-        self.app.previous_picture = None
-        self.app.previous_animated = []
-        self.app.previous_picture_file = None
-        self.app.camera.drop_captures()  # Flush previous captures
-        self.app.window.show_oops()
-        self.timer.start()
-
-    def validate_transition(self, events):
-        if self.timer.is_timeout():
-            return 'wait'
-
-
-class StateWait(State):
-
-    def __init__(self):
-        State.__init__(self, 'wait')
-        self.timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'animate_delay'))
-        if self.app.config.getfloat('WINDOW', 'final_image_delay') < 0:
-            self.final_display_timer = None
-        else:
-            self.final_display_timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'final_image_delay'))
-
-    def entry_actions(self):
-        animated = self.app.makers_pool.get()
-        if self.app.config.getfloat('WINDOW', 'final_image_delay') < 0:
-            self.final_display_timer = None
-        else:
-            self.final_display_timer = PoolingTimer(self.app.config.getfloat('WINDOW', 'final_image_delay'))
-
-        if self.final_display_timer and self.final_display_timer.is_timeout():
-            previous_picture = None
-        elif self.app.config.getboolean('WINDOW', 'animate') and animated:
-            self.app.previous_animated = itertools.cycle(animated)
-            previous_picture = next(self.app.previous_animated)
-            self.timer.timeout = self.app.config.getfloat('WINDOW', 'animate_delay')
-            self.timer.start()
-        else:
-            previous_picture = self.app.previous_picture
-
-        self.app.window.show_intro(previous_picture, self.app.printer.is_installed() and
-                                   self.app.nbr_duplicates < self.app.config.getint('PRINTER', 'max_duplicates') and
-                                   not self.app.printer_unavailable)
-        self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_unavailable)
-
-        self.app.led_capture.blink()
-        if self.app.previous_picture_file and self.app.printer.is_installed() and not self.app.printer_unavailable:
-            self.app.led_print.blink()
-
-    def do_actions(self, events):
-        if self.app.config.getboolean('WINDOW', 'animate') and self.app.previous_animated and self.timer.is_timeout():
-            previous_picture = next(self.app.previous_animated)
-            self.app.window.show_intro(previous_picture, self.app.printer.is_installed() and
-                                       self.app.nbr_duplicates < self.app.config.getint('PRINTER', 'max_duplicates') and
-                                       not self.app.printer_unavailable)
-            self.timer.start()
-        else:
-            previous_picture = self.app.previous_picture
-
-        if self.app.find_print_event(events) and self.app.previous_picture_file and self.app.printer.is_installed()\
-                and not (self.final_display_timer and self.final_display_timer.is_timeout()):
-
-            if self.app.nbr_duplicates >= self.app.config.getint('PRINTER', 'max_duplicates'):
-                LOGGER.warning("Too many duplicates sent to the printer (%s max)",
-                               self.app.config.getint('PRINTER', 'max_duplicates'))
-                return
-
-            elif self.app.printer_unavailable:
-                LOGGER.warning("Maximum number of printed pages reached (%s/%s max)", self.app.printer.nbr_printed,
-                               self.app.config.getint('PRINTER', 'max_pages'))
-                return
-
-            with timeit("Send final picture to printer"):
-                self.app.led_print.switch_on()
-                self.app.printer.print_file(self.app.previous_picture_file,
-                                            self.app.config.getint('PRINTER', 'pictures_per_page'))
-
-            time.sleep(1)  # Just to let the LED switched on
-            self.app.nbr_duplicates += 1
-
-            if self.app.nbr_duplicates >= self.app.config.getint('PRINTER', 'max_duplicates') or self.app.printer_unavailable:
-                self.app.window.show_intro(previous_picture, False)
-                self.app.led_print.switch_off()
-            else:
-                self.app.led_print.blink()
-
-        event = self.app.find_print_status_event(events)
-        if event:
-            self.app.window.set_print_number(len(event.tasks), self.app.printer_unavailable)
-
-        if self.final_display_timer and self.final_display_timer.is_timeout():
-            self.app.window.show_intro(None, False)
-
-    def exit_actions(self):
-        self.app.led_capture.switch_off()
-        self.app.led_print.switch_off()
-
-        # Clear currently displayed image
-        self.app.window.show_image(None)
-
-    def validate_transition(self, events):
-        if self.app.find_capture_event(events):
-            if len(self.app.capture_choices) > 1:
-                return 'choose'
-            else:
-                self.app.capture_nbr = self.app.capture_choices[0]
-                return 'capture'
-
-
-class StateChoose(State):
-
-    def __init__(self, timeout):
-        State.__init__(self, 'choose')
-        self.timer = PoolingTimer(timeout)
-
-    def entry_actions(self):
-        with timeit("Show picture choice (nothing selected)"):
-            self.app.window.set_print_number(0)  # Hide printer status
-            self.app.window.show_choice(self.app.capture_choices)
-        self.app.capture_nbr = None
-        self.app.led_capture.blink()
-        self.app.led_print.blink()
-        self.timer.start()
-
-    def do_actions(self, events):
-        event = self.app.find_choice_event(events)
-        if event:
-            if event.key == pygame.K_LEFT:
-                self.app.capture_nbr = self.app.capture_choices[0]
-            elif event.key == pygame.K_RIGHT:
-                self.app.capture_nbr = self.app.capture_choices[1]
-
-    def exit_actions(self):
-        if self.app.capture_nbr == self.app.capture_choices[0]:
-            self.app.led_capture.switch_on()
-            self.app.led_print.switch_off()
-        elif self.app.capture_nbr == self.app.capture_choices[1]:
-            self.app.led_print.switch_on()
-            self.app.led_capture.switch_off()
-        else:
-            self.app.led_print.switch_off()
-            self.app.led_capture.switch_off()
-
-    def validate_transition(self, events):
-        if self.app.capture_nbr:
-            return 'chosen'
-        elif self.timer.is_timeout():
-            return 'wait'
-
-
-class StateChosen(State):
-
-    def __init__(self, timeout):
-        State.__init__(self, 'chosen')
-        self.timer = PoolingTimer(timeout)
-
-    def entry_actions(self):
-        with timeit("Show picture choice ({} captures selected)".format(self.app.capture_nbr)):
-            self.app.window.show_choice(self.app.capture_choices, selected=self.app.capture_nbr)
-        self.timer.start()
-
-    def exit_actions(self):
-        self.app.led_capture.switch_off()
-        self.app.led_print.switch_off()
-
-    def validate_transition(self, events):
-        if self.timer.is_timeout():
-            return 'capture'
-
-
-class StateCapture(State):
-
-    def __init__(self):
-        State.__init__(self, 'capture')
-        self.count = 0
-
-    def entry_actions(self):
-        LOGGER.info("Start new captures sequence")
-        self.app.nbr_duplicates = 0
-        self.app.previous_picture = None
-        self.app.previous_picture_file = None
-        self.app.dirname = osp.join(self.app.savedir, "raw", time.strftime("%Y-%m-%d-%H-%M-%S"))
-        os.makedirs(self.app.dirname)
-        self.app.led_preview.switch_on()
-
-        self.count = 0
-        self.app.window.set_capture_number(self.count, self.app.capture_nbr)
-        self.app.camera.preview(self.app.window)
-
-    def do_actions(self, events):
-        self.app.window.set_capture_number(self.count + 1, self.app.capture_nbr)
-        pygame.event.pump()
-
-        if self.app.config.getboolean('WINDOW', 'preview_countdown'):
-            self.app.camera.preview_countdown(self.app.config.getint('WINDOW', 'preview_delay'))
-        else:
-            self.app.camera.preview_wait(self.app.config.getint('WINDOW', 'preview_delay'))
-
-        capture_path = osp.join(self.app.dirname, "pibooth{:03}.jpg".format(self.count))
-
-        if self.app.config.getboolean('WINDOW', 'preview_stop_on_capture'):
-            self.app.camera.stop_preview()
-
-        effects = self.app.config.gettyped('PICTURE', 'captures_effects')
-        if not isinstance(effects, (list, tuple)):
-            # Same effect for all captures
-            effect = effects
-        elif len(effects) >= self.app.capture_nbr:
-            # Take the effect corresponding to the current capture
-            effect = effects[self.count]
-        else:
-            # Not possible
-            raise ValueError("Not enough effects defined for {} captures {}".format(
-                self.app.capture_nbr, effects))
-
-        with timeit("Take a capture and save it in {}".format(capture_path)):
-            if self.app.config.getboolean('WINDOW', 'flash'):
-                with self.app.window.flash(2):
-                    self.app.camera.capture(capture_path, effect)
-            else:
-                self.app.camera.capture(capture_path, effect)
-
-        self.count += 1
-
-        if self.app.config.getboolean('WINDOW', 'preview_stop_on_capture') and self.count < self.app.capture_nbr:
-            # Restart preview only if other captures needed
-            self.app.camera.preview(self.app.window)
-
-    def exit_actions(self):
-        self.app.camera.stop_preview()
-        self.app.led_preview.switch_off()
-
-    def validate_transition(self, events):
-        if self.count >= self.app.capture_nbr:
-            return 'processing'
-
-
-class StateProcessing(State):
-
-    def __init__(self):
-        State.__init__(self, 'processing')
-
-    def entry_actions(self):
-        self.app.window.show_work_in_progress()
-        self.app.makers_pool.clear()
-        self.app.previous_animated = []
-
-    def do_actions(self, events):
-        with timeit("Creating the final picture"):
-            captures = self.app.camera.get_captures()
-
-            backgrounds = self.app.config.gettuple('PICTURE', 'backgrounds', ('color', 'path'), 2)
-            if self.app.capture_nbr == self.app.capture_choices[0]:
-                background = backgrounds[0]
-            else:
-                background = backgrounds[1]
-
-            overlays = self.app.config.gettuple('PICTURE', 'overlays', 'path', 2)
-            if self.app.capture_nbr == self.app.capture_choices[0]:
-                overlay = overlays[0]
-            else:
-                overlay = overlays[1]
-
-            texts = [self.app.config.get('PICTURE', 'footer_text1').strip('"'),
-                     self.app.config.get('PICTURE', 'footer_text2').strip('"')]
-            colors = self.app.config.gettuple('PICTURE', 'text_colors', 'color', len(texts))
-            text_fonts = self.app.config.gettuple('PICTURE', 'text_fonts', str, len(texts))
-            alignments = self.app.config.gettuple('PICTURE', 'text_alignments', str, len(texts))
-
-            def _setup_maker(m):
-                m.set_background(background)
-                if any(elem != '' for elem in texts):
-                    for params in zip(texts, text_fonts, colors, alignments):
-                        m.add_text(*params)
-                if self.app.config.getboolean('PICTURE', 'captures_cropping'):
-                    m.set_cropping()
-                if overlay:
-                    m.set_overlay(overlay)
-                if self.app.config.getboolean('GENERAL', 'debug'):
-                    m.set_outlines()
-
-            maker = get_picture_maker(captures, self.app.config.get('PICTURE', 'orientation'))
-            _setup_maker(maker)
-            self.app.previous_picture = maker.build()
-
-        self.app.previous_picture_file = osp.join(self.app.savedir, osp.basename(self.app.dirname) + "_pibooth.jpg")
-        maker.save(self.app.previous_picture_file)
-
-        if self.app.config.getboolean('WINDOW', 'animate') and self.app.capture_nbr > 1:
-            with timeit("Asyncronously generate pictures for animation"):
-                for capture in captures:
-                    maker = get_picture_maker((capture,), self.app.config.get('PICTURE', 'orientation'), force_pil=True)
-                    _setup_maker(maker)
-                    self.app.makers_pool.add(maker)
-
-    def validate_transition(self, events):
-        if self.app.printer.is_installed() and self.app.config.getfloat('PRINTER', 'printer_delay') > 0 \
-                and not self.app.printer_unavailable:
-            return 'print'
-        else:
-            return 'finish'  # Can not print
-
-
-class StatePrint(State):
-
-    def __init__(self):
-        State.__init__(self, 'print')
-        self.timer = PoolingTimer(self.app.config.getfloat('PRINTER', 'printer_delay'))
-        self.printed = False
-
-    def entry_actions(self):
-        self.printed = False
-
-        with timeit("Display the final picture"):
-            self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_unavailable)
-            self.app.window.show_print(self.app.previous_picture)
-
-        self.app.led_print.blink()
-        # Reset timeout in case of settings changed
-        self.timer.timeout = self.app.config.getfloat('PRINTER', 'printer_delay')
-        self.timer.start()
-
-    def do_actions(self, events):
-        if self.app.find_print_event(events) and self.app.previous_picture_file:
-
-            with timeit("Send final picture to printer"):
-                self.app.led_print.switch_on()
-                self.app.printer.print_file(self.app.previous_picture_file,
-                                            self.app.config.getint('PRINTER', 'pictures_per_page'))
-
-            time.sleep(1)  # Just to let the LED switched on
-            self.app.nbr_duplicates += 1
-            self.app.led_print.blink()
-            self.printed = True
-
-    def validate_transition(self, events):
-        if self.timer.is_timeout() or self.printed:
-            if self.printed:
-                self.app.window.set_print_number(len(self.app.printer.get_all_tasks()), self.app.printer_unavailable)
-            return 'finish'
-
-
-class StateFinish(State):
-
-    def __init__(self, timeout):
-        State.__init__(self, 'finish')
-        self.timer = PoolingTimer(timeout)
-
-    def entry_actions(self):
-        self.app.window.show_finished()
-        self.timer.start()
-
-    def validate_transition(self, events):
-        if self.timer.is_timeout():
-            return 'wait'
-
-
 class PiApplication(object):
 
     def __init__(self, config):
-        self.config = config
+        self._config = config
 
         # Clean directory where pictures are saved
         self.savedir = config.getpath('GENERAL', 'directory')
@@ -418,12 +51,12 @@ class PiApplication(object):
         pygame.event.set_blocked(pygame.MOUSEMOTION)
 
         # Create window of (width, height)
-        init_size = self.config.gettyped('WINDOW', 'size')
-        init_debug = self.config.getboolean('GENERAL', 'debug')
-        init_color = self.config.gettyped('WINDOW', 'background')
-        init_text_color = self.config.gettyped('WINDOW', 'text_color')
+        init_size = self._config.gettyped('WINDOW', 'size')
+        init_debug = self._config.getboolean('GENERAL', 'debug')
+        init_color = self._config.gettyped('WINDOW', 'background')
+        init_text_color = self._config.gettyped('WINDOW', 'text_color')
         if not isinstance(init_color, (tuple, list)):
-            init_color = self.config.getpath('WINDOW', 'background')
+            init_color = self._config.getpath('WINDOW', 'background')
         if not isinstance(init_size, str):
             self.window = PtbWindow('Pibooth', init_size, color=init_color,
                                     text_color=init_text_color, debug=init_debug)
@@ -431,14 +64,25 @@ class PiApplication(object):
             self.window = PtbWindow('Pibooth', color=init_color,
                                     text_color=init_text_color, debug=init_debug)
 
-        self.state_machine = StateMachine(self)
-        self.state_machine.add_state(StateWait())
-        self.state_machine.add_state(StateChoose(30))  # 30s before going back to the start
-        self.state_machine.add_state(StateChosen(4))
-        self.state_machine.add_state(StateCapture())
-        self.state_machine.add_state(StateProcessing())
-        self.state_machine.add_state(StatePrint())
-        self.state_machine.add_state(StateFinish(0.5))
+        # Create plugin manager and defined hooks specification
+        self.pm = pluggy.PluginManager(hookspecs.hookspec.project_name)
+        self.pm.add_hookspecs(hookspecs)
+        self.pm.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
+        self.pm.check_pending()
+
+        # Register plugins
+        for plugin in get_plugins():
+            self.pm.register(plugin)
+
+        # Define states of the application
+        self.state_machine = StateMachine(self._config, self)
+        self.state_machine.add_state('wait')
+        self.state_machine.add_state('choose')
+        self.state_machine.add_state('chosen')
+        self.state_machine.add_state('capture')
+        self.state_machine.add_state('processing')
+        self.state_machine.add_state('print')
+        self.state_machine.add_state('finish')
 
         self.camera = camera.get_camera(config.getint('CAMERA', 'iso'),
                                         config.gettyped('CAMERA', 'resolution'),
@@ -468,7 +112,7 @@ class PiApplication(object):
         self.capture_choices = (4, 1)
         self.nbr_duplicates = 0
         self.previous_picture = None
-        self.previous_animated = []
+        self.previous_animated = None
         self.previous_picture_file = None
 
     def initialize(self):
@@ -477,11 +121,11 @@ class PiApplication(object):
         Only parameters that can be changed at runtime are restored.
         """
         # Handle the language configuration
-        language.CURRENT = self.config.get('GENERAL', 'language')
-        fonts.CURRENT = fonts.get_filename(self.config.gettuple('PICTURE', 'text_fonts', str)[0])
+        language.CURRENT = self._config.get('GENERAL', 'language')
+        fonts.CURRENT = fonts.get_filename(self._config.gettuple('PICTURE', 'text_fonts', str)[0])
 
         # Set the captures choices
-        choices = self.config.gettuple('PICTURE', 'captures', int)
+        choices = self._config.gettuple('PICTURE', 'captures', int)
         for chx in choices:
             if chx not in [1, 2, 3, 4]:
                 LOGGER.warning("Invalid captures number '%s' in config, fallback to '%s'",
@@ -494,26 +138,26 @@ class PiApplication(object):
         self.printer.nbr_printed = 0
 
         # Handle autostart of the application
-        self.config.enable_autostart(self.config.getboolean('GENERAL', 'autostart'))
+        self._config.enable_autostart(self._config.getboolean('GENERAL', 'autostart'))
 
-        self.window.arrow_location = self.config.get('WINDOW', 'arrows')
-        self.window.arrow_offset = self.config.getint('WINDOW', 'arrows_x_offset')
+        self.window.arrow_location = self._config.get('WINDOW', 'arrows')
+        self.window.arrow_offset = self._config.getint('WINDOW', 'arrows_x_offset')
         self.window.drop_cache()
 
         # Handle window size
-        size = self.config.gettyped('WINDOW', 'size')
+        size = self._config.gettyped('WINDOW', 'size')
         if isinstance(size, str) and size.lower() == 'fullscreen':
             if not self.window.is_fullscreen:
                 self.window.toggle_fullscreen()
         else:
             if self.window.is_fullscreen:
                 self.window.toggle_fullscreen()
-        self.window.debug = self.config.getboolean('GENERAL', 'debug')
+        self.window.debug = self._config.getboolean('GENERAL', 'debug')
 
         # Handle debug mode
-        if not self.config.getboolean('GENERAL', 'debug'):
+        if not self._config.getboolean('GENERAL', 'debug'):
             set_logging_level()  # Restore default level
-            self.state_machine.add_failsafe_state(StateFailSafe(2))
+            self.state_machine.add_failsafe_state('failsafe')
         else:
             set_logging_level(logging.DEBUG)
             self.state_machine.remove_state('failsafe')
@@ -525,9 +169,9 @@ class PiApplication(object):
     def printer_unavailable(self):
         """Return True is paper/ink counter is reached or printing is disabled
         """
-        if self.config.getint('PRINTER', 'max_pages') < 0:  # No limit
+        if self._config.getint('PRINTER', 'max_pages') < 0:  # No limit
             return False
-        return self.printer.nbr_printed >= self.config.getint('PRINTER', 'max_pages')
+        return self.printer.nbr_printed >= self._config.getint('PRINTER', 'max_pages')
 
     def find_quit_event(self, events):
         """Return the first found event if found in the list.
@@ -657,7 +301,7 @@ class PiApplication(object):
                     self.window.resize(event.size)
 
                 if not menu and self.find_settings_event(events):
-                    menu = PiConfigMenu(self.window, self.config, fps, version=pibooth.__version__)
+                    menu = PiConfigMenu(self.window, self._config, fps, version=pibooth.__version__)
                     menu.show()
 
                 if menu and menu.is_shown():

@@ -13,8 +13,9 @@ ARROW_HIDDEN = 'hidden'
 
 def multiline_text_to_surfaces(text, color, rect, align='center'):
     """Return a list of surfaces corresponding to each line of the text.
-    The surfaces are next to each others in torder to fit the given rect.
+    The surfaces are next to each others in order to fit the given rect.
 
+    The ``align`` parameter can be one of:
        * top-left
        * top-center
        * top-right
@@ -75,7 +76,9 @@ class Background(object):
 
     def __str__(self):
         """Return background final name.
-        It is used in the main window to distinguish background in the cache.
+
+        It is used in the main window to distinguish backgrounds in the cache
+        thus each background string shall be uniq.
         """
         return "{}({})".format(self.__class__.__name__, self._name)
 
@@ -394,13 +397,13 @@ class CaptureBackground(Background):
     def resize(self, screen):
         Background.resize(self, screen)
         if self._need_update:
-            images_height = self._rect.height/4
-            size = (3*images_height, images_height)
+            images_height = self._rect.height / 4
+            size = (3 * images_height, images_height)
 
             self.left_image = pictures.get_pygame_image("capture_left_image.png", size=size)
             self.right_image = pictures.get_pygame_image("capture_right_image.png", size=size)
 
-            x = int(self._rect.right - 2*self.right_image.get_rect().width)
+            x = int(self._rect.right - 2 * self.right_image.get_rect().width)
             y = int(self._rect.bottom - images_height)
 
             self.left_image_pos = (0, y)
@@ -410,6 +413,7 @@ class CaptureBackground(Background):
         Background.paint(self, screen)
         screen.blit(self.left_image, self.left_image_pos)
         screen.blit(self.right_image, self.right_image_pos)
+
 
 class ProcessingBackground(Background):
 
