@@ -181,6 +181,50 @@ def state_chosen_exit(cfg, app):
     """
 
 
+#--- Preview State ------------------------------------------------------------
+
+
+@hookspec
+def state_preview_enter(cfg, app):
+    """Actions performed when application enter in Preview state.
+
+    :param cfg: application cfg
+    :param app: application instance
+    """
+
+
+@hookspec
+def state_preview_do(cfg, app, events):
+    """Actions performed when application is in Preview state.
+    This hook is called in a loop until the application can switch
+    to the next state.
+
+    :param cfg: application cfg
+    :param app: application instance
+    :param events: pygame events generated since last call
+    """
+
+
+@hookspec(firstresult=True)
+def state_preview_validate(cfg, app, events):
+    """Return the next state name if application can switch to it
+    else return None.
+
+    :param cfg: application cfg
+    :param app: application instance
+    :param events: pygame events generated since last call
+    """
+
+
+@hookspec
+def state_preview_exit(cfg, app):
+    """Actions performed when application exit Preview state.
+
+    :param cfg: application cfg
+    :param app: application instance
+    """
+
+
 #--- Capture State ------------------------------------------------------------
 
 

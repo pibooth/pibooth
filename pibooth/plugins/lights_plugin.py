@@ -44,9 +44,6 @@ class LightsPlugin(object):
         elif app.capture_nbr == app.capture_choices[1]:
             app.led_print.switch_on()
             app.led_capture.switch_off()
-        else:
-            app.led_print.switch_off()
-            app.led_capture.switch_off()
 
     @pibooth.hookimpl
     def state_chosen_exit(self, app):
@@ -54,7 +51,7 @@ class LightsPlugin(object):
         app.led_print.switch_off()
 
     @pibooth.hookimpl
-    def state_capture_enter(self, app):
+    def state_preview_enter(self, app):
         app.led_preview.switch_on()
 
     @pibooth.hookimpl

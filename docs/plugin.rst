@@ -27,11 +27,16 @@ The following states are defined:
  * ``wait``       : wait for starting a new sequence
  * ``choose``     : selection of the number of captures
  * ``chosen``     : confirm the number of captures
+ * ``preview``    : show preview and countdown
  * ``capture``    : take captures
  * ``processing`` : build the final picture
- * ``print``      : ask for printing
+ * ``print``      : show preview and ask for printing
  * ``finish``     : thank before going back to wait state
  * ``failsafe``   : oops message when an exception occurs
+
+.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/state_sequence_details.png
+    :align: center
+    :alt: State sequence
 
 There are four hooks defined for each state. The ``enter`` hook is invoked one
 time when the state is activated. The ``do`` one is invoked in a loop until

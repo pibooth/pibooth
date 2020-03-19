@@ -26,6 +26,7 @@ class CameraPlugin(object):
 
     @pibooth.hookimpl
     def state_wait_enter(self, app):
+        app.dirname = None
         app.capture_nbr = None
 
     @pibooth.hookimpl
@@ -38,29 +39,31 @@ class CameraPlugin(object):
                 app.capture_nbr = app.capture_choices[1]
 
     @pibooth.hookimpl
-    def state_capture_enter(self, app):
-        LOGGER.info("Start new captures sequence")
-        self.count = 0
+    def state_preview_enter(self, app):
+        LOGGER.info("Take a new capture")
         if not app.capture_nbr:
             app.capture_nbr = app.capture_choices[0]
-        app.dirname = osp.join(app.savedir, "raw", time.strftime("%Y-%m-%d-%H-%M-%S"))
-        os.makedirs(app.dirname)
+        if not app.dirname:
+            app.dirname = osp.join(app.savedir, "raw", time.strftime("%Y-%m-%d-%H-%M-%S"))
+            os.makedirs(app.dirname)
         app.camera.preview(app.window)
 
     @pibooth.hookimpl
-    def state_capture_do(self, cfg, app):
+    def state_preview_do(self, cfg, app):
         pygame.event.pump()  # Before blocking actions
-
         if cfg.getboolean('WINDOW', 'preview_countdown'):
             app.camera.preview_countdown(cfg.getint('WINDOW', 'preview_delay'))
         else:
             app.camera.preview_wait(cfg.getint('WINDOW', 'preview_delay'))
 
-        capture_path = osp.join(app.dirname, "pibooth{:03}.jpg".format(self.count))
-
+    @pibooth.hookimpl
+    def state_preview_exit(self, cfg, app):
         if cfg.getboolean('WINDOW', 'preview_stop_on_capture'):
             app.camera.stop_preview()
 
+    @pibooth.hookimpl
+    def state_capture_do(self, cfg, app):
+        capture_path = osp.join(app.dirname, "pibooth{:03}.jpg".format(self.count))
         effects = cfg.gettyped('PICTURE', 'captures_effects')
         if not isinstance(effects, (list, tuple)):
             # Same effect for all captures
@@ -82,10 +85,7 @@ class CameraPlugin(object):
 
         self.count += 1
 
-        if cfg.getboolean('WINDOW', 'preview_stop_on_capture') and self.count < app.capture_nbr:
-            # Restart preview only if other captures needed
-            app.camera.preview(app.window)
-
     @pibooth.hookimpl
-    def state_capture_exit(self, app):
-        app.camera.stop_preview()
+    def state_capture_exit(self, cfg, app):
+        if not cfg.getboolean('WINDOW', 'preview_stop_on_capture'):
+            app.camera.stop_preview()

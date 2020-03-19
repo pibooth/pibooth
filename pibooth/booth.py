@@ -79,6 +79,7 @@ class PiApplication(object):
         self.state_machine.add_state('wait')
         self.state_machine.add_state('choose')
         self.state_machine.add_state('chosen')
+        self.state_machine.add_state('preview')
         self.state_machine.add_state('capture')
         self.state_machine.add_state('processing')
         self.state_machine.add_state('print')
