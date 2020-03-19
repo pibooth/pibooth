@@ -260,6 +260,9 @@ Customize using plugins
 Extra functionalities can be added using your own
 `custom plugins <https://github.com/werdeil/pibooth/blob/master/docs/plugins.rst>`_.
 
+The paths custom plugins have to be declared in the ``[GENERAL][plugins]`` key of the
+configuration.
+
 GUI translations
 ^^^^^^^^^^^^^^^^
 

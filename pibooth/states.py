@@ -9,7 +9,7 @@ from pibooth.utils import LOGGER, BlockConsoleHandler
 
 class StateMachine(object):
 
-    def __init__(self, configuration, application):
+    def __init__(self, plugins_manager, configuration, application):
         self.states = set()
         self.failsafe_state = None
         self.active_state = None
@@ -17,7 +17,7 @@ class StateMachine(object):
         # Share the application to manage between states
         self.app = application
         self.cfg = configuration
-        self.pm = application.pm
+        self.pm = plugins_manager
 
     def add_state(self, name):
         """Add a state to the internal dictionary.

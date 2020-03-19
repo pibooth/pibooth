@@ -76,7 +76,7 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
         pil_image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, size),
                                      Image.ANTIALIAS if antialiasing else Image.NEAREST)
 
-        image = pygame.image.fromstring(pil_image.tobytes(), pil_image.size, pil_image.mode)
+        image = pygame.image.frombuffer(pil_image.tobytes(), pil_image.size, pil_image.mode)
 
     if hflip or vflip:
         image = pygame.transform.flip(image, hflip, vflip)

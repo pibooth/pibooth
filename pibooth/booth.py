@@ -65,25 +65,26 @@ class PiApplication(object):
                                     text_color=init_text_color, debug=init_debug)
 
         # Create plugin manager and defined hooks specification
-        self.pm = pluggy.PluginManager(hookspecs.hookspec.project_name)
-        self.pm.add_hookspecs(hookspecs)
-        self.pm.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
-        self.pm.check_pending()
+        self._pm = pluggy.PluginManager(hookspecs.hookspec.project_name)
+        self._pm.add_hookspecs(hookspecs)
+        self._pm.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
+        self._pm.check_pending()
 
         # Register plugins
-        for plugin in get_plugins():
-            self.pm.register(plugin)
+        custom_paths = [p for p in self._config.gettuple('GENERAL', 'plugins', 'path') if p]
+        for plugin in get_plugins(*custom_paths):
+            self._pm.register(plugin)
 
         # Define states of the application
-        self.state_machine = StateMachine(self._config, self)
-        self.state_machine.add_state('wait')
-        self.state_machine.add_state('choose')
-        self.state_machine.add_state('chosen')
-        self.state_machine.add_state('preview')
-        self.state_machine.add_state('capture')
-        self.state_machine.add_state('processing')
-        self.state_machine.add_state('print')
-        self.state_machine.add_state('finish')
+        self._machine = StateMachine(self._pm, self._config, self)
+        self._machine.add_state('wait')
+        self._machine.add_state('choose')
+        self._machine.add_state('chosen')
+        self._machine.add_state('preview')
+        self._machine.add_state('capture')
+        self._machine.add_state('processing')
+        self._machine.add_state('print')
+        self._machine.add_state('finish')
 
         self.camera = camera.get_camera(config.getint('CAMERA', 'iso'),
                                         config.gettyped('CAMERA', 'resolution'),
@@ -116,7 +117,7 @@ class PiApplication(object):
         self.previous_animated = None
         self.previous_picture_file = None
 
-    def initialize(self):
+    def _initialize(self):
         """Restore the application with initial parameters defined in the
         configuration file.
         Only parameters that can be changed at runtime are restored.
@@ -158,13 +159,13 @@ class PiApplication(object):
         # Handle debug mode
         if not self._config.getboolean('GENERAL', 'debug'):
             set_logging_level()  # Restore default level
-            self.state_machine.add_failsafe_state('failsafe')
+            self._machine.add_failsafe_state('failsafe')
         else:
             set_logging_level(logging.DEBUG)
-            self.state_machine.remove_state('failsafe')
+            self._machine.remove_state('failsafe')
 
         # Initialize state machine
-        self.state_machine.set_state('wait')
+        self._machine.set_state('wait')
 
     @property
     def printer_unavailable(self):
@@ -284,7 +285,7 @@ class PiApplication(object):
         try:
             clock = pygame.time.Clock()
             self.led_startup.switch_on()
-            self.initialize()
+            self._initialize()
             menu = None
             fps = 40
 
@@ -316,10 +317,10 @@ class PiApplication(object):
 
                     menu.process(events)
                 elif menu and not menu.is_shown():
-                    self.initialize()
+                    self._initialize()
                     menu = None
                 else:
-                    self.state_machine.process(events)
+                    self._machine.process(events)
 
                 pygame.display.update()
                 clock.tick(fps)  # Ensure the program will never run at more than x frames per second

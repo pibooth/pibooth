@@ -71,7 +71,7 @@ class PtbWindow(object):
                     pil_image.size, image_size_max), Image.ANTIALIAS)
             else:
                 image = pil_image
-            image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+            image = pygame.image.frombuffer(image.tobytes(), image.size, image.mode)
             if self._current_foreground:
                 self._buffered_images.pop(id(self._current_foreground[0]), None)
             LOGGER.debug("Add to buffer the image '%s'", image_name)

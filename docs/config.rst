@@ -20,6 +20,9 @@ Default configuration
     # In debug mode, exceptions are not caught, logs are more verbose
     debug = False
 
+    # Path to a custom pibooth plugin (list of paths accepted)
+    plugins =
+
     [WINDOW]
     # The (width, height) of the display window or 'fullscreen'
     size = (800, 480)
@@ -76,7 +79,7 @@ Default configuration
     # Secondary text displayed
     footer_text2 = Footer 2
 
-    # RGB colors used for footer texts (list of tuple accepted)
+    # RGB colors used for footer texts (list of tuples accepted)
     text_colors = (0, 0, 0)
 
     # Fonts name or file path used for footer texts (list of quoted names accepted)
@@ -85,10 +88,10 @@ Default configuration
     # Alignments used for footer texts: 'left', 'center' or 'right' (list of quoted names accepted)
     text_alignments = center
 
-    # Overlay path (PNG file) with same aspect ratio than final picture (list of path accepted)
+    # Overlay path (PNG file) with same aspect ratio than final picture (list of paths accepted)
     overlays =
 
-    # Background RGB color or image path (list of tuple or path accepted)
+    # Background RGB color or image path (list of tuples or paths accepted)
     backgrounds = (255, 255, 255)
 
     [CAMERA]

@@ -44,7 +44,41 @@ the state is switching to an other one. The ``validate``, also invoked in a
 loop, returns the name  of the next state. And finally the ``exit`` hook is
 invoked one time when the state is exited.
 
-Example #1 : Upload to FTP
+Example #1 : Hello from plugin
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``pibooth_hello.py``
+
+.. code-block:: python
+
+    import pibooth
+    from pibooth.utils import LOGGER
+
+    @pibooth.hookimpl
+    def state_wait_enter():
+        LOGGER.info("Hello from '%s' plugin", __name__)
+
+Example #2 : Flash light on capture
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``pibooth_flash.py``
+
+.. code-block:: python
+
+    import pibooth
+    from pibooth.controls.light import PtbLed
+
+    FLASH = PtbLed(36)
+
+    @pibooth.hookimpl
+    def state_capture_enter():
+        FLASH.switch_on()
+
+    @pibooth.hookimpl
+    def state_capture_exit():
+        FLASH.switch_off()
+
+Example #3 : Upload to FTP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``pibooth_ftp.py``
@@ -53,9 +87,8 @@ Example #1 : Upload to FTP
 
     import os
     from ftplib import FTP
-
     import pibooth
-    from pibooth.utils import LOGGER
+
 
     @pibooth.hookimpl
     def state_processing_exit(app):
@@ -64,14 +97,14 @@ Example #1 : Upload to FTP
         ftp.connect("ftp.pibooth.org", 21)
         ftp.login("pibooth", "1h!gR4/opK")
 
-        name = os.path.basename(self.app.previous_picture_file))
+        name = os.path.basename(app.previous_picture_file)
 
-        with open(self.app.previous_picture_file, 'rb') as fp:
+        with open(app.previous_picture_file, 'rb') as fp:
             ftp.storbinary('STOR {}'.format(name), fp, 1024)
 
         ftp.close()
 
-Example #2 : Generate a QR-Code
+Example #4 : Generate a QR-Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``pibooth_qrcode.py``
@@ -86,20 +119,30 @@ Example #2 : Generate a QR-Code
     from pibooth.utils import LOGGER
 
     @pibooth.hookimpl
+    def state_wait_enter(app):
+        """Display the QR Code on the wait view.
+        """
+        if hasattr(app, 'previous_qr'):
+            win_rect = app.window.get_rect()
+            qr_rect = app.previous_qr.get_rect()
+            app.window.surface.blit(app.previous_qr, (10,
+                                                      win_rect.height - qr_rect.height - 10))
+
+    @pibooth.hookimpl
     def state_processing_exit(app):
         """Generate the QR Code and store it in the application.
         """
         qr = qrcode.QRCode(version=1,
                            error_correction=qrcode.constants.ERROR_CORRECT_L,
-                           box_size=10,
-                           border=4)
+                           box_size=3,
+                           border=1)
 
-        name = os.path.basename(self.app.previous_picture_file))
+        name = os.path.basename(app.previous_picture_file)
 
         qr.add_data(os.path.join("www.pibooth.org/pictures", name))
         qr.make(fit=True)
 
-        image = qr.make_image(fill_color="black", back_color="white")
+        image = qr.make_image(fill_color="black", back_color="white").convert('RGB')
         app.previous_qr = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
 
 
@@ -107,10 +150,7 @@ Example #2 : Generate a QR-Code
     def state_print_enter(app):
         """Display the QR Code on the print view.
         """
-        app.window.surface.blit(app.previous_qr, (10, 10))
-
-    @pibooth.hookimpl
-    def state_wait_enter(app):
-        """Display the QR Code on the wait view.
-        """
-        app.window.surface.blit(app.previous_qr, (10, 10))
+        win_rect = app.window.get_rect()
+        qr_rect = app.previous_qr.get_rect()
+        app.window.surface.blit(app.previous_qr, (win_rect.width - qr_rect.width - 10,
+                                                  win_rect.height - qr_rect.height - 10))
