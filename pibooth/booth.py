@@ -375,10 +375,14 @@ class StatePrint(State):
             self.printed = True
         
         if self.app.find_capture_event(events):
-            self.app.previous_picture = None
-            file_dir, file_name = os.path.split(self.app.previous_picture_file)
-            os.rename(self.app.previous_picture_file, os.path.join(file_dir, 'forget_'+file_name))
-            self.forget = True
+            with timeit("Putting the capture in the forget folder"):
+                self.app.previous_picture = None
+                file_dir, file_name = osp.split(self.app.previous_picture_file)
+                forget_dir = osp.join(file_dir, "forget")
+                if not os.path.exists(forget_dir):
+                    os.mkdir(forget_dir)
+                os.rename(self.app.previous_picture_file, osp.join(forget_dir, file_name))
+                self.forget = True
 
     def validate_transition(self, events):
         if self.timer.is_timeout() or self.printed or self.forget:
