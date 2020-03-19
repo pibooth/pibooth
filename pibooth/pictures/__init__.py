@@ -68,7 +68,7 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
         else:
             pil_image = Image.new('RGBA', size, (0, 0, 0, 0))
 
-        if color:
+        if color and is_grey_scale(pil_image):
             pil_image = set_picto_color(pil_image, color, bg_color)
 
         if crop:
@@ -187,3 +187,17 @@ def set_picto_color(pil_image, color, bg_color=None):
     colorize_pil_image = ImageOps.colorize(gray_pil_image, black=bg_color, white=color)
     colorize_pil_image.putalpha(alpha)
     return colorize_pil_image
+
+def is_grey_scale(pil_image):
+    """Tell if an image is grey_scale of color
+    """
+    colors = pil_image.convert('RGB').getcolors(maxcolors=256)
+    if colors: # there are less than 256 colors
+        total_pixels = sum([color[0] for color in colors])
+        for color in colors:
+            nb_pixel, pixels = color
+            if pixels[0] != pixels[1] and pixels[1] != pixels[2]:
+                if nb_pixel/total_pixels > 0.0001:
+                    # we have at leat 1/1000 of pixel not grey
+                    return True
+    return False
