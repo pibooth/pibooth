@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import os.path as osp
 import pibooth
 from pibooth.utils import timeit, PoolingTimer
@@ -14,13 +15,19 @@ class PicturePlugin(object):
     def __init__(self):
         self.picture_destroy_timer = PoolingTimer(0)
 
+    def _reset_vars(self, app):
+        """Destroy final picture (can not be used anymore).
+        """
+        app.makers_pool.clear()
+        app.previous_picture = None
+        app.previous_animated = None
+        app.previous_picture_file = None
+
     @pibooth.hookimpl
     def state_failsafe_enter(self, app):
         """Reset variables set in this plugin.
         """
-        app.previous_picture = None
-        app.previous_animated = None
-        app.previous_picture_file = None
+        self._reset_vars(app)
 
     @pibooth.hookimpl
     def state_wait_enter(self, cfg):
@@ -31,17 +38,11 @@ class PicturePlugin(object):
     @pibooth.hookimpl
     def state_wait_do(self, cfg, app):
         if cfg.getfloat('WINDOW', 'final_image_delay') > 0 and self.picture_destroy_timer.is_timeout():
-            # Destroy final picture (can not be used anymore)
-            app.previous_picture = None
-            app.previous_animated = None
-            app.previous_picture_file = None
+            self._reset_vars(app)
 
     @pibooth.hookimpl
     def state_processing_enter(self, app):
-        app.makers_pool.clear()
-        app.previous_picture = None
-        app.previous_animated = None
-        app.previous_picture_file = None
+        self._reset_vars(app)
 
     @pibooth.hookimpl
     def state_processing_do(self, cfg, app):
@@ -91,3 +92,10 @@ class PicturePlugin(object):
                     maker = get_picture_maker((capture,), cfg.get('PICTURE', 'orientation'), force_pil=True)
                     _setup_maker(maker)
                     app.makers_pool.add(maker)
+
+    @pibooth.hookimpl
+    def state_print_do(self, app, events):
+        if app.find_capture_event(events):
+            file_dir, file_name = osp.split(app.previous_picture_file)
+            os.rename(app.previous_picture_file, osp.join(file_dir, 'forget_' + file_name))
+            self._reset_vars(app)

@@ -436,6 +436,8 @@ class PrintBackground(Background):
         self.arrow_offset = arrow_offset
         self.right_arrow = None
         self.right_arrow_pos = None
+        self.left_arrow = None
+        self.left_arrow_pos = None
 
     def resize(self, screen):
         Background.resize(self, screen)
@@ -443,6 +445,8 @@ class PrintBackground(Background):
             size = (self._rect.width * 0.3, self._rect.height * 0.3)
 
             vflip = True if self.arrow_location == ARROW_TOP else False
+
+            # Right arrow
             self.right_arrow = pictures.get_pygame_image(
                 "arrow.png", size, hflip=True, vflip=vflip, color=self._text_color)
 
@@ -455,6 +459,22 @@ class PrintBackground(Background):
                 y = int(self._rect.top + 2 * self._rect.height // 3)
 
             self.right_arrow_pos = (x + self.arrow_offset, y)
+
+            # Left arrow
+            size = (self._rect.width * 0.1, self._rect.height * 0.1)
+            angle = 70 if self.arrow_location == ARROW_TOP else -70
+            self.left_arrow = pictures.get_pygame_image(
+                "arrow.png", size, hflip=False, vflip=vflip, angle=angle, color=self._text_color)
+
+            x = int(self._rect.left + self._rect.width // 2
+                    - self.left_arrow.get_rect().width // 2)
+
+            if self.arrow_location == ARROW_TOP:
+                y = self._rect.top + 10
+            else:
+                y = int(self._rect.bottom - self.left_arrow.get_rect().height * 1.1)
+
+            self.left_arrow_pos = (x - self.arrow_offset, y)
 
     def resize_texts(self):
         """Update text surfaces.
@@ -476,10 +496,23 @@ class PrintBackground(Background):
             align = 'top-center'
         Background.resize_texts(self, rect, align)
 
+        text = get_translated_text("print_forget")
+        if text:
+            if self.arrow_location == ARROW_HIDDEN or self.arrow_location == ARROW_BOTTOM:
+                rect = pygame.Rect(self._rect.width // 2, self._rect.height * 0.7,
+                                   self._rect.width // 5 - 2 * self._text_border,
+                                   self._rect.height * 0.3 - 2 * self._text_border)
+            else:
+                rect = pygame.Rect(self._rect.width // 2, self._text_border,
+                                   self._rect.width // 5 - 2 * self._text_border,
+                                   self._rect.height * 0.3 - 2 * self._text_border)
+            self._write_text(text, rect)
+
     def paint(self, screen):
         Background.paint(self, screen)
         if self.arrow_location != ARROW_HIDDEN:
             screen.blit(self.right_arrow, self.right_arrow_pos)
+            screen.blit(self.left_arrow, self.left_arrow_pos)
 
 
 class FinishedBackground(Background):
