@@ -57,7 +57,7 @@ def multiline_text_to_surfaces(text, color, rect, align='center'):
 
 class Background(object):
 
-    def __init__(self, image_name, color=(0, 0, 0), text_color=(255, 255, 255)):
+    def __init__(self, image_name, color=(0, 0, 0), text_color=(255, 255, 255), text_color_img=(0, 0, 0), recolor=True):
         self._rect = None
         self._outlines = True
         self._name = image_name
@@ -72,6 +72,8 @@ class Background(object):
         self._texts = []  # List of (surface, rect)
         self._text_border = 20  # Distance to other elements
         self._text_color = text_color
+        self._text_color_img = text_color_img  # color of text on image if background is an image
+        self._recolor = recolor
 
     def __str__(self):
         """Return background final name.
@@ -120,6 +122,27 @@ class Background(object):
             self._text_color = color
             self._need_update = True
 
+    def set_text_color_img(self, text_color_img):
+        """Set text color for image (RGB tuple) used to write the texts.
+
+        :param text_color_img: RGB color tuple
+        :type text_color_img: tuple
+        """
+        assert len(text_color_img) == 3, "Length of 3 is required for RGB tuple"
+        if text_color_img != self._text_color_img:
+            self._text_color_img = text_color_img
+            self._need_update = True
+
+    def set_recolor(self, recolor):
+        """Set option to recolor all image of keep original color.
+
+        :param recolor: bool
+        :type recolor: bool
+        """
+        if recolor != self._recolor:
+            self._recolor = recolor
+            self._need_update = True
+
     def set_outlines(self, outlines=True):
         """Draw outlines for each rectangle available for drawing
         texts.
@@ -140,12 +163,14 @@ class Background(object):
             overlay_name = "{}.png".format(self._name)
             if osp.isfile(pictures.get_filename(overlay_name)):
                 self._overlay = pictures.get_pygame_image(
-                    pictures.get_filename(overlay_name), (self._rect.width, self._rect.height), color=self._text_color, bg_color=self._background_color)
+                    pictures.get_filename(overlay_name), (self._rect.width, self._rect.height), color=self._text_color, bg_color=self._background_color, recolor=self._recolor)
 
             if self._background_image:
+
                 self._background = pictures.get_pygame_image(
-                    self._background_image, (self._rect.width, self._rect.height), crop=True, color=None)
+                    self._background_image, (self._rect.width, self._rect.height), crop=True, color=None, recolor=self._recolor)
                 self._background_color = pictures.get_pygame_main_color(self._background)
+                self._background_color = self._text_color_img
 
             self.resize_texts()
 
@@ -188,7 +213,7 @@ class IntroBackground(Background):
             size = (self._rect.width * 0.3, self._rect.height * 0.3)
 
             vflip = True if self.arrow_location == ARROW_TOP else False
-            self.left_arrow = pictures.get_pygame_image("arrow.png", size, vflip=vflip, color=self._text_color)
+            self.left_arrow = pictures.get_pygame_image("arrow.png", size, vflip=vflip, color=self._text_color, recolor=self._recolor)
 
             x = int(self._rect.left + self._rect.width // 4
                     - self.left_arrow.get_rect().width // 2)
@@ -245,7 +270,7 @@ class IntroWithPrintBackground(IntroBackground):
             vflip = True if self.arrow_location == ARROW_TOP else False
             angle = -70 if self.arrow_location == ARROW_TOP else 70
             self.right_arrow = pictures.get_pygame_image(
-                "arrow.png", size, hflip=False, vflip=vflip, angle=angle, color=self._text_color)
+                "arrow.png", size, hflip=False, vflip=vflip, angle=angle, color=self._text_color, recolor=self._recolor)
             x = int(self._rect.left + self._rect.width // 2
                     - self.right_arrow.get_rect().width // 2)
             if self.arrow_location == ARROW_TOP:
@@ -296,8 +321,8 @@ class ChooseBackground(Background):
         Background.resize(self, screen)
         if self._need_update:
             size = (self._rect.width * 0.6, self._rect.height * 0.6)
-            self.layout0 = pictures.get_layout_image(self._text_color, self._background_color, self.choices[0], size)
-            self.layout1 = pictures.get_layout_image(self._text_color, self._background_color, self.choices[1], size)
+            self.layout0 = pictures.get_layout_image(self._text_color, self._background_color, self.choices[0], size, self._recolor)
+            self.layout1 = pictures.get_layout_image(self._text_color, self._background_color, self.choices[1], size, self._recolor)
 
             inter = (self._rect.width - 2 * self.layout0.get_rect().width) // 3
 
@@ -319,9 +344,9 @@ class ChooseBackground(Background):
                     size = (self._rect.width * 0.1, self._rect.bottom - y - 5)
 
                 vflip = True if self.arrow_location == ARROW_TOP else False
-                self.left_arrow = pictures.get_pygame_image("arrow.png", size, vflip=vflip, color=self._text_color)
+                self.left_arrow = pictures.get_pygame_image("arrow.png", size, vflip=vflip, color=self._text_color, recolor=self._recolor)
                 self.right_arrow = pictures.get_pygame_image(
-                    "arrow.png", size, hflip=True, vflip=vflip, color=self._text_color)
+                    "arrow.png", size, hflip=True, vflip=vflip, color=self._text_color, recolor=self._recolor)
 
                 inter = (self._rect.width - 2 * self.left_arrow.get_rect().width) // 4
 
@@ -367,7 +392,7 @@ class ChosenBackground(Background):
         if self._need_update:
             size = (self._rect.width * 0.6, self._rect.height * 0.6)
 
-            self.layout = pictures.get_layout_image(self._text_color, self._background_color, self.selected, size)
+            self.layout = pictures.get_layout_image(self._text_color, self._background_color, self.selected, size, self._recolor)
 
             x = self.layout.get_rect(center=self._rect.center).left
             y = int(self._rect.top + self._rect.height * 0.3)
@@ -397,8 +422,8 @@ class CaptureBackground(Background):
             images_height = self._rect.height/4
             size = (3*images_height, images_height)
 
-            self.left_image = pictures.get_pygame_image("capture_left_image.png", size=size)
-            self.right_image = pictures.get_pygame_image("capture_right_image.png", size=size)
+            self.left_image = pictures.get_pygame_image("capture_left_image.png", size=size, recolor=self._recolor)
+            self.right_image = pictures.get_pygame_image("capture_right_image.png", size=size, recolor=self._recolor)
 
             x = int(self._rect.right - 2*self.right_image.get_rect().width)
             y = int(self._rect.bottom - images_height)
@@ -440,7 +465,7 @@ class PrintBackground(Background):
 
             vflip = True if self.arrow_location == ARROW_TOP else False
             self.right_arrow = pictures.get_pygame_image(
-                "arrow.png", size, hflip=True, vflip=vflip, color=self._text_color)
+                "arrow.png", size, hflip=True, vflip=vflip, color=self._text_color, recolor=self._recolor)
 
             x = int(self._rect.left + self._rect.width * 0.75
                     - self.right_arrow.get_rect().width // 2)

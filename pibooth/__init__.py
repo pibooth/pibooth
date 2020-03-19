@@ -2,4 +2,4 @@
 
 """A photo booth application in pure Python for the Raspberry Pi."""
 
-__version__ = "1.2.0"
+__version__ = "BPW-1.2.0"

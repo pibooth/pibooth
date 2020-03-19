@@ -24,6 +24,8 @@ class PtbWindow(object):
                  size=(800, 480),
                  color=(0, 0, 0),
                  text_color=(255, 255, 255),
+                 text_color_img=(0, 0, 0),
+                 recolor = True,
                  arrow_location=background.ARROW_BOTTOM,
                  arrow_offset=0,
                  debug=False):
@@ -31,6 +33,8 @@ class PtbWindow(object):
         self.debug = debug
         self.color = color
         self.text_color = text_color
+        self.text_color_img = text_color_img
+        self.recolor = recolor
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
 
@@ -87,6 +91,8 @@ class PtbWindow(object):
         self._current_background.set_color(self.color)
         self._current_background.set_outlines(self.debug)
         self._current_background.set_text_color(self.text_color)
+        self._current_background.set_text_color_img(self.text_color_img)
+        self._current_background.set_recolor(self.recolor)
         self._current_background.resize(self.surface)
         self._current_background.paint(self.surface)
         self._update_capture_number()
@@ -123,9 +129,9 @@ class PtbWindow(object):
 
         if side > 0:
             if self._print_failure:
-                image = pictures.get_pygame_image('printer_failure.png', (side, side))
+                image = pictures.get_pygame_image('printer_failure.png', (side, side), recolor=self.recolor)
             else:
-                image = pictures.get_pygame_image('printer.png', (side, side))
+                image = pictures.get_pygame_image('printer.png', (side, side), recolor=self.recolor)
             y = self.surface.get_rect().height - image.get_rect().height - 10
             self.surface.blit(image, (10, y))
             font = pygame.font.Font(fonts.CURRENT, side)

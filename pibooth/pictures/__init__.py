@@ -33,7 +33,7 @@ def get_pygame_main_color(surface):
     return tuple(monopixel_surface.get_at((0, 0)))
 
 
-def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False, crop=False, angle=0, color=(255, 255, 255), bg_color=None):
+def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False, crop=False, angle=0, color=(255, 255, 255), bg_color=None, recolor=True):
     """Return a Pygame image. If a size is given, the image is
     resized keeping the original image's aspect ratio.
 
@@ -55,6 +55,8 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
     :type color: tuple
     :param bg_color: recolorize the image background with this RGB color
     :type bg_color: tuple
+    :param recolor: allow recolorize the image background with RGB color define with color and bg_color
+    :type recolor: bool
 
     :return: pygame.Surface with image
     :rtype: object
@@ -67,10 +69,8 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
             pil_image = Image.open(path)
         else:
             pil_image = Image.new('RGBA', size, (0, 0, 0, 0))
-
-        if color:
+        if color and recolor:
             pil_image = set_picto_color(pil_image, color, bg_color)
-
         if crop:
             pil_image = pil_image.crop(sizing.new_size_by_croping_ratio(pil_image.size, size))
         pil_image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, size),
@@ -144,7 +144,7 @@ def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6), force_pil
     return maker.OpenCvPictureMaker(size[0], size[1], *captures)
 
 
-def get_layout_image(text_color, bg_color, layout_number, size):
+def get_layout_image(text_color, bg_color, layout_number, size, recolor):
     """Generate the layout image with the corresponding text.
 
     :param text_color: RGB color for texts
@@ -153,11 +153,10 @@ def get_layout_image(text_color, bg_color, layout_number, size):
     :type layout_number: int
     :param size: maximum size of the layout surface
     :type size: tuple
-
-    :return: surface
-    :rtype: pygame.Surface
+    :param recolor: to pass args for function get_pygame_image allow recolorize the image background with RGB color define with color and bg_color
+    :type recolor: bool
     """
-    layout_image = get_pygame_image("layout{0}.png".format(layout_number), size, color=text_color, bg_color=bg_color)
+    layout_image = get_pygame_image("layout{0}.png".format(layout_number), size, color=text_color, bg_color=bg_color, recolor=recolor)
     text = language.get_translated_text(str(layout_number))
     if text:
         rect = layout_image.get_rect()

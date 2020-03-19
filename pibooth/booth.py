@@ -422,14 +422,18 @@ class PiApplication(object):
         init_debug = self.config.getboolean('GENERAL', 'debug')
         init_color = self.config.gettyped('WINDOW', 'background')
         init_text_color = self.config.gettyped('WINDOW', 'text_color')
+        init_text_color_img = self.config.gettyped('WINDOW', 'text_color_img')
+        init_recolor = self.config.gettyped('WINDOW', 'recolor')
         if not isinstance(init_color, (tuple, list)):
             init_color = self.config.getpath('WINDOW', 'background')
         if not isinstance(init_size, str):
             self.window = PtbWindow('Pibooth', init_size, color=init_color,
-                                    text_color=init_text_color, debug=init_debug)
+                                    text_color=init_text_color, text_color_img=init_text_color_img,
+                                    recolor=init_recolor, debug=init_debug)
         else:
-            self.window = PtbWindow('Pibooth', color=init_color,
-                                    text_color=init_text_color, debug=init_debug)
+            self.window = PtbWindow('Pibooth', color=init_color, text_color=init_text_color,
+                                    text_color_img=init_text_color_img,
+                                    recolor=init_recolor, debug=init_debug)
 
         self.state_machine = StateMachine(self)
         self.state_machine.add_state(StateWait())
@@ -737,6 +741,7 @@ def main():
         LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
     elif not options.reset:
+        LOGGER.info("------------------------------------------------------------------")
         LOGGER.info("Starting the photo booth application...")
         app = PiApplication(config)
         app.main_loop()

@@ -30,6 +30,12 @@ Default configuration
     # Text RGB color
     text_color = (255, 255, 255)
 
+    # Text image RGB color
+    text_color_img = (255, 0, 0)
+
+    # To no keep image overlay with original color
+    recolor = True
+
     # Blinking background when a capture is taken
     flash = True
 
