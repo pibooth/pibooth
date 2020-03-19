@@ -96,6 +96,10 @@ class PicturePlugin(object):
     @pibooth.hookimpl
     def state_print_do(self, app, events):
         if app.find_capture_event(events):
-            file_dir, file_name = osp.split(app.previous_picture_file)
-            os.rename(app.previous_picture_file, osp.join(file_dir, 'forget_' + file_name))
-            self._reset_vars(app)
+            with timeit("Putting the capture in the forget folder"):
+                file_dir, file_name = osp.split(app.previous_picture_file)
+                forget_dir = osp.join(file_dir, "forget")
+                if not os.path.exists(forget_dir):
+                    os.makedirs(forget_dir)
+                os.rename(app.previous_picture_file, osp.join(forget_dir, file_name))
+                self._reset_vars(app)
