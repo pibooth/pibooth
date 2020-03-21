@@ -39,14 +39,15 @@ class CameraPlugin(object):
                 app.capture_nbr = app.capture_choices[1]
 
     @pibooth.hookimpl
-    def state_preview_enter(self, app):
+    def state_preview_enter(self, cfg, app, win):
         LOGGER.info("Take a new capture")
         if not app.capture_nbr:
             app.capture_nbr = app.capture_choices[0]
         if not app.dirname:
-            app.dirname = osp.join(app.savedir, "raw", time.strftime("%Y-%m-%d-%H-%M-%S"))
+            savedir = cfg.getpath('GENERAL', 'directory')
+            app.dirname = osp.join(savedir, "raw", time.strftime("%Y-%m-%d-%H-%M-%S"))
             os.makedirs(app.dirname)
-        app.camera.preview(app.window)
+        app.camera.preview(win)
 
     @pibooth.hookimpl
     def state_preview_do(self, cfg, app):
@@ -62,7 +63,7 @@ class CameraPlugin(object):
             app.camera.stop_preview()
 
     @pibooth.hookimpl
-    def state_capture_do(self, cfg, app):
+    def state_capture_do(self, cfg, app, win):
         capture_path = osp.join(app.dirname, "pibooth{:03}.jpg".format(self.count))
         effects = cfg.gettyped('PICTURE', 'captures_effects')
         if not isinstance(effects, (list, tuple)):
@@ -78,7 +79,7 @@ class CameraPlugin(object):
 
         with timeit("Take a capture and save it in {}".format(capture_path)):
             if cfg.getboolean('WINDOW', 'flash'):
-                with app.window.flash(2):  # Manage the window here, have no choice
+                with win.flash(2):  # Manage the window here, have no choice
                     app.camera.capture(capture_path, effect)
             else:
                 app.camera.capture(capture_path, effect)

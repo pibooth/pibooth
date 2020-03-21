@@ -9,13 +9,14 @@ from pibooth.utils import LOGGER, BlockConsoleHandler
 
 class StateMachine(object):
 
-    def __init__(self, plugins_manager, configuration, application):
+    def __init__(self, plugins_manager, configuration, application, window):
         self.states = set()
         self.failsafe_state = None
         self.active_state = None
 
         # Share the application to manage between states
         self.app = application
+        self.win = window
         self.cfg = configuration
         self.pm = plugins_manager
 
@@ -47,11 +48,11 @@ class StateMachine(object):
         try:
             # Perform the actions of the active state
             hook = getattr(self.pm.hook, 'state_{}_do'.format(self.active_state))
-            hook(cfg=self.cfg, app=self.app, events=events)
+            hook(cfg=self.cfg, app=self.app, win=self.win, events=events)
 
             # Check conditions to activate the next state
             hook = getattr(self.pm.hook, 'state_{}_validate'.format(self.active_state))
-            new_state_name = hook(cfg=self.cfg, app=self.app, events=events)
+            new_state_name = hook(cfg=self.cfg, app=self.app, win=self.win, events=events)
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
@@ -71,7 +72,7 @@ class StateMachine(object):
             # Perform any exit actions of the current state
             if self.active_state is not None:
                 hook = getattr(self.pm.hook, 'state_{}_exit'.format(self.active_state))
-                hook(cfg=self.cfg, app=self.app)
+                hook(cfg=self.cfg, app=self.app, win=self.win)
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
@@ -90,7 +91,7 @@ class StateMachine(object):
 
         try:
             hook = getattr(self.pm.hook, 'state_{}_enter'.format(self.active_state))
-            hook(cfg=self.cfg, app=self.app)
+            hook(cfg=self.cfg, app=self.app, win=self.win)
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))

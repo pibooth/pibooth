@@ -129,15 +129,16 @@ Example #4 : Generate a QR-Code
     import pibooth
     from pibooth.utils import LOGGER
 
+
     @pibooth.hookimpl
-    def state_wait_enter(app):
+    def state_wait_enter(app, win):
         """Display the QR Code on the wait view.
         """
         if hasattr(app, 'previous_qr'):
-            win_rect = app.window.get_rect()
+            win_rect = win.get_rect()
             qr_rect = app.previous_qr.get_rect()
-            app.window.surface.blit(app.previous_qr, (10,
-                                                      win_rect.height - qr_rect.height - 10))
+            win.surface.blit(app.previous_qr, (10, win_rect.height - qr_rect.height - 10))
+
 
     @pibooth.hookimpl
     def state_processing_exit(app):
@@ -158,10 +159,10 @@ Example #4 : Generate a QR-Code
 
 
     @pibooth.hookimpl
-    def state_print_enter(app):
+    def state_print_enter(app, win):
         """Display the QR Code on the print view.
         """
-        win_rect = app.window.get_rect()
+        win_rect = win.get_rect()
         qr_rect = app.previous_qr.get_rect()
-        app.window.surface.blit(app.previous_qr, (win_rect.width - qr_rect.width - 10,
-                                                  win_rect.height - qr_rect.height - 10))
+        win.surface.blit(app.previous_qr, (win_rect.width - qr_rect.width - 10,
+                                           win_rect.height - qr_rect.height - 10))

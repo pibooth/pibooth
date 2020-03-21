@@ -83,7 +83,8 @@ class PicturePlugin(object):
             _setup_maker(maker)
             app.previous_picture = maker.build()
 
-        app.previous_picture_file = osp.join(app.savedir, osp.basename(app.dirname) + "_pibooth.jpg")
+        savedir = cfg.getpath('GENERAL', 'directory')
+        app.previous_picture_file = osp.join(savedir, osp.basename(app.dirname) + "_pibooth.jpg")
         maker.save(app.previous_picture_file)
 
         if cfg.getboolean('WINDOW', 'animate') and app.capture_nbr > 1:

@@ -34,12 +34,12 @@ class PiApplication(object):
         self._config = config
 
         # Clean directory where pictures are saved
-        self.savedir = config.getpath('GENERAL', 'directory')
-        if not osp.isdir(self.savedir):
-            os.makedirs(self.savedir)
-        if osp.isdir(self.savedir) and config.getboolean('GENERAL', 'clear_on_startup'):
-            shutil.rmtree(self.savedir)
-            os.makedirs(self.savedir)
+        savedir = config.getpath('GENERAL', 'directory')
+        if not osp.isdir(savedir):
+            os.makedirs(savedir)
+        if osp.isdir(savedir) and config.getboolean('GENERAL', 'clear_on_startup'):
+            shutil.rmtree(savedir)
+            os.makedirs(savedir)
 
         # Prepare GPIO, physical pins mode
         GPIO.setmode(GPIO.BOARD)
@@ -58,25 +58,25 @@ class PiApplication(object):
         if not isinstance(init_color, (tuple, list)):
             init_color = self._config.getpath('WINDOW', 'background')
         if not isinstance(init_size, str):
-            self.window = PtbWindow('Pibooth', init_size, color=init_color,
-                                    text_color=init_text_color, debug=init_debug)
+            self._window = PtbWindow('Pibooth', init_size, color=init_color,
+                                     text_color=init_text_color, debug=init_debug)
         else:
-            self.window = PtbWindow('Pibooth', color=init_color,
-                                    text_color=init_text_color, debug=init_debug)
+            self._window = PtbWindow('Pibooth', color=init_color,
+                                     text_color=init_text_color, debug=init_debug)
 
         # Create plugin manager and defined hooks specification
-        self._pm = pluggy.PluginManager(hookspecs.hookspec.project_name)
-        self._pm.add_hookspecs(hookspecs)
-        self._pm.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
-        self._pm.check_pending()
+        self._plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
+        self._plugin_manager.add_hookspecs(hookspecs)
+        self._plugin_manager.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
+        self._plugin_manager.check_pending()
 
         # Register plugins
         custom_paths = [p for p in self._config.gettuple('GENERAL', 'plugins', 'path') if p]
         for plugin in get_plugins(*custom_paths):
-            self._pm.register(plugin)
+            self._plugin_manager.register(plugin)
 
         # Define states of the application
-        self._machine = StateMachine(self._pm, self._config, self)
+        self._machine = StateMachine(self._plugin_manager, self._config, self, self._window)
         self._machine.add_state('wait')
         self._machine.add_state('choose')
         self._machine.add_state('chosen')
@@ -107,7 +107,8 @@ class PiApplication(object):
         # Initialize the printer
         self.printer = PtbPrinter(config.get('PRINTER', 'printer_name'))
 
-        # Variables shared between states
+        # ---------------------------------------------------------------------
+        # Variables shared with plugins
         self.dirname = None
         self.makers_pool = PicturesMakersPool()
         self.capture_nbr = None
@@ -116,6 +117,7 @@ class PiApplication(object):
         self.previous_picture = None
         self.previous_animated = None
         self.previous_picture_file = None
+        # ---------------------------------------------------------------------
 
     def _initialize(self):
         """Restore the application with initial parameters defined in the
@@ -142,19 +144,19 @@ class PiApplication(object):
         # Handle autostart of the application
         self._config.enable_autostart(self._config.getboolean('GENERAL', 'autostart'))
 
-        self.window.arrow_location = self._config.get('WINDOW', 'arrows')
-        self.window.arrow_offset = self._config.getint('WINDOW', 'arrows_x_offset')
-        self.window.drop_cache()
+        self._window.arrow_location = self._config.get('WINDOW', 'arrows')
+        self._window.arrow_offset = self._config.getint('WINDOW', 'arrows_x_offset')
+        self._window.drop_cache()
 
         # Handle window size
         size = self._config.gettyped('WINDOW', 'size')
         if isinstance(size, str) and size.lower() == 'fullscreen':
-            if not self.window.is_fullscreen:
-                self.window.toggle_fullscreen()
+            if not self._window.is_fullscreen:
+                self._window.toggle_fullscreen()
         else:
-            if self.window.is_fullscreen:
-                self.window.toggle_fullscreen()
-        self.window.debug = self._config.getboolean('GENERAL', 'debug')
+            if self._window.is_fullscreen:
+                self._window.toggle_fullscreen()
+        self._window.debug = self._config.getboolean('GENERAL', 'debug')
 
         # Handle debug mode
         if not self._config.getboolean('GENERAL', 'debug'):
@@ -228,7 +230,7 @@ class PiApplication(object):
                 if type_filter is None or type_filter == event.type:
                     return event
             elif event.type == pygame.MOUSEBUTTONUP:
-                rect = self.window.get_rect()
+                rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     if type_filter is None or type_filter == event.type:
                         return event
@@ -244,7 +246,7 @@ class PiApplication(object):
                 if type_filter is None or type_filter == event.type:
                     return event
             elif event.type == pygame.MOUSEBUTTONUP:
-                rect = self.window.get_rect()
+                rect = self._window.get_rect()
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     if type_filter is None or type_filter == event.type:
                         return event
@@ -271,7 +273,7 @@ class PiApplication(object):
                 event.key = pygame.K_RIGHT
                 return event
             elif event.type == pygame.MOUSEBUTTONUP:
-                rect = self.window.get_rect()
+                rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     event.key = pygame.K_LEFT
                 else:
@@ -296,14 +298,14 @@ class PiApplication(object):
                     break
 
                 if self.find_fullscreen_event(events):
-                    self.window.toggle_fullscreen()
+                    self._window.toggle_fullscreen()
 
                 event = self.find_resize_event(events)
                 if event:
-                    self.window.resize(event.size)
+                    self._window.resize(event.size)
 
                 if not menu and self.find_settings_event(events):
-                    menu = PiConfigMenu(self.window, self._config, fps, version=pibooth.__version__)
+                    menu = PiConfigMenu(self._window, self._config, fps, version=pibooth.__version__)
                     menu.show()
 
                 if menu and menu.is_shown():
