@@ -44,6 +44,17 @@ the state is switching to an other one. The ``validate``, also invoked in a
 loop, returns the name  of the next state. And finally the ``exit`` hook is
 invoked one time when the state is exited.
 
+The name of each hook has always the same syntax::
+
+    state_<name>_enter
+    state_<name>_do
+    state_<name>_validate
+    state_<name>_exit
+
+.. note:: The hooks specification define all arguments that can be used by the
+          hook, but in the implementation there is no need to defined arguments
+          that are no used.
+
 Example #1 : Hello from plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -68,7 +79,7 @@ Example #2 : Flash light on capture
     import pibooth
     from pibooth.controls.light import PtbLed
 
-    FLASH = PtbLed(36)
+    FLASH = PtbLed(36) # GPIO configured as BOARD
 
     @pibooth.hookimpl
     def state_capture_enter():
