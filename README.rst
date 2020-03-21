@@ -315,6 +315,16 @@ to know the default pins used.
    :align: center
    :alt: Electronic sketch
 
+An extra button can be added to start and shutdown properly the Raspberry Pi.
+Edit the file ``/boot/config.txt`` and set the line::
+
+    dtoverlay=gpio-shutdown
+
+Then connect a push button between physical *pin 5* and *pin 6*.
+
+.. warning:: At startup, ``pibooth`` configure the GPIO library using BOARD references
+             (not BCM one).
+
 Terms and conditions
 --------------------
 
