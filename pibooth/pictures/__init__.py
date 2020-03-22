@@ -26,6 +26,25 @@ def get_filename(name):
     return osp.join(osp.dirname(osp.abspath(__file__)), 'assets', name)
 
 
+def colorize_pil_image(pil_image, color, bg_color=None):
+    """Convert a picto in white to the corresponding color.
+
+    :param pil_image: PIL image to be colorized
+    :type pil_image: :py:class:`PIL.Image`
+    :param color: RGB color to convert the picto
+    :type color: tuple
+    :param bg_color: RGB color to use for the picto's background
+    :type bg_color: tuple
+    """
+    if not bg_color:
+        bg_color = (abs(color[0] - 255), abs(color[1] - 255), abs(color[2] - 255))
+    _, _, _, alpha = pil_image.split()
+    gray_pil_image = pil_image.convert('L')
+    new_pil_image = ImageOps.colorize(gray_pil_image, black=bg_color, white=color)
+    new_pil_image.putalpha(alpha)
+    return new_pil_image
+
+
 def get_pygame_main_color(surface):
     """Return the main color of the given pygame surface.
     """
@@ -33,7 +52,8 @@ def get_pygame_main_color(surface):
     return tuple(monopixel_surface.get_at((0, 0)))
 
 
-def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False, crop=False, angle=0, color=(255, 255, 255), bg_color=None):
+def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False,
+                     crop=False, angle=0, color=(255, 255, 255), bg_color=None):
     """Return a Pygame image. If a size is given, the image is
     resized keeping the original image's aspect ratio.
 
@@ -69,20 +89,47 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
             pil_image = Image.new('RGBA', size, (0, 0, 0, 0))
 
         if color:
-            pil_image = set_picto_color(pil_image, color, bg_color)
+            pil_image = colorize_pil_image(pil_image, color, bg_color)
 
         if crop:
             pil_image = pil_image.crop(sizing.new_size_by_croping_ratio(pil_image.size, size))
         pil_image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, size),
                                      Image.ANTIALIAS if antialiasing else Image.NEAREST)
 
-        image = pygame.image.fromstring(pil_image.tobytes(), pil_image.size, pil_image.mode)
+        image = pygame.image.frombuffer(pil_image.tobytes(), pil_image.size, pil_image.mode)
 
     if hflip or vflip:
         image = pygame.transform.flip(image, hflip, vflip)
     if angle != 0:
         image = pygame.transform.rotate(image, angle)
     return image
+
+
+def get_pygame_layout_image(text_color, bg_color, layout_number, size):
+    """Generate the layout image with the corresponding text.
+
+    :param text_color: RGB color for texts
+    :type text_color: tuple
+    :param layout_number: number of captures on the layout
+    :type layout_number: int
+    :param size: maximum size of the layout surface
+    :type size: tuple
+
+    :return: surface
+    :rtype: :py:class:`pygame.Surface`
+    """
+    layout_image = get_pygame_image("layout{0}.png".format(layout_number),
+                                    size, color=text_color, bg_color=bg_color)
+    text = language.get_translated_text(str(layout_number))
+    if text:
+        rect = layout_image.get_rect()
+        rect = pygame.Rect(rect.x + rect.width * 0.3 / 2,
+                           rect.y + rect.height * 0.76,
+                           rect.width * 0.7, rect.height * 0.20)
+        text_font = fonts.get_pygame_font(text, fonts.CURRENT, rect.width, rect.height)
+        surface = text_font.render(text, True, bg_color)
+        layout_image.blit(surface, surface.get_rect(center=rect.center))
+    return layout_image
 
 
 def get_best_orientation(captures):
@@ -142,48 +189,3 @@ def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6), force_pil
         return maker.PilPictureMaker(size[0], size[1], *captures)
 
     return maker.OpenCvPictureMaker(size[0], size[1], *captures)
-
-
-def get_layout_image(text_color, bg_color, layout_number, size):
-    """Generate the layout image with the corresponding text.
-
-    :param text_color: RGB color for texts
-    :type text_color: tuple
-    :param layout_number: number of captures on the layout
-    :type layout_number: int
-    :param size: maximum size of the layout surface
-    :type size: tuple
-
-    :return: surface
-    :rtype: pygame.Surface
-    """
-    layout_image = get_pygame_image("layout{0}.png".format(layout_number), size, color=text_color, bg_color=bg_color)
-    text = language.get_translated_text(str(layout_number))
-    if text:
-        rect = layout_image.get_rect()
-        rect = pygame.Rect(rect.x + rect.width * 0.3 / 2,
-                           rect.y + rect.height * 0.76,
-                           rect.width * 0.7, rect.height * 0.20)
-        text_font = fonts.get_pygame_font(text, fonts.CURRENT, rect.width, rect.height)
-        surface = text_font.render(text, True, bg_color)
-        layout_image.blit(surface, surface.get_rect(center=rect.center))
-    return layout_image
-
-
-def set_picto_color(pil_image, color, bg_color=None):
-    """Convert a picto in white to the corresponding color.
-
-    :param pil_image: Picto image to be colorized
-    :type pil_image: PIL.image
-    :param color: RGB color to convert the picto
-    :type color: tuple
-    :param bg_color: RGB color to use for the picto's background
-    :type bg_color: tuple
-    """
-    if not bg_color:
-        bg_color = (abs(color[0] - 255), abs(color[1] - 255), abs(color[2] - 255))
-    _, _, _, alpha = pil_image.split()
-    gray_pil_image = pil_image.convert('L')
-    colorize_pil_image = ImageOps.colorize(gray_pil_image, black=bg_color, white=color)
-    colorize_pil_image.putalpha(alpha)
-    return colorize_pil_image
