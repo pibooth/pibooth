@@ -147,14 +147,18 @@ def init(filename, clear=False):
 
     PARSER.read(PARSER.filename, encoding='utf-8')
 
-    # Complete with missing language
+    # Update the current file with missing language(s) and key(s)
     changed = False
     for section, options in DEFAULT.items():
         if not PARSER.has_section(section):
             changed = True
             LOGGER.debug("Add [%s] to available language list", section)
             PARSER.add_section(section)
-            for option, value in options.items():
+
+        for option, value in options.items():
+            if not PARSER.has_option(section, option):
+                changed = True
+                LOGGER.debug("Add [%s][%s] to available translations", section, option)
                 PARSER.set(section, option, value)
 
     if changed:
