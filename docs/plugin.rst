@@ -14,8 +14,7 @@ and participating to the ``pibooth`` execution when they are invoked.
 
 The list of available ``hooks`` are defined in the file
 `hookspecs.py <https://github.com/werdeil/pibooth/blob/master/pibooth/plugins/hookspecs.py>`_.
-
-A plugin implements a subset of the functions of this specification.
+A plugin implements a subset of those functions.
 
 Influencing states
 ^^^^^^^^^^^^^^^^^^
@@ -24,11 +23,11 @@ The ``pibooth`` application is built on the principle of states. Each state
 is defined by a specific screen and possible actions available to the user.
 
 The following states are defined:
- * ``wait``       : wait for starting a new sequence
+ * ``wait``       : wait for starting a new capture sequence
  * ``choose``     : selection of the number of captures
  * ``chosen``     : confirm the number of captures
  * ``preview``    : show preview and countdown
- * ``capture``    : take captures
+ * ``capture``    : take a capture
  * ``processing`` : build the final picture
  * ``print``      : show preview and ask for printing
  * ``finish``     : thank before going back to wait state
@@ -38,18 +37,23 @@ The following states are defined:
     :align: center
     :alt: State sequence
 
-There are four hooks defined for each state. The ``enter`` hook is invoked one
-time when the state is activated. The ``do`` one is invoked in a loop until
-the state is switching to an other one. The ``validate``, also invoked in a
-loop, returns the name  of the next state. And finally the ``exit`` hook is
-invoked one time when the state is exited.
+There are four hooks defined for each state.
 
-The name of each hook has always the same syntax::
+- ``state_<name>_enter``
 
-    state_<name>_enter
-    state_<name>_do
-    state_<name>_validate
-    state_<name>_exit
+  Invoked one time when the state is activated.
+
+- ``state_<name>_do``
+
+  The ``do`` one is invoked in a loop until the state is switching to an other one.
+
+- ``state_<name>_validate``
+
+  Invoked in a loop, returns the name  of the next state.
+
+- ``state_<name>_exit``
+
+  Invoked one time when the state is exited.
 
 .. note:: The hooks specification define all arguments that can be used by the
           hook, but in the implementation there is no need to defined arguments
@@ -127,7 +131,6 @@ Example #4 : Generate a QR-Code
     import pygame
 
     import pibooth
-    from pibooth.utils import LOGGER
 
 
     @pibooth.hookimpl
