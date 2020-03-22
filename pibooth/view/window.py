@@ -29,7 +29,7 @@ class PtbWindow(object):
                  debug=False):
         self.__size = size
         self.debug = debug
-        self.color = color
+        self.bg_color = color
         self.text_color = text_color
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
@@ -84,7 +84,7 @@ class PtbWindow(object):
         """Show image on the background.
         """
         self._current_background = self._buffered_images.setdefault(str(bkgd), bkgd)
-        self._current_background.set_color(self.color)
+        self._current_background.set_color(self.bg_color)
         self._current_background.set_outlines(self.debug)
         self._current_background.set_text_color(self.text_color)
         self._current_background.resize(self.surface)
@@ -101,15 +101,14 @@ class PtbWindow(object):
         center = self.surface.get_rect().center
         radius = 10
         border = 20
-        color = (255, 255, 255)
         x = center[0] - (2 * radius * self._capture_number[1] + border * (self._capture_number[1] - 1)) // 2
         y = self.size[1] - radius - border
         for nbr in range(self._capture_number[1]):
-            gfxdraw.aacircle(self.surface, x, y, radius, color)
+            gfxdraw.aacircle(self.surface, x, y, radius, self.text_color)
             if self._capture_number[0] > nbr:
                 # Because anti-aliased filled circle doesn't exist
-                gfxdraw.aacircle(self.surface, x, y, radius - 3, color)
-                gfxdraw.filled_circle(self.surface, x, y, radius - 3, color)
+                gfxdraw.aacircle(self.surface, x, y, radius - 3, self.text_color)
+                gfxdraw.filled_circle(self.surface, x, y, radius - 3, self.text_color)
             x += (2 * radius + border)
 
     def _update_print_number(self):
@@ -123,9 +122,9 @@ class PtbWindow(object):
 
         if side > 0:
             if self._print_failure:
-                image = pictures.get_pygame_image('printer_failure.png', (side, side))
+                image = pictures.get_pygame_image('printer_failure.png', (side, side), color=self.text_color)
             else:
-                image = pictures.get_pygame_image('printer.png', (side, side))
+                image = pictures.get_pygame_image('printer.png', (side, side), color=self.text_color)
             y = self.surface.get_rect().height - image.get_rect().height - 10
             self.surface.blit(image, (10, y))
             font = pygame.font.Font(fonts.CURRENT, side)

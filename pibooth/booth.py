@@ -316,7 +316,6 @@ class PiApplication(object):
                         events.insert(0, menu.create_next_event())
                     elif self.find_print_event(events, BUTTON_DOWN):
                         events.insert(0, menu.create_click_event())
-
                     menu.process(events)
                 elif menu and not menu.is_shown():
                     self._initialize()
@@ -325,7 +324,7 @@ class PiApplication(object):
                     self._machine.process(events)
 
                 pygame.display.update()
-                clock.tick(fps)  # Ensure the program will never run at more than x frames per second
+                clock.tick(fps)  # Ensure the program will never run at more than <fps> frames per second
 
         finally:
             self.makers_pool.quit()
