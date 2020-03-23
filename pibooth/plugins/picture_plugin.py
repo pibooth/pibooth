@@ -2,6 +2,7 @@
 
 import os
 import os.path as osp
+import itertools
 import pibooth
 from pibooth.utils import timeit, PoolingTimer
 from pibooth.pictures import get_picture_maker
@@ -30,7 +31,11 @@ class PicturePlugin(object):
         self._reset_vars(app)
 
     @pibooth.hookimpl
-    def state_wait_enter(self, cfg):
+    def state_wait_enter(self, cfg, app):
+        animated = app.makers_pool.get()
+        if animated:
+            app.previous_animated = itertools.cycle(animated)
+
         # Reset timeout in case of settings changed
         self.picture_destroy_timer.timeout = max(0, cfg.getfloat('WINDOW', 'final_image_delay'))
         self.picture_destroy_timer.start()

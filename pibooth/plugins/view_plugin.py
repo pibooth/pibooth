@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import itertools
 import pibooth
 from pibooth.utils import timeit, PoolingTimer
 
@@ -37,10 +36,7 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_wait_enter(self, cfg, app, win):
-        animated = app.makers_pool.get()
-
-        if cfg.getboolean('WINDOW', 'animate') and animated:
-            app.previous_animated = itertools.cycle(animated)
+        if app.previous_animated:
             previous_picture = next(app.previous_animated)
 
             # Reset timeout in case of settings changed
@@ -56,7 +52,7 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_wait_do(self, cfg, app, win, events):
-        if cfg.getboolean('WINDOW', 'animate') and app.previous_animated and self.animated_frame_timer.is_timeout():
+        if app.previous_animated and self.animated_frame_timer.is_timeout():
             previous_picture = next(app.previous_animated)
             win.show_intro(previous_picture, app.printer.is_installed() and
                            app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates') and

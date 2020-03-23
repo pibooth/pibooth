@@ -50,15 +50,15 @@ There are four hooks defined for each state.
 - ``state_<name>_validate``
 
   Invoked in a loop, returns the name of the next state if all conditions
-  are met (else retrun ``None``).
+  are met (else return ``None``).
 
 - ``state_<name>_exit``
 
   Invoked one time when the state is exiting.
 
 .. note:: The hooks specification define all arguments that can be used by the
-          hook, but in the implementation there is no need to defined, in the
-          function signature, the arguments not used in the code.
+          hook, but there is no need to defined, in the function signature, the
+          arguments not used in the code.
 
 Example #1 : Hello from plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
