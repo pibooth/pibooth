@@ -19,6 +19,12 @@ except ImportError:
     # Python 2.x fallback
     from ConfigParser import ConfigParser
 
+try:
+    basestring
+except NameError:
+    # Python 3.x fallback
+    basestring = str
+
 
 def values_list_repr(values):
     """Concatenate a list of values to a readable string.
@@ -370,6 +376,9 @@ class PiConfigParser(ConfigParser):
         else:
             types = list(types)
 
+        if str in types:  # Python 2.x compat
+            types[types.index(str)] = basestring
+
         color = False
         if 'color' in types:
             types.remove('color')
@@ -380,7 +389,7 @@ class PiConfigParser(ConfigParser):
         path = False
         if 'path' in types:
             types.remove('path')
-            types.append(str)
+            types.append(basestring)
             path = True  # Option accept file path
 
         types = tuple(types)
@@ -399,7 +408,7 @@ class PiConfigParser(ConfigParser):
         if path:
             new_values = []
             for v in values:
-                if isinstance(v, str) and v != '':
+                if isinstance(v, basestring) and v != '':
                     new_values.append(self._get_abs_path(v))
                 else:
                     new_values.append(v)
