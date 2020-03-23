@@ -41,23 +41,24 @@ There are four hooks defined for each state.
 
 - ``state_<name>_enter``
 
-  Invoked one time when the state is activated.
+  Invoked one time when the state is activating.
 
 - ``state_<name>_do``
 
-  The ``do`` one is invoked in a loop until the state is switching to an other one.
+  Invoked in a loop until the state is switching to an other one.
 
 - ``state_<name>_validate``
 
-  Invoked in a loop, returns the name  of the next state.
+  Invoked in a loop, returns the name of the next state if all conditions
+  are met (else retrun ``None``).
 
 - ``state_<name>_exit``
 
-  Invoked one time when the state is exited.
+  Invoked one time when the state is exiting.
 
 .. note:: The hooks specification define all arguments that can be used by the
-          hook, but in the implementation there is no need to defined arguments
-          that are no used.
+          hook, but in the implementation there is no need to defined, in the
+          function signature, the arguments not used in the code.
 
 Example #1 : Hello from plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
