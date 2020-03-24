@@ -47,6 +47,7 @@ class PicturePlugin(object):
 
     @pibooth.hookimpl
     def state_processing_enter(self, app):
+        app.second_previous_picture = app.previous_picture
         self._reset_vars(app)
 
     @pibooth.hookimpl
@@ -109,3 +110,4 @@ class PicturePlugin(object):
                     os.makedirs(forget_dir)
                 os.rename(app.previous_picture_file, osp.join(forget_dir, file_name))
                 self._reset_vars(app)
+                app.previous_picture = app.second_previous_picture
