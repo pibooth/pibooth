@@ -15,6 +15,7 @@ class PicturePlugin(object):
 
     def __init__(self):
         self.picture_destroy_timer = PoolingTimer(0)
+        self.second_previous_picture = None
 
     def _reset_vars(self, app):
         """Destroy final picture (can not be used anymore).
@@ -47,7 +48,7 @@ class PicturePlugin(object):
 
     @pibooth.hookimpl
     def state_processing_enter(self, app):
-        app.second_previous_picture = app.previous_picture
+        self.second_previous_picture = app.previous_picture
         self._reset_vars(app)
 
     @pibooth.hookimpl
@@ -101,7 +102,7 @@ class PicturePlugin(object):
                     app.makers_pool.add(maker)
 
     @pibooth.hookimpl
-    def state_print_do(self, app, events):
+    def state_print_do(self, cfg, app, events):
         if app.find_capture_event(events):
             with timeit("Putting the capture in the forget folder"):
                 file_dir, file_name = osp.split(app.previous_picture_file)
@@ -110,4 +111,5 @@ class PicturePlugin(object):
                     os.makedirs(forget_dir)
                 os.rename(app.previous_picture_file, osp.join(forget_dir, file_name))
                 self._reset_vars(app)
-                app.previous_picture = app.second_previous_picture
+                app.previous_picture = self.second_previous_picture
+                app.nbr_duplicates = cfg.getint('PRINTER', 'max_duplicates') + 1

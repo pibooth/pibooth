@@ -117,7 +117,6 @@ class PiApplication(object):
         self.previous_picture = None
         self.previous_animated = None
         self.previous_picture_file = None
-        self.second_previous_picture = None
         # ---------------------------------------------------------------------
 
     def _initialize(self):
