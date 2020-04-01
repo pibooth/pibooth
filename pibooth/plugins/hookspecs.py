@@ -16,13 +16,18 @@ def pibooth_startup(app):
 
 
 @hookspec
-def pibooth_setup_picture_factory(factory):
+def pibooth_setup_picture_factory(cfg, opt_index, factory):
     """Hook used to setup the ``PictureFactory`` instance.
+
+    The ``opt_index`` is the index to be get in case of configuration option
+    of type tuple where the value depends of the captures number.
 
     A hook wrapper can be used to catch the current factory and return
     a customized one.
     (see details https://pluggy.readthedocs.io/en/latest/#wrappers)
 
+    :param cfg: application cfg
+    :param opt_index: index for tuple options
     :param factory: ``PictureFactory`` instance
     """
 

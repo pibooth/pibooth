@@ -83,6 +83,8 @@ class PtbPrinter(object):
             with tempfile.NamedTemporaryFile(suffix=osp.basename(filename)) as fp:
                 picture = Image.open(filename)
                 factory = get_picture_factory((picture,) * copies)
+                # Don't call setup factory hook here, as the selected parameters
+                # are the one necessary to render several pictures on same page.
                 factory.set_margin(2)
                 factory.save(fp.name)
                 self._conn.printFile(self.name, fp.name, osp.basename(filename), {})
