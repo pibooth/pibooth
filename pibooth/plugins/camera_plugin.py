@@ -17,6 +17,10 @@ class CameraPlugin(object):
         self.count = 0
 
     @pibooth.hookimpl
+    def pibooth_cleanup(self, app):
+        app.camera.quit()
+
+    @pibooth.hookimpl
     def state_failsafe_enter(self, app):
         """Reset variables set in this plugin.
         """

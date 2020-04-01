@@ -138,9 +138,6 @@ class PiApplication(object):
                 break
         self.capture_choices = choices
 
-        # Reset printed pages number
-        self.printer.nbr_printed = 0
-
         # Handle autostart of the application
         self._config.enable_autostart(self._config.getboolean('GENERAL', 'autostart'))
 
@@ -286,8 +283,8 @@ class PiApplication(object):
         """
         try:
             clock = pygame.time.Clock()
-            self.led_startup.switch_on()
             self._initialize()
+            self._plugin_manager.hook.pibooth_startup(app=self)
             menu = None
             fps = 40
 
@@ -328,13 +325,8 @@ class PiApplication(object):
 
         finally:
             self.makers_pool.quit()
-            self.led_startup.quit()
-            self.led_preview.quit()
-            self.led_capture.quit()
-            self.led_print.quit()
+            self._plugin_manager.hook.pibooth_cleanup(app=self)
             GPIO.cleanup()
-            self.camera.quit()
-            self.printer.quit()
             pygame.quit()
 
 

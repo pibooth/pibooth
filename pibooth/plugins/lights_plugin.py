@@ -10,6 +10,17 @@ class LightsPlugin(object):
     """
 
     @pibooth.hookimpl
+    def pibooth_startup(self, app):
+        app.led_startup.switch_on()
+
+    @pibooth.hookimpl
+    def pibooth_cleanup(self, app):
+        app.led_startup.quit()
+        app.led_preview.quit()
+        app.led_capture.quit()
+        app.led_print.quit()
+
+    @pibooth.hookimpl
     def state_wait_enter(self, app):
         app.led_capture.blink()
         if app.previous_picture_file and app.printer.is_installed() and not app.printer_unavailable:
