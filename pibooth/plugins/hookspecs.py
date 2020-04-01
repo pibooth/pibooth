@@ -7,13 +7,13 @@ hookspec = pluggy.HookspecMarker('pibooth')
 #--- Pibooth startup and cleanup ----------------------------------------------
 
 @hookspec
-def pibooth_startup(cfg, app, win):
-    """Actions performed at the startup of pybooth
+def pibooth_startup(app):
+    """Actions performed at the startup of pibooth
     """
 
 @hookspec
-def pibooth_cleanup(cfg, app, win):
-    """Actions performed at the cleanup of pybooth
+def pibooth_cleanup(app):
+    """Actions performed at the cleanup of pibooth
     """
 
 
