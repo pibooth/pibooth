@@ -11,13 +11,10 @@ Default configuration
     # Path to save pictures
     directory = ~/Pictures/pibooth
 
-    # Cleanup the 'directory' before start
-    clear_on_startup = False
-
     # Start pibooth at Raspberry Pi startup
     autostart = False
 
-    # In debug mode, exceptions are not caught, logs are more verbose
+    # In debug mode, exceptions are not caught, logs are more verbose, pictures are cleared at startup
     debug = False
 
     # Path to a custom pibooth plugin (list of paths accepted)

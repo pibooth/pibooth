@@ -37,7 +37,7 @@ class PiApplication(object):
         savedir = config.getpath('GENERAL', 'directory')
         if not osp.isdir(savedir):
             os.makedirs(savedir)
-        elif osp.isdir(savedir) and config.getboolean('GENERAL', 'clear_on_startup'):
+        elif osp.isdir(savedir) and config.getboolean('GENERAL', 'debug'):
             shutil.rmtree(savedir)
             os.makedirs(savedir)
 
