@@ -5,7 +5,7 @@ from PIL import Image, ImageOps
 import pygame
 from pibooth import language
 from pibooth import fonts
-from pibooth.pictures import maker
+from pibooth.pictures import factory
 from pibooth.pictures import sizing
 
 
@@ -160,8 +160,8 @@ def get_best_orientation(captures):
     return orientation
 
 
-def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6), force_pil=False):
-    """Return the picture maker use to concatenate the captures.
+def get_picture_factory(captures, orientation=AUTO, paper_format=(4, 6), force_pil=False):
+    """Return the picture factory use to concatenate the captures.
 
     :param captures: list of captures to concatenate
     :type captures: list
@@ -185,7 +185,7 @@ def get_picture_maker(captures, orientation=AUTO, paper_format=(4, 6), force_pil
     if orientation == LANDSCAPE:
         size = (size[1], size[0])
 
-    if not maker.cv2 or force_pil:
-        return maker.PilPictureMaker(size[0], size[1], *captures)
+    if not factory.cv2 or force_pil:
+        return factory.PilPictureFactory(size[0], size[1], *captures)
 
-    return maker.OpenCvPictureMaker(size[0], size[1], *captures)
+    return factory.OpenCvPictureFactory(size[0], size[1], *captures)

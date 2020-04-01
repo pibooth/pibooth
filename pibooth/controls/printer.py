@@ -12,7 +12,7 @@ import os.path as osp
 import pygame
 from PIL import Image
 from pibooth.utils import LOGGER
-from pibooth.pictures import get_picture_maker
+from pibooth.pictures import get_picture_factory
 
 
 PRINTER_TASKS_UPDATED = pygame.USEREVENT + 2
@@ -82,9 +82,9 @@ class PtbPrinter(object):
         if copies > 1:
             with tempfile.NamedTemporaryFile(suffix=osp.basename(filename)) as fp:
                 picture = Image.open(filename)
-                maker = get_picture_maker((picture,) * copies)
-                maker.set_margin(2)
-                maker.save(fp.name)
+                factory = get_picture_factory((picture,) * copies)
+                factory.set_margin(2)
+                factory.save(fp.name)
                 self._conn.printFile(self.name, fp.name, osp.basename(filename), {})
         else:
             self._conn.printFile(self.name, filename, osp.basename(filename), {})

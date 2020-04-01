@@ -3,18 +3,18 @@
 import multiprocessing
 
 
-class PicturesMakersPool(object):
+class PicturesFactoryPool(object):
 
     def __init__(self):
         self._pool = None
         self._async_results = []
 
-    def add(self, maker):
-        """Add a new picture maker and build it asyncronously.
+    def add(self, factory):
+        """Add a new picture factory and build it asyncronously.
         """
         if not self._pool:
             self._pool = multiprocessing.Pool(processes=min(multiprocessing.cpu_count(), 4))
-        self._async_results.append(self._pool.apply_async(maker.build))
+        self._async_results.append(self._pool.apply_async(factory.build))
 
     def get(self):
         """Return all the results.
@@ -22,7 +22,7 @@ class PicturesMakersPool(object):
         return [res.get() for res in self._async_results]
 
     def clear(self):
-        """Cancel all run tasks and drop all makers.
+        """Cancel all run tasks and drop all factories.
         """
         for res in self._async_results:
             res.get(5)
