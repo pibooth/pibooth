@@ -29,6 +29,8 @@ class PicturePlugin(object):
 
     @pibooth.hookimpl
     def pibooth_setup_picture_factory(self, cfg, opt_index, factory):
+        factory.set_margin(cfg.getint('PICTURE', 'margin_thick'))
+
         backgrounds = cfg.gettuple('PICTURE', 'backgrounds', ('color', 'path'), 2)
         factory.set_background(backgrounds[opt_index])
 
