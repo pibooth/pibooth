@@ -4,6 +4,18 @@ import pluggy
 
 hookspec = pluggy.HookspecMarker('pibooth')
 
+#--- Pibooth startup and cleanup ----------------------------------------------
+
+@hookspec
+def pibooth_startup(cfg, app, win):
+    """Actions performed at the startup of pybooth
+    """
+
+@hookspec
+def pibooth_cleanup(cfg, app, win):
+    """Actions performed at the cleanup of pybooth
+    """
+
 
 #--- FailSafe State -----------------------------------------------------------
 

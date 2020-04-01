@@ -10,6 +10,14 @@ class PrinterPlugin(object):
     """
 
     @pibooth.hookimpl
+    def pibooth_startup(self, app):
+        app.printer.nbr_printed = 0
+
+    @pibooth.hookimpl
+    def pibooth_cleanup(self, app):
+        app.printer.quit()
+
+    @pibooth.hookimpl
     def state_failsafe_enter(self, app):
         """Reset variables set in this plugin.
         """
