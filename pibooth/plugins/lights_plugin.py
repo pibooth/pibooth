@@ -9,6 +9,9 @@ class LightsPlugin(object):
     """Plugin to manage the lights via GPIO.
     """
 
+    def __init__(self, plugin_manager):
+        self._pm = plugin_manager
+
     @pibooth.hookimpl
     def pibooth_startup(self, app):
         app.led_startup.switch_on()

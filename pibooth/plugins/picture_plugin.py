@@ -14,7 +14,8 @@ class PicturePlugin(object):
     """Plugin to build the final picture.
     """
 
-    def __init__(self):
+    def __init__(self, plugin_manager):
+        self._pm = plugin_manager
         self.factory_pool = PicturesFactoryPool()
         self.picture_destroy_timer = PoolingTimer(0)
         self.second_previous_picture = None
@@ -88,9 +89,9 @@ class PicturePlugin(object):
         with timeit("Creating the final picture"):
             captures = app.camera.get_captures()
             factory = get_picture_factory(captures, cfg.get('PICTURE', 'orientation'))
-            app._plugin_manager.hook.pibooth_setup_picture_factory(cfg=cfg,
-                                                                   opt_index=idx,
-                                                                   factory=factory)
+            self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
+                                                        opt_index=idx,
+                                                        factory=factory)
             app.previous_picture = factory.build()
 
         savedir = cfg.getpath('GENERAL', 'directory')
@@ -101,9 +102,9 @@ class PicturePlugin(object):
             with timeit("Asyncronously generate pictures for animation"):
                 for capture in captures:
                     factory = get_picture_factory((capture,), cfg.get('PICTURE', 'orientation'), force_pil=True)
-                    app._plugin_manager.hook.pibooth_setup_picture_factory(cfg=cfg,
-                                                                           opt_index=idx,
-                                                                           factory=factory)
+                    self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
+                                                                opt_index=idx,
+                                                                factory=factory)
                     self.factory_pool.add(factory)
 
     @pibooth.hookimpl

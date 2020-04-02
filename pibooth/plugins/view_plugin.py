@@ -9,7 +9,8 @@ class ViewPlugin(object):
     """Plugin to manage the pibooth window dans transitions.
     """
 
-    def __init__(self):
+    def __init__(self, plugin_manager):
+        self._pm = plugin_manager
         self.count = 0
         # Seconds to display the failed message
         self.failed_view_timer = PoolingTimer(2)
