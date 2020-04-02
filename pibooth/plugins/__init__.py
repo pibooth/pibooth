@@ -30,3 +30,7 @@ def load_plugins(plugin_manager, *paths):
 
     for plugin in plugins:
         plugin_manager.register(plugin)
+
+    # Check that each hookimpl is defined in the hookspec
+    # except for hookimpl with kwarg ``optionalhook=True``.
+    plugin_manager.check_pending()

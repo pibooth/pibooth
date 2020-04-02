@@ -71,7 +71,6 @@ class PiApplication(object):
         # Register plugins
         custom_paths = [p for p in self._config.gettuple('GENERAL', 'plugins', 'path') if p]
         load_plugins(self._plugin_manager, *custom_paths)
-        self._plugin_manager.check_pending()
 
         # Define states of the application
         self._machine = StateMachine(self._plugin_manager, self._config, self, self._window)
