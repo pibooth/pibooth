@@ -10,7 +10,7 @@ from PIL import Image
 
 from pibooth.utils import LOGGER, configure_logging
 from pibooth.config import PiConfigParser
-from pibooth.pictures import get_picture_maker
+from pibooth.pictures import get_picture_factory
 
 
 def get_captures(images_folder):
@@ -60,19 +60,19 @@ def regenerate_all_images(config):
             LOGGER.warning("Folder %s doesn't contain the correct number of pictures", captures_folder_path)
             continue
 
-        maker = get_picture_maker(captures, config.get('PICTURE', 'orientation'))
+        factory = get_picture_factory(captures, config.get('PICTURE', 'orientation'))
 
-        maker.set_background(background)
+        factory.set_background(background)
         if any(elem != '' for elem in texts):
             for params in zip(texts, text_fonts, colors, alignments):
-                maker.add_text(*params)
+                factory.add_text(*params)
         if config.getboolean('PICTURE', 'captures_cropping'):
-            maker.set_cropping()
+            factory.set_cropping()
         if overlay:
-            maker.set_overlay(overlay)
+            factory.set_overlay(overlay)
 
         picture_file = osp.join(captures_folders, captures_folder + "_pibooth.jpg")
-        maker.save(picture_file)
+        factory.save(picture_file)
 
 
 def main():

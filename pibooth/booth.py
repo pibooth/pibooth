@@ -22,7 +22,6 @@ from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth.controls import GPIO, camera
 from pibooth.fonts import get_available_fonts
-from pibooth.pictures.pool import PicturesMakersPool
 from pibooth.controls.light import PtbLed
 from pibooth.controls.button import BUTTON_DOWN, PtbButton
 from pibooth.controls.printer import PRINTER_TASKS_UPDATED, PtbPrinter
@@ -110,7 +109,6 @@ class PiApplication(object):
         # ---------------------------------------------------------------------
         # Variables shared with plugins
         self.dirname = None
-        self.makers_pool = PicturesMakersPool()
         self.capture_nbr = None
         self.capture_choices = (4, 1)
         self.nbr_duplicates = 0
@@ -324,7 +322,6 @@ class PiApplication(object):
                 clock.tick(fps)  # Ensure the program will never run at more than <fps> frames per second
 
         finally:
-            self.makers_pool.quit()
             self._plugin_manager.hook.pibooth_cleanup(app=self)
             GPIO.cleanup()
             pygame.quit()

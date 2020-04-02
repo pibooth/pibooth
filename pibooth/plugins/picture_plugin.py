@@ -5,7 +5,8 @@ import os.path as osp
 import itertools
 import pibooth
 from pibooth.utils import timeit, PoolingTimer
-from pibooth.pictures import get_picture_maker
+from pibooth.pictures import get_picture_factory
+from pibooth.pictures.pool import PicturesFactoryPool
 
 
 class PicturePlugin(object):
@@ -14,26 +15,55 @@ class PicturePlugin(object):
     """
 
     def __init__(self):
+        self.factory_pool = PicturesFactoryPool()
         self.picture_destroy_timer = PoolingTimer(0)
         self.second_previous_picture = None
 
     def _reset_vars(self, app):
         """Destroy final picture (can not be used anymore).
         """
-        app.makers_pool.clear()
+        self.factory_pool.clear()
         app.previous_picture = None
         app.previous_animated = None
         app.previous_picture_file = None
 
     @pibooth.hookimpl
+    def pibooth_setup_picture_factory(self, cfg, opt_index, factory):
+        factory.set_margin(cfg.getint('PICTURE', 'margin_thick'))
+
+        backgrounds = cfg.gettuple('PICTURE', 'backgrounds', ('color', 'path'), 2)
+        factory.set_background(backgrounds[opt_index])
+
+        overlays = cfg.gettuple('PICTURE', 'overlays', 'path', 2)
+        if overlays[opt_index]:
+            factory.set_overlay(overlays[opt_index])
+
+        texts = [cfg.get('PICTURE', 'footer_text1').strip('"'),
+                 cfg.get('PICTURE', 'footer_text2').strip('"')]
+        colors = cfg.gettuple('PICTURE', 'text_colors', 'color', len(texts))
+        text_fonts = cfg.gettuple('PICTURE', 'text_fonts', str, len(texts))
+        alignments = cfg.gettuple('PICTURE', 'text_alignments', str, len(texts))
+        if any(elem != '' for elem in texts):
+            for params in zip(texts, text_fonts, colors, alignments):
+                factory.add_text(*params)
+
+        if cfg.getboolean('PICTURE', 'captures_cropping'):
+            factory.set_cropping()
+
+        if cfg.getboolean('GENERAL', 'debug'):
+            factory.set_outlines()
+
+    @pibooth.hookimpl
+    def pibooth_cleanup(self):
+        self.factory_pool.quit()
+
+    @pibooth.hookimpl
     def state_failsafe_enter(self, app):
-        """Reset variables set in this plugin.
-        """
         self._reset_vars(app)
 
     @pibooth.hookimpl
     def state_wait_enter(self, cfg, app):
-        animated = app.makers_pool.get()
+        animated = self.factory_pool.get()
         if animated:
             app.previous_animated = itertools.cycle(animated)
 
@@ -53,53 +83,28 @@ class PicturePlugin(object):
 
     @pibooth.hookimpl
     def state_processing_do(self, cfg, app):
+        idx = app.capture_choices.index(app.capture_nbr)
+
         with timeit("Creating the final picture"):
             captures = app.camera.get_captures()
-
-            backgrounds = cfg.gettuple('PICTURE', 'backgrounds', ('color', 'path'), 2)
-            if app.capture_nbr == app.capture_choices[0]:
-                background = backgrounds[0]
-            else:
-                background = backgrounds[1]
-
-            overlays = cfg.gettuple('PICTURE', 'overlays', 'path', 2)
-            if app.capture_nbr == app.capture_choices[0]:
-                overlay = overlays[0]
-            else:
-                overlay = overlays[1]
-
-            texts = [cfg.get('PICTURE', 'footer_text1').strip('"'),
-                     cfg.get('PICTURE', 'footer_text2').strip('"')]
-            colors = cfg.gettuple('PICTURE', 'text_colors', 'color', len(texts))
-            text_fonts = cfg.gettuple('PICTURE', 'text_fonts', str, len(texts))
-            alignments = cfg.gettuple('PICTURE', 'text_alignments', str, len(texts))
-
-            def _setup_maker(m):
-                m.set_background(background)
-                if any(elem != '' for elem in texts):
-                    for params in zip(texts, text_fonts, colors, alignments):
-                        m.add_text(*params)
-                if cfg.getboolean('PICTURE', 'captures_cropping'):
-                    m.set_cropping()
-                if overlay:
-                    m.set_overlay(overlay)
-                if cfg.getboolean('GENERAL', 'debug'):
-                    m.set_outlines()
-
-            maker = get_picture_maker(captures, cfg.get('PICTURE', 'orientation'))
-            _setup_maker(maker)
-            app.previous_picture = maker.build()
+            factory = get_picture_factory(captures, cfg.get('PICTURE', 'orientation'))
+            app._plugin_manager.hook.pibooth_setup_picture_factory(cfg=cfg,
+                                                                   opt_index=idx,
+                                                                   factory=factory)
+            app.previous_picture = factory.build()
 
         savedir = cfg.getpath('GENERAL', 'directory')
         app.previous_picture_file = osp.join(savedir, osp.basename(app.dirname) + "_pibooth.jpg")
-        maker.save(app.previous_picture_file)
+        factory.save(app.previous_picture_file)
 
         if cfg.getboolean('WINDOW', 'animate') and app.capture_nbr > 1:
             with timeit("Asyncronously generate pictures for animation"):
                 for capture in captures:
-                    maker = get_picture_maker((capture,), cfg.get('PICTURE', 'orientation'), force_pil=True)
-                    _setup_maker(maker)
-                    app.makers_pool.add(maker)
+                    factory = get_picture_factory((capture,), cfg.get('PICTURE', 'orientation'), force_pil=True)
+                    app._plugin_manager.hook.pibooth_setup_picture_factory(cfg=cfg,
+                                                                           opt_index=idx,
+                                                                           factory=factory)
+                    self.factory_pool.add(factory)
 
     @pibooth.hookimpl
     def state_print_do(self, cfg, app, events):

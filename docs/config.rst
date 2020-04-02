@@ -70,6 +70,9 @@ Default configuration
     # Crop each capture border in order to fit the paper size
     captures_cropping = False
 
+    # Thick (in pixels) between captures and picture borders/texts
+    margin_thick = 100
+
     # Main text displayed
     footer_text1 = Footer 1
 

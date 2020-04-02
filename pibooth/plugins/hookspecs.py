@@ -4,16 +4,39 @@ import pluggy
 
 hookspec = pluggy.HookspecMarker('pibooth')
 
-#--- Pibooth startup and cleanup ----------------------------------------------
+#--- Pibooth state-independent hooks ------------------------------------------
+
 
 @hookspec
 def pibooth_startup(app):
-    """Actions performed at the startup of pibooth
+    """Actions performed at the startup of pibooth.
+
+    :param app: application instance
     """
+
+
+@hookspec
+def pibooth_setup_picture_factory(cfg, opt_index, factory):
+    """Hook used to setup the ``PictureFactory`` instance.
+
+    The ``opt_index`` is the index to use in case of configuration option
+    with a type tuple which depends on the selected captures number.
+
+    A hook wrapper can be used to catch the current factory and return
+    a customized one.
+    (see details https://pluggy.readthedocs.io/en/latest/#wrappers)
+
+    :param cfg: application cfg
+    :param opt_index: index for tuple options
+    :param factory: ``PictureFactory`` instance
+    """
+
 
 @hookspec
 def pibooth_cleanup(app):
-    """Actions performed at the cleanup of pibooth
+    """Actions performed at the cleanup of pibooth.
+
+    :param app: application instance
     """
 
 
