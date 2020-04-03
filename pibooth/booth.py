@@ -20,12 +20,12 @@ from pibooth.states import StateMachine
 from pibooth.plugins import hookspecs, get_plugins
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
-from pibooth.controls import GPIO, camera
+from pibooth.controls import camera
 from pibooth.fonts import get_available_fonts
-from pibooth.controls.light import PtbLed
-from pibooth.controls.button import BUTTON_DOWN, PtbButton
 from pibooth.controls.printer import PRINTER_TASKS_UPDATED, PtbPrinter
+from gpiozero import Button
 
+BUTTON_DOWN = pygame.USEREVENT + 1
 
 class PiApplication(object):
 
@@ -39,9 +39,6 @@ class PiApplication(object):
         elif osp.isdir(savedir) and config.getboolean('GENERAL', 'debug'):
             shutil.rmtree(savedir)
             os.makedirs(savedir)
-
-        # Prepare GPIO, physical pins mode
-        GPIO.setmode(GPIO.BOARD)
 
         # Prepare the pygame module for use
         os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -92,16 +89,14 @@ class PiApplication(object):
                                         config.getboolean('CAMERA', 'delete_internal_memory'))
 
         # Initialize the hardware buttons
-        self.led_capture = PtbLed(config.getint('CONTROLS', 'picture_led_pin'))
-        self.button_capture = PtbButton(config.getint('CONTROLS', 'picture_btn_pin'),
-                                        config.getfloat('CONTROLS', 'debounce_delay'))
 
-        self.led_print = PtbLed(config.getint('CONTROLS', 'print_led_pin'))
-        self.button_print = PtbButton(config.getint('CONTROLS', 'print_btn_pin'),
-                                      config.getfloat('CONTROLS', 'debounce_delay'))
-
-        self.led_startup = PtbLed(config.getint('CONTROLS', 'startup_led_pin'))
-        self.led_preview = PtbLed(config.getint('CONTROLS', 'preview_led_pin'))
+        self.button_capture = Button("BOARD" + config.get('CONTROLS', 'picture_btn_pin'), pull_up=True,
+                                     active_state=None,
+                                     bounce_time=config.getfloat('CONTROLS', 'debounce_delay'), hold_time=1,
+                                     hold_repeat=False, pin_factory=None)
+        self.button_print = Button("BOARD" + config.get('CONTROLS', 'print_btn_pin'), pull_up=True, active_state=None,
+                                   bounce_time=config.getfloat('CONTROLS', 'debounce_delay'), hold_time=1,
+                                   hold_repeat=False, pin_factory=None)
 
         # Initialize the printer
         self.printer = PtbPrinter(config.get('PRINTER', 'printer_name'))
@@ -143,7 +138,7 @@ class PiApplication(object):
         self._window.arrow_offset = self._config.getint('WINDOW', 'arrows_x_offset')
         self._window.drop_cache()
 
-        # Handle window size
+        # Handle window siz
         size = self._config.gettyped('WINDOW', 'size')
         if isinstance(size, str) and size.lower() == 'fullscreen':
             if not self._window.is_fullscreen:
@@ -186,16 +181,13 @@ class PiApplication(object):
         event_capture = None
         event_print = None
         for event in events:
+            # LOGGER.info(f"CAPTURE type:{event.type}    BUTTON:{BUTTON_DOWN}    dict:{event.__dict__}")
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and \
                     (type_filter is None or type_filter == event.type):
                 return event
-            if event.type == BUTTON_DOWN:
-                if event.pin == self.button_capture and (type_filter is None or type_filter == event.type):
-                    event_capture = event
-                elif event.pin == self.button_print and (type_filter is None or type_filter == event.type):
-                    event_print = event
-            if event_capture and event_print:
-                return event_capture  # One of both (return != None is enough)
+            if self.button_capture.is_pressed and self.button_print.is_pressed:
+                # LOGGER.info(f"CAPTURE type:{event.type}    BUTTON:{BUTTON_DOWN}    dict:{event.__dict__}")
+                return event
 
         return None
 
@@ -220,10 +212,11 @@ class PiApplication(object):
         """Return the first found event if found in the list.
         """
         for event in events:
-            if (event.type == pygame.KEYDOWN and event.key == pygame.K_p) or \
-                    (event.type == BUTTON_DOWN and event.pin == self.button_capture):
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_p):
                 if type_filter is None or type_filter == event.type:
                     return event
+            elif self.button_capture.is_pressed:
+                return event
             elif event.type == pygame.MOUSEBUTTONUP:
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
@@ -236,10 +229,11 @@ class PiApplication(object):
         """
         for event in events:
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_e and
-                    pygame.key.get_mods() & pygame.KMOD_CTRL) or \
-                    (event.type == BUTTON_DOWN and event.pin == self.button_print):
+                    pygame.key.get_mods() & pygame.KMOD_CTRL):
                 if type_filter is None or type_filter == event.type:
                     return event
+            elif self.button_print.is_pressed:
+                return event
             elif event.type == pygame.MOUSEBUTTONUP:
                 rect = self._window.get_rect()
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
@@ -260,11 +254,11 @@ class PiApplication(object):
         """
         for event in events:
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT) or \
-                    (event.type == BUTTON_DOWN and event.pin == self.button_capture):
+                    self.button_capture.is_pressed:
                 event.key = pygame.K_LEFT
                 return event
             elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT) or \
-                    (event.type == BUTTON_DOWN and event.pin == self.button_print):
+                    self.button_print.is_pressed:
                 event.key = pygame.K_RIGHT
                 return event
             elif event.type == pygame.MOUSEBUTTONUP:
@@ -323,7 +317,6 @@ class PiApplication(object):
 
         finally:
             self._plugin_manager.hook.pibooth_cleanup(app=self)
-            GPIO.cleanup()
             pygame.quit()
 
 
