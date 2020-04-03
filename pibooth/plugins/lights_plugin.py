@@ -3,7 +3,7 @@
 import time
 import pibooth
 from pibooth.utils import LOGGER
-from gpiozero import Device, LED, LEDBoard
+from gpiozero import Device, LEDBoard
 try:
     from RPi import GPIO
     LOGGER.info("Start on Raspberry pi")
