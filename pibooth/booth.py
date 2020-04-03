@@ -27,6 +27,7 @@ from gpiozero import Button
 
 BUTTON_DOWN = pygame.USEREVENT + 1
 
+
 class PiApplication(object):
 
     def __init__(self, config):
@@ -178,17 +179,12 @@ class PiApplication(object):
     def find_settings_event(self, events, type_filter=None):
         """Return the first found event if found in the list.
         """
-        event_capture = None
-        event_print = None
         for event in events:
-            # LOGGER.info(f"CAPTURE type:{event.type}    BUTTON:{BUTTON_DOWN}    dict:{event.__dict__}")
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and \
                     (type_filter is None or type_filter == event.type):
                 return event
             if self.button_capture.is_pressed and self.button_print.is_pressed:
-                # LOGGER.info(f"CAPTURE type:{event.type}    BUTTON:{BUTTON_DOWN}    dict:{event.__dict__}")
                 return event
-
         return None
 
     def find_fullscreen_event(self, events):
@@ -212,9 +208,9 @@ class PiApplication(object):
         """Return the first found event if found in the list.
         """
         for event in events:
-            if (event.type == pygame.KEYDOWN and event.key == pygame.K_p):
-                if type_filter is None or type_filter == event.type:
-                    return event
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_p) and \
+                    (type_filter is None or type_filter == event.type):
+                return event
             elif self.button_capture.is_pressed:
                 return event
             elif event.type == pygame.MOUSEBUTTONUP:
@@ -229,8 +225,8 @@ class PiApplication(object):
         """
         for event in events:
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_e and
-                    pygame.key.get_mods() & pygame.KMOD_CTRL):
-                if type_filter is None or type_filter == event.type:
+                    pygame.key.get_mods() & pygame.KMOD_CTRL) and \
+                    (type_filter is None or type_filter == event.type):
                     return event
             elif self.button_print.is_pressed:
                 return event
