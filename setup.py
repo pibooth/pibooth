@@ -58,7 +58,8 @@ def main():
             'Pygame>=1.9.4',
             'pygame-menu>=2.0.4',
             'psutil>=5.5.1',
-            'pluggy>=0.13.1'
+            'pluggy>=0.13.1',
+            'gpiozero>=1.5.1'
         ],
         extras_require={
             'dslr': ['gphoto2>=2.0.0'],
