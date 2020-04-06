@@ -139,6 +139,7 @@ class PiApplication(object):
 
         self._window.arrow_location = self._config.get('WINDOW', 'arrows')
         self._window.arrow_offset = self._config.getint('WINDOW', 'arrows_x_offset')
+        self._window.text_color = self._config.gettyped('WINDOW', 'text_color')
         self._window.drop_cache()
 
         # Handle window size
