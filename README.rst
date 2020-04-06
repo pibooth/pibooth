@@ -352,6 +352,7 @@ Credits
 
 Icons from the Noun Project
 
+- Icon from `Artcore Illustrations <https://www.iconspedia.com/icon/photobooth-icon-29464.html>`_
 - Polaroid by icon 54
 - Up hand drawn arrow by Kid A
 - Cameraman and Friends Posing For Camera by Gan Khoon Lay
