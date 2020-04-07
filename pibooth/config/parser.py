@@ -70,7 +70,7 @@ DEFAULT = odict((
             ("text_color",
                 ((255, 255, 255),
                  "Text RGB color",
-                 None, None)),
+                 "Text RGB color", (255, 255, 255))),
             ("flash",
                 (True,
                  "Blinking background when a capture is taken",
