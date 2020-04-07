@@ -350,9 +350,10 @@ sure that the people that will use the ``pibooth`` are aware that the image will
 Credits
 ^^^^^^^
 
-Icons from the Noun Project
+Pibooth icon from `Artcore Illustrations <https://www.iconspedia.com/icon/photobooth-icon-29464.html>`_
 
-- Icon from `Artcore Illustrations <https://www.iconspedia.com/icon/photobooth-icon-29464.html>`_
+Icons from the Noun Project (https://thenounproject.com/)
+
 - Polaroid by icon 54
 - Up hand drawn arrow by Kid A
 - Cameraman and Friends Posing For Camera by Gan Khoon Lay
