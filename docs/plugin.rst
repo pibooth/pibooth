@@ -82,17 +82,17 @@ Example #2 : Flash light on capture
 .. code-block:: python
 
     import pibooth
-    from pibooth.controls.light import PtbLed
+    from gpiozero import LED
 
-    FLASH = PtbLed(36) # GPIO configured as BOARD
+    FLASH = LED("BOARD36") # GPIOZERO is configured as BCM, use string with "BOARD(pin)" to convert on BOARD
 
     @pibooth.hookimpl
     def state_capture_enter():
-        FLASH.switch_on()
+        FLASH.on()
 
     @pibooth.hookimpl
     def state_capture_exit():
-        FLASH.switch_off()
+        FLASH.off()
 
 Example #3 : Upload to FTP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -170,3 +170,6 @@ Example #4 : Generate a QR-Code
         qr_rect = app.previous_qr.get_rect()
         win.surface.blit(app.previous_qr, (win_rect.width - qr_rect.width - 10,
                                            win_rect.height - qr_rect.height - 10))
+
+Example #5 : RGB LED
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

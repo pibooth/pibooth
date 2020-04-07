@@ -35,11 +35,6 @@ class LightsPlugin(object):
                     )
             self.leds.led_start.on()
             self.load = True
-        # Initialize the LED
-        # self.led_print = LED("BOARD" + cfg.get('CONTROLS', 'print_led_pin'), initial_value=False)
-        # self.led_capture = LED("BOARD" + cfg.get('CONTROLS', 'picture_led_pin'), initial_value=False)
-        # self.led_startup = LED("BOARD" + cfg.get('CONTROLS', 'startup_led_pin'), initial_value=True)
-        # self.led_preview = LED("BOARD" + cfg.get('CONTROLS', 'preview_led_pin'), initial_value=False)
 
     @pibooth.hookimpl
     def state_wait_enter(self, cfg, app):
@@ -60,12 +55,12 @@ class LightsPlugin(object):
                 self.leds.led_print.blink(on_time=self.blink_time, off_time=self.blink_time, n=None, background=True)
 
     @pibooth.hookimpl
-    def state_wait_exit(self, app):
+    def state_wait_exit(self):
         self.leds.led_capture.off()
         self.leds.led_print.off()
 
     @pibooth.hookimpl
-    def state_choose_enter(self, app):
+    def state_choose_enter(self):
         self.leds.led_capture.blink(on_time=self.blink_time, off_time=self.blink_time, n=None, background=True)
         self.leds.led_print.blink(on_time=self.blink_time, off_time=self.blink_time, n=None, background=True)
 
@@ -79,20 +74,20 @@ class LightsPlugin(object):
             self.leds.led_capture.off()
 
     @pibooth.hookimpl
-    def state_chosen_exit(self, app):
+    def state_chosen_exit(self):
         self.leds.led_capture.off()
         self.leds.led_print.off()
 
     @pibooth.hookimpl
-    def state_preview_enter(self, app):
+    def state_preview_enter(self):
         self.leds.led_preview.on()
 
     @pibooth.hookimpl
-    def state_capture_exit(self, app):
+    def state_capture_exit(self):
         self.leds.led_preview.off()
 
     @pibooth.hookimpl
-    def state_print_enter(self, app):
+    def state_print_enter(self):
         self.leds.led_print.blink(on_time=self.blink_time, off_time=self.blink_time, n=None, background=True)
 
     @pibooth.hookimpl
