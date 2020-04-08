@@ -17,7 +17,7 @@ from pibooth import language
 from pibooth.utils import (LOGGER, configure_logging,
                            set_logging_level, print_columns_words)
 from pibooth.states import StateMachine
-from pibooth.plugins import hookspecs, get_plugins
+from pibooth.plugins import hookspecs, load_plugins
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth import camera
@@ -64,23 +64,23 @@ class PiApplication(object):
         init_text_color = self._config.gettyped('WINDOW', 'text_color')
         if not isinstance(init_color, (tuple, list)):
             init_color = self._config.getpath('WINDOW', 'background')
+
+        title = 'Pibooth v{}'.format(pibooth.__version__)
         if not isinstance(init_size, str):
-            self._window = PtbWindow('Pibooth', init_size, color=init_color,
+            self._window = PtbWindow(title, init_size, color=init_color,
                                      text_color=init_text_color, debug=init_debug)
         else:
-            self._window = PtbWindow('Pibooth', color=init_color,
+            self._window = PtbWindow(title, color=init_color,
                                      text_color=init_text_color, debug=init_debug)
 
         # Create plugin manager and defined hooks specification
         self._plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
         self._plugin_manager.add_hookspecs(hookspecs)
         self._plugin_manager.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
-        self._plugin_manager.check_pending()
 
         # Register plugins
         custom_paths = [p for p in self._config.gettuple('GENERAL', 'plugins', 'path') if p]
-        for plugin in get_plugins(*custom_paths):
-            self._plugin_manager.register(plugin)
+        load_plugins(self._plugin_manager, *custom_paths)
 
         # Define states of the application
         self._machine = StateMachine(self._plugin_manager, self._config, self, self._window)
@@ -156,6 +156,7 @@ class PiApplication(object):
 
         self._window.arrow_location = self._config.get('WINDOW', 'arrows')
         self._window.arrow_offset = self._config.getint('WINDOW', 'arrows_x_offset')
+        self._window.text_color = self._config.gettyped('WINDOW', 'text_color')
         self._window.drop_cache()
 
         # Handle window size

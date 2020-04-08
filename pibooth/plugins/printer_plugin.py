@@ -9,6 +9,9 @@ class PrinterPlugin(object):
     """Plugin to manage the printer.
     """
 
+    def __init__(self, plugin_manager):
+        self._pm = plugin_manager
+
     @pibooth.hookimpl
     def pibooth_startup(self, app):
         app.printer.nbr_printed = 0

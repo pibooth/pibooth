@@ -8,7 +8,7 @@ from pibooth.plugins.printer_plugin import PrinterPlugin
 from pibooth.plugins.view_plugin import ViewPlugin
 
 
-def get_plugins(*paths):
+def load_plugins(plugin_manager, *paths):
     """Return the list of core plugins and load those from the
     given paths.
 
@@ -22,8 +22,15 @@ def get_plugins(*paths):
             LOGGER.info("Plugin '%s' loaded", path)
             plugins.append(plugin)
 
-    return plugins + [ViewPlugin(),  # Last called
-                      PrinterPlugin(),
-                      PicturePlugin(),
-                      CameraPlugin(),
-                      LightsPlugin()]  # First called
+    plugins += [ViewPlugin(plugin_manager),  # Last called
+                PrinterPlugin(plugin_manager),
+                PicturePlugin(plugin_manager),
+                CameraPlugin(plugin_manager),
+                LightsPlugin(plugin_manager)]  # First called
+
+    for plugin in plugins:
+        plugin_manager.register(plugin)
+
+    # Check that each hookimpl is defined in the hookspec
+    # except for hookimpl with kwarg ``optionalhook=True``.
+    plugin_manager.check_pending()

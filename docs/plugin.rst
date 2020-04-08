@@ -16,6 +16,10 @@ The list of available ``hooks`` are defined in the file
 `hookspecs.py <https://github.com/werdeil/pibooth/blob/master/pibooth/plugins/hookspecs.py>`_.
 A plugin implements a subset of those functions.
 
+There are 2 families of hooks implemented in `pibooth`:
+ * Pibooth state-independent hooks
+ * State dependant hooks (see below)
+
 Influencing states
 ^^^^^^^^^^^^^^^^^^
 
@@ -56,8 +60,8 @@ There are four hooks defined for each state.
 
   Invoked one time when the state is exiting.
 
-.. note:: The hooks specification define all arguments that can be used by the
-          hook, but there is no need to defined, in the function signature, the
+.. note:: The hooks specification defines all arguments that can be used by the
+          hook, but there is no need to define, in the function signature, the
           arguments not used in the code.
 
 Example #1 : Hello from plugin
