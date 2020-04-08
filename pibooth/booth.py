@@ -56,11 +56,13 @@ class PiApplication(object):
         init_text_color = self._config.gettyped('WINDOW', 'text_color')
         if not isinstance(init_color, (tuple, list)):
             init_color = self._config.getpath('WINDOW', 'background')
+
+        title = 'Pibooth v{}'.format(pibooth.__version__)
         if not isinstance(init_size, str):
-            self._window = PtbWindow('Pibooth', init_size, color=init_color,
+            self._window = PtbWindow(title, init_size, color=init_color,
                                      text_color=init_text_color, debug=init_debug)
         else:
-            self._window = PtbWindow('Pibooth', color=init_color,
+            self._window = PtbWindow(title, color=init_color,
                                      text_color=init_text_color, debug=init_debug)
 
         # Create plugin manager and defined hooks specification

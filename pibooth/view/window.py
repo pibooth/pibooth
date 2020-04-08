@@ -60,7 +60,7 @@ class PtbWindow(object):
         """
         image_name = id(pil_image)
 
-        image_size_max = (2 * self.size[1] // 3, self.size[1])
+        image_size_max = (2 * self.surface.get_size()[1] // 3, self.surface.get_size()[1])
 
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
@@ -102,7 +102,7 @@ class PtbWindow(object):
         radius = 10
         border = 20
         x = center[0] - (2 * radius * self._capture_number[1] + border * (self._capture_number[1] - 1)) // 2
-        y = self.size[1] - radius - border
+        y = self.surface.get_size()[1] - radius - border
         for nbr in range(self._capture_number[1]):
             gfxdraw.aacircle(self.surface, x, y, radius, self.text_color)
             if self._capture_number[0] > nbr:
@@ -117,7 +117,8 @@ class PtbWindow(object):
         if not self._print_number:
             return  # Dont show counter: no file in queue
 
-        smaller = self.size[1] if self.size[1] < self.size[0] else self.size[0]
+        smaller = self.surface.get_size()[1] if self.surface.get_size(
+            )[1] < self.surface.get_size()[0] else self.surface.get_size()[0]
         side = int(smaller * 0.05)  # 5% of the window
 
         if side > 0:
@@ -152,15 +153,6 @@ class PtbWindow(object):
         pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
         return image.get_rect(center=pos) if image else pos
 
-    @property
-    def size(self):
-        """Return the current window size.
-        """
-        if self.is_fullscreen:
-            return self.display_size
-        else:
-            return self.__size
-
     def get_rect(self):
         """Return a Rect object (as defined in pygame) for this window. The position represent
         the absolute position considering the window centered on screen.
@@ -170,8 +162,8 @@ class PtbWindow(object):
     def resize(self, size):
         """Resize the window keeping aspect ratio.
         """
-        self.__size = size
-        self.surface = pygame.display.set_mode(self.size, pygame.RESIZABLE)
+        if not self.is_fullscreen:
+            self.__size = size  # Manual resizing
         self.update()
 
     def update(self):
@@ -309,12 +301,16 @@ class PtbWindow(object):
         """
         if self.is_fullscreen:
             self.is_fullscreen = False  # Set before get size
+            pygame.display.quit()
+            pygame.display.init()
             pygame.mouse.set_cursor(*self._default_cursor)
-            self.surface = pygame.display.set_mode(self.size, pygame.RESIZABLE)
+            self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
         else:
             self.is_fullscreen = True  # Set before get size
+            pygame.display.quit()
+            pygame.display.init()
             pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
-            self.surface = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
+            self.surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
         self.update()
 
