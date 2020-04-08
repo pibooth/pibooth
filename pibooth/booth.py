@@ -5,10 +5,10 @@
 """
 
 import os
+import os.path as osp
 import shutil
 import logging
 import argparse
-import os.path as osp
 import pygame
 import pluggy
 import pibooth
@@ -33,7 +33,7 @@ try:
 except ImportError:
     from gpiozero.pins.mock import MockFactory
     Device.pin_factory = MockFactory()
-    LOGGER.debug("NMockFactory() mode")
+    LOGGER.debug("Backend RPi.GPIO not installed, fallback to GPIO mock")
 
 
 BUTTON_DOWN = pygame.USEREVENT + 1
@@ -198,7 +198,8 @@ class PiApplication(object):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and \
                     (type_filter is None or type_filter == event.type):
                 return event
-            if self.button_capture.is_pressed and self.button_print.is_pressed:
+            if (type_filter is None or type_filter == BUTTON_DOWN) and\
+                    self.button_capture.is_pressed and self.button_print.is_pressed:
                 return event
         return None
 
@@ -226,7 +227,8 @@ class PiApplication(object):
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_p) and \
                     (type_filter is None or type_filter == event.type):
                 return event
-            elif self.button_capture.is_pressed:
+            elif (type_filter is None or type_filter == BUTTON_DOWN) and\
+                    self.button_capture.is_pressed:
                 return event
             elif event.type == pygame.MOUSEBUTTONUP:
                 rect = self._window.get_rect()
@@ -243,7 +245,8 @@ class PiApplication(object):
                     pygame.key.get_mods() & pygame.KMOD_CTRL) and \
                     (type_filter is None or type_filter == event.type):
                     return event
-            elif self.button_print.is_pressed:
+            elif (type_filter is None or type_filter == BUTTON_DOWN) and\
+                    self.button_print.is_pressed:
                 return event
             elif event.type == pygame.MOUSEBUTTONUP:
                 rect = self._window.get_rect()
