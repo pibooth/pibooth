@@ -88,6 +88,7 @@ class PiConfigMenu(object):
                         and all(isinstance(i, int) for i in option[3]):
                     menu.add_color_input(option[2],
                                          "rgb",
+                                         cursor_color=(255, 255, 255),
                                          default=self.config.gettyped(section, name),
                                          input_separator=',',
                                          onchange=self._on_color_changed,
