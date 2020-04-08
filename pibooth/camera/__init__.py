@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from pibooth.utils import LOGGER, pkill
-from pibooth.controls.camera.rpi import RpiCamera, rpi_camera_connected
-from pibooth.controls.camera.gphoto import GpCamera, gp_camera_connected
-from pibooth.controls.camera.gphoto_omx import GpOmxCamera, gpomx_camera_connected
-from pibooth.controls.camera.opencv import CvCamera, cv_camera_connected
-from pibooth.controls.camera.hybrid import HybridCamera
+from pibooth.camera.rpi import RpiCamera, rpi_camera_connected
+from pibooth.camera.gphoto import GpCamera, gp_camera_connected
+from pibooth.camera.gphoto_omx import GpOmxCamera, gpomx_camera_connected
+from pibooth.camera.opencv import CvCamera, cv_camera_connected
+from pibooth.camera.hybrid import HybridCamera
 
 
 def get_camera(iso, resolution, rotation, flip, delete_internal_memory):

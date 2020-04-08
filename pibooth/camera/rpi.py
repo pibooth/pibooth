@@ -8,7 +8,7 @@ except ImportError:
     picamera = None  # picamera is optional
 from pibooth.utils import memorize
 from pibooth.language import get_translated_text
-from pibooth.controls.camera.base import BaseCamera
+from pibooth.camera.base import BaseCamera
 
 
 @memorize

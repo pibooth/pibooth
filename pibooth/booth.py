@@ -20,10 +20,20 @@ from pibooth.states import StateMachine
 from pibooth.plugins import hookspecs, get_plugins
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
-from pibooth.controls import camera
+from pibooth import camera
 from pibooth.fonts import get_available_fonts
-from pibooth.controls.printer import PRINTER_TASKS_UPDATED, PtbPrinter
-from gpiozero import Button
+from pibooth.printer import PRINTER_TASKS_UPDATED, PtbPrinter
+from gpiozero import Device, LEDBoard, Button
+
+# GPIO library only existes on Raspberry Pi
+# Set the default pin factory to a mock factory
+try:
+    from RPi import GPIO
+    LOGGER.debug("Start on Raspberry pi")
+except ImportError:
+    from gpiozero.pins.mock import MockFactory
+    Device.pin_factory = MockFactory()
+    LOGGER.debug("Programme not start on Raspberry pi use MockFactory() mode")
 
 BUTTON_DOWN = pygame.USEREVENT + 1
 
@@ -89,8 +99,8 @@ class PiApplication(object):
                                         config.getboolean('CAMERA', 'flip'),
                                         config.getboolean('CAMERA', 'delete_internal_memory'))
 
-        # Initialize the hardware buttons
 
+        # Initialize the hardware buttons
         self.button_capture = Button("BOARD" + config.get('CONTROLS', 'picture_btn_pin'), pull_up=True,
                                      active_state=None,
                                      bounce_time=config.getfloat('CONTROLS', 'debounce_delay'), hold_time=1,
@@ -98,6 +108,15 @@ class PiApplication(object):
         self.button_print = Button("BOARD" + config.get('CONTROLS', 'print_btn_pin'), pull_up=True, active_state=None,
                                    bounce_time=config.getfloat('CONTROLS', 'debounce_delay'), hold_time=1,
                                    hold_repeat=False, pin_factory=None)
+
+        # Initialize the LED
+        self.led_board = LEDBoard(
+            led_capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
+            led_print="BOARD" + config.get('CONTROLS', 'print_led_pin'),
+            led_preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
+            led_start="BOARD" + config.get('CONTROLS', 'startup_led_pin'),
+            # pwm=True
+        )
 
         # Initialize the printer
         self.printer = PtbPrinter(config.get('PRINTER', 'printer_name'))
@@ -139,7 +158,7 @@ class PiApplication(object):
         self._window.arrow_offset = self._config.getint('WINDOW', 'arrows_x_offset')
         self._window.drop_cache()
 
-        # Handle window siz
+        # Handle window size
         size = self._config.gettyped('WINDOW', 'size')
         if isinstance(size, str) and size.lower() == 'fullscreen':
             if not self._window.is_fullscreen:

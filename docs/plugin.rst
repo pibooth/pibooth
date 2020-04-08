@@ -173,3 +173,35 @@ Example #4 : Generate a QR-Code
 
 Example #5 : RGB LED
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``pibooth_RGBLED.py``
+
+.. code-block:: python
+
+    import pibooth
+    from gpiozero import RGBLED
+    from colorzero import Color
+
+    led = RGBLED("BOARD36","BOARD38","BOARD40") # GPIOZERO is configured as BCM, use string with "BOARD(pin)" to convert on BOARD
+
+
+    class RGBPlugin(object):
+
+        """Plugin to manage the RGB lights via GPIO.
+        """
+        @pibooth.hookimpl
+        def state_wait_enter(self, app):
+            led.color = Color('green')
+
+        @pibooth.hookimpl
+        def state_choose_enter(self, app):
+            led.blink()
+
+        @pibooth.hookimpl
+        def state_preview_enter(self, app):
+            led.color = Color('white')
+            led.blink()
+
+        @pibooth.hookimpl
+        def state_capture_exit(app):
+            led.color = Color('red')
