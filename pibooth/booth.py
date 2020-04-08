@@ -33,7 +33,8 @@ try:
 except ImportError:
     from gpiozero.pins.mock import MockFactory
     Device.pin_factory = MockFactory()
-    LOGGER.debug("Programme not start on Raspberry pi use MockFactory() mode")
+    LOGGER.debug("NMockFactory() mode")
+
 
 BUTTON_DOWN = pygame.USEREVENT + 1
 
@@ -93,36 +94,9 @@ class PiApplication(object):
         self._machine.add_state('print')
         self._machine.add_state('finish')
 
-        self.camera = camera.get_camera(config.getint('CAMERA', 'iso'),
-                                        config.gettyped('CAMERA', 'resolution'),
-                                        config.getint('CAMERA', 'rotation'),
-                                        config.getboolean('CAMERA', 'flip'),
-                                        config.getboolean('CAMERA', 'delete_internal_memory'))
-
-
-        # Initialize the hardware buttons
-        self.button_capture = Button("BOARD" + config.get('CONTROLS', 'picture_btn_pin'), pull_up=True,
-                                     active_state=None,
-                                     bounce_time=config.getfloat('CONTROLS', 'debounce_delay'), hold_time=1,
-                                     hold_repeat=False, pin_factory=None)
-        self.button_print = Button("BOARD" + config.get('CONTROLS', 'print_btn_pin'), pull_up=True, active_state=None,
-                                   bounce_time=config.getfloat('CONTROLS', 'debounce_delay'), hold_time=1,
-                                   hold_repeat=False, pin_factory=None)
-
-        # Initialize the LED
-        self.led_board = LEDBoard(
-            led_capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
-            led_print="BOARD" + config.get('CONTROLS', 'print_led_pin'),
-            led_preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
-            led_start="BOARD" + config.get('CONTROLS', 'startup_led_pin'),
-            # pwm=True
-        )
-
-        # Initialize the printer
-        self.printer = PtbPrinter(config.get('PRINTER', 'printer_name'))
-
         # ---------------------------------------------------------------------
         # Variables shared with plugins
+        # Change them may break plugins compatibility
         self.dirname = None
         self.capture_nbr = None
         self.capture_choices = (4, 1)
@@ -130,6 +104,27 @@ class PiApplication(object):
         self.previous_picture = None
         self.previous_animated = None
         self.previous_picture_file = None
+
+        self.camera = camera.get_camera(config.getint('CAMERA', 'iso'),
+                                        config.gettyped('CAMERA', 'resolution'),
+                                        config.getint('CAMERA', 'rotation'),
+                                        config.getboolean('CAMERA', 'flip'),
+                                        config.getboolean('CAMERA', 'delete_internal_memory'))
+
+        self.button_capture = Button("BOARD" + config.get('CONTROLS', 'picture_btn_pin'),
+                                     bounce_time=config.getfloat('CONTROLS', 'debounce_delay'),
+                                     pull_up=True, hold_time=1)
+
+        self.button_print = Button("BOARD" + config.get('CONTROLS', 'print_btn_pin'),
+                                   bounce_time=config.getfloat('CONTROLS', 'debounce_delay'),
+                                   pull_up=True, hold_time=1)
+
+        self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
+                             printer="BOARD" + config.get('CONTROLS', 'print_led_pin'),
+                             preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
+                             start="BOARD" + config.get('CONTROLS', 'startup_led_pin'))
+
+        self.printer = PtbPrinter(config.get('PRINTER', 'printer_name'))
         # ---------------------------------------------------------------------
 
     def _initialize(self):

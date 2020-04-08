@@ -330,9 +330,6 @@ Edit the file ``/boot/config.txt`` and set the line::
 
 Then connect a push button between physical *pin 5* and *pin 6*.
 
-.. warning:: At startup, ``pibooth`` configure the GPIO library using BOARD references
-             (not BCM one).
-
 Terms and conditions
 --------------------
 
