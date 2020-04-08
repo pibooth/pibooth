@@ -84,12 +84,12 @@ class PiConfigMenu(object):
                                         # Additional parameters:
                                         section=section,
                                         option=name)
-                elif option[3] == tuple and len(option[3]) == 3:
+                elif isinstance(option[3], (list, tuple)) and len(option[3]) == 3\
+                        and all(isinstance(i, int) for i in option[3]):
                     menu.add_color_input(option[2],
                                          "rgb",
                                          default=self.config.gettyped(section, name),
                                          input_separator=',',
-                                         font_size=0,
                                          onchange=self._on_color_changed,
                                          previsualization_width=3,
                                          section=section,
