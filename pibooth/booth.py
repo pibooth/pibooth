@@ -23,14 +23,15 @@ from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth import camera
 from pibooth.fonts import get_available_fonts
 from pibooth.printer import PRINTER_TASKS_UPDATED, PtbPrinter
-from gpiozero import Device, LEDBoard, Button
+from gpiozero import Device, LEDBoard, Button, pi_info
+from gpiozero.exc import BadPinFactory, PinFactoryFallback
 
-# GPIO library only existes on Raspberry Pi
-# Set the default pin factory to a mock factory
+
+# Set the default pin factory to a mock factory if pibooth is not started a Raspberry Pi
 try:
-    from RPi import GPIO
-    LOGGER.debug("Start on Raspberry pi")
-except ImportError:
+    warnings.filterwarnings("ignore", category=PinFactoryFallback)
+    LOGGER.debug("Start on Raspberry pi {0:model}".format(pi_info()))
+except BadPinFactory:
     from gpiozero.pins.mock import MockFactory
     Device.pin_factory = MockFactory()
     LOGGER.debug("Backend RPi.GPIO not installed, fallback to GPIO mock")
