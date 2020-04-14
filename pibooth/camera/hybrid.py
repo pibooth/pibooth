@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pibooth.controls.camera.rpi import RpiCamera
-from pibooth.controls.camera.gphoto import GpCamera
+from pibooth.camera.rpi import RpiCamera
+from pibooth.camera.gphoto import GpCamera
 
 
 class HybridCamera(RpiCamera):

@@ -7,7 +7,7 @@ import subprocess
 from PIL import Image
 from pibooth.utils import PoolingTimer, memorize
 from pibooth.language import get_translated_text
-from pibooth.controls.camera.gphoto import gp, gp_camera_connected, GpCamera
+from pibooth.camera.gphoto import gp, gp_camera_connected, GpCamera
 
 
 @memorize

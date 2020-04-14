@@ -86,17 +86,18 @@ Example #2 : Flash light on capture
 .. code-block:: python
 
     import pibooth
-    from pibooth.controls.light import PtbLed
+    from gpiozero import LED
 
-    FLASH = PtbLed(36) # GPIO configured as BOARD
+    # GPIOZERO is configured as BCM, use string with "BOARD(pin)" to convert on BOARD
+    FLASH = LED("BOARD36")
 
     @pibooth.hookimpl
     def state_capture_enter():
-        FLASH.switch_on()
+        FLASH.on()
 
     @pibooth.hookimpl
     def state_capture_exit():
-        FLASH.switch_off()
+        FLASH.off()
 
 Example #3 : Upload to FTP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -174,3 +175,37 @@ Example #4 : Generate a QR-Code
         qr_rect = app.previous_qr.get_rect()
         win.surface.blit(app.previous_qr, (win_rect.width - qr_rect.width - 10,
                                            win_rect.height - qr_rect.height - 10))
+
+Example #5 : RGB LED
+^^^^^^^^^^^^^^^^^^^^
+
+``pibooth_RGBLED.py``
+
+.. code-block:: python
+
+    """Plugin to manage the RGB lights via GPIO.
+    """
+
+    import pibooth
+    from gpiozero import RGBLED
+    from colorzero import Color
+
+    # GPIOZERO is configured as BCM, use string with "BOARD(pin)" to convert on BOARD
+    led = RGBLED("BOARD36", "BOARD38", "BOARD40")
+
+    @pibooth.hookimpl
+    def state_wait_enter():
+        led.color = Color('green')
+
+    @pibooth.hookimpl
+    def state_choose_enter():
+        led.blink()
+
+    @pibooth.hookimpl
+    def state_preview_enter():
+        led.color = Color('white')
+        led.blink()
+
+    @pibooth.hookimpl
+    def state_capture_exit():
+        led.color = Color('red')
