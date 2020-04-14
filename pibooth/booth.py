@@ -34,7 +34,7 @@ try:
 except BadPinFactory:
     from gpiozero.pins.mock import MockFactory
     Device.pin_factory = MockFactory()
-    gpio_info = "without backend RPi.GPIO (not installed), fallback to GPIO mock"
+    gpio_info = "without physical GPIO, fallback to GPIO mock"
 
 
 BUTTON_DOWN = pygame.USEREVENT + 1
