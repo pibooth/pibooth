@@ -209,3 +209,8 @@ Example #5 : RGB LED
     @pibooth.hookimpl
     def state_capture_exit():
         led.color = Color('red')
+
+
+Example #6 : Google Photo upload
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`full doc here <https://github.com/pibooth/pibooth/blob/master/docs/google_photo.rst>`_.
