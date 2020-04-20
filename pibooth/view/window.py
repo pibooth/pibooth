@@ -301,14 +301,10 @@ class PtbWindow(object):
         """
         if self.is_fullscreen:
             self.is_fullscreen = False  # Set before get size
-            pygame.display.quit()
-            pygame.display.init()
             pygame.mouse.set_cursor(*self._default_cursor)
             self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
         else:
             self.is_fullscreen = True  # Set before get size
-            pygame.display.quit()
-            pygame.display.init()
             pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
             self.surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
