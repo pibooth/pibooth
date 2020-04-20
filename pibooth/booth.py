@@ -22,7 +22,7 @@ from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth import camera
 from pibooth.fonts import get_available_fonts
-from pibooth.printer import PRINTER_TASKS_UPDATED, PtbPrinter
+from pibooth.printer import PRINTER_TASKS_UPDATED, Printer
 from gpiozero import Device, LEDBoard, Button, pi_info
 from gpiozero.exc import BadPinFactory, PinFactoryFallback
 from warnings import filterwarnings
@@ -30,11 +30,11 @@ from warnings import filterwarnings
 # Set the default pin factory to a mock factory if pibooth is not started a Raspberry Pi
 try:
     filterwarnings("ignore", category=PinFactoryFallback)
-    gpio_info = "on Raspberry pi {0}".format(pi_info().model)
+    GPIO_INFO = "on Raspberry pi {0}".format(pi_info().model)
 except BadPinFactory:
     from gpiozero.pins.mock import MockFactory
     Device.pin_factory = MockFactory()
-    gpio_info = "without physical GPIO, fallback to GPIO mock"
+    GPIO_INFO = "without physical GPIO, fallback to GPIO mock"
 
 
 BUTTON_DOWN = pygame.USEREVENT + 1
@@ -125,7 +125,7 @@ class PiApplication(object):
                              preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
                              start="BOARD" + config.get('CONTROLS', 'startup_led_pin'))
 
-        self.printer = PtbPrinter(config.get('PRINTER', 'printer_name'))
+        self.printer = Printer(config.get('PRINTER', 'printer_name'))
         # ---------------------------------------------------------------------
 
     def _initialize(self):
@@ -381,7 +381,7 @@ def main():
         LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
     elif not options.reset:
-        LOGGER.info("Starting the photo booth application {}".format(gpio_info))
+        LOGGER.info("Starting the photo booth application {}".format(GPIO_INFO))
         app = PiApplication(config)
         app.main_loop()
 

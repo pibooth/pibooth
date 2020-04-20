@@ -27,7 +27,7 @@ PAPER_FORMATS = {
 }
 
 
-class PtbPrinter(object):
+class Printer(object):
 
     def __init__(self, name='default'):
         self._conn = cups.Connection() if cups else None
