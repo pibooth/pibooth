@@ -56,8 +56,6 @@ class PiApplication(object):
         # Prepare the pygame module for use
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
-        # Dont catch mouse motion to avoid filling the queue during long actions
-        pygame.event.set_blocked(pygame.MOUSEMOTION)
 
         # Create window of (width, height)
         init_size = self._config.gettyped('WINDOW', 'size')
@@ -74,6 +72,8 @@ class PiApplication(object):
         else:
             self._window = PtbWindow(title, color=init_color,
                                      text_color=init_text_color, debug=init_debug)
+
+        self._menu = PiConfigMenu(self._window, self._config, self._initialize)
 
         # Create plugin manager and defined hooks specification
         self._plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
@@ -289,11 +289,10 @@ class PiApplication(object):
         """Run the main game loop.
         """
         try:
+            fps = 40
             clock = pygame.time.Clock()
             self._initialize()
             self._plugin_manager.hook.pibooth_startup(app=self)
-            menu = None
-            fps = 40
 
             while True:
                 events = list(pygame.event.get())
@@ -308,22 +307,17 @@ class PiApplication(object):
                 if event:
                     self._window.resize(event.size)
 
-                if not menu and self.find_settings_event(events):
-                    menu = PiConfigMenu(self._window, self._config, fps, version=pibooth.__version__)
-                    menu.show()
-
-                if menu and menu.is_shown():
+                if self.find_settings_event(events) and not self._menu.is_shown():
+                    self._menu.show()
+                elif self._menu.is_shown():
                     # Convert HW button events to keyboard events for menu
                     if self.find_settings_event(events, BUTTON_DOWN):
-                        events.insert(0, menu.create_back_event())
+                        events.insert(0, self._menu.create_back_event())
                     if self.find_capture_event(events, BUTTON_DOWN):
-                        events.insert(0, menu.create_next_event())
+                        events.insert(0, self._menu.create_next_event())
                     elif self.find_print_event(events, BUTTON_DOWN):
-                        events.insert(0, menu.create_click_event())
-                    menu.process(events)
-                elif menu and not menu.is_shown():
-                    self._initialize()
-                    menu = None
+                        events.insert(0, self._menu.create_click_event())
+                    self._menu.process(events)
                 else:
                     self._machine.process(events)
 
