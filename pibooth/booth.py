@@ -120,7 +120,7 @@ class PiApplication(object):
                                    bounce_time=config.getfloat('CONTROLS', 'debounce_delay'),
                                    pull_up=True, hold_time=1)
 
-        self.leds_link = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
+        self.button_synced_leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
                                   printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
         self.leds = LEDBoard(preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
                              start="BOARD" + config.get('CONTROLS', 'startup_led_pin'))

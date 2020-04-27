@@ -2,7 +2,6 @@
 
 import time
 import pibooth
-from gpiozero import LEDBoard
 
 
 class LightsPlugin(object):
@@ -19,43 +18,43 @@ class LightsPlugin(object):
 
     @pibooth.hookimpl
     def state_wait_enter(self, app):
-        app.leds_link.capture.blink(on_time=self.blink_time, off_time=self.blink_time)
+        app.button_synced_leds.capture.blink(on_time=self.blink_time, off_time=self.blink_time)
         if app.previous_picture_file and app.printer.is_installed() and not app.printer_unavailable:
-            app.leds_link.blink(on_time=self.blink_time, off_time=self.blink_time)
+            app.button_synced_leds.blink(on_time=self.blink_time, off_time=self.blink_time)
         elif not app.previous_picture_file:
-            app.leds_link.printer.off()
+            app.button_synced_leds.printer.off()
 
     @pibooth.hookimpl
     def state_wait_do(self, cfg, app, events):
         if app.find_print_event(events) and app.previous_picture_file and app.printer.is_installed():
-            app.leds_link.printer.on()
+            app.button_synced_leds.printer.on()
             time.sleep(1)  # Just to let the LED switched on
 
             if app.nbr_duplicates >= cfg.getint('PRINTER', 'max_duplicates') or app.printer_unavailable:
-                app.leds_link.printer.off()
+                app.button_synced_leds.printer.off()
             else:
-                app.leds_link.printer.blink(on_time=self.blink_time, off_time=self.blink_time)
+                app.button_synced_leds.printer.blink(on_time=self.blink_time, off_time=self.blink_time)
 
     @pibooth.hookimpl
     def state_wait_exit(self, app):
-        app.leds_link.off()
+        app.button_synced_leds.off()
 
     @pibooth.hookimpl
     def state_choose_enter(self, app):
-        app.leds_link.blink(on_time=self.blink_time, off_time=self.blink_time)
+        app.button_synced_leds.blink(on_time=self.blink_time, off_time=self.blink_time)
 
     @pibooth.hookimpl
     def state_choose_exit(self, app):
         if app.capture_nbr == app.capture_choices[0]:
-            app.leds_link.capture.on()
-            app.leds_link.printer.off()
+            app.button_synced_leds.capture.on()
+            app.button_synced_leds.printer.off()
         elif app.capture_nbr == app.capture_choices[1]:
-            app.leds_link.printer.on()
-            app.leds_link.capture.off()
+            app.button_synced_leds.printer.on()
+            app.button_synced_leds.capture.off()
 
     @pibooth.hookimpl
     def state_chosen_exit(self, app):
-        app.leds_link.off()
+        app.button_synced_leds.off()
 
     @pibooth.hookimpl
     def state_preview_enter(self, app):
@@ -65,14 +64,9 @@ class LightsPlugin(object):
     def state_capture_exit(self, app):
         app.leds.preview.off()
 
-    # @pibooth.hookimpl
-    # def state_print_enter(self, app):
-
-
     @pibooth.hookimpl
     def state_print_do(self, app, events):
-        app.leds_link.blink(on_time=self.blink_time, off_time=self.blink_time)
-        # app.leds.printer.blink(on_time=self.blink_time, off_time=self.blink_time)
+        app.button_synced_leds.blink(on_time=self.blink_time, off_time=self.blink_time)
         if app.find_print_event(events) and app.previous_picture_file:
-            app.leds_link.printer.on()
-            app.leds_link.capture.off()
+            app.button_synced_leds.printer.on()
+            app.button_synced_leds.capture.off()
