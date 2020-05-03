@@ -48,7 +48,6 @@ class PtbWindow(object):
         self._print_number = 0
         self._print_failure = False
         self._capture_number = (0, 4)  # (current, max)
-        self._default_cursor = pygame.mouse.get_cursor()
 
         self._pos_map = {self.CENTER: self._center_pos,
                          self.RIGHT: self._right_pos,
@@ -302,11 +301,11 @@ class PtbWindow(object):
         """
         if self.is_fullscreen:
             self.is_fullscreen = False  # Set before resize
-            pygame.mouse.set_cursor(*self._default_cursor)
+            pygame.mouse.set_visible(True)
             self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
         else:
             self.is_fullscreen = True  # Set before resize
-            pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
+            pygame.mouse.set_visible(False)
             self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
 
         self.update()
