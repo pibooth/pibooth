@@ -164,6 +164,7 @@ class PtbWindow(object):
         """
         if not self.is_fullscreen:
             self.__size = size  # Manual resizing
+            self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
         self.update()
 
     def update(self):
@@ -300,13 +301,13 @@ class PtbWindow(object):
         """Set window to full screen or initial size.
         """
         if self.is_fullscreen:
-            self.is_fullscreen = False  # Set before get size
+            self.is_fullscreen = False  # Set before resize
             pygame.mouse.set_cursor(*self._default_cursor)
             self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
         else:
-            self.is_fullscreen = True  # Set before get size
+            self.is_fullscreen = True  # Set before resize
             pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
-            self.surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+            self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
 
         self.update()
 
