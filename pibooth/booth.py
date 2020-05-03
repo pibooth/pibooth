@@ -9,8 +9,13 @@ import os.path as osp
 import shutil
 import logging
 import argparse
+from warnings import filterwarnings
+
 import pygame
 import pluggy
+from gpiozero import Device, LEDBoard, Button, pi_info
+from gpiozero.exc import BadPinFactory, PinFactoryFallback
+
 import pibooth
 from pibooth import fonts
 from pibooth import language
@@ -23,9 +28,7 @@ from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth import camera
 from pibooth.fonts import get_available_fonts
 from pibooth.printer import PRINTER_TASKS_UPDATED, Printer
-from gpiozero import Device, LEDBoard, Button, pi_info
-from gpiozero.exc import BadPinFactory, PinFactoryFallback
-from warnings import filterwarnings
+
 
 # Set the default pin factory to a mock factory if pibooth is not started a Raspberry Pi
 try:

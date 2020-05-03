@@ -17,23 +17,23 @@ class LightsPlugin(object):
         app.leds.start.on()
 
     @pibooth.hookimpl
-    def state_wait_enter(self, app):
-        app.button_synced_leds.capture.blink(on_time=self.blink_time, off_time=self.blink_time)
-        if app.previous_picture_file and app.printer.is_installed() and not app.printer_unavailable:
+    def state_wait_enter(self, cfg, app):
+        if app.previous_picture_file and app.printer.is_installed() and not app.printer_unavailable\
+                and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'):
             app.button_synced_leds.blink(on_time=self.blink_time, off_time=self.blink_time)
-        elif not app.previous_picture_file:
+        else:
+            app.button_synced_leds.capture.blink(on_time=self.blink_time, off_time=self.blink_time)
             app.button_synced_leds.printer.off()
 
     @pibooth.hookimpl
     def state_wait_do(self, cfg, app, events):
         if app.find_print_event(events) and app.previous_picture_file and app.printer.is_installed():
-            app.button_synced_leds.printer.on()
-            time.sleep(1)  # Just to let the LED switched on
-
             if app.nbr_duplicates >= cfg.getint('PRINTER', 'max_duplicates') or app.printer_unavailable:
                 app.button_synced_leds.printer.off()
             else:
-                app.button_synced_leds.printer.blink(on_time=self.blink_time, off_time=self.blink_time)
+                app.button_synced_leds.printer.on()
+                time.sleep(1)  # Just to let the LED switched on
+                app.button_synced_leds.blink(on_time=self.blink_time, off_time=self.blink_time)
 
     @pibooth.hookimpl
     def state_wait_exit(self, app):
@@ -65,8 +65,15 @@ class LightsPlugin(object):
         app.leds.preview.off()
 
     @pibooth.hookimpl
-    def state_print_do(self, app, events):
+    def state_print_enter(self, app):
         app.button_synced_leds.blink(on_time=self.blink_time, off_time=self.blink_time)
-        if app.find_print_event(events) and app.previous_picture_file:
+
+    @pibooth.hookimpl
+    def state_print_do(self, app, events):
+        if app.find_print_event(events):
             app.button_synced_leds.printer.on()
             app.button_synced_leds.capture.off()
+
+    @pibooth.hookimpl
+    def state_finish_enter(self, app):
+        app.button_synced_leds.off()
