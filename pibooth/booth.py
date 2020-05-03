@@ -9,8 +9,13 @@ import os.path as osp
 import shutil
 import logging
 import argparse
+from warnings import filterwarnings
+
 import pygame
 import pluggy
+from gpiozero import Device, LEDBoard, Button, pi_info
+from gpiozero.exc import BadPinFactory, PinFactoryFallback
+
 import pibooth
 from pibooth import fonts
 from pibooth import language
@@ -23,9 +28,7 @@ from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth import camera
 from pibooth.fonts import get_available_fonts
 from pibooth.printer import PRINTER_TASKS_UPDATED, Printer
-from gpiozero import Device, LEDBoard, Button, pi_info
-from gpiozero.exc import BadPinFactory, PinFactoryFallback
-from warnings import filterwarnings
+
 
 # Set the default pin factory to a mock factory if pibooth is not started a Raspberry Pi
 try:
@@ -120,9 +123,9 @@ class PiApplication(object):
                                    bounce_time=config.getfloat('CONTROLS', 'debounce_delay'),
                                    pull_up=True, hold_time=1)
 
-        self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
-                             printer="BOARD" + config.get('CONTROLS', 'print_led_pin'),
-                             preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
+        self.button_synced_leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
+                                  printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
+        self.leds = LEDBoard(preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
                              start="BOARD" + config.get('CONTROLS', 'startup_led_pin'))
 
         self.printer = Printer(config.get('PRINTER', 'printer_name'))
