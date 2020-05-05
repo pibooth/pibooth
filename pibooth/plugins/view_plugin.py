@@ -46,18 +46,18 @@ class ViewPlugin(object):
         else:
             previous_picture = app.previous_picture
 
-        win.show_intro(previous_picture, app.printer.is_installed() and
-                       app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates') and
-                       not app.printer_unavailable)
+        win.show_intro(previous_picture, app.printer.is_installed()
+                       and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates')
+                       and not app.printer_unavailable)
         win.set_print_number(len(app.printer.get_all_tasks()), app.printer_unavailable)
 
     @pibooth.hookimpl
     def state_wait_do(self, cfg, app, win, events):
         if app.previous_animated and self.animated_frame_timer.is_timeout():
             previous_picture = next(app.previous_animated)
-            win.show_intro(previous_picture, app.printer.is_installed() and
-                           app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates') and
-                           not app.printer_unavailable)
+            win.show_intro(previous_picture, app.printer.is_installed()
+                           and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates')
+                           and not app.printer_unavailable)
             self.animated_frame_timer.start()
         else:
             previous_picture = app.previous_picture
