@@ -22,8 +22,8 @@ def load_plugins(plugin_manager, *paths):
             LOGGER.info("Plugin '%s' loaded", path)
             plugins.append(plugin)
 
-    plugins += [ViewPlugin(plugin_manager),  # Last called
-                LightsPlugin(plugin_manager),
+    plugins += [LightsPlugin(plugin_manager),  # Last called
+                ViewPlugin(plugin_manager),
                 PrinterPlugin(plugin_manager),
                 PicturePlugin(plugin_manager),
                 CameraPlugin(plugin_manager)]  # First called
