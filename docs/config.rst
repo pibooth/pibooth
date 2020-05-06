@@ -128,7 +128,7 @@ Default configuration
 
     [CONTROLS]
     # How long to debounce the hardware buttons in seconds
-    debounce_delay = 0.5
+    debounce_delay = 0.3
 
     # Physical GPIO IN pin to take a picture
     picture_btn_pin = 11

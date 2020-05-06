@@ -119,10 +119,10 @@ class PiApplication(object):
 
         self.buttons = ButtonBoard(capture="BOARD" + config.get('CONTROLS', 'picture_btn_pin'),
                                    printer="BOARD" + config.get('CONTROLS', 'print_btn_pin'),
-                                   bounce_time=config.getfloat('CONTROLS', 'debounce_delay'),
-                                   pull_up=True, hold_time=1)
-        self.buttons.capture.when_pressed = self._on_button_capture_pressed
-        self.buttons.printer.when_pressed = self._on_button_printer_pressed
+                                   hold_time=config.getfloat('CONTROLS', 'debounce_delay'),
+                                   pull_up=True)
+        self.buttons.capture.when_held = self._on_button_capture_held
+        self.buttons.printer.when_held = self._on_button_printer_held
 
         self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
                              printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
@@ -180,10 +180,11 @@ class PiApplication(object):
         # Initialize state machine
         self._machine.set_state('wait')
 
-    def _on_button_capture_pressed(self):
+    def _on_button_capture_held(self):
         """Called when the capture button is pressed.
         """
         if all(self.buttons.value):
+            # capture was held while printer was pressed
             if self._menu and self._menu.is_shown():
                 # Convert HW button events to keyboard events for menu
                 event = self._menu.create_back_event()
@@ -193,6 +194,7 @@ class PiApplication(object):
                                            button=self.buttons)
                 LOGGER.debug("BUTTONDOWN: generate DOUBLE buttons event")
         else:
+            # capture was held but printer not pressed
             if self._menu and self._menu.is_shown():
                 # Convert HW button events to keyboard events for menu
                 event = self._menu.create_next_event()
@@ -203,10 +205,15 @@ class PiApplication(object):
                 LOGGER.debug("BUTTONDOWN: generate CAPTURE button event")
         pygame.event.post(event)
 
-    def _on_button_printer_pressed(self):
+    def _on_button_printer_held(self):
         """Called when the printer button is pressed.
         """
-        if not all(self.buttons.value):
+        if all(self.buttons.value):
+            # printer was held while capture was pressed
+            # but don't do anything here, let capture_held handle it instead
+            pass
+        else:
+            # printer was held but capture not pressed
             if self._menu and self._menu.is_shown():
                 # Convert HW button events to keyboard events for menu
                 event = self._menu.create_click_event()
@@ -408,7 +415,7 @@ def main():
         LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
     elif not options.reset:
-        LOGGER.info("Starting the photo booth application {}".format(GPIO_INFO))
+        LOGGER.info("Starting the photo booth application %s", GPIO_INFO)
         app = PiApplication(config)
         app.main_loop()
 
