@@ -39,7 +39,6 @@ class ViewPlugin(object):
     def state_wait_enter(self, cfg, app, win):
         if app.previous_animated:
             previous_picture = next(app.previous_animated)
-
             # Reset timeout in case of settings changed
             self.animated_frame_timer.timeout = cfg.getfloat('WINDOW', 'animate_delay')
             self.animated_frame_timer.start()
@@ -66,9 +65,7 @@ class ViewPlugin(object):
         if event:
             win.set_print_number(len(event.tasks), app.printer_unavailable)
 
-        if not previous_picture:
-            win.show_intro(None, False)
-        elif app.find_print_event(events):
+        if app.find_print_event(events):
             win.show_intro(previous_picture, app.printer.is_installed()
                            and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates')
                            and not app.printer_unavailable)
