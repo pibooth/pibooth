@@ -68,6 +68,10 @@ class ViewPlugin(object):
 
         if not previous_picture:
             win.show_intro(None, False)
+        elif app.find_print_event(events):
+            win.show_intro(previous_picture, app.printer.is_installed()
+                           and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates')
+                           and not app.printer_unavailable)
 
     @pibooth.hookimpl
     def state_wait_validate(self, app, events):
