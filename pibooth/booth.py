@@ -347,8 +347,7 @@ class PiApplication(object):
                 if not self._menu and self.find_settings_event(events):
                     self._menu = PiConfigMenu(self._window, self._config, self._initialize)
                     self._menu.show()
-
-                if self._menu and self._menu.is_shown():
+                elif self._menu and self._menu.is_shown():
                     self._menu.process(events)
                 else:
                     if self._menu:

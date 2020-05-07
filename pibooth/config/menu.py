@@ -18,7 +18,7 @@ THEME.widget_font_size = 20
 
 SUBTHEME = THEME.copy()
 SUBTHEME.widget_alignment = pgm.locals.ALIGN_LEFT
-SUBTHEME.widget_offset = (10, 0)
+SUBTHEME.widget_offset = (40, 0)
 SUBTHEME.widget_font_size = 18
 
 
@@ -42,8 +42,9 @@ class PiConfigMenu(object):
         self._close_callback = onclose
 
         size = self.window.get_rect().size
-        self._main_menu = pgm.Menu(size[1] * 0.8,
-                                   size[0] * 0.8,
+        self.size = (min(600, size[0]), min(400, size[1]))
+        self._main_menu = pgm.Menu(self.size[1],
+                                   self.size[0],
                                    "Settings",
                                    theme=THEME,
                                    onclose=self._on_close)
@@ -57,17 +58,16 @@ class PiConfigMenu(object):
 
     def _build_submenu(self, section):
         """Build sub-menu"""
-        size = self.window.get_rect().size
-        menu = pgm.Menu(size[1] * 0.8,
-                        size[0] * 0.8,
-                        section.capitalize(),
-                        theme=SUBTHEME)
-
         length = 0
         for name, option in DEFAULT[section].items():
             if option[2] and length < len(option[2]):
                 length = len(option[2])
         pattern = '{:.<' + str(max(length + 2, 25)) + '} '
+
+        menu = pgm.Menu(self.size[1],
+                        self.size[0],
+                        section.capitalize(),
+                        theme=SUBTHEME)
 
         for name, option in DEFAULT[section].items():
             if option[2]:
