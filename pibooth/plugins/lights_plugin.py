@@ -18,7 +18,7 @@ class LightsPlugin(object):
 
     @pibooth.hookimpl
     def state_wait_enter(self, cfg, app):
-        if app.previous_picture_file and app.printer.is_installed() and not app.printer_unavailable\
+        if app.previous_picture_file and app.printer.is_available()\
                 and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'):
             app.leds.blink(on_time=self.blink_time, off_time=self.blink_time)
         else:
@@ -27,8 +27,8 @@ class LightsPlugin(object):
 
     @pibooth.hookimpl
     def state_wait_do(self, cfg, app, events):
-        if app.find_print_event(events) and app.previous_picture_file and app.printer.is_installed():
-            if app.nbr_duplicates >= cfg.getint('PRINTER', 'max_duplicates') or app.printer_unavailable:
+        if app.find_print_event(events) and app.previous_picture_file and app.printer.is_available():
+            if app.nbr_duplicates >= cfg.getint('PRINTER', 'max_duplicates'):
                 app.leds.printer.off()
             else:
                 app.leds.printer.on()

@@ -45,30 +45,28 @@ class ViewPlugin(object):
         else:
             previous_picture = app.previous_picture
 
-        win.show_intro(previous_picture, app.printer.is_installed()
-                       and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates')
-                       and not app.printer_unavailable)
-        win.set_print_number(len(app.printer.get_all_tasks()), app.printer_unavailable)
+        win.show_intro(previous_picture, app.printer.is_available()
+                       and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'))
+        if app.printer.is_installed():
+            win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_available())
 
     @pibooth.hookimpl
     def state_wait_do(self, cfg, app, win, events):
         if app.previous_animated and self.animated_frame_timer.is_timeout():
             previous_picture = next(app.previous_animated)
-            win.show_intro(previous_picture, app.printer.is_installed()
-                           and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates')
-                           and not app.printer_unavailable)
+            win.show_intro(previous_picture, app.printer.is_available()
+                           and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'))
             self.animated_frame_timer.start()
         else:
             previous_picture = app.previous_picture
 
         event = app.find_print_status_event(events)
-        if event:
-            win.set_print_number(len(event.tasks), app.printer_unavailable)
+        if event and app.printer.is_installed():
+            win.set_print_number(len(event.tasks), not app.printer.is_available())
 
         if app.find_print_event(events):
-            win.show_intro(previous_picture, app.printer.is_installed()
-                           and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates')
-                           and not app.printer_unavailable)
+            win.show_intro(previous_picture, app.printer.is_available()
+                           and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'))
 
     @pibooth.hookimpl
     def state_wait_validate(self, app, events):
@@ -85,7 +83,7 @@ class ViewPlugin(object):
     @pibooth.hookimpl
     def state_choose_enter(self, app, win):
         with timeit("Show picture choice (nothing selected)"):
-            win.set_print_number(0)  # Hide printer status
+            win.set_print_number(0, False)  # Hide printer status
             win.show_choice(app.capture_choices)
         self.choose_timer.start()
 
@@ -132,15 +130,15 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_processing_validate(self, cfg, app):
-        if app.printer.is_installed() and cfg.getfloat('PRINTER', 'printer_delay') > 0 \
-                and not app.printer_unavailable:
+        if app.printer.is_available() and cfg.getfloat('PRINTER', 'printer_delay') > 0\
+                and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'):
             return 'print'
         return 'finish'  # Can not print
 
     @pibooth.hookimpl
     def state_print_enter(self, cfg, app, win):
         with timeit("Display the final picture"):
-            win.set_print_number(len(app.printer.get_all_tasks()), app.printer_unavailable)
+            win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_available())
             win.show_print(app.previous_picture)
 
         # Reset timeout in case of settings changed
@@ -153,7 +151,7 @@ class ViewPlugin(object):
         forgotten = app.find_capture_event(events)
         if self.print_view_timer.is_timeout() or printed or forgotten:
             if printed:
-                win.set_print_number(len(app.printer.get_all_tasks()), app.printer_unavailable)
+                win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_available())
             return 'finish'
 
     @pibooth.hookimpl

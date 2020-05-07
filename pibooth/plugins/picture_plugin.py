@@ -118,4 +118,7 @@ class PicturePlugin(object):
                 os.rename(app.previous_picture_file, osp.join(forget_dir, file_name))
                 self._reset_vars(app)
                 app.previous_picture = self.second_previous_picture
+
+                # Deactivate the print function for the backuped picture
+                # as we don't known how many times it has already been printed
                 app.nbr_duplicates = cfg.getint('PRINTER', 'max_duplicates') + 1

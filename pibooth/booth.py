@@ -129,7 +129,8 @@ class PiApplication(object):
         self.other_leds = LEDBoard(preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
                                    start="BOARD" + config.get('CONTROLS', 'startup_led_pin'))
 
-        self.printer = Printer(config.get('PRINTER', 'printer_name'))
+        self.printer = Printer(config.get('PRINTER', 'printer_name'),
+                               config.getint('PRINTER', 'max_pages'))
         # ---------------------------------------------------------------------
 
     def _initialize(self):
@@ -177,6 +178,10 @@ class PiApplication(object):
             set_logging_level(logging.DEBUG)
             self._machine.remove_state('failsafe')
 
+        # Reset the print counter (in case of max_pages is reached)
+        self.printer.max_pages = self._config.getint('PRINTER', 'max_pages')
+        self.printer.nbr_printed = 0
+
         # Initialize state machine
         self._machine.set_state('wait')
 
@@ -223,14 +228,6 @@ class PiApplication(object):
                                            button=self.buttons.printer)
                 LOGGER.debug("BUTTONDOWN: generate PRINTER event")
             pygame.event.post(event)
-
-    @property
-    def printer_unavailable(self):
-        """Return True is paper/ink counter is reached or printing is disabled
-        """
-        if self._config.getint('PRINTER', 'max_pages') < 0:  # No limit
-            return False
-        return self.printer.nbr_printed >= self._config.getint('PRINTER', 'max_pages')
 
     def find_quit_event(self, events):
         """Return the first found event if found in the list.

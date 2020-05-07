@@ -113,8 +113,8 @@ class PtbWindow(object):
     def _update_print_number(self):
         """Update the number of files in the printer queue.
         """
-        if not self._print_number:
-            return  # Dont show counter: no file in queue
+        if not self._print_number and not self._print_failure:
+            return  # Dont show counter: no file in queue, no failure
 
         smaller = self.surface.get_size()[1] if self.surface.get_size(
             )[1] < self.surface.get_size()[0] else self.surface.get_size()[0]
