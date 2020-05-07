@@ -29,10 +29,11 @@ PAPER_FORMATS = {
 
 class Printer(object):
 
-    def __init__(self, name='default'):
+    def __init__(self, name='default', max_pages=-1):
         self._conn = cups.Connection() if cups else None
         self._notifier = Subscriber(self._conn) if cups else None
         self.name = None
+        self.max_pages = max_pages
         self.nbr_printed = 0
         if not cups:
             LOGGER.warning("No printer found (pycups or pycups-notify not installed)")
@@ -64,6 +65,15 @@ class Printer(object):
         """Return True if the CUPS server is available for printing.
         """
         return cups is not None and self.name is not None
+
+    def is_available(self):
+        """Return True is paper/ink counter is reached or printing is disabled.
+        """
+        if not self.is_installed():
+            return False
+        if self.max_pages < 0:  # No limit
+            return True
+        return self.nbr_printed < self.max_pages
 
     def print_file(self, filename, copies=1):
         """Send a file to the CUPS server to the default printer.

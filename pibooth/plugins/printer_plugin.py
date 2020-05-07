@@ -13,10 +13,6 @@ class PrinterPlugin(object):
         self._pm = plugin_manager
 
     @pibooth.hookimpl
-    def pibooth_startup(self, app):
-        app.printer.nbr_printed = 0
-
-    @pibooth.hookimpl
     def pibooth_cleanup(self, app):
         app.printer.quit()
 
@@ -35,7 +31,7 @@ class PrinterPlugin(object):
                                cfg.getint('PRINTER', 'max_duplicates'))
                 return
 
-            elif app.printer_unavailable:
+            elif not app.printer.is_available():
                 LOGGER.warning("Maximum number of printed pages reached (%s/%s max)", app.printer.nbr_printed,
                                cfg.getint('PRINTER', 'max_pages'))
                 return

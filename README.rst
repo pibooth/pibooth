@@ -1,5 +1,7 @@
 |Pibooth| |BeerPay|
 
+|PythonVersions| |PypiPackage| |Downloads| 
+
 The ``pibooth`` project provides a photobooth application *out-of-the-box* in pure Python
 for Raspberry Pi. Have a look to the `wiki <https://github.com/werdeil/pibooth/wiki>`_
 to discover some realizations from GitHub users.
@@ -370,5 +372,18 @@ If you want to help us you can by clicking on the following links!
    :align: middle
    :target: https://beerpay.io/werdeil/pibooth?focus=wish
 
-.. |Pibooth| image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/pibooth.png
+.. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/pibooth.png
    :align: middle
+   
+.. |PythonVersions| image:: https://img.shields.io/badge/python-2.7+ / 3.6+-red.svg
+    :target: https://www.python.org/downloads
+    :alt: Python 2.7+/3.6+
+
+.. |PypiPackage| image:: https://badge.fury.io/py/pibooth.svg
+    :target: https://pypi.org/project/pibooth
+    :alt: PyPi package
+
+.. |Downloads| image:: https://img.shields.io/pypi/dm/pibooth?color=purple
+    :target: https://pypi.org/project/pibooth
+    :alt: PyPi downloads
+ 

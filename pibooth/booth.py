@@ -9,8 +9,13 @@ import os.path as osp
 import shutil
 import logging
 import argparse
+from warnings import filterwarnings
+
 import pygame
 import pluggy
+from gpiozero import Device, ButtonBoard, LEDBoard, pi_info
+from gpiozero.exc import BadPinFactory, PinFactoryFallback
+
 import pibooth
 from pibooth import fonts
 from pibooth import language
@@ -23,9 +28,7 @@ from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth import camera
 from pibooth.fonts import get_available_fonts
 from pibooth.printer import PRINTER_TASKS_UPDATED, Printer
-from gpiozero import Device, LEDBoard, Button, pi_info
-from gpiozero.exc import BadPinFactory, PinFactoryFallback
-from warnings import filterwarnings
+
 
 # Set the default pin factory to a mock factory if pibooth is not started a Raspberry Pi
 try:
@@ -37,7 +40,7 @@ except BadPinFactory:
     GPIO_INFO = "without physical GPIO, fallback to GPIO mock"
 
 
-BUTTON_DOWN = pygame.USEREVENT + 1
+BUTTONDOWN = pygame.USEREVENT + 1
 
 
 class PiApplication(object):
@@ -73,7 +76,7 @@ class PiApplication(object):
             self._window = PtbWindow(title, color=init_color,
                                      text_color=init_text_color, debug=init_debug)
 
-        self._menu = PiConfigMenu(self._window, self._config, self._initialize)
+        self._menu = None
 
         # Create plugin manager and defined hooks specification
         self._plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
@@ -112,20 +115,20 @@ class PiApplication(object):
                                         config.getboolean('CAMERA', 'flip'),
                                         config.getboolean('CAMERA', 'delete_internal_memory'))
 
-        self.button_capture = Button("BOARD" + config.get('CONTROLS', 'picture_btn_pin'),
-                                     bounce_time=config.getfloat('CONTROLS', 'debounce_delay'),
-                                     pull_up=True, hold_time=1)
-
-        self.button_print = Button("BOARD" + config.get('CONTROLS', 'print_btn_pin'),
-                                   bounce_time=config.getfloat('CONTROLS', 'debounce_delay'),
-                                   pull_up=True, hold_time=1)
+        self.buttons = ButtonBoard(capture="BOARD" + config.get('CONTROLS', 'picture_btn_pin'),
+                                   printer="BOARD" + config.get('CONTROLS', 'print_btn_pin'),
+                                   hold_time=config.getfloat('CONTROLS', 'debounce_delay'),
+                                   pull_up=True)
+        self.buttons.capture.when_held = self._on_button_capture_held
+        self.buttons.printer.when_held = self._on_button_printer_held
 
         self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
-                             printer="BOARD" + config.get('CONTROLS', 'print_led_pin'),
-                             preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
-                             start="BOARD" + config.get('CONTROLS', 'startup_led_pin'))
+                             printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
+        self.other_leds = LEDBoard(preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
+                                   start="BOARD" + config.get('CONTROLS', 'startup_led_pin'))
 
-        self.printer = Printer(config.get('PRINTER', 'printer_name'))
+        self.printer = Printer(config.get('PRINTER', 'printer_name'),
+                               config.getint('PRINTER', 'max_pages'))
         # ---------------------------------------------------------------------
 
     def _initialize(self):
@@ -173,16 +176,56 @@ class PiApplication(object):
             set_logging_level(logging.DEBUG)
             self._machine.remove_state('failsafe')
 
+        # Reset the print counter (in case of max_pages is reached)
+        self.printer.max_pages = self._config.getint('PRINTER', 'max_pages')
+        self.printer.nbr_printed = 0
+
         # Initialize state machine
         self._machine.set_state('wait')
 
-    @property
-    def printer_unavailable(self):
-        """Return True is paper/ink counter is reached or printing is disabled
+    def _on_button_capture_held(self):
+        """Called when the capture button is pressed.
         """
-        if self._config.getint('PRINTER', 'max_pages') < 0:  # No limit
-            return False
-        return self.printer.nbr_printed >= self._config.getint('PRINTER', 'max_pages')
+        if all(self.buttons.value):
+            # capture was held while printer was pressed
+            if self._menu and self._menu.is_shown():
+                # Convert HW button events to keyboard events for menu
+                event = self._menu.create_back_event()
+                LOGGER.debug("BUTTONDOWN: generate MENU-ESC event")
+            else:
+                event = pygame.event.Event(BUTTONDOWN, capture=1, printer=1,
+                                           button=self.buttons)
+                LOGGER.debug("BUTTONDOWN: generate DOUBLE buttons event")
+        else:
+            # capture was held but printer not pressed
+            if self._menu and self._menu.is_shown():
+                # Convert HW button events to keyboard events for menu
+                event = self._menu.create_next_event()
+                LOGGER.debug("BUTTONDOWN: generate MENU-NEXT event")
+            else:
+                event = pygame.event.Event(BUTTONDOWN, capture=1, printer=0,
+                                           button=self.buttons.capture)
+                LOGGER.debug("BUTTONDOWN: generate CAPTURE button event")
+        pygame.event.post(event)
+
+    def _on_button_printer_held(self):
+        """Called when the printer button is pressed.
+        """
+        if all(self.buttons.value):
+            # printer was held while capture was pressed
+            # but don't do anything here, let capture_held handle it instead
+            pass
+        else:
+            # printer was held but capture not pressed
+            if self._menu and self._menu.is_shown():
+                # Convert HW button events to keyboard events for menu
+                event = self._menu.create_click_event()
+                LOGGER.debug("BUTTONDOWN: generate MENU-APPLY event")
+            else:
+                event = pygame.event.Event(BUTTONDOWN, capture=0, printer=1,
+                                           button=self.buttons.printer)
+                LOGGER.debug("BUTTONDOWN: generate PRINTER event")
+            pygame.event.post(event)
 
     def find_quit_event(self, events):
         """Return the first found event if found in the list.
@@ -192,15 +235,13 @@ class PiApplication(object):
                 return event
         return None
 
-    def find_settings_event(self, events, type_filter=None):
+    def find_settings_event(self, events):
         """Return the first found event if found in the list.
         """
         for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and \
-                    (type_filter is None or type_filter == event.type):
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 return event
-            if (type_filter is None or type_filter == BUTTON_DOWN) and\
-                    self.button_capture.is_pressed and self.button_print.is_pressed:
+            if event.type == BUTTONDOWN and event.capture and event.printer:
                 return event
         return None
 
@@ -221,39 +262,33 @@ class PiApplication(object):
                 return event
         return None
 
-    def find_capture_event(self, events, type_filter=None):
+    def find_capture_event(self, events):
         """Return the first found event if found in the list.
         """
         for event in events:
-            if (event.type == pygame.KEYDOWN and event.key == pygame.K_p) and \
-                    (type_filter is None or type_filter == event.type):
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 return event
-            elif (type_filter is None or type_filter == BUTTON_DOWN) and\
-                    self.button_capture.is_pressed:
-                return event
-            elif event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP:
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
-                    if type_filter is None or type_filter == event.type:
-                        return event
+                    return event
+            if event.type == BUTTONDOWN and event.capture:
+                return event
         return None
 
-    def find_print_event(self, events, type_filter=None):
+    def find_print_event(self, events):
         """Return the first found event if found in the list.
         """
         for event in events:
-            if (event.type == pygame.KEYDOWN and event.key == pygame.K_e and
-                    pygame.key.get_mods() & pygame.KMOD_CTRL) and \
-                    (type_filter is None or type_filter == event.type):
-                    return event
-            elif (type_filter is None or type_filter == BUTTON_DOWN) and\
-                    self.button_print.is_pressed:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_e\
+                        and pygame.key.get_mods() & pygame.KMOD_CTRL:
                 return event
-            elif event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP:
                 rect = self._window.get_rect()
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
-                    if type_filter is None or type_filter == event.type:
-                        return event
+                    return event
+            if event.type == BUTTONDOWN and event.printer:
+                return event
         return None
 
     def find_print_status_event(self, events):
@@ -268,17 +303,19 @@ class PiApplication(object):
         """Return the first found event if found in the list.
         """
         for event in events:
-            if (event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT) or \
-                    self.button_capture.is_pressed:
-                event.key = pygame.K_LEFT
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
                 return event
-            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT) or \
-                    self.button_print.is_pressed:
-                event.key = pygame.K_RIGHT
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                 return event
-            elif event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP:
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
+                    event.key = pygame.K_LEFT
+                else:
+                    event.key = pygame.K_RIGHT
+                return event
+            if event.type == BUTTONDOWN:
+                if event.capture:
                     event.key = pygame.K_LEFT
                 else:
                     event.key = pygame.K_RIGHT
@@ -307,18 +344,15 @@ class PiApplication(object):
                 if event:
                     self._window.resize(event.size)
 
-                if self.find_settings_event(events) and not self._menu.is_shown():
+                if not self._menu and self.find_settings_event(events):
+                    self._menu = PiConfigMenu(self._window, self._config, self._initialize)
                     self._menu.show()
-                elif self._menu.is_shown():
-                    # Convert HW button events to keyboard events for menu
-                    if self.find_settings_event(events, BUTTON_DOWN):
-                        events.insert(0, self._menu.create_back_event())
-                    if self.find_capture_event(events, BUTTON_DOWN):
-                        events.insert(0, self._menu.create_next_event())
-                    elif self.find_print_event(events, BUTTON_DOWN):
-                        events.insert(0, self._menu.create_click_event())
+
+                if self._menu and self._menu.is_shown():
                     self._menu.process(events)
                 else:
+                    if self._menu:
+                        self._menu = None
                     self._machine.process(events)
 
                 pygame.display.update()
@@ -375,7 +409,7 @@ def main():
         LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
     elif not options.reset:
-        LOGGER.info("Starting the photo booth application {}".format(GPIO_INFO))
+        LOGGER.info("Starting the photo booth application %s", GPIO_INFO)
         app = PiApplication(config)
         app.main_loop()
 

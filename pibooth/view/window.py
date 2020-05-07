@@ -48,7 +48,6 @@ class PtbWindow(object):
         self._print_number = 0
         self._print_failure = False
         self._capture_number = (0, 4)  # (current, max)
-        self._default_cursor = pygame.mouse.get_cursor()
 
         self._pos_map = {self.CENTER: self._center_pos,
                          self.RIGHT: self._right_pos,
@@ -114,8 +113,8 @@ class PtbWindow(object):
     def _update_print_number(self):
         """Update the number of files in the printer queue.
         """
-        if not self._print_number:
-            return  # Dont show counter: no file in queue
+        if not self._print_number and not self._print_failure:
+            return  # Dont show counter: no file in queue, no failure
 
         smaller = self.surface.get_size()[1] if self.surface.get_size(
             )[1] < self.surface.get_size()[0] else self.surface.get_size()[0]
@@ -164,6 +163,7 @@ class PtbWindow(object):
         """
         if not self.is_fullscreen:
             self.__size = size  # Manual resizing
+            self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
         self.update()
 
     def update(self):
@@ -300,13 +300,13 @@ class PtbWindow(object):
         """Set window to full screen or initial size.
         """
         if self.is_fullscreen:
-            self.is_fullscreen = False  # Set before get size
-            pygame.mouse.set_cursor(*self._default_cursor)
+            self.is_fullscreen = False  # Set before resize
+            pygame.mouse.set_visible(True)
             self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
         else:
-            self.is_fullscreen = True  # Set before get size
-            pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
-            self.surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+            self.is_fullscreen = True  # Set before resize
+            pygame.mouse.set_visible(False)
+            self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
 
         self.update()
 
