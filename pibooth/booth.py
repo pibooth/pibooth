@@ -45,7 +45,8 @@ BUTTONDOWN = pygame.USEREVENT + 1
 
 class PiApplication(object):
 
-    def __init__(self, config):
+    def __init__(self, config, plugin_manager):
+        self._pm = plugin_manager
         self._config = config
 
         # Clean directory where pictures are saved
@@ -80,17 +81,8 @@ class PiApplication(object):
 
         self._menu = None
 
-        # Create plugin manager and defined hooks specification
-        self._plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
-        self._plugin_manager.add_hookspecs(hookspecs)
-        self._plugin_manager.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
-
-        # Register plugins
-        custom_paths = [p for p in self._config.gettuple('GENERAL', 'plugins', 'path') if p]
-        load_plugins(self._plugin_manager, *custom_paths)
-
         # Define states of the application
-        self._machine = StateMachine(self._plugin_manager, self._config, self, self._window)
+        self._machine = StateMachine(self._pm, self._config, self, self._window)
         self._machine.add_state('wait')
         self._machine.add_state('choose')
         self._machine.add_state('chosen')
@@ -330,7 +322,7 @@ class PiApplication(object):
         try:
             clock = pygame.time.Clock()
             self._initialize()
-            self._plugin_manager.hook.pibooth_startup(app=self)
+            self._pm.hook.pibooth_startup(app=self)
             fps = 40
 
             while True:
@@ -362,7 +354,7 @@ class PiApplication(object):
                 clock.tick(fps)  # Ensure the program will never run at more than <fps> frames per second
 
         finally:
-            self._plugin_manager.hook.pibooth_cleanup(app=self)
+            self._pm.hook.pibooth_cleanup(app=self)
             pygame.quit()
 
 
@@ -399,8 +391,19 @@ def main():
 
     configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=options.log)
 
+    # Load the configuration and languages
     config = PiConfigParser("~/.config/pibooth/pibooth.cfg", options.reset)
     language.init("~/.config/pibooth/translations.cfg", options.reset)
+
+    # Create plugin manager and defined hooks specification
+    plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
+    plugin_manager.add_hookspecs(hookspecs)
+    plugin_manager.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
+
+    # Register plugins
+    custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
+    load_plugins(plugin_manager, *custom_paths)
+    plugin_manager.hook.pibooth_configure(cfg=config)
 
     if options.config:
         LOGGER.info("Editing the pibooth configuration...")
@@ -413,7 +416,7 @@ def main():
         print_columns_words(get_available_fonts(), 3)
     elif not options.reset:
         LOGGER.info("Starting the photo booth application %s", GPIO_INFO)
-        app = PiApplication(config)
+        app = PiApplication(config, plugin_manager)
         app.main_loop()
 
 

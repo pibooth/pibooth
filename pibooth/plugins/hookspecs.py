@@ -8,10 +8,21 @@ hookspec = pluggy.HookspecMarker('pibooth')
 
 
 @hookspec
-def pibooth_startup(app):
+def pibooth_configure(cfg):
+    """Actions performed after loading of the configuration file.
+    The ``cfg`` object is an instance of :py:class:`ConfigParser`
+    class.
+
+    :param cfg: loaded configuration
+    """
+
+
+@hookspec
+def pibooth_startup(app, cfg):
     """Actions performed at the startup of pibooth.
 
     :param app: application instance
+    :param cfg: application cfg
     """
 
 
@@ -19,8 +30,9 @@ def pibooth_startup(app):
 def pibooth_setup_picture_factory(cfg, opt_index, factory):
     """Hook used to setup the ``PictureFactory`` instance.
 
-    The ``opt_index`` is the index to use in case of configuration option
-    with a type tuple which depends on the selected captures number.
+    The ``opt_index`` is the selected index of the ``[PICTURE][captures]``
+    configuration option for the current captures sequence. It represents
+    the selected captures number.
 
     A hook wrapper can be used to catch the current factory and return
     a customized one.
