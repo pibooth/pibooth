@@ -18,11 +18,11 @@ def pibooth_configure(cfg):
 
 
 @hookspec
-def pibooth_startup(app, cfg):
+def pibooth_startup(cfg, app):
     """Actions performed at the startup of pibooth.
 
-    :param app: application instance
     :param cfg: application cfg
+    :param app: application instance
     """
 
 

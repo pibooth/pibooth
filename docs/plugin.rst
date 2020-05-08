@@ -71,8 +71,6 @@ Code skeleton
 A plugin is generally a Python module called ``pibooth_[...].py``. It shall
 have the variable ``__version__`` set to the plugin version.
 
-``pibooth_myplugin.py``
-
 .. code-block:: python
 
     __version__ = "0.0.1"
@@ -85,7 +83,7 @@ is available, the application is not yet created.
 
     @pibooth.hookimpl
     def pibooth_configure(cfg):
-        # Add the new options here.
+        pass # Add the new options here.
 
 New objects which should persist between states can be created and attached to
 the application instance in the ``pibooth_startup`` hook:
@@ -93,7 +91,7 @@ the application instance in the ``pibooth_startup`` hook:
 .. code-block:: python
 
     @pibooth.hookimpl
-    def pibooth_startup(app, cfg):
+    def pibooth_startup(cfg, app):
         app.led_flash = LED("BOARD" + cfg.get('CONTROLS', 'flash_led_pin'))
 
 Example #1 : Hello from plugin

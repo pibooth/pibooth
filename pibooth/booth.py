@@ -322,7 +322,7 @@ class PiApplication(object):
         try:
             clock = pygame.time.Clock()
             self._initialize()
-            self._pm.hook.pibooth_startup(app=self)
+            self._pm.hook.pibooth_startup(cfg=self._config, app=self)
             fps = 40
 
             while True:
