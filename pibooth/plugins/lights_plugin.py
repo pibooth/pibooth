@@ -13,10 +13,6 @@ class LightsPlugin(object):
         self.blink_time = 0.3
 
     @pibooth.hookimpl
-    def pibooth_startup(self, app):
-        app.other_leds.start.on()
-
-    @pibooth.hookimpl
     def state_wait_enter(self, cfg, app):
         if app.previous_picture_file and app.printer.is_available()\
                 and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'):
@@ -55,14 +51,6 @@ class LightsPlugin(object):
     @pibooth.hookimpl
     def state_chosen_exit(self, app):
         app.leds.off()
-
-    @pibooth.hookimpl
-    def state_preview_enter(self, app):
-        app.other_leds.preview.on()
-
-    @pibooth.hookimpl
-    def state_capture_exit(self, app):
-        app.other_leds.preview.off()
 
     @pibooth.hookimpl
     def state_print_enter(self, app):

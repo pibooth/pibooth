@@ -35,8 +35,8 @@ def main():
             'Topic :: Multimedia :: Graphics :: Capture :: Digital Camera',
         ],
         author="Vincent Verdeil, Antoine Rousseaux",
-        url="https://github.com/werdeil/pibooth",
-        download_url="https://github.com/werdeil/pibooth/archive/{}.tar.gz".format(pibooth.__version__),
+        url="https://github.com/pibooth/pibooth",
+        download_url="https://github.com/pibooth/pibooth/archive/{}.tar.gz".format(pibooth.__version__),
         license='MIT license',
         platforms=['unix', 'linux'],
         keywords=[

@@ -141,9 +141,3 @@ Default configuration
 
     # Physical GPIO OUT pin to light a LED when print button is pressed
     print_led_pin = 15
-
-    # Physical GPIO OUT pin to light a LED at pibooth startup
-    startup_led_pin = 29
-
-    # Physical GPIO OUT pin to light a LED during preview
-    preview_led_pin = 31

@@ -1,12 +1,12 @@
 |Pibooth| |BeerPay|
 
-|PythonVersions| |PypiPackage| |Downloads| 
+|PythonVersions| |PypiPackage| |Downloads|
 
 The ``pibooth`` project provides a photobooth application *out-of-the-box* in pure Python
-for Raspberry Pi. Have a look to the `wiki <https://github.com/werdeil/pibooth/wiki>`_
+for Raspberry Pi. Have a look to the `wiki <https://github.com/pibooth/pibooth/wiki>`_
 to discover some realizations from GitHub users.
 
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/background_samples.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/background_samples.png
    :align: center
    :alt: Settings
 
@@ -31,10 +31,10 @@ Features
 * All settings available in a configuration file (most common options in a graphical interface)
 * Customize the behavior by developing your own plugin
 
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/gallery.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/gallery.png
    :align: center
    :alt: gallery
-   :target: https://github.com/werdeil/pibooth/blob/master/docs/examples.rst
+   :target: https://github.com/pibooth/pibooth/blob/master/docs/examples.rst
 
 Requirements
 ------------
@@ -115,7 +115,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
              printer or dslr under the []
 
 .. note:: An editable/customizable version of ``pibooth`` can be installed by following
-          these `instructions <https://github.com/werdeil/pibooth/blob/master/docs/dev.rst>`_ .
+          these `instructions <https://github.com/pibooth/pibooth/blob/master/docs/dev.rst>`_ .
           Be aware that the code on the `master` branch may be unstable.
 
 Run
@@ -140,15 +140,15 @@ You can display a basic help on application options by using the command::
 States and lights management
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The application follows the states sequence defined in the diagram below:
+The application follows the states sequence defined in the simplified diagram
+below:
 
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/state_sequence.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/state_sequence.png
    :align: center
    :alt: State sequence
 
 The states of the **LED 1** and **LED 2** are modified depending on the actions available
-for the user. The **LED 3** is switched on when the application starts and the **LED 4**
-is switched on during the preview and photo capture.
+for the user.
 
 Commands
 ^^^^^^^^
@@ -247,7 +247,7 @@ which permits to configure the behavior of the application.
 
 A quick configuration GUI menu (see `Commands`_ ) gives access to the most common options:
 
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/settings.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/settings.png
    :align: center
    :alt: Settings
 
@@ -261,14 +261,14 @@ upgrading ``pibooth``)::
 
     $ pibooth --reset
 
-See the `default configuration file <https://github.com/werdeil/pibooth/blob/master/docs/config.rst>`_
+See the `default configuration file <https://github.com/pibooth/pibooth/blob/master/docs/config.rst>`_
 for further details.
 
 Customize using plugins
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Extra functionalities can be added using your own
-`custom plugins <https://github.com/werdeil/pibooth/blob/master/docs/plugin.rst>`_.
+`custom plugins <https://github.com/pibooth/pibooth/blob/master/docs/plugin.rst>`_.
 
 The paths to custom plugins have to be declared in the ``[GENERAL][plugins]`` key of the
 configuration.
@@ -318,10 +318,10 @@ Circuit diagram
 ---------------
 
 Here is the diagram for hardware connections. Please refer to the
-`default configuration file <https://github.com/werdeil/pibooth/blob/master/docs/config.rst>`_
+`default configuration file <https://github.com/pibooth/pibooth/blob/master/docs/config.rst>`_
 to know the default pins used.
 
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/sketch.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/sketch.png
    :align: center
    :alt: Electronic sketch
 
@@ -364,17 +364,17 @@ If you want to help us you can by clicking on the following links!
 
 |BeerPay| |BeerPay2|
 
-.. |BeerPay| image:: https://beerpay.io/werdeil/pibooth/badge.svg?style=beer-square
+.. |BeerPay| image:: https://beerpay.io/pibooth/pibooth/badge.svg?style=beer-square
    :align: middle
-   :target: https://beerpay.io/werdeil/pibooth
+   :target: https://beerpay.io/pibooth/pibooth
 
-.. |BeerPay2| image:: https://beerpay.io/werdeil/pibooth/make-wish.svg?style=flat-square
+.. |BeerPay2| image:: https://beerpay.io/pibooth/pibooth/make-wish.svg?style=flat-square
    :align: middle
-   :target: https://beerpay.io/werdeil/pibooth?focus=wish
+   :target: https://beerpay.io/pibooth/pibooth?focus=wish
 
 .. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/pibooth.png
    :align: middle
-   
+
 .. |PythonVersions| image:: https://img.shields.io/badge/python-2.7+ / 3.6+-red.svg
     :target: https://www.python.org/downloads
     :alt: Python 2.7+/3.6+
@@ -386,4 +386,3 @@ If you want to help us you can by clicking on the following links!
 .. |Downloads| image:: https://img.shields.io/pypi/dm/pibooth?color=purple
     :target: https://pypi.org/project/pibooth
     :alt: PyPi downloads
- 

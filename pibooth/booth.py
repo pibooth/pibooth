@@ -22,7 +22,7 @@ from pibooth import language
 from pibooth.utils import (LOGGER, configure_logging,
                            set_logging_level, print_columns_words)
 from pibooth.states import StateMachine
-from pibooth.plugins import hookspecs, load_plugins
+from pibooth.plugins import hookspecs, load_plugins, get_names
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth import camera
@@ -118,8 +118,6 @@ class PiApplication(object):
 
         self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
                              printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
-        self.other_leds = LEDBoard(preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
-                                   start="BOARD" + config.get('CONTROLS', 'startup_led_pin'))
 
         self.printer = Printer(config.get('PRINTER', 'printer_name'),
                                config.getint('PRINTER', 'max_pages'))
@@ -403,6 +401,7 @@ def main():
     # Register plugins
     custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
     load_plugins(plugin_manager, *custom_paths)
+    LOGGER.info("Plugins: %s" % ", ".join(get_names(plugin_manager)))
     plugin_manager.hook.pibooth_configure(cfg=config)
 
     if options.config:
