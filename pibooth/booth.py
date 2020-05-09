@@ -22,7 +22,7 @@ from pibooth import language
 from pibooth.utils import (LOGGER, configure_logging,
                            set_logging_level, print_columns_words)
 from pibooth.states import StateMachine
-from pibooth.plugins import hookspecs, load_plugins, get_names
+from pibooth.plugins import hookspecs, load_plugins, list_plugin_names
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth import camera
@@ -389,20 +389,24 @@ def main():
 
     configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=options.log)
 
-    # Load the configuration and languages
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", options.reset)
-    language.init("~/.config/pibooth/translations.cfg", options.reset)
-
     # Create plugin manager and defined hooks specification
     plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
     plugin_manager.add_hookspecs(hookspecs)
     plugin_manager.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
 
+    # Load the configuration and languages
+    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager, options.reset)
+    language.init("~/.config/pibooth/translations.cfg", options.reset)
+
     # Register plugins
     custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
     load_plugins(plugin_manager, *custom_paths)
-    LOGGER.info("Plugins: %s" % ", ".join(get_names(plugin_manager)))
+    LOGGER.info("Installed plugins: %s", ", ".join(list_plugin_names(plugin_manager)))
+
+    # Update plugins configuration
     plugin_manager.hook.pibooth_configure(cfg=config)
+    if not osp.isfile(config.filename):
+        config.save()
 
     if options.config:
         LOGGER.info("Editing the pibooth configuration...")
@@ -413,7 +417,9 @@ def main():
     elif options.fonts:
         LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
-    elif not options.reset:
+    elif options.reset:
+        config.save()
+    else:
         LOGGER.info("Starting the photo booth application %s", GPIO_INFO)
         app = PiApplication(config, plugin_manager)
         app.main_loop()

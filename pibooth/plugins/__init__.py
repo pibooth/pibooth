@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import inspect
 from pibooth.utils import LOGGER, load_module
 from pibooth.plugins.camera_plugin import CameraPlugin
 from pibooth.plugins.lights_plugin import LightsPlugin
@@ -14,6 +15,11 @@ def load_plugins(plugin_manager, *paths):
 
     note:: by default hooks are called in LIFO registered order thus
            plugins register order may be important.
+
+    :param plugin_manager: plugins manager instance
+    :type plugin_manager: :py:class:`pluggy.PluginManager`
+    :param paths: list of Python module paths to load
+    :type paths: str
     """
     plugins = []
     for path in paths:
@@ -36,17 +42,53 @@ def load_plugins(plugin_manager, *paths):
     plugin_manager.check_pending()
 
 
-def get_names(plugin_manager):
+def list_plugin_names(plugin_manager):
     """Return the list of registered plugins.
+
+    :param plugin_manager: plugins manager instance
+    :type plugin_manager: :py:class:`pluggy.PluginManager`
     """
     values = []
-    for _plugin, dist in plugin_manager.list_plugin_distinfo():
-        name = "{dist.project_name}-{dist.version}".format(dist=dist)
-        # Questionable convenience, but it keeps things short
-        if name.startswith("pibooth-") or name.startswith("pibooth_"):
-            name = name[8:]
-        # List Python package names however they can have more
-        # than one plugin depending on their architecture.
-        if name not in values:
-            values.append(name)
+    for plugin in plugin_manager.get_plugins():
+        # The internal plugins are classes, we don't want to include
+        # them here, thus we take only the modules objects.
+        if inspect.ismodule(plugin):
+            name = get_plugin_name(plugin_manager, plugin)
+            if name not in values:
+                values.append(name)
     return values
+
+
+def get_plugin_name(plugin_manager, plugin, version=True):
+    """Return the canonical name of the given plugin and
+    optionally sits version.
+
+    :param plugin_manager: plugins manager instance
+    :type plugin_manager: :py:class:`pluggy.PluginManager`
+    :param plugin: registered plugin object
+    :type plugin: object
+    :param version: include the version number
+    :type version: bool
+    """
+    # List of all setuptools registered plugins
+    distinfo = dict(plugin_manager.list_plugin_distinfo())
+
+    if plugin in distinfo:
+        name = distinfo[plugin].project_name
+        vnumber = distinfo[plugin].version
+    else:
+        name = plugin_manager.get_name(plugin)
+        if not name:
+            name = getattr(plugin, '__name__', "unknown")
+        vnumber = getattr(plugin, '__version__', '?.?.?')
+
+    if version:
+        name = "{}-{}".format(name, vnumber)
+    else:
+        name = "{}".format(name)
+
+    # Questionable convenience, but it keeps things short
+    if name.startswith("pibooth-") or name.startswith("pibooth_"):
+        name = name[8:]
+
+    return name
