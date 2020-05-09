@@ -68,16 +68,17 @@ There are four hooks defined for each state.
 Code skeleton
 ^^^^^^^^^^^^^
 
-A plugin is generally a Python module called ``pibooth_[...].py``. It shall
-have the variable ``__version__`` set to the plugin version:
+A plugin is generally a Python module called ``pibooth_[...].py``. For a better
+configuration management, it should have the constant ``__version__`` set to the
+plugin version:
 
 .. code-block:: python
 
-    __version__ = "0.0.1"
+    __version__ = "1.0.0"
 
-The ``pibooth_configure`` hook permits to define some new configuration entries.
-At this step of the ``pibooth`` starting process, only the pre-loaded configuration
-is available (the application is not yet created).
+The ``pibooth_configure`` hook permits to define some new configuration options.
+At this step of the starting process, only the pre-loaded configuration is
+available (the application is not yet created).
 
 .. code-block:: python
 
