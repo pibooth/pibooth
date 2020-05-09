@@ -364,13 +364,13 @@ If you want to help us you can by clicking on the following links!
 
 |BeerPay| |BeerPay2|
 
-.. |BeerPay| image:: https://beerpay.io/pibooth/pibooth/badge.svg?style=beer-square
+.. |BeerPay| image:: https://beerpay.io/werdeil/pibooth/badge.svg?style=beer-square
    :align: middle
-   :target: https://beerpay.io/pibooth/pibooth
+   :target: https://beerpay.io/werdeil/pibooth
 
-.. |BeerPay2| image:: https://beerpay.io/pibooth/pibooth/make-wish.svg?style=flat-square
+.. |BeerPay2| image:: https://beerpay.io/werdeil/pibooth/make-wish.svg?style=flat-square
    :align: middle
-   :target: https://beerpay.io/pibooth/pibooth?focus=wish
+   :target: https://beerpay.io/werdeil/pibooth?focus=wish
 
 .. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/pibooth.png
    :align: middle
