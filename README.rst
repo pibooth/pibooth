@@ -266,11 +266,12 @@ for further details.
 Customize using plugins
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Extra functionalities can be added using your own
-`custom plugins <https://github.com/pibooth/pibooth/blob/master/docs/plugin.rst>`_.
+Several plugins maintained by the community are available. They add extra features to
+``pibooth``. Have a look to the `plugins on PyPI  <https://pypi.org/search/?q=pibooth>`_.
 
-The paths to custom plugins have to be declared in the ``[GENERAL][plugins]`` key of the
-configuration.
+You can also easily develop your own plugin, and declare it in the ``[GENERAL][plugins]``
+key of the configuration. See guidelines to
+`develop custom plugin <https://github.com/pibooth/pibooth/blob/master/docs/plugin.rst>`_.
 
 GUI translations
 ^^^^^^^^^^^^^^^^
