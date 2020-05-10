@@ -375,13 +375,13 @@ If you want to help us you can by clicking on the following links!
    :align: middle
 
 .. |PythonVersions| image:: https://img.shields.io/badge/python-2.7+ / 3.6+-red.svg
-    :target: https://www.python.org/downloads
-    :alt: Python 2.7+/3.6+
+   :target: https://www.python.org/downloads
+   :alt: Python 2.7+/3.6+
 
 .. |PypiPackage| image:: https://badge.fury.io/py/pibooth.svg
-    :target: https://pypi.org/project/pibooth
-    :alt: PyPi package
+   :target: https://pypi.org/project/pibooth
+   :alt: PyPi package
 
 .. |Downloads| image:: https://img.shields.io/pypi/dm/pibooth?color=purple
-    :target: https://pypi.org/project/pibooth
-    :alt: PyPi downloads
+   :target: https://pypi.org/project/pibooth
+   :alt: PyPi downloads

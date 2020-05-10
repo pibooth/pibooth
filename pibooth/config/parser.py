@@ -55,7 +55,7 @@ DEFAULT = odict((
                  "Debug mode", ['True', 'False'])),
             ("plugins",
                 ('',
-                 "Path to a custom pibooth plugin (list of paths accepted)",
+                 "Path to custom plugin(s) not installed with pip (list of paths accepted)",
                  None, None)),
         ))
      ),

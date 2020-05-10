@@ -17,7 +17,7 @@ Default configuration
     # In debug mode, exceptions are not caught, logs are more verbose, pictures are cleared at startup
     debug = False
 
-    # Path to a custom pibooth plugin (list of paths accepted)
+    # Path to custom plugin(s) not installed with pip (list of paths accepted)
     plugins =
 
     [WINDOW]
