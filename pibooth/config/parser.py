@@ -257,6 +257,8 @@ class PiConfigParser(ConfigParser):
         """Return absolute path. In case of relative path given, the absolute
         one is created using config file path as reference path.
         """
+        if not path:  # Empty string, don't process it as it is not a path
+            return path
         path = osp.expanduser(path)
         if not osp.isabs(path):
             path = osp.join(osp.relpath(osp.dirname(self.filename), '.'), path)
@@ -439,7 +441,7 @@ class PiConfigParser(ConfigParser):
         if path:
             new_values = []
             for v in values:
-                if isinstance(v, basestring) and v != '':
+                if isinstance(v, basestring):
                     new_values.append(self._get_abs_path(v))
                 else:
                     new_values.append(v)
