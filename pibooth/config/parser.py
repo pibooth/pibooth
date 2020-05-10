@@ -342,7 +342,7 @@ class PiConfigParser(ConfigParser):
                              "which is already defined.".format(plugin_name, section, option))
 
         # Add the option to the default dictionary
-        description = "{}\n# used by '{}' plugin".format(description, plugin_name)
+        description = "{}\n# Required by '{}' plugin".format(description, plugin_name)
         DEFAULT.setdefault(section, odict())[option] = (default, description, None, None)
 
     def get(self, section, option, **kwargs):

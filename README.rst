@@ -21,15 +21,14 @@ Features
 * Support all cameras compatible with gPhoto2, OpenCV and Raspberry Pi
 * Support for hardware buttons and lamps on Raspberry Pi GPIO
 * Fully driven from hardware buttons / keyboard / mouse / touchscreen
-* Preview during countdown
 * Auto-start at the Raspberry Pi startup
 * Animate last pictures during idle time
 * Store final pictures and the individual captures
 * Printing final pictures using CUPS server (printing queue indication)
-* Custom texts can be added on the final pictures (customizable fonts, colors, alignments)
-* Custom background(s) and overlay(s) can be added on final pictures
+* Custom texts can be added on the final picture (customizable fonts, colors, alignments)
+* Custom background(s) and overlay(s) can be added on the final picture
 * All settings available in a configuration file (most common options in a graphical interface)
-* Customize the behavior by developing your own plugin
+* Highly customizable thanks to it plugin system: you can develop your own plugin
 
 .. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/gallery.png
    :align: center
@@ -319,7 +318,7 @@ Circuit diagram
 
 Here is the diagram for hardware connections. Please refer to the
 `default configuration file <https://github.com/pibooth/pibooth/blob/master/docs/config.rst>`_
-to know the default pins used.
+to know the default pins used (`physical pin numbering <https://pinout.xyz>`_).
 
 .. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/sketch.png
    :align: center
