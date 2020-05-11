@@ -130,7 +130,7 @@ DEFAULT = odict((
             ("margin_thick",
                 (100,
                  "Thick (in pixels) between captures and picture borders/texts",
-                 "borders width", [str(i) for i in range(0, 210, 10)])),
+                 "Borders width", [str(i) for i in range(0, 210, 10)])),
             ("footer_text1",
                 ("Footer 1",
                  "Main text displayed",
