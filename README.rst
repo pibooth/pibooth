@@ -4,7 +4,7 @@
 
 The ``pibooth`` project provides a photobooth application *out-of-the-box* in pure Python
 for Raspberry Pi. Have a look to the `wiki <https://github.com/pibooth/pibooth/wiki>`_
-to discover some realizations from GitHub users.
+to discover some realizations from GitHub users, and don't hesitate to send us photos of your version.
 
 .. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/background_samples.png
    :align: center
@@ -29,6 +29,11 @@ Features
 * Custom background(s) and overlay(s) can be added on the final picture
 * All settings available in a configuration file (most common options in a graphical interface)
 * Highly customizable thanks to it plugin system: you can develop your own plugin
+
+Output pictures gallery
+-----------------------
+
+You can see some examples of the output picture formats you can get with ``pibooth`` on the following page.
 
 .. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/gallery.png
    :align: center
