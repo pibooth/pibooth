@@ -141,15 +141,16 @@ class Background(object):
         if self._rect != screen.get_rect():
             self._rect = screen.get_rect()
 
+            if self._background_image:
+                self._background = pictures.get_pygame_image(
+                    self._background_image, (self._rect.width, self._rect.height), crop=True, color=None)
+                self._background_color = pictures.get_pygame_main_color(self._background)
+
             overlay_name = "{}.png".format(self._name)
             if osp.isfile(pictures.get_filename(overlay_name)):
                 self._overlay = pictures.get_pygame_image(
                     pictures.get_filename(overlay_name), (self._rect.width, self._rect.height), color=self._text_color, bg_color=self._background_color)
 
-            if self._background_image:
-                self._background = pictures.get_pygame_image(
-                    self._background_image, (self._rect.width, self._rect.height), crop=True, color=None)
-                self._background_color = pictures.get_pygame_main_color(self._background)
 
             self.resize_texts()
 
