@@ -39,6 +39,7 @@ You can see some examples of the output picture formats you can get with ``piboo
    :align: center
    :alt: gallery
    :target: https://github.com/pibooth/pibooth/blob/master/docs/examples.rst
+   :height: 200px
 
 Requirements
 ------------
