@@ -2,6 +2,9 @@
 Default configuration
 ---------------------
 
+.. note:: Relative path (path which doesn't start by a ``/``) can be used. In this
+          case, the absolute path is computed from the configuration file location.
+
 .. code-block:: ini
 
     [GENERAL]
@@ -17,7 +20,7 @@ Default configuration
     # In debug mode, exceptions are not caught, logs are more verbose, pictures are cleared at startup
     debug = False
 
-    # Path to a custom pibooth plugin (list of paths accepted)
+    # Path to custom plugin(s) not installed with pip (list of paths accepted)
     plugins =
 
     [WINDOW]
@@ -141,9 +144,3 @@ Default configuration
 
     # Physical GPIO OUT pin to light a LED when print button is pressed
     print_led_pin = 15
-
-    # Physical GPIO OUT pin to light a LED at pibooth startup
-    startup_led_pin = 29
-
-    # Physical GPIO OUT pin to light a LED during preview
-    preview_led_pin = 31

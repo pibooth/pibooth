@@ -4,7 +4,12 @@
 
 __version__ = "1.2.0"
 
-import pluggy
+try:
 
-# Marker to be imported and used in plugins (and for own implementations)
-hookimpl = pluggy.HookimplMarker('pibooth')
+    import pluggy
+
+    # Marker to be imported and used in plugins (and for own implementations)
+    hookimpl = pluggy.HookimplMarker('pibooth')
+
+except ImportError:
+    pass  # When running the setup.py, pluggy is not yet installed

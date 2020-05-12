@@ -141,15 +141,16 @@ class Background(object):
         if self._rect != screen.get_rect():
             self._rect = screen.get_rect()
 
+            if self._background_image:
+                self._background = pictures.get_pygame_image(
+                    self._background_image, (self._rect.width, self._rect.height), crop=True, color=None)
+                self._background_color = pictures.get_pygame_main_color(self._background)
+
             overlay_name = "{}.png".format(self._name)
             if osp.isfile(pictures.get_filename(overlay_name)):
                 self._overlay = pictures.get_pygame_image(
                     pictures.get_filename(overlay_name), (self._rect.width, self._rect.height), color=self._text_color, bg_color=self._background_color)
 
-            if self._background_image:
-                self._background = pictures.get_pygame_image(
-                    self._background_image, (self._rect.width, self._rect.height), crop=True, color=None)
-                self._background_color = pictures.get_pygame_main_color(self._background)
 
             self.resize_texts()
 
@@ -512,11 +513,11 @@ class PrintBackground(Background):
         text = get_translated_text("print_forget")
         if text:
             if self.arrow_location == ARROW_HIDDEN or self.arrow_location == ARROW_BOTTOM:
-                rect = pygame.Rect(self._rect.width // 2, self._rect.height * 0.7,
+                rect = pygame.Rect(self._rect.width // 2 + self._text_border, self._rect.height * 0.7,
                                    self._rect.width // 5 - 2 * self._text_border,
                                    self._rect.height * 0.3 - 2 * self._text_border)
             else:
-                rect = pygame.Rect(self._rect.width // 2, self._text_border,
+                rect = pygame.Rect(self._rect.width // 2 + self._text_border, self._text_border,
                                    self._rect.width // 5 - 2 * self._text_border,
                                    self._rect.height * 0.3 - 2 * self._text_border)
             self._write_text(text, rect)

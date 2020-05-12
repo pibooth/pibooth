@@ -64,6 +64,38 @@ There are four hooks defined for each state.
           hook, but there is no need to define, in the function signature, the
           arguments not used in the code.
 
+
+Code skeleton
+^^^^^^^^^^^^^
+
+A plugin is generally a Python module called ``pibooth_[...].py``. For a better
+configuration management, it should have the constant ``__version__`` set to the
+plugin version:
+
+.. code-block:: python
+
+    __version__ = "1.0.0"
+
+The ``pibooth_configure`` hook permits to define some new configuration options.
+At this step of the starting process, only the pre-loaded configuration is
+available (the application is not yet created).
+
+.. code-block:: python
+
+    @pibooth.hookimpl
+    def pibooth_configure(cfg):
+        cfg.add_option('CONTROLS', 'startup_led_pin', 29,
+                       "Physical GPIO OUT pin to light a LED at pibooth startup")
+
+The new objects, which should persist between states, can be created and attached
+to the application instance in the ``pibooth_startup`` hook:
+
+.. code-block:: python
+
+    @pibooth.hookimpl
+    def pibooth_startup(cfg, app):
+        app.led_startup = LED("BOARD" + cfg.get('CONTROLS', 'startup_led_pin'))
+
 Example #1 : Hello from plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -74,32 +106,13 @@ Example #1 : Hello from plugin
     import pibooth
     from pibooth.utils import LOGGER
 
+    __version__ = "1.0.0"
+
     @pibooth.hookimpl
     def state_wait_enter():
         LOGGER.info("Hello from '%s' plugin", __name__)
 
-Example #2 : Flash light on capture
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-``pibooth_flash.py``
-
-.. code-block:: python
-
-    import pibooth
-    from gpiozero import LED
-
-    # GPIOZERO is configured as BCM, use string with "BOARD(pin)" to convert on BOARD
-    FLASH = LED("BOARD36")
-
-    @pibooth.hookimpl
-    def state_capture_enter():
-        FLASH.on()
-
-    @pibooth.hookimpl
-    def state_capture_exit():
-        FLASH.off()
-
-Example #3 : Upload to FTP
+Example #2 : Upload to FTP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``pibooth_ftp.py``
@@ -110,6 +123,7 @@ Example #3 : Upload to FTP
     from ftplib import FTP
     import pibooth
 
+    __version__ = "0.0.2"
 
     @pibooth.hookimpl
     def state_processing_exit(app):
@@ -125,58 +139,7 @@ Example #3 : Upload to FTP
 
         ftp.close()
 
-Example #4 : Generate a QR-Code
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-``pibooth_qrcode.py``
-
-.. code-block:: python
-
-    import os
-    import qrcode
-    import pygame
-
-    import pibooth
-
-
-    @pibooth.hookimpl
-    def state_wait_enter(app, win):
-        """Display the QR Code on the wait view.
-        """
-        if hasattr(app, 'previous_qr'):
-            win_rect = win.get_rect()
-            qr_rect = app.previous_qr.get_rect()
-            win.surface.blit(app.previous_qr, (10, win_rect.height - qr_rect.height - 10))
-
-
-    @pibooth.hookimpl
-    def state_processing_exit(app):
-        """Generate the QR Code and store it in the application.
-        """
-        qr = qrcode.QRCode(version=1,
-                           error_correction=qrcode.constants.ERROR_CORRECT_L,
-                           box_size=3,
-                           border=1)
-
-        name = os.path.basename(app.previous_picture_file)
-
-        qr.add_data(os.path.join("www.pibooth.org/pictures", name))
-        qr.make(fit=True)
-
-        image = qr.make_image(fill_color="black", back_color="white").convert('RGB')
-        app.previous_qr = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
-
-
-    @pibooth.hookimpl
-    def state_print_enter(app, win):
-        """Display the QR Code on the print view.
-        """
-        win_rect = win.get_rect()
-        qr_rect = app.previous_qr.get_rect()
-        win.surface.blit(app.previous_qr, (win_rect.width - qr_rect.width - 10,
-                                           win_rect.height - qr_rect.height - 10))
-
-Example #5 : RGB LED
+Example #3 : RGB LED
 ^^^^^^^^^^^^^^^^^^^^
 
 ``pibooth_RGBLED.py``
@@ -190,22 +153,27 @@ Example #5 : RGB LED
     from gpiozero import RGBLED
     from colorzero import Color
 
-    # GPIOZERO is configured as BCM, use string with "BOARD(pin)" to convert on BOARD
-    led = RGBLED("BOARD36", "BOARD38", "BOARD40")
+    __version__ = "1.1.0"
 
     @pibooth.hookimpl
-    def state_wait_enter():
-        led.color = Color('green')
+    def pibooth_startup(app):
+        # GPIOZERO is configured as BCM, use string with "BOARD(pin)" to
+        # convert on BOARD
+        app.rgbled = RGBLED("BOARD36", "BOARD38", "BOARD40")
 
     @pibooth.hookimpl
-    def state_choose_enter():
-        led.blink()
+    def state_wait_enter(app):
+        app.rgbled.color = Color('green')
 
     @pibooth.hookimpl
-    def state_preview_enter():
-        led.color = Color('white')
-        led.blink()
+    def state_choose_enter(app):
+        app.rgbled.blink()
 
     @pibooth.hookimpl
-    def state_capture_exit():
-        led.color = Color('red')
+    def state_preview_enter(app):
+        app.rgbled.color = Color('white')
+        app.rgbled.blink()
+
+    @pibooth.hookimpl
+    def state_capture_exit(app):
+        app.rgbled.color = Color('red')

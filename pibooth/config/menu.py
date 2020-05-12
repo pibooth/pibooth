@@ -45,11 +45,10 @@ class PiConfigMenu(object):
         self.size = (min(600, size[0]), min(400, size[1]))
         self._main_menu = pgm.Menu(self.size[1],
                                    self.size[0],
-                                   "Settings",
+                                   "Settings v{}".format(pibooth.__version__),
                                    theme=THEME,
                                    onclose=self._on_close)
 
-        self._main_menu.add_label('Pibooth version: {}'.format(pibooth.__version__))
         for name in ('GENERAL', 'WINDOW', 'PICTURE', 'PRINTER'):
             submenu = self._build_submenu(name)
             self._main_menu.add_button(submenu.get_title(), submenu)

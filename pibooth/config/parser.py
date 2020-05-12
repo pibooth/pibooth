@@ -8,9 +8,11 @@ import ast
 import os
 import os.path as osp
 import itertools
+import inspect
 from collections import OrderedDict as odict
 from pibooth.utils import LOGGER, open_text_editor
 from pibooth import language
+from pibooth.plugins import get_plugin_name
 
 
 try:
@@ -53,7 +55,7 @@ DEFAULT = odict((
                  "Debug mode", ['True', 'False'])),
             ("plugins",
                 ('',
-                 "Path to a custom pibooth plugin (list of paths accepted)",
+                 "Path to custom plugin(s) not installed with pip (list of paths accepted)",
                  None, None)),
         ))
      ),
@@ -231,14 +233,6 @@ DEFAULT = odict((
                 (15,
                  "Physical GPIO OUT pin to light a LED when print button is pressed",
                  None, None)),
-            ("startup_led_pin",
-                (29,
-                 "Physical GPIO OUT pin to light a LED at pibooth startup",
-                 None, None)),
-            ("preview_led_pin",
-                (31,
-                 "Physical GPIO OUT pin to light a LED during preview",
-                 None, None)),
         ))
      ),
 ))
@@ -249,23 +243,22 @@ class PiConfigParser(ConfigParser):
     """Enhenced configuration file parser.
     """
 
-    def __init__(self, filename, clear=False):
+    def __init__(self, filename, plugin_manager, clear=False):
         ConfigParser.__init__(self)
+        self._pm = plugin_manager
         self.filename = osp.abspath(osp.expanduser(filename))
 
-        if not osp.isfile(self.filename) or clear:
-            dirname = osp.dirname(self.filename)
-            if not osp.isdir(dirname):
-                os.makedirs(dirname)
-            self.save(True)
-            self.enable_autostart(DEFAULT['GENERAL']['autostart'][0])
-
-        self.read(self.filename, encoding="utf-8")
+        # Overide
+        if osp.isfile(self.filename) and not clear:
+            self.read(self.filename, encoding="utf-8")
+            self.enable_autostart(self.getboolean('GENERAL', 'autostart'))
 
     def _get_abs_path(self, path):
         """Return absolute path. In case of relative path given, the absolute
         one is created using config file path as reference path.
         """
+        if not path:  # Empty string, don't process it as it is not a path
+            return path
         path = osp.expanduser(path)
         if not osp.isabs(path):
             path = osp.join(osp.relpath(osp.dirname(self.filename), '.'), path)
@@ -275,6 +268,11 @@ class PiConfigParser(ConfigParser):
         """Save the current or default values into the configuration file.
         """
         LOGGER.info("Generate the configuration file in '%s'", self.filename)
+
+        dirname = osp.dirname(self.filename)
+        if not osp.isdir(dirname):
+            os.makedirs(dirname)
+
         with io.open(self.filename, 'w', encoding="utf-8") as fp:
             for section, options in DEFAULT.items():
                 fp.write("[{}]\n".format(section))
@@ -284,6 +282,8 @@ class PiConfigParser(ConfigParser):
                     else:
                         val = self.get(section, name)
                     fp.write("# {}\n{} = {}\n\n".format(value[1], name, val))
+
+        self.enable_autostart(self.getboolean('GENERAL', 'autostart'))
 
     def edit(self):
         """Open a text editor to edit the configuration.
@@ -313,6 +313,39 @@ class PiConfigParser(ConfigParser):
         elif not enable and osp.isfile(filename):
             LOGGER.info("Remove the auto-startup file in '%s'", dirname)
             os.remove(filename)
+
+    def add_option(self, section, option, default, description):
+        """Add a new option to the configuration.
+
+        :param section: section in which the option is declared
+        :type section: str
+        :param option: option name
+        :type option: str
+        :param default: default value of the option
+        :type default: any
+        :param description: description to put in the configuration
+        :type description: str
+        """
+        assert section, "Section name can not be empty string"
+        assert option, "Option name can not be empty string"
+        assert description, "Description can not be empty string"
+
+        # Find the caller plugin
+        stack = inspect.stack()
+        if len(stack) < 2:
+            plugin_name = "Unknown"
+        else:
+            plugin = inspect.getmodule(inspect.stack()[1][0])
+            plugin_name = get_plugin_name(self._pm, plugin, False)
+
+        # Check that the option is not already created
+        if section in DEFAULT and option in DEFAULT[section]:
+            raise ValueError("The plugin '{}' try to define the option [{}][{}] "
+                             "which is already defined.".format(plugin_name, section, option))
+
+        # Add the option to the default dictionary
+        description = "{}\n# Required by '{}' plugin".format(description, plugin_name)
+        DEFAULT.setdefault(section, odict())[option] = (default, description, None, None)
 
     def get(self, section, option, **kwargs):
         """Override the default function of ConfigParser to add a
@@ -408,7 +441,7 @@ class PiConfigParser(ConfigParser):
         if path:
             new_values = []
             for v in values:
-                if isinstance(v, basestring) and v != '':
+                if isinstance(v, basestring):
                     new_values.append(self._get_abs_path(v))
                 else:
                     new_values.append(v)

@@ -4,7 +4,9 @@
 import os
 import pytest
 from PIL import Image
+from pibooth.config.parser import PiConfigParser
 
+MOCKS_DIR = os.path.join(os.path.dirname(__file__), 'mocks')
 CAPTURES_DIR = os.path.join(os.path.dirname(__file__), 'captures')
 
 
@@ -21,10 +23,19 @@ def captures_landscape():
 
 
 @pytest.fixture(scope='session')
-def fond():
+def fond_path():
     return os.path.join(CAPTURES_DIR, 'fond.jpg')
 
 
 @pytest.fixture(scope='session')
-def overlay():
+def overlay_path():
     return os.path.join(CAPTURES_DIR, 'overlay.png')
+
+
+@pytest.fixture(scope='session')
+def cfg_path():
+    return os.path.join(MOCKS_DIR, 'pibooth.cfg')
+
+@pytest.fixture(scope='session')
+def cfg(cfg_path):
+    return PiConfigParser(cfg_path, None)

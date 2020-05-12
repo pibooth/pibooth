@@ -22,7 +22,7 @@ from pibooth import language
 from pibooth.utils import (LOGGER, configure_logging,
                            set_logging_level, print_columns_words)
 from pibooth.states import StateMachine
-from pibooth.plugins import hookspecs, load_plugins
+from pibooth.plugins import hookspecs, load_plugins, list_plugin_names
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth import camera
@@ -45,7 +45,8 @@ BUTTONDOWN = pygame.USEREVENT + 1
 
 class PiApplication(object):
 
-    def __init__(self, config):
+    def __init__(self, config, plugin_manager):
+        self._pm = plugin_manager
         self._config = config
 
         # Clean directory where pictures are saved
@@ -78,17 +79,8 @@ class PiApplication(object):
 
         self._menu = None
 
-        # Create plugin manager and defined hooks specification
-        self._plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
-        self._plugin_manager.add_hookspecs(hookspecs)
-        self._plugin_manager.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
-
-        # Register plugins
-        custom_paths = [p for p in self._config.gettuple('GENERAL', 'plugins', 'path') if p]
-        load_plugins(self._plugin_manager, *custom_paths)
-
         # Define states of the application
-        self._machine = StateMachine(self._plugin_manager, self._config, self, self._window)
+        self._machine = StateMachine(self._pm, self._config, self, self._window)
         self._machine.add_state('wait')
         self._machine.add_state('choose')
         self._machine.add_state('chosen')
@@ -124,8 +116,6 @@ class PiApplication(object):
 
         self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
                              printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
-        self.other_leds = LEDBoard(preview="BOARD" + config.get('CONTROLS', 'preview_led_pin'),
-                                   start="BOARD" + config.get('CONTROLS', 'startup_led_pin'))
 
         self.printer = Printer(config.get('PRINTER', 'printer_name'),
                                config.getint('PRINTER', 'max_pages'))
@@ -329,7 +319,7 @@ class PiApplication(object):
             fps = 40
             clock = pygame.time.Clock()
             self._initialize()
-            self._plugin_manager.hook.pibooth_startup(app=self)
+            self._pm.hook.pibooth_startup(cfg=self._config, app=self)
 
             while True:
                 events = list(pygame.event.get())
@@ -345,20 +335,24 @@ class PiApplication(object):
                     self._window.resize(event.size)
 
                 if not self._menu and self.find_settings_event(events):
-                    self._menu = PiConfigMenu(self._window, self._config, self._initialize)
+                    self.leds.off()
+                    self._menu = PiConfigMenu(self._window, self._config)
                     self._menu.show()
+                    self.leds.blink(on_time=0.1, off_time=1)
                 elif self._menu and self._menu.is_shown():
                     self._menu.process(events)
+                elif self._menu and not self._menu.is_shown():
+                    self.leds.off()
+                    self._initialize()
+                    self._menu = None
                 else:
-                    if self._menu:
-                        self._menu = None
                     self._machine.process(events)
 
                 pygame.display.update()
                 clock.tick(fps)  # Ensure the program will never run at more than <fps> frames per second
 
         finally:
-            self._plugin_manager.hook.pibooth_cleanup(app=self)
+            self._pm.hook.pibooth_cleanup(app=self)
             pygame.quit()
 
 
@@ -395,8 +389,24 @@ def main():
 
     configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=options.log)
 
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", options.reset)
+    # Create plugin manager and defined hooks specification
+    plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
+    plugin_manager.add_hookspecs(hookspecs)
+    plugin_manager.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
+
+    # Load the configuration and languages
+    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager, options.reset)
     language.init("~/.config/pibooth/translations.cfg", options.reset)
+
+    # Register plugins
+    custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
+    load_plugins(plugin_manager, *custom_paths)
+    LOGGER.info("Installed plugins: %s", ", ".join(list_plugin_names(plugin_manager)))
+
+    # Update plugins configuration
+    plugin_manager.hook.pibooth_configure(cfg=config)
+    if not osp.isfile(config.filename):
+        config.save()
 
     if options.config:
         LOGGER.info("Editing the pibooth configuration...")
@@ -407,9 +417,11 @@ def main():
     elif options.fonts:
         LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
-    elif not options.reset:
+    elif options.reset:
+        config.save()
+    else:
         LOGGER.info("Starting the photo booth application %s", GPIO_INFO)
-        app = PiApplication(config)
+        app = PiApplication(config, plugin_manager)
         app.main_loop()
 
 
