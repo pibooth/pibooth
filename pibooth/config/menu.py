@@ -11,12 +11,16 @@ from pibooth.config.parser import DEFAULT
 
 
 pgm.controls.KEY_BACK = pygame.K_ESCAPE
-THEME = pgm.themes.THEME_GREEN.copy()
+
+THEME = pgm.themes.THEME_DARK.copy()
+THEME.title_shadow = True
 THEME.title_font = fonts.get_filename("Monoid-Retina")
 THEME.widget_font = fonts.get_filename("Monoid-Retina")
 THEME.widget_font_size = 20
 
-SUBTHEME = THEME.copy()
+SUBTHEME = pgm.themes.THEME_BLUE.copy()
+SUBTHEME.title_font = fonts.get_filename("Monoid-Retina")
+SUBTHEME.widget_font = fonts.get_filename("Monoid-Retina")
 SUBTHEME.widget_alignment = pgm.locals.ALIGN_LEFT
 SUBTHEME.widget_offset = (40, 0)
 SUBTHEME.widget_font_size = 18
