@@ -260,7 +260,8 @@ class PiApplication(object):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
+                # Don't consider the mouse wheel (button 4 & 5):
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     return event
@@ -275,7 +276,8 @@ class PiApplication(object):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e\
                         and pygame.key.get_mods() & pygame.KMOD_CTRL:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
+                # Don't consider the mouse wheel (button 4 & 5):
                 rect = self._window.get_rect()
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     return event
@@ -299,7 +301,8 @@ class PiApplication(object):
                 return event
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
+                # Don't consider the mouse wheel (button 4 & 5):
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     event.key = pygame.K_LEFT
