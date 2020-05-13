@@ -172,9 +172,6 @@ class PiApplication(object):
         self.printer.max_pages = self._config.getint('PRINTER', 'max_pages')
         self.printer.nbr_printed = 0
 
-        # Initialize state machine
-        self._machine.set_state('wait')
-
     def _on_button_capture_held(self):
         """Called when the capture button is pressed.
         """
@@ -321,10 +318,11 @@ class PiApplication(object):
         """Run the main game loop.
         """
         try:
+            fps = 40
             clock = pygame.time.Clock()
             self._initialize()
             self._pm.hook.pibooth_startup(cfg=self._config, app=self)
-            fps = 40
+            self._machine.set_state('wait')
 
             while True:
                 events = list(pygame.event.get())
@@ -350,6 +348,7 @@ class PiApplication(object):
                 elif self._menu and not self._menu.is_shown():
                     self.leds.off()
                     self._initialize()
+                    self._machine.set_state('wait')
                     self._menu = None
                 else:
                     self._machine.process(events)

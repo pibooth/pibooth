@@ -60,10 +60,9 @@ There are four hooks defined for each state.
 
   Invoked one time when the state is exiting.
 
-.. note:: The hooks specification defines all arguments that can be used by the
-          hook, but there is no need to define, in the function signature, the
-          arguments not used in the code.
-
+.. note:: Hooks specification defines all arguments that can be used by the hook
+          implementation, but there is no need to put them in the function
+          signature if they are not used in the code.
 
 Code skeleton
 ^^^^^^^^^^^^^
@@ -78,7 +77,7 @@ plugin version:
 
 The ``pibooth_configure`` hook permits to define some new configuration options.
 At this step of the starting process, only the pre-loaded configuration is
-available (the application is not yet created).
+available (application is not created yet).
 
 .. code-block:: python
 
@@ -103,6 +102,8 @@ Example #1 : Hello from plugin
 
 .. code-block:: python
 
+    """Plugin to log a message when entering in the 'wait' state."""
+
     import pibooth
     from pibooth.utils import LOGGER
 
@@ -119,6 +120,8 @@ Example #2 : Upload to FTP
 
 .. code-block:: python
 
+    """Plugin to upload pictures on a FTP server."""
+
     import os
     from ftplib import FTP
     import pibooth
@@ -126,28 +129,31 @@ Example #2 : Upload to FTP
     __version__ = "0.0.2"
 
     @pibooth.hookimpl
-    def state_processing_exit(app):
-        ftp = FTP()
-        ftp.set_debuglevel(0)
-        ftp.connect("ftp.pibooth.org", 21)
-        ftp.login("pibooth", "1h!gR4/opK")
+    def pibooth_startup(app):
+        app.ftp = FTP()
+        app.ftp.set_debuglevel(0)
+        app.ftp.connect("ftp.pibooth.org", 21)
+        app.ftp.login("pibooth", "1h!gR4/opK")
 
+    @pibooth.hookimpl
+    def state_processing_exit(app):
         name = os.path.basename(app.previous_picture_file)
 
         with open(app.previous_picture_file, 'rb') as fp:
-            ftp.storbinary('STOR {}'.format(name), fp, 1024)
+            app.ftp.storbinary('STOR {}'.format(name), fp, 1024)
 
-        ftp.close()
+    @pibooth.hookimpl
+    def pibooth_cleanup(app):
+        app.ftp.close()
 
-Example #3 : RGB LED
-^^^^^^^^^^^^^^^^^^^^
+Example #3 : Control a RGB LED
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``pibooth_RGBLED.py``
+``pibooth_rgb_led.py``
 
 .. code-block:: python
 
-    """Plugin to manage the RGB lights via GPIO.
-    """
+    """Plugin to manage the RGB lights via GPIO."""
 
     import pibooth
     from gpiozero import RGBLED
