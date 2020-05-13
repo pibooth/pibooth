@@ -8,7 +8,7 @@ import pygameMenu as pgm
 from pygameMenu import controls as pgmctrl
 from pygameMenu import events as pgmevt
 from pibooth import fonts
-from pibooth.config.parser import DEFAULT
+from pibooth.config.parser import DEFAULT, MENU_LIST
 
 
 pgmctrl.KEY_BACK = pygame.K_ESCAPE
@@ -51,7 +51,7 @@ class PiConfigMenu(object):
                                    dopause=False,
                                    )
 
-        for name in ('GENERAL', 'WINDOW', 'PICTURE', 'PRINTER'):
+        for name in MENU_LIST:
             submenu = self._build_submenu(name, width, height)
             self._main_menu.add_option(submenu.get_title(), submenu)
         self._main_menu.add_option('Exit Pibooth', pgmevt.EXIT)
@@ -174,3 +174,4 @@ class PiConfigMenu(object):
         """Process the events related to the menu.
         """
         self._main_menu.mainloop(events)  # block until exit menu (dopause=True)
+        

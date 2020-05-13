@@ -236,7 +236,7 @@ DEFAULT = odict((
         ))
      ),
 ))
-
+MENU_LIST = ['GENERAL', 'WINDOW', 'PICTURE', 'PRINTER']
 
 class PiConfigParser(ConfigParser):
 
@@ -314,7 +314,7 @@ class PiConfigParser(ConfigParser):
             LOGGER.info("Remove the auto-startup file in '%s'", dirname)
             os.remove(filename)
 
-    def add_option(self, section, option, default, description):
+    def add_option(self, section, option, default, description, menu_name=None, menu_option=None):
         """Add a new option to the configuration.
 
         :param section: section in which the option is declared
@@ -325,6 +325,10 @@ class PiConfigParser(ConfigParser):
         :type default: any
         :param description: description to put in the configuration
         :type description: str
+        :param menu_name: name of parameter on sub-menu
+        :type menu_name: str
+        :param menu_option: choice for parameter on sub-menu
+        :type menu_option: any
         """
         assert section, "Section name can not be empty string"
         assert option, "Option name can not be empty string"
@@ -343,9 +347,13 @@ class PiConfigParser(ConfigParser):
             raise ValueError("The plugin '{}' try to define the option [{}][{}] "
                              "which is already defined.".format(plugin_name, section, option))
 
+        # Add section to menu if menu_name and menu_option
+        if menu_name and menu_option:
+            MENU_LIST.append(section)
+
         # Add the option to the default dictionary
         description = "{}\n# Required by '{}' plugin".format(description, plugin_name)
-        DEFAULT.setdefault(section, odict())[option] = (default, description, None, None)
+        DEFAULT.setdefault(section, odict())[option] = (default, description, menu_name, menu_option)
 
     def get(self, section, option, **kwargs):
         """Override the default function of ConfigParser to add a
