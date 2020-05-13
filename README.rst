@@ -155,6 +155,8 @@ below:
 The states of the **LED 1** and **LED 2** are modified depending on the actions available
 for the user.
 
+Detailed state diagram can be found `here <https://github.com/pibooth/pibooth/blob/master/docs/plugin.rst>`_.
+
 Commands
 ^^^^^^^^
 
