@@ -12,7 +12,7 @@ from pibooth.config.parser import DEFAULT
 
 pgm.controls.KEY_BACK = pygame.K_ESCAPE
 
-THEME = pgm.themes.Theme(
+THEME_WITHE = pgm.themes.Theme(
     background_color=(255, 255, 255),
     scrollbar_thick=14,
     scrollbar_slider_pad=2,
@@ -20,31 +20,30 @@ THEME = pgm.themes.Theme(
     selection_color=(29, 120, 107),
     title_background_color=(35, 149, 135),
     title_font=fonts.get_filename("Monoid-Bold"),
+    title_font_size=30,
     title_font_color=(255, 255, 255),
     widget_font=fonts.get_filename("Monoid-Retina"),
     widget_font_size=30,
     widget_font_color=(0, 0, 0),
 )
+THEME_WITHE.widget_margin = (0, 20)
 
-THEME.widget_margin=(0, 20)
+SUBTHEME_WITHE = THEME_WITHE.copy()
+SUBTHEME_WITHE.background_color = (255, 255, 255)
+SUBTHEME_WITHE.scrollbar_slider_color = (252, 151, 0)
+SUBTHEME_WITHE.selection_color = (241, 125, 1)
+SUBTHEME_WITHE.title_background_color = (252, 151, 0)
+SUBTHEME_WITHE.widget_alignment = pgm.locals.ALIGN_LEFT
+SUBTHEME_WITHE.widget_margin = (40, 10)
+SUBTHEME_WITHE.widget_font_size = 18
 
-SUBTHEME = THEME.copy()
-SUBTHEME.background_color = (255, 255, 255)
-SUBTHEME.scrollbar_slider_color = (252, 151, 0)
-SUBTHEME.selection_color = (241, 125, 1)
-SUBTHEME.title_background_color = (252, 151, 0)
-SUBTHEME.widget_alignment = pgm.locals.ALIGN_LEFT
-SUBTHEME.widget_margin=(40, 10)
-SUBTHEME.widget_font_size = 18
+THEME_DARK = THEME_WITHE.copy()
+THEME_DARK.background_color = (40, 41, 35)
+THEME_DARK.widget_font_color = (255, 255, 255)
 
-
-THEME2 = THEME.copy()
-THEME2.background_color = (40, 41, 35)
-THEME2.widget_font_color=(255, 255, 255)
-
-SUBTHEME2 = SUBTHEME.copy()
-SUBTHEME2.background_color = (40, 41, 35)
-SUBTHEME2.widget_font_color=(255, 255, 255)
+SUBTHEME_DARK = SUBTHEME_WITHE.copy()
+SUBTHEME_DARK.background_color = (40, 41, 35)
+SUBTHEME_DARK.widget_font_color = (255, 255, 255)
 
 
 def _find(choices, value):
@@ -71,7 +70,7 @@ class PiConfigMenu(object):
         self._main_menu = pgm.Menu(self.size[1],
                                    self.size[0],
                                    "Settings v{}".format(pibooth.__version__),
-                                   theme=THEME2,
+                                   theme=THEME_DARK,
                                    onclose=self._on_close)
 
         for name in ('GENERAL', 'WINDOW', 'PICTURE', 'PRINTER'):
@@ -91,7 +90,7 @@ class PiConfigMenu(object):
         menu = pgm.Menu(self.size[1],
                         self.size[0],
                         section.capitalize(),
-                        theme=SUBTHEME2)
+                        theme=SUBTHEME_DARK)
 
         for name, option in DEFAULT[section].items():
             if option[2]:
