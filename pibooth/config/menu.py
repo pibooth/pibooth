@@ -20,7 +20,7 @@ THEME_WITHE = pgm.themes.Theme(
     selection_color=(29, 120, 107),
     title_background_color=(35, 149, 135),
     title_font=fonts.get_filename("Monoid-Bold"),
-    title_font_size=30,
+    title_font_size=33,
     title_font_color=(255, 255, 255),
     widget_font=fonts.get_filename("Monoid-Retina"),
     widget_font_size=30,
@@ -39,10 +39,12 @@ SUBTHEME_WITHE.widget_font_size = 18
 
 THEME_DARK = THEME_WITHE.copy()
 THEME_DARK.background_color = (40, 41, 35)
+THEME_DARK.cursor_color = (255, 255, 255)
 THEME_DARK.widget_font_color = (255, 255, 255)
 
 SUBTHEME_DARK = SUBTHEME_WITHE.copy()
 SUBTHEME_DARK.background_color = (40, 41, 35)
+SUBTHEME_DARK.cursor_color = (255, 255, 255)
 SUBTHEME_DARK.widget_font_color = (255, 255, 255)
 
 
