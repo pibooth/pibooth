@@ -170,9 +170,6 @@ class PiApplication(object):
         self.printer.max_pages = self._config.getint('PRINTER', 'max_pages')
         self.printer.nbr_printed = 0
 
-        # Initialize state machine
-        self._machine.set_state('wait')
-
     def _on_button_capture_held(self):
         """Called when the capture button is pressed.
         """
@@ -258,7 +255,8 @@ class PiApplication(object):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
+                # Don't consider the mouse wheel (button 4 & 5):
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     return event
@@ -273,7 +271,8 @@ class PiApplication(object):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e\
                         and pygame.key.get_mods() & pygame.KMOD_CTRL:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
+                # Don't consider the mouse wheel (button 4 & 5):
                 rect = self._window.get_rect()
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     return event
@@ -297,7 +296,8 @@ class PiApplication(object):
                 return event
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
+                # Don't consider the mouse wheel (button 4 & 5):
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     event.key = pygame.K_LEFT
@@ -320,6 +320,7 @@ class PiApplication(object):
             clock = pygame.time.Clock()
             self._initialize()
             self._pm.hook.pibooth_startup(cfg=self._config, app=self)
+            self._machine.set_state('wait')
 
             while True:
                 events = list(pygame.event.get())
@@ -344,6 +345,7 @@ class PiApplication(object):
                 elif self._menu and not self._menu.is_shown():
                     self.leds.off()
                     self._initialize()
+                    self._machine.set_state('wait')
                     self._menu = None
                 else:
                     self._machine.process(events)
