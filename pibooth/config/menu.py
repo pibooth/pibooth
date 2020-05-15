@@ -8,7 +8,7 @@ import pygameMenu as pgm
 from pygameMenu import controls as pgmctrl
 from pygameMenu import events as pgmevt
 from pibooth import fonts
-from pibooth.config.parser import DEFAULT, MENU_LIST
+from pibooth.config.parser import DEFAULT
 
 
 pgmctrl.KEY_BACK = pygame.K_ESCAPE
@@ -42,7 +42,7 @@ class PiConfigMenu(object):
                                    "Pibooth v{} - Settings".format(version),
                                    draw_region_y=55,
                                    font_color=(255, 255, 255),
-                                   font_title = fonts.get_filename("Amatic-Bold"),
+                                   font_title=fonts.get_filename("Amatic-Bold"),
                                    color_selected=(38, 139, 210),
                                    menu_color=(0, 0, 51),
                                    menu_color_title=(90, 90, 140),
@@ -51,9 +51,10 @@ class PiConfigMenu(object):
                                    dopause=False,
                                    )
 
-        for name in MENU_LIST:
+        for name in DEFAULT:
             submenu = self._build_submenu(name, width, height)
-            self._main_menu.add_option(submenu.get_title(), submenu)
+            if submenu._option:
+                self._main_menu.add_option(submenu.get_title(), submenu)
         self._main_menu.add_option('Exit Pibooth', pgmevt.EXIT)
 
         self._main_menu.set_fps(fps)
@@ -67,7 +68,7 @@ class PiConfigMenu(object):
                         section.capitalize(),
                         font_size=30,
                         font_color=(255, 255, 255),
-                        font_title = fonts.get_filename("Amatic-Bold"),
+                        font_title=fonts.get_filename("Amatic-Bold"),
                         color_selected=(38, 139, 100),
                         menu_color=(0, 0, 51),
                         menu_color_title=(60, 90, 140),
@@ -174,4 +175,3 @@ class PiConfigMenu(object):
         """Process the events related to the menu.
         """
         self._main_menu.mainloop(events)  # block until exit menu (dopause=True)
-        
