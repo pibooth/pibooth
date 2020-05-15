@@ -75,9 +75,10 @@ class PiConfigMenu(object):
                                    theme=THEME_DARK,
                                    onclose=self._on_close)
 
-        for name in ('GENERAL', 'WINDOW', 'PICTURE', 'PRINTER'):
+        for name in DEFAULT:
             submenu = self._build_submenu(name)
-            self._main_menu.add_button(submenu.get_title(), submenu)
+            if submenu._widgets:
+                self._main_menu.add_button(submenu.get_title(), submenu)
         self._main_menu.add_button('Exit', pgm.events.EXIT)
         self._main_menu.disable()
 
