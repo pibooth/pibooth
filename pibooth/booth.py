@@ -60,8 +60,6 @@ class PiApplication(object):
         # Prepare the pygame module for use
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
-        # Dont catch mouse motion to avoid filling the queue during long actions
-        pygame.event.set_blocked(pygame.MOUSEMOTION)
 
         # Create window of (width, height)
         init_size = self._config.gettyped('WINDOW', 'size')
@@ -339,11 +337,10 @@ class PiApplication(object):
 
                 if not self._menu and self.find_settings_event(events):
                     self.leds.off()
-                    self._menu = PiConfigMenu(self._window, self._config, fps, version=pibooth.__version__)
+                    self._menu = PiConfigMenu(self._window, self._config)
                     self._menu.show()
                     self.leds.blink(on_time=0.1, off_time=1)
-
-                if self._menu and self._menu.is_shown():
+                elif self._menu and self._menu.is_shown():
                     self._menu.process(events)
                 elif self._menu and not self._menu.is_shown():
                     self.leds.off()
