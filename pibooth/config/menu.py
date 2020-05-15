@@ -22,11 +22,11 @@ THEME_WHITE = pgm.themes.Theme(
     title_font=fonts.get_filename("Monoid-Regular"),
     title_font_size=33,
     title_font_color=(255, 255, 255),
+    widget_margin=(0, 20),
     widget_font=fonts.get_filename("Monoid-Retina"),
     widget_font_size=30,
     widget_font_color=(0, 0, 0),
 )
-THEME_WHITE.widget_margin = (0, 20)
 
 SUBTHEME_WHITE = THEME_WHITE.copy()
 SUBTHEME_WHITE.background_color = (255, 255, 255)

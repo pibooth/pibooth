@@ -55,7 +55,7 @@ def main():
             'picamera>=1.13 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
             'Pillow>=6.1.0',
             'Pygame>=1.9.4',
-            'pygame-menu>=3.0.0',
+            'pygame-menu>=3.0.1',
             'psutil>=5.5.1',
             'pluggy>=0.13.1',
             'gpiozero>=1.5.1'
