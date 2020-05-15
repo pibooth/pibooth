@@ -12,37 +12,37 @@ from pibooth.config.parser import DEFAULT
 
 pgm.controls.KEY_BACK = pygame.K_ESCAPE
 
-THEME_WITHE = pgm.themes.Theme(
+THEME_WHITE = pgm.themes.Theme(
     background_color=(255, 255, 255),
     scrollbar_thick=14,
     scrollbar_slider_pad=2,
     scrollbar_slider_color=(35, 149, 135),
     selection_color=(29, 120, 107),
     title_background_color=(35, 149, 135),
-    title_font=fonts.get_filename("Monoid-Bold"),
+    title_font=fonts.get_filename("Monoid-Regular"),
     title_font_size=33,
     title_font_color=(255, 255, 255),
     widget_font=fonts.get_filename("Monoid-Retina"),
     widget_font_size=30,
     widget_font_color=(0, 0, 0),
 )
-THEME_WITHE.widget_margin = (0, 20)
+THEME_WHITE.widget_margin = (0, 20)
 
-SUBTHEME_WITHE = THEME_WITHE.copy()
-SUBTHEME_WITHE.background_color = (255, 255, 255)
-SUBTHEME_WITHE.scrollbar_slider_color = (252, 151, 0)
-SUBTHEME_WITHE.selection_color = (241, 125, 1)
-SUBTHEME_WITHE.title_background_color = (252, 151, 0)
-SUBTHEME_WITHE.widget_alignment = pgm.locals.ALIGN_LEFT
-SUBTHEME_WITHE.widget_margin = (40, 10)
-SUBTHEME_WITHE.widget_font_size = 18
+SUBTHEME_WHITE = THEME_WHITE.copy()
+SUBTHEME_WHITE.background_color = (255, 255, 255)
+SUBTHEME_WHITE.scrollbar_slider_color = (252, 151, 0)
+SUBTHEME_WHITE.selection_color = (241, 125, 1)
+SUBTHEME_WHITE.title_background_color = (252, 151, 0)
+SUBTHEME_WHITE.widget_alignment = pgm.locals.ALIGN_LEFT
+SUBTHEME_WHITE.widget_margin = (40, 10)
+SUBTHEME_WHITE.widget_font_size = 18
 
-THEME_DARK = THEME_WITHE.copy()
+THEME_DARK = THEME_WHITE.copy()
 THEME_DARK.background_color = (40, 41, 35)
 THEME_DARK.cursor_color = (255, 255, 255)
 THEME_DARK.widget_font_color = (255, 255, 255)
 
-SUBTHEME_DARK = SUBTHEME_WITHE.copy()
+SUBTHEME_DARK = SUBTHEME_WHITE.copy()
 SUBTHEME_DARK.background_color = (40, 41, 35)
 SUBTHEME_DARK.cursor_color = (255, 255, 255)
 SUBTHEME_DARK.widget_font_color = (255, 255, 255)
