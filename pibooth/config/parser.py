@@ -315,7 +315,7 @@ class PiConfigParser(ConfigParser):
             os.remove(filename)
 
     def add_option(self, section, option, default, description, menu_name=None, menu_choices=None):
-        """Add a new option to the configuration.
+        """Add a new option to the configuration and defines its default value.
 
         :param section: section in which the option is declared
         :type section: str
@@ -363,6 +363,13 @@ class PiConfigParser(ConfigParser):
         if self.has_section(section) and self.has_option(section, option):
             return ConfigParser.get(self, section, option, **kwargs)
         return str(DEFAULT[section][option][0])
+
+    def set(self, section, option, value=None):
+        """Override the default function of ConfigParser to create
+        the section if it does not exist."""
+        if not self.has_section(section):
+            self.add_section(section)
+        super(PiConfigParser, self).set(section, option, value)
 
     def gettyped(self, section, option):
         """Get a value from config and try to convert it in a native Python
