@@ -121,7 +121,7 @@ class PicturePlugin(object):
     def state_print_do(self, cfg, app, events):
         if app.find_capture_event(events):
 
-            with timeit("Move the picture in the forget folder"):
+            with timeit("Moving the picture in the forget folder"):
 
                 for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
                     forgetdir = osp.join(savedir, "forget")
