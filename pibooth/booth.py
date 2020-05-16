@@ -12,7 +12,6 @@ import argparse
 from warnings import filterwarnings
 
 import pygame
-import pluggy
 from gpiozero import Device, ButtonBoard, LEDBoard, pi_info
 from gpiozero.exc import BadPinFactory, PinFactoryFallback
 
@@ -22,7 +21,7 @@ from pibooth import language
 from pibooth.utils import (LOGGER, configure_logging,
                            set_logging_level, print_columns_words)
 from pibooth.states import StateMachine
-from pibooth.plugins import hookspecs, load_plugins, list_plugin_names
+from pibooth.plugins import create_plugin_manager, load_plugins, list_plugin_names
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth import camera
@@ -49,13 +48,12 @@ class PiApplication(object):
         self._pm = plugin_manager
         self._config = config
 
-        # Clean directory where pictures are saved
-        savedir = config.getpath('GENERAL', 'directory')
-        if not osp.isdir(savedir):
-            os.makedirs(savedir)
-        elif osp.isdir(savedir) and config.getboolean('GENERAL', 'debug'):
-            shutil.rmtree(savedir)
-            os.makedirs(savedir)
+        # Create directories where pictures are saved
+        for savedir in config.gettuple('GENERAL', 'directory', 'path'):
+            if osp.isdir(savedir) and config.getboolean('GENERAL', 'debug'):
+                shutil.rmtree(savedir)
+            if not osp.isdir(savedir):
+                os.makedirs(savedir)
 
         # Prepare the pygame module for use
         os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -93,8 +91,8 @@ class PiApplication(object):
         # ---------------------------------------------------------------------
         # Variables shared with plugins
         # Change them may break plugins compatibility
-        self.dirname = None
         self.capture_nbr = None
+        self.capture_date = None
         self.capture_choices = (4, 1)
         self.nbr_duplicates = 0
         self.previous_picture = None
@@ -213,6 +211,14 @@ class PiApplication(object):
                                            button=self.buttons.printer)
                 LOGGER.debug("BUTTONDOWN: generate PRINTER event")
             pygame.event.post(event)
+
+    @property
+    def picture_filename(self):
+        """Return the final picture file name.
+        """
+        if not self.capture_date:
+            raise EnvironmentError("The 'capture_date' attribute is not set yet")
+        return "{}_pibooth.jpg".format(self.capture_date)
 
     def find_quit_event(self, events):
         """Return the first found event if found in the list.
@@ -391,10 +397,7 @@ def main():
 
     configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=options.log)
 
-    # Create plugin manager and defined hooks specification
-    plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
-    plugin_manager.add_hookspecs(hookspecs)
-    plugin_manager.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
+    plugin_manager = create_plugin_manager()
 
     # Load the configuration and languages
     config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager, options.reset)
@@ -405,7 +408,7 @@ def main():
     load_plugins(plugin_manager, *custom_paths)
     LOGGER.info("Installed plugins: %s", ", ".join(list_plugin_names(plugin_manager)))
 
-    # Update plugins configuration
+    # Update configuration with plugins ones
     plugin_manager.hook.pibooth_configure(cfg=config)
     if not osp.isfile(config.filename):
         config.save()

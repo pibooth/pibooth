@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import inspect
+import pluggy
+
 from pibooth.utils import LOGGER, load_module
+from pibooth.plugins import hookspecs
 from pibooth.plugins.camera_plugin import CameraPlugin
 from pibooth.plugins.lights_plugin import LightsPlugin
 from pibooth.plugins.picture_plugin import PicturePlugin
@@ -9,12 +12,19 @@ from pibooth.plugins.printer_plugin import PrinterPlugin
 from pibooth.plugins.view_plugin import ViewPlugin
 
 
+def create_plugin_manager():
+    """Create plugin manager and defined hooks specification."""
+    plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
+    plugin_manager.add_hookspecs(hookspecs)
+    plugin_manager.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
+    return plugin_manager
+
+
 def load_plugins(plugin_manager, *paths):
-    """Return the list of core plugins and load those from the
-    given paths.
+    """Register the core plugins and load those from the given paths.
 
     note:: by default hooks are called in LIFO registered order thus
-           plugins register order may be important.
+           plugins register order is important.
 
     :param plugin_manager: plugins manager instance
     :type plugin_manager: :py:class:`pluggy.PluginManager`
@@ -38,7 +48,7 @@ def load_plugins(plugin_manager, *paths):
         plugin_manager.register(plugin)
 
     # Check that each hookimpl is defined in the hookspec
-    # except for hookimpl with kwarg ``optionalhook=True``.
+    # except for hookimpl with kwarg 'optionalhook=True'.
     plugin_manager.check_pending()
 
 

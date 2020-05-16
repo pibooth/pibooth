@@ -25,13 +25,13 @@ class CameraPlugin(object):
     def state_failsafe_enter(self, app):
         """Reset variables set in this plugin.
         """
-        app.dirname = None
+        app.capture_date = None
         app.capture_nbr = None
         app.camera.drop_captures()  # Flush previous captures
 
     @pibooth.hookimpl
     def state_wait_enter(self, app):
-        app.dirname = None
+        app.capture_date = None
         app.capture_nbr = None
 
     @pibooth.hookimpl
@@ -48,10 +48,8 @@ class CameraPlugin(object):
         LOGGER.info("Take a new capture")
         if not app.capture_nbr:
             app.capture_nbr = app.capture_choices[0]
-        if not app.dirname:
-            savedir = cfg.getpath('GENERAL', 'directory')
-            app.dirname = osp.join(savedir, "raw", time.strftime("%Y-%m-%d-%H-%M-%S"))
-            os.makedirs(app.dirname)
+        if not app.capture_date:
+            app.capture_date = time.strftime("%Y-%m-%d-%H-%M-%S")
         app.camera.preview(win)
 
     @pibooth.hookimpl
