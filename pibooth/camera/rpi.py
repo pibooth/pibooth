@@ -2,6 +2,8 @@
 
 import time
 import subprocess
+from io import BytesIO
+from PIL import Image
 try:
     import picamera
 except ImportError:
@@ -74,6 +76,16 @@ class RpiCamera(BaseCamera):
             self._cam.remove_overlay(self._overlay)
             self._overlay = None
 
+    def _post_process_capture(self, capture_data):
+        """Rework capture data.
+
+        :param capture_data: binary data as stream
+        :type capture_data: :py:class:`io.BytesIO`
+        """
+        # "Rewind" the stream to the beginning so we can read its content
+        capture_data.seek(0)
+        return Image.open(capture_data)
+
     def preview(self, window, flip=True):
         """Display a preview on the given Rect (flip if necessary).
         """
@@ -124,7 +136,7 @@ class RpiCamera(BaseCamera):
         self._cam.stop_preview()
         self._window = None
 
-    def capture(self, filename, effect=None):
+    def capture(self, effect=None):
         """Capture a new picture in a file.
         """
         effect = str(effect).lower()
@@ -132,9 +144,10 @@ class RpiCamera(BaseCamera):
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
         try:
+            stream = BytesIO()
             self._cam.image_effect = effect
-            self._cam.capture(filename)
-            self._captures[filename] = None  # Nothing to keep for post processing
+            self._cam.capture(stream, format='jpeg')
+            self._captures.append(stream)
         finally:
             self._cam.image_effect = 'none'
 

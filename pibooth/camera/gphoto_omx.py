@@ -111,7 +111,7 @@ class GpOmxCamera(GpCamera):
             self.omxplayer_process = None
         self._window = None
 
-    def capture(self, filename, effect=None):
+    def capture(self, effect=None):
         """Capture a picture in a file.
         """
         effect = str(effect).lower()
@@ -119,7 +119,7 @@ class GpOmxCamera(GpCamera):
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
         self._initialize()
-        self._captures[filename] = (self._cam.capture(gp.GP_CAPTURE_IMAGE), effect)
+        self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         time.sleep(1)  # Necessary to let the time for the camera to save the image
         self.quit()
 

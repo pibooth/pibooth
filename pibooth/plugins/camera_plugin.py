@@ -69,7 +69,6 @@ class CameraPlugin(object):
 
     @pibooth.hookimpl
     def state_capture_do(self, cfg, app, win):
-        capture_path = osp.join(app.dirname, "pibooth{:03}.jpg".format(self.count))
         effects = cfg.gettyped('PICTURE', 'captures_effects')
         if not isinstance(effects, (list, tuple)):
             # Same effect for all captures
@@ -82,12 +81,12 @@ class CameraPlugin(object):
             raise ValueError("Not enough effects defined for {} captures {}".format(
                 app.capture_nbr, effects))
 
-        with timeit("Take a capture and save it in {}".format(capture_path)):
+        with timeit("Take a capture"):
             if cfg.getboolean('WINDOW', 'flash'):
                 with win.flash(2):  # Manage the window here, have no choice
-                    app.camera.capture(capture_path, effect)
+                    app.camera.capture(effect)
             else:
-                app.camera.capture(capture_path, effect)
+                app.camera.capture(effect)
 
         self.count += 1
 

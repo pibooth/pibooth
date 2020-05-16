@@ -86,8 +86,13 @@ class PicturePlugin(object):
     def state_processing_do(self, cfg, app):
         idx = app.capture_choices.index(app.capture_nbr)
 
-        with timeit("Creating the final picture"):
+        with timeit("Saving raw captures"):
             captures = app.camera.get_captures()
+            for capture in captures:
+                count = captures.index(capture)
+                capture.save(osp.join(app.dirname, "pibooth{:03}.jpg".format(count)))
+
+        with timeit("Creating the final picture"):
             factory = get_picture_factory(captures, cfg.get('PICTURE', 'orientation'))
             self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
                                                         opt_index=idx,
