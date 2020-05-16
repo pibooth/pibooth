@@ -62,12 +62,12 @@ def _find(choices, value):
 class PiConfigMenu(object):
 
     def __init__(self, window, config, onclose=None):
-        self.window = window
-        self.config = config
+        self.win = window
+        self.cfg = config
         self._main_menu = None
         self._close_callback = onclose
 
-        size = self.window.get_rect().size
+        size = self.win.get_rect().size
         self.size = (min(600, size[0]), min(400, size[1]))
         self._main_menu = pgm.Menu(self.size[1],
                                    self.size[0],
@@ -101,7 +101,7 @@ class PiConfigMenu(object):
                 if isinstance(option[3], str):
                     menu.add_text_input(title,
                                         onchange=self._on_text_changed,
-                                        default=self.config.get(section, name).strip('"'),
+                                        default=self.cfg.get(section, name).strip('"'),
                                         # Parameters passed to callback:
                                         section=section,
                                         option=name)
@@ -109,7 +109,7 @@ class PiConfigMenu(object):
                         and all(isinstance(i, int) for i in option[3]):
                     menu.add_color_input(title,
                                          "rgb",
-                                         default=self.config.gettyped(section, name),
+                                         default=self.cfg.gettyped(section, name),
                                          input_separator=',',
                                          onchange=self._on_color_changed,
                                          previsualization_width=1,
@@ -121,7 +121,7 @@ class PiConfigMenu(object):
                     menu.add_selector(title,
                                       values,
                                       onchange=self._on_selector_changed,
-                                      default=_find(values, self.config.get(section, name)),
+                                      default=_find(values, self.cfg.get(section, name)),
                                       # Parameters passed to callback:
                                       section=section,
                                       option=name)
@@ -131,26 +131,26 @@ class PiConfigMenu(object):
     def _on_selector_changed(self, value, **kwargs):
         """Called after each option changed.
         """
-        if self._main_menu.is_enabled():
-            self.config.set(kwargs['section'], kwargs['option'], str(value[0]))
+        if self._main_menu.is_enabled():  # Menu may have been closed
+            self.cfg.set(kwargs['section'], kwargs['option'], str(value[0]))
 
     def _on_text_changed(self, value, **kwargs):
         """Called after each text input changed.
         """
-        if self._main_menu.is_enabled():
-            self.config.set(kwargs['section'], kwargs['option'], '"{}"'.format(str(value)))
+        if self._main_menu.is_enabled():  # Menu may have been closed
+            self.cfg.set(kwargs['section'], kwargs['option'], '"{}"'.format(str(value)))
 
     def _on_color_changed(self, value, **kwargs):
         """Called after each text input changed.
         """
-        if self._main_menu.is_enabled():
-            self.config.set(kwargs['section'], kwargs['option'], str(value))
+        if self._main_menu.is_enabled():  # Menu may have been closed
+            self.cfg.set(kwargs['section'], kwargs['option'], str(value))
 
     def _on_close(self):
         """Called when the menu is closed.
         """
         self._main_menu.disable()
-        self.config.save()
+        self.cfg.save()
         if self._close_callback:
             self._close_callback()
 
@@ -196,5 +196,5 @@ class PiConfigMenu(object):
         """Process the events related to the menu.
         """
         self._main_menu.update(events)
-        if self.is_shown():  # Menu may have been closed
-            self._main_menu.draw(self.window.surface)
+        if self._main_menu.is_enabled():  # Menu may have been closed
+            self._main_menu.draw(self.win.surface)
