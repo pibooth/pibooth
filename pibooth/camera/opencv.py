@@ -12,7 +12,7 @@ from pibooth.utils import memorize
 from pibooth.pictures import sizing
 from pibooth.utils import PoolingTimer
 from pibooth.language import get_translated_text
-from pibooth.controls.camera.base import BaseCamera
+from pibooth.camera.base import BaseCamera
 
 
 @memorize

@@ -7,60 +7,35 @@ import traceback
 from pibooth.utils import LOGGER, BlockConsoleHandler
 
 
-class State(object):
-
-    app = None
-
-    def __init__(self, name):
-        self.name = name
-
-    def entry_actions(self):
-        """Perform actions when state is activated
-        """
-        pass
-
-    def do_actions(self, events):
-        """Perform periodic actions related to the state
-        """
-        pass
-
-    def exit_actions(self):
-        """Perform actions before state is deactivated
-        """
-        pass
-
-    def validate_transition(self, events):
-        """Return the name of the next state if can be activated
-        """
-        pass
-
-
 class StateMachine(object):
 
-    def __init__(self, application):
-        self.states = {}
+    def __init__(self, plugins_manager, configuration, application, window):
+        self.states = set()
         self.failsafe_state = None
         self.active_state = None
 
         # Share the application to manage between states
-        State.app = application
+        self.app = application
+        self.win = window
+        self.cfg = configuration
+        self.pm = plugins_manager
 
-    def add_state(self, state):
+    def add_state(self, name):
         """Add a state to the internal dictionary.
         """
-        self.states[state.name] = state
+        self.states.add(name)
 
-    def add_failsafe_state(self, state):
+    def add_failsafe_state(self, name):
         """Add a state that will be call in case of exception.
         """
-        self.failsafe_state = state
-        self.states[state.name] = state
+        self.failsafe_state = name
+        self.states.add(name)
 
-    def remove_state(self, state_name):
+    def remove_state(self, name):
         """Remove a state to the internal dictionary.
         """
-        state = self.states.pop(state_name, None)
-        if state == self.failsafe_state:
+        self.states.discard(name)
+        if name == self.failsafe_state:
             self.failsafe_state = None
 
     def process(self, events):
@@ -72,16 +47,18 @@ class StateMachine(object):
 
         try:
             # Perform the actions of the active state
-            self.active_state.do_actions(events)
+            hook = getattr(self.pm.hook, 'state_{}_do'.format(self.active_state))
+            hook(cfg=self.cfg, app=self.app, win=self.win, events=events)
 
             # Check conditions to activate the next state
-            new_state_name = self.active_state.validate_transition(events)
+            hook = getattr(self.pm.hook, 'state_{}_validate'.format(self.active_state))
+            new_state_name = hook(cfg=self.cfg, app=self.app, win=self.win, events=events)
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
                 if BlockConsoleHandler.is_debug():
                     traceback.print_exc()
-                new_state_name = self.failsafe_state.name
+                new_state_name = self.failsafe_state
             else:
                 raise
 
@@ -94,13 +71,14 @@ class StateMachine(object):
         try:
             # Perform any exit actions of the current state
             if self.active_state is not None:
-                self.active_state.exit_actions()
+                hook = getattr(self.pm.hook, 'state_{}_exit'.format(self.active_state))
+                hook(cfg=self.cfg, app=self.app, win=self.win)
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
                 if BlockConsoleHandler.is_debug():
                     traceback.print_exc()
-                state_name = self.failsafe_state.name
+                state_name = self.failsafe_state
             else:
                 raise
 
@@ -109,15 +87,16 @@ class StateMachine(object):
 
         # Switch to the new state and perform its entry actions
         LOGGER.debug("Activate state '%s'", state_name)
-        self.active_state = self.states[state_name]
+        self.active_state = state_name
 
         try:
-            self.active_state.entry_actions()
+            hook = getattr(self.pm.hook, 'state_{}_enter'.format(self.active_state))
+            hook(cfg=self.cfg, app=self.app, win=self.win)
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
                 if BlockConsoleHandler.is_debug():
                     traceback.print_exc()
-                self.set_state(self.failsafe_state.name)
+                self.set_state(self.failsafe_state)
             else:
                 raise

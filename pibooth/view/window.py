@@ -29,7 +29,7 @@ class PtbWindow(object):
                  debug=False):
         self.__size = size
         self.debug = debug
-        self.color = color
+        self.bg_color = color
         self.text_color = text_color
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
@@ -48,7 +48,6 @@ class PtbWindow(object):
         self._print_number = 0
         self._print_failure = False
         self._capture_number = (0, 4)  # (current, max)
-        self._default_cursor = pygame.mouse.get_cursor()
 
         self._pos_map = {self.CENTER: self._center_pos,
                          self.RIGHT: self._right_pos,
@@ -60,7 +59,7 @@ class PtbWindow(object):
         """
         image_name = id(pil_image)
 
-        image_size_max = (2 * self.size[1] // 3, self.size[1])
+        image_size_max = (2 * self.surface.get_size()[1] // 3, self.surface.get_size()[1])
 
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
@@ -71,7 +70,7 @@ class PtbWindow(object):
                     pil_image.size, image_size_max), Image.ANTIALIAS)
             else:
                 image = pil_image
-            image = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+            image = pygame.image.frombuffer(image.tobytes(), image.size, image.mode)
             if self._current_foreground:
                 self._buffered_images.pop(id(self._current_foreground[0]), None)
             LOGGER.debug("Add to buffer the image '%s'", image_name)
@@ -84,7 +83,7 @@ class PtbWindow(object):
         """Show image on the background.
         """
         self._current_background = self._buffered_images.setdefault(str(bkgd), bkgd)
-        self._current_background.set_color(self.color)
+        self._current_background.set_color(self.bg_color)
         self._current_background.set_outlines(self.debug)
         self._current_background.set_text_color(self.text_color)
         self._current_background.resize(self.surface)
@@ -101,31 +100,31 @@ class PtbWindow(object):
         center = self.surface.get_rect().center
         radius = 10
         border = 20
-        color = (255, 255, 255)
         x = center[0] - (2 * radius * self._capture_number[1] + border * (self._capture_number[1] - 1)) // 2
-        y = self.size[1] - radius - border
+        y = self.surface.get_size()[1] - radius - border
         for nbr in range(self._capture_number[1]):
-            gfxdraw.aacircle(self.surface, x, y, radius, color)
+            gfxdraw.aacircle(self.surface, x, y, radius, self.text_color)
             if self._capture_number[0] > nbr:
                 # Because anti-aliased filled circle doesn't exist
-                gfxdraw.aacircle(self.surface, x, y, radius - 3, color)
-                gfxdraw.filled_circle(self.surface, x, y, radius - 3, color)
+                gfxdraw.aacircle(self.surface, x, y, radius - 3, self.text_color)
+                gfxdraw.filled_circle(self.surface, x, y, radius - 3, self.text_color)
             x += (2 * radius + border)
 
     def _update_print_number(self):
         """Update the number of files in the printer queue.
         """
-        if not self._print_number:
-            return  # Dont show counter: no file in queue
+        if not self._print_number and not self._print_failure:
+            return  # Dont show counter: no file in queue, no failure
 
-        smaller = self.size[1] if self.size[1] < self.size[0] else self.size[0]
+        smaller = self.surface.get_size()[1] if self.surface.get_size(
+            )[1] < self.surface.get_size()[0] else self.surface.get_size()[0]
         side = int(smaller * 0.05)  # 5% of the window
 
         if side > 0:
             if self._print_failure:
-                image = pictures.get_pygame_image('printer_failure.png', (side, side))
+                image = pictures.get_pygame_image('printer_failure.png', (side, side), color=self.text_color)
             else:
-                image = pictures.get_pygame_image('printer.png', (side, side))
+                image = pictures.get_pygame_image('printer.png', (side, side), color=self.text_color)
             y = self.surface.get_rect().height - image.get_rect().height - 10
             self.surface.blit(image, (10, y))
             font = pygame.font.Font(fonts.CURRENT, side)
@@ -153,15 +152,6 @@ class PtbWindow(object):
         pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
         return image.get_rect(center=pos) if image else pos
 
-    @property
-    def size(self):
-        """Return the current window size.
-        """
-        if self.is_fullscreen:
-            return self.display_size
-        else:
-            return self.__size
-
     def get_rect(self):
         """Return a Rect object (as defined in pygame) for this window. The position represent
         the absolute position considering the window centered on screen.
@@ -171,8 +161,9 @@ class PtbWindow(object):
     def resize(self, size):
         """Resize the window keeping aspect ratio.
         """
-        self.__size = size
-        self.surface = pygame.display.set_mode(self.size, pygame.RESIZABLE)
+        if not self.is_fullscreen:
+            self.__size = size  # Manual resizing
+            self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
         self.update()
 
     def update(self):
@@ -309,13 +300,13 @@ class PtbWindow(object):
         """Set window to full screen or initial size.
         """
         if self.is_fullscreen:
-            self.is_fullscreen = False  # Set before get size
-            pygame.mouse.set_cursor(*self._default_cursor)
-            self.surface = pygame.display.set_mode(self.size, pygame.RESIZABLE)
+            self.is_fullscreen = False  # Set before resize
+            pygame.mouse.set_visible(True)
+            self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
         else:
-            self.is_fullscreen = True  # Set before get size
-            pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
-            self.surface = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
+            self.is_fullscreen = True  # Set before resize
+            pygame.mouse.set_visible(False)
+            self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
 
         self.update()
 

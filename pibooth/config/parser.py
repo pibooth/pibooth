@@ -8,9 +8,11 @@ import ast
 import os
 import os.path as osp
 import itertools
+import inspect
 from collections import OrderedDict as odict
 from pibooth.utils import LOGGER, open_text_editor
 from pibooth import language
+from pibooth.plugins import get_plugin_name
 
 
 try:
@@ -18,6 +20,12 @@ try:
 except ImportError:
     # Python 2.x fallback
     from ConfigParser import ConfigParser
+
+try:
+    basestring
+except NameError:
+    # Python 3.x fallback
+    basestring = str
 
 
 def values_list_repr(values):
@@ -37,18 +45,18 @@ DEFAULT = odict((
                 ("~/Pictures/pibooth",
                  "Path to save pictures",
                  None, None)),
-            ("clear_on_startup",
-                (False,
-                 "Cleanup the 'directory' before start",
-                 "Clear on startup", ['True', 'False'])),
             ("autostart",
                 (False,
                  "Start pibooth at Raspberry Pi startup",
                  "Auto-start", ['True', 'False'])),
             ("debug",
                 (False,
-                 "In debug mode, exceptions are not caught, logs are more verbose",
+                 "In debug mode, exceptions are not caught, logs are more verbose, pictures are cleared at startup",
                  "Debug mode", ['True', 'False'])),
+            ("plugins",
+                ('',
+                 "Path to custom plugin(s) not installed with pip (list of paths accepted)",
+                 None, None)),
         ))
      ),
     ("WINDOW",
@@ -64,7 +72,7 @@ DEFAULT = odict((
             ("text_color",
                 ((255, 255, 255),
                  "Text RGB color",
-                 None, None)),
+                 "Text RGB color", (255, 255, 255))),
             ("flash",
                 (True,
                  "Blinking background when a capture is taken",
@@ -79,7 +87,7 @@ DEFAULT = odict((
                  None, None)),
             ("final_image_delay",
                 (-1,
-                 "How long is displayed the final image in seconds before being hidden (-1 if never hidden)",
+                 "How long is displayed the final picture in seconds before being hidden (-1 if never hidden)",
                  "Final image display time", ['-1'] + [str(i) for i in range(0, 121, 5)])),
             ("arrows",
                 ('bottom',
@@ -121,17 +129,21 @@ DEFAULT = odict((
                 (False,
                  "Crop each capture border in order to fit the paper size",
                  "Crop captures",  ['True', 'False'])),
+            ("margin_thick",
+                (100,
+                 "Thick (in pixels) between captures and picture borders/texts",
+                 "Borders width", [str(i) for i in range(0, 210, 10)])),
             ("footer_text1",
                 ("Footer 1",
                  "Main text displayed",
-                 "Title : ", "")),
+                 "Title", "")),
             ("footer_text2",
                 ("Footer 2",
                  "Secondary text displayed",
-                 "Sub-title : ", "")),
+                 "Sub-title", "")),
             ("text_colors",
                 ((0, 0, 0),
-                 "RGB colors used for footer texts (list of tuple accepted)",
+                 "RGB colors used for footer texts (list of tuples accepted)",
                  None, None)),
             ("text_fonts",
                 (('Amatic-Bold', 'AmaticSC-Regular'),
@@ -143,11 +155,11 @@ DEFAULT = odict((
                  None, None)),
             ("overlays",
                 ('',
-                 "Overlay path (PNG file) with same aspect ratio than final picture (list of path accepted)",
+                 "Overlay path (PNG file) with same aspect ratio than final picture (list of paths accepted)",
                  None, None)),
             ("backgrounds",
                 ((255, 255, 255),
-                 "Background RGB color or image path (list of tuple or path accepted)",
+                 "Background RGB color or image path (list of tuples or paths accepted)",
                  None, None)),
         ))
      ),
@@ -192,7 +204,7 @@ DEFAULT = odict((
             ("max_duplicates",
                 (3,
                  "Maximum number of duplicate pages sent to the printer (avoid paper waste)",
-                 'Maximum of printed duplicates', [str(i) for i in range(1, 5)])),
+                 'Maximum of printed duplicates', [str(i) for i in range(0, 10)])),
             ("pictures_per_page",
                 (1,
                  "Print 1, 2, 3 or 4 picture copies per page",
@@ -202,7 +214,7 @@ DEFAULT = odict((
     ("CONTROLS",
         odict((
             ("debounce_delay",
-                (0.5,
+                (0.3,
                  "How long to debounce the hardware buttons in seconds",
                  None, None)),
             ("picture_btn_pin",
@@ -221,14 +233,6 @@ DEFAULT = odict((
                 (15,
                  "Physical GPIO OUT pin to light a LED when print button is pressed",
                  None, None)),
-            ("startup_led_pin",
-                (29,
-                 "Physical GPIO OUT pin to light a LED at pibooth startup",
-                 None, None)),
-            ("preview_led_pin",
-                (31,
-                 "Physical GPIO OUT pin to light a LED during preview",
-                 None, None)),
         ))
      ),
 ))
@@ -239,23 +243,22 @@ class PiConfigParser(ConfigParser):
     """Enhenced configuration file parser.
     """
 
-    def __init__(self, filename, clear=False):
+    def __init__(self, filename, plugin_manager, clear=False):
         ConfigParser.__init__(self)
+        self._pm = plugin_manager
         self.filename = osp.abspath(osp.expanduser(filename))
 
-        if not osp.isfile(self.filename) or clear:
-            dirname = osp.dirname(self.filename)
-            if not osp.isdir(dirname):
-                os.makedirs(dirname)
-            self.save(True)
-            self.enable_autostart(DEFAULT['GENERAL']['autostart'][0])
-
-        self.read(self.filename, encoding="utf-8")
+        # Overide
+        if osp.isfile(self.filename) and not clear:
+            self.read(self.filename, encoding="utf-8")
+            self.enable_autostart(self.getboolean('GENERAL', 'autostart'))
 
     def _get_abs_path(self, path):
         """Return absolute path. In case of relative path given, the absolute
         one is created using config file path as reference path.
         """
+        if not path:  # Empty string, don't process it as it is not a path
+            return path
         path = osp.expanduser(path)
         if not osp.isabs(path):
             path = osp.join(osp.relpath(osp.dirname(self.filename), '.'), path)
@@ -265,6 +268,11 @@ class PiConfigParser(ConfigParser):
         """Save the current or default values into the configuration file.
         """
         LOGGER.info("Generate the configuration file in '%s'", self.filename)
+
+        dirname = osp.dirname(self.filename)
+        if not osp.isdir(dirname):
+            os.makedirs(dirname)
+
         with io.open(self.filename, 'w', encoding="utf-8") as fp:
             for section, options in DEFAULT.items():
                 fp.write("[{}]\n".format(section))
@@ -274,6 +282,8 @@ class PiConfigParser(ConfigParser):
                     else:
                         val = self.get(section, name)
                     fp.write("# {}\n{} = {}\n\n".format(value[1], name, val))
+
+        self.enable_autostart(self.getboolean('GENERAL', 'autostart'))
 
     def edit(self):
         """Open a text editor to edit the configuration.
@@ -304,6 +314,43 @@ class PiConfigParser(ConfigParser):
             LOGGER.info("Remove the auto-startup file in '%s'", dirname)
             os.remove(filename)
 
+    def add_option(self, section, option, default, description, menu_name=None, menu_choices=None):
+        """Add a new option to the configuration and defines its default value.
+
+        :param section: section in which the option is declared
+        :type section: str
+        :param option: option name
+        :type option: str
+        :param default: default value of the option
+        :type default: any
+        :param description: description to put in the configuration
+        :type description: str
+        :param menu_name: option label on graphical menu (hidden if None)
+        :type menu_name: str
+        :param menu_choices: option possible choices on graphical menu
+        :type menu_choices: any
+        """
+        assert section, "Section name can not be empty string"
+        assert option, "Option name can not be empty string"
+        assert description, "Description can not be empty string"
+
+        # Find the caller plugin
+        stack = inspect.stack()
+        if len(stack) < 2:
+            plugin_name = "Unknown"
+        else:
+            plugin = inspect.getmodule(inspect.stack()[1][0])
+            plugin_name = get_plugin_name(self._pm, plugin, False)
+
+        # Check that the option is not already created
+        if section in DEFAULT and option in DEFAULT[section]:
+            raise ValueError("The plugin '{}' try to define the option [{}][{}] "
+                             "which is already defined.".format(plugin_name, section, option))
+
+        # Add the option to the default dictionary
+        description = "{}\n# Required by '{}' plugin".format(description, plugin_name)
+        DEFAULT.setdefault(section, odict())[option] = (default, description, menu_name, menu_choices)
+
     def get(self, section, option, **kwargs):
         """Override the default function of ConfigParser to add a
         default value if section or option is not found.
@@ -316,6 +363,13 @@ class PiConfigParser(ConfigParser):
         if self.has_section(section) and self.has_option(section, option):
             return ConfigParser.get(self, section, option, **kwargs)
         return str(DEFAULT[section][option][0])
+
+    def set(self, section, option, value=None):
+        """Override the default function of ConfigParser to create
+        the section if it does not exist."""
+        if not self.has_section(section):
+            self.add_section(section)
+        super(PiConfigParser, self).set(section, option, value)
 
     def gettyped(self, section, option):
         """Get a value from config and try to convert it in a native Python
@@ -366,6 +420,9 @@ class PiConfigParser(ConfigParser):
         else:
             types = list(types)
 
+        if str in types:  # Python 2.x compat
+            types[types.index(str)] = basestring
+
         color = False
         if 'color' in types:
             types.remove('color')
@@ -376,7 +433,7 @@ class PiConfigParser(ConfigParser):
         path = False
         if 'path' in types:
             types.remove('path')
-            types.append(str)
+            types.append(basestring)
             path = True  # Option accept file path
 
         types = tuple(types)
@@ -395,7 +452,7 @@ class PiConfigParser(ConfigParser):
         if path:
             new_values = []
             for v in values:
-                if isinstance(v, str) and v != '':
+                if isinstance(v, basestring):
                     new_values.append(self._get_abs_path(v))
                 else:
                     new_values.append(v)

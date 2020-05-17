@@ -2,6 +2,9 @@
 Default configuration
 ---------------------
 
+.. note:: Relative path (path which doesn't start by a ``/``) can be used. In this
+          case, the absolute path is computed from the configuration file location.
+
 .. code-block:: ini
 
     [GENERAL]
@@ -11,14 +14,14 @@ Default configuration
     # Path to save pictures
     directory = ~/Pictures/pibooth
 
-    # Cleanup the 'directory' before start
-    clear_on_startup = False
-
     # Start pibooth at Raspberry Pi startup
     autostart = False
 
-    # In debug mode, exceptions are not caught, logs are more verbose
+    # In debug mode, exceptions are not caught, logs are more verbose, pictures are cleared at startup
     debug = False
+
+    # Path to custom plugin(s) not installed with pip (list of paths accepted)
+    plugins =
 
     [WINDOW]
     # The (width, height) of the display window or 'fullscreen'
@@ -39,7 +42,7 @@ Default configuration
     # How long is displayed the capture in seconds before switching to the next one
     animate_delay = 0.2
 
-    # How long is displayed the final image in seconds before being hidden (-1 if never hidden)
+    # How long is displayed the final picture in seconds before being hidden (-1 if never hidden)
     final_image_delay = -1
 
     # Show arrows to indicate physical buttons: 'bottom', 'top' or 'hidden'
@@ -70,13 +73,16 @@ Default configuration
     # Crop each capture border in order to fit the paper size
     captures_cropping = False
 
+    # Thick (in pixels) between captures and picture borders/texts
+    margin_thick = 100
+
     # Main text displayed
     footer_text1 = Footer 1
 
     # Secondary text displayed
     footer_text2 = Footer 2
 
-    # RGB colors used for footer texts (list of tuple accepted)
+    # RGB colors used for footer texts (list of tuples accepted)
     text_colors = (0, 0, 0)
 
     # Fonts name or file path used for footer texts (list of quoted names accepted)
@@ -85,10 +91,10 @@ Default configuration
     # Alignments used for footer texts: 'left', 'center' or 'right' (list of quoted names accepted)
     text_alignments = center
 
-    # Overlay path (PNG file) with same aspect ratio than final picture (list of path accepted)
+    # Overlay path (PNG file) with same aspect ratio than final picture (list of paths accepted)
     overlays =
 
-    # Background RGB color or image path (list of tuple or path accepted)
+    # Background RGB color or image path (list of tuples or paths accepted)
     backgrounds = (255, 255, 255)
 
     [CAMERA]
@@ -125,7 +131,7 @@ Default configuration
 
     [CONTROLS]
     # How long to debounce the hardware buttons in seconds
-    debounce_delay = 0.5
+    debounce_delay = 0.3
 
     # Physical GPIO IN pin to take a picture
     picture_btn_pin = 11
@@ -138,9 +144,3 @@ Default configuration
 
     # Physical GPIO OUT pin to light a LED when print button is pressed
     print_led_pin = 15
-
-    # Physical GPIO OUT pin to light a LED at pibooth startup
-    startup_led_pin = 29
-
-    # Physical GPIO OUT pin to light a LED during preview
-    preview_led_pin = 31

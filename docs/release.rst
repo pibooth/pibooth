@@ -2,11 +2,11 @@
 Release ``pibooth`` for Pypi
 ----------------------------
 
-1. Install twine:
+1. Install packaging libraries:
 
    ::
 
-        $ sudo pip install twine
+        $ sudo pip install setuptools wheel twine
 
 2. Update the version number in the ``pibooth/__init__.py`` file.
 

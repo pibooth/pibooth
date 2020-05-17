@@ -1,10 +1,12 @@
 |Pibooth| |BeerPay|
 
-The ``pibooth`` project provides a photobooth application *out-of-the-box* in pure Python
-for Raspberry Pi. Have a look to the `wiki <https://github.com/werdeil/pibooth/wiki>`_
-to discover some realizations from GitHub users.
+|PythonVersions| |PypiPackage| |Downloads|
 
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/background_samples.png
+The ``pibooth`` project provides a photobooth application *out-of-the-box* in pure Python
+for Raspberry Pi. Have a look to the `wiki <https://github.com/pibooth/pibooth/wiki>`_
+to discover some realizations from GitHub users, and don't hesitate to send us photos of your version.
+
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/background_samples.png
    :align: center
    :alt: Settings
 
@@ -19,19 +21,25 @@ Features
 * Support all cameras compatible with gPhoto2, OpenCV and Raspberry Pi
 * Support for hardware buttons and lamps on Raspberry Pi GPIO
 * Fully driven from hardware buttons / keyboard / mouse / touchscreen
-* Preview during countdown
 * Auto-start at the Raspberry Pi startup
 * Animate last pictures during idle time
 * Store final pictures and the individual captures
 * Printing final pictures using CUPS server (printing queue indication)
-* Custom texts can be added on the final pictures (customizable fonts, colors, alignments)
-* Custom background(s) and overlay(s) can be added on final pictures
+* Custom texts can be added on the final picture (customizable fonts, colors, alignments)
+* Custom background(s) and overlay(s) can be added on the final picture
 * All settings available in a configuration file (most common options in a graphical interface)
+* Highly customizable thanks to it plugin system: you can develop your own plugin
 
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/gallery.png
+Output pictures gallery
+-----------------------
+
+You can see some examples of the output picture formats you can get with ``pibooth`` on the following page.
+
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/gallery.png
    :align: center
    :alt: gallery
-   :target: https://github.com/werdeil/pibooth/blob/master/docs/examples.rst
+   :target: https://github.com/pibooth/pibooth/blob/master/docs/examples.rst
+   :height: 200px
 
 Requirements
 ------------
@@ -112,7 +120,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
              printer or dslr under the []
 
 .. note:: An editable/customizable version of ``pibooth`` can be installed by following
-          these `instructions <https://github.com/werdeil/pibooth/blob/master/docs/dev.rst>`_ .
+          these `instructions <https://github.com/pibooth/pibooth/blob/master/docs/dev.rst>`_ .
           Be aware that the code on the `master` branch may be unstable.
 
 Run
@@ -137,15 +145,17 @@ You can display a basic help on application options by using the command::
 States and lights management
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The application follows the states sequence defined in the diagram below:
+The application follows the states sequence defined in the simplified diagram
+below:
 
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/state_sequence.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/state_sequence.png
    :align: center
    :alt: State sequence
 
 The states of the **LED 1** and **LED 2** are modified depending on the actions available
-for the user. The **LED 3** is switched on when the application starts and the **LED 4**
-is switched on during the preview and photo capture.
+for the user.
+
+Detailed state diagram can be found `here <https://github.com/pibooth/pibooth/blob/master/docs/plugin.rst>`_.
 
 Commands
 ^^^^^^^^
@@ -228,6 +238,14 @@ The available fonts can be listed using the following the command::
 
     $ pibooth --fonts
 
+To regenerate the final pictures afterwards, from the originals captures present in the
+``raw`` folder, use the command::
+
+    $ pibooth-regen
+
+It permits to adjust the configuration to enhance the previous pictures with better
+parameters (title, more effects, etc...)
+
 Configuration
 -------------
 
@@ -236,7 +254,7 @@ which permits to configure the behavior of the application.
 
 A quick configuration GUI menu (see `Commands`_ ) gives access to the most common options:
 
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/settings.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/settings.png
    :align: center
    :alt: Settings
 
@@ -250,11 +268,21 @@ upgrading ``pibooth``)::
 
     $ pibooth --reset
 
-See the `default configuration file <https://github.com/werdeil/pibooth/blob/master/docs/config.rst>`_
+See the `default configuration file <https://github.com/pibooth/pibooth/blob/master/docs/config.rst>`_
 for further details.
 
+Customize using plugins
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Several plugins maintained by the community are available. They add extra features to
+``pibooth``. Have a look to the `plugins on PyPI  <https://pypi.org/search/?q=pibooth>`_.
+
+You can also easily develop your own plugin, and declare it in the ``[GENERAL][plugins]``
+key of the configuration. See guidelines to
+`develop custom plugin <https://github.com/pibooth/pibooth/blob/master/docs/plugin.rst>`_.
+
 GUI translations
-----------------
+^^^^^^^^^^^^^^^^
 
 The graphical interface texts are available in 4 languages by default: English, French,
 German, Dutch and Spanish. The default translations can be easily edited using the command::
@@ -265,7 +293,7 @@ A new language can be added by adding a new section (``[alpha-2-code]``).
 If you want to have ``pibooth`` in your language feel free to send us the corresponding keywords via a GitHub issue.
 
 Printer
--------
+^^^^^^^
 
 The print button (see `Commands`_) and print states are automatically activated/shown if:
 
@@ -298,21 +326,19 @@ Circuit diagram
 ---------------
 
 Here is the diagram for hardware connections. Please refer to the
-`default configuration file <https://github.com/werdeil/pibooth/blob/master/docs/config.rst>`_
-to know the default pins used.
+`default configuration file <https://github.com/pibooth/pibooth/blob/master/docs/config.rst>`_
+to know the default pins used (`physical pin numbering <https://pinout.xyz>`_).
 
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/sketch.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/sketch.png
    :align: center
    :alt: Electronic sketch
 
-Credits
--------
+An extra button can be added to start and shutdown properly the Raspberry Pi.
+Edit the file ``/boot/config.txt`` and set the line::
 
-Icons from the Noun Project
+    dtoverlay=gpio-shutdown
 
-- Polaroid by icon 54
-- Up hand drawn arrow by Kid A
-- Cameraman and Friends Posing For Camera by Gan Khoon Lay
+Then connect a push button between physical *pin 5* and *pin 6*.
 
 Terms and conditions
 --------------------
@@ -324,10 +350,20 @@ GDPR advices
 
 ``pibooth`` was developed for a private usage with no connection to a professional or commercial activity,
 as a consequence GDPR does not apply.
-However if you are using photobooth in Europe, it is your responsability to check that your usage and 
+However if you are using photobooth in Europe, it is your responsability to check that your usage and
 more particularly the usage of the pictures generated by ``pibooth`` follows the GDPR rules, especially make
 sure that the people that will use the ``pibooth`` are aware that the image will be stored on the device.
 
+Credits
+^^^^^^^
+
+Pibooth icon from `Artcore Illustrations <https://www.iconspedia.com/icon/photobooth-icon-29464.html>`_
+
+Icons from the Noun Project (https://thenounproject.com/)
+
+- Polaroid by icon 54
+- Up hand drawn arrow by Kid A
+- Cameraman and Friends Posing For Camera by Gan Khoon Lay
 
 Support us on Beerpay
 ---------------------
@@ -344,5 +380,17 @@ If you want to help us you can by clicking on the following links!
    :align: middle
    :target: https://beerpay.io/werdeil/pibooth?focus=wish
 
-.. |Pibooth| image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/pibooth.png
+.. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/pibooth.png
    :align: middle
+
+.. |PythonVersions| image:: https://img.shields.io/badge/python-2.7+ / 3.6+-red.svg
+   :target: https://www.python.org/downloads
+   :alt: Python 2.7+/3.6+
+
+.. |PypiPackage| image:: https://badge.fury.io/py/pibooth.svg
+   :target: https://pypi.org/project/pibooth
+   :alt: PyPi package
+
+.. |Downloads| image:: https://img.shields.io/pypi/dm/pibooth?color=purple
+   :target: https://pypi.org/project/pibooth
+   :alt: PyPi downloads

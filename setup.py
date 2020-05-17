@@ -35,8 +35,8 @@ def main():
             'Topic :: Multimedia :: Graphics :: Capture :: Digital Camera',
         ],
         author="Vincent Verdeil, Antoine Rousseaux",
-        url="https://github.com/werdeil/pibooth",
-        download_url="https://github.com/werdeil/pibooth/archive/{}.tar.gz".format(pibooth.__version__),
+        url="https://github.com/pibooth/pibooth",
+        download_url="https://github.com/pibooth/pibooth/archive/{}.tar.gz".format(pibooth.__version__),
         license='MIT license',
         platforms=['unix', 'linux'],
         keywords=[
@@ -52,12 +52,13 @@ def main():
         },
         include_package_data=True,
         install_requires=[
-            'RPi.GPIO>=0.6.3 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
             'picamera>=1.13 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
             'Pillow>=6.1.0',
             'Pygame>=1.9.4',
-            'pygame-menu>=2.0.4',
-            'psutil>=5.5.1'
+            'pygame-menu>=3.0.1',
+            'psutil>=5.5.1',
+            'pluggy>=0.13.1',
+            'gpiozero>=1.5.1'
         ],
         extras_require={
             'dslr': ['gphoto2>=2.0.0'],

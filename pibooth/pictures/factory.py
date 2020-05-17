@@ -14,7 +14,7 @@ except ImportError:
     cv2 = None
 
 
-class PictureMaker(object):
+class PictureFactory(object):
 
     """
     Concatenate up to 4 PIL images in portrait orientation...
@@ -49,6 +49,7 @@ class PictureMaker(object):
         self._texts_height = 0
         self._final = None
         self._margin = 100
+        self._margin_text = self._margin
         self._crop = False
         self._outlines = False
         self._images = images
@@ -128,10 +129,10 @@ class PictureMaker(object):
         if not interline:
             interline = 20
 
-        text_x = self._margin
+        text_x = self._margin_text
         text_y = self.height - self._texts_height
-        total_width = self.width - 2 * self._margin
-        total_height = self._texts_height - self._margin
+        total_width = self.width - 2 * self._margin_text
+        total_height = self._texts_height - self._margin_text
 
         if self.is_portrait:
             text_height = (total_height - interline * (len(self._texts) - 1)) // (len(self._texts) + 1)
@@ -381,7 +382,7 @@ class PictureMaker(object):
         return image
 
 
-class PilPictureMaker(PictureMaker):
+class PilPictureFactory(PictureFactory):
 
     def _image_resize_keep_ratio(self, image, max_w, max_h, crop=False):
         """See upper class description.
@@ -426,7 +427,7 @@ class PilPictureMaker(PictureMaker):
         return image
 
 
-class OpenCvPictureMaker(PictureMaker):
+class OpenCvPictureFactory(PictureFactory):
 
     def _image_resize_keep_ratio(self, image, max_w, max_h, crop=False):
         """See upper class description.

@@ -8,7 +8,7 @@ except ImportError:
     picamera = None  # picamera is optional
 from pibooth.utils import memorize
 from pibooth.language import get_translated_text
-from pibooth.controls.camera.base import BaseCamera
+from pibooth.camera.base import BaseCamera
 
 
 @memorize
@@ -77,6 +77,10 @@ class RpiCamera(BaseCamera):
     def preview(self, window, flip=True):
         """Display a preview on the given Rect (flip if necessary).
         """
+        if self._cam.preview is not None:
+            # Already running
+            return
+
         self._window = window
         rect = self.get_rect()
         if self._cam.hflip:
