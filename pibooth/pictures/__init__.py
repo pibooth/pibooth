@@ -53,7 +53,7 @@ def is_grey_scale(pil_image):
         total_pixels = sum([color[0] for color in colors])
         for color in colors:
             nb_pixel, pixels = color
-            if pixels[0] != pixels[1] and pixels[1] != pixels[2]:
+            if pixels[0] != pixels[1] or pixels[1] != pixels[2] or pixels[0] != pixels[2]:
                 if nb_pixel/total_pixels > 0.0001:
                     # we have at leat 1/1000 of pixel not grey
                     is_grey = False
