@@ -90,7 +90,7 @@ class Background(object):
             rect = self._rect.inflate(-self._text_border, -self._text_border)
         if self._outlines:
             # Build rectangle around text area for debuging purpose
-            outlines = pygame.Surface(rect.size)
+            outlines = pygame.Surface(rect.size, pygame.SRCALPHA, 32)
             pygame.draw.rect(outlines, pygame.Color(255, 0, 0), outlines.get_rect(), 2)
             self._texts.append((outlines, rect))
         self._texts.extend(multiline_text_to_surfaces(text, self._text_color, rect, align))
@@ -268,13 +268,15 @@ class IntroWithPrintBackground(IntroBackground):
         text = get_translated_text("intro_print")
         if text:
             if self.arrow_location == ARROW_HIDDEN or self.arrow_location == ARROW_BOTTOM:
-                rect = pygame.Rect(self._rect.width * 0.30 + self._text_border, self._rect.height * 0.7,
+                rect = pygame.Rect(self._rect.width * 0.30 + self._text_border, 0,
                                    self._rect.width * 0.20 - 2 * self._text_border,
                                    self._rect.height * 0.3 - 2 * self._text_border)
+                rect.bottom = self._rect.height - self._rect.height * 0.08
             else:
-                rect = pygame.Rect(self._rect.width * 0.30 + self._text_border, self._text_border,
+                rect = pygame.Rect(self._rect.width * 0.30 + self._text_border, 0,
                                    self._rect.width * 0.20 - 2 * self._text_border,
                                    self._rect.height * 0.3 - 2 * self._text_border)
+                rect.top = self._rect.height * 0.08
             self._write_text(text, rect)
 
     def paint(self, screen):
@@ -513,13 +515,16 @@ class PrintBackground(Background):
         text = get_translated_text("print_forget")
         if text:
             if self.arrow_location == ARROW_HIDDEN or self.arrow_location == ARROW_BOTTOM:
-                rect = pygame.Rect(self._rect.width // 2 + self._text_border, self._rect.height * 0.7,
+                rect = pygame.Rect(self._rect.width // 2, 0,
                                    self._rect.width // 5 - 2 * self._text_border,
                                    self._rect.height * 0.3 - 2 * self._text_border)
+                rect.bottom = self._rect.height - self._rect.height * 0.08
             else:
-                rect = pygame.Rect(self._rect.width // 2 + self._text_border, self._text_border,
+                rect = pygame.Rect(self._rect.width // 2, 0,
                                    self._rect.width // 5 - 2 * self._text_border,
                                    self._rect.height * 0.3 - 2 * self._text_border)
+                rect.top = self._rect.height * 0.08
+
             self._write_text(text, rect)
 
     def paint(self, screen):
