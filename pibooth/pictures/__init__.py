@@ -206,31 +206,3 @@ def get_picture_factory(captures, orientation=AUTO, paper_format=(4, 6), force_p
         return factory.PilPictureFactory(size[0], size[1], *captures)
 
     return factory.OpenCvPictureFactory(size[0], size[1], *captures)
-
-
-def get_layout_image(text_color, bg_color, layout_number, size):
-    """Generate the layout image with the corresponding text.
-
-    :param text_color: RGB color for texts
-    :type text_color: tuple
-    :param layout_number: number of captures on the layout
-    :type layout_number: int
-    :param size: maximum size of the layout surface
-    :type size: tuple
-
-    :return: surface
-    :rtype: pygame.Surface
-    """
-    layout_image = get_pygame_image("layout{0}.png".format(layout_number), size, color=text_color, bg_color=bg_color)
-    text = language.get_translated_text(str(layout_number))
-    if text:
-        rect = layout_image.get_rect()
-        rect = pygame.Rect(rect.x + rect.width * 0.3 / 2,
-                           rect.y + rect.height * 0.76,
-                           rect.width * 0.7, rect.height * 0.20)
-        text_font = fonts.get_pygame_font(text, fonts.CURRENT, rect.width, rect.height)
-        surface = text_font.render(text, True, bg_color)
-        layout_image.blit(surface, surface.get_rect(center=rect.center))
-    return layout_image
-
-
