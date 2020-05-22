@@ -53,6 +53,13 @@ class PtbWindow(object):
                          self.RIGHT: self._right_pos,
                          self.LEFT: self._left_pos}
 
+        # Don't use pygame.mouse.get_cursor() because will be removed in pygame2
+        self._cursor = ((16, 16), (0, 0),
+                        (0, 0, 64, 0, 96, 0, 112, 0, 120, 0, 124, 0, 126, 0, 127, 0,
+                         127, 128, 124, 0, 108, 0, 70, 0, 6, 0, 3, 0, 3, 0, 0, 0),
+                        (192, 0, 224, 0, 240, 0, 248, 0, 252, 0, 254, 0, 255, 0, 255,
+                         128, 255, 192, 255, 224, 254, 0, 239, 0, 207, 0, 135, 128, 7, 128, 3, 0))
+
     def _update_foreground(self, pil_image, pos=CENTER, resize=True):
         """Show a PIL image on the foreground.
         Only once is bufferized to avoid memory leak.
@@ -301,11 +308,13 @@ class PtbWindow(object):
         """
         if self.is_fullscreen:
             self.is_fullscreen = False  # Set before resize
-            pygame.mouse.set_visible(True)
+            pygame.mouse.set_cursor(*self._cursor)
             self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
         else:
             self.is_fullscreen = True  # Set before resize
-            pygame.mouse.set_visible(False)
+            # Make an invisible cursor (don't use pygame.mouse.set_visible(False) because
+            # the mouse event will always return the window bottom-right coordinate)
+            pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
             self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
 
         self.update()
