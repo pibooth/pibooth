@@ -25,13 +25,13 @@ class CameraPlugin(object):
     def state_failsafe_enter(self, app):
         """Reset variables set in this plugin.
         """
-        app.dirname = None
+        app.capture_date = None
         app.capture_nbr = None
         app.camera.drop_captures()  # Flush previous captures
 
     @pibooth.hookimpl
     def state_wait_enter(self, app):
-        app.dirname = None
+        app.capture_date = None
         app.capture_nbr = None
 
     @pibooth.hookimpl
@@ -48,10 +48,8 @@ class CameraPlugin(object):
         LOGGER.info("Take a new capture")
         if not app.capture_nbr:
             app.capture_nbr = app.capture_choices[0]
-        if not app.dirname:
-            savedir = cfg.getpath('GENERAL', 'directory')
-            app.dirname = osp.join(savedir, "raw", time.strftime("%Y-%m-%d-%H-%M-%S"))
-            os.makedirs(app.dirname)
+        if not app.capture_date:
+            app.capture_date = time.strftime("%Y-%m-%d-%H-%M-%S")
         app.camera.preview(win)
 
     @pibooth.hookimpl
@@ -69,7 +67,6 @@ class CameraPlugin(object):
 
     @pibooth.hookimpl
     def state_capture_do(self, cfg, app, win):
-        capture_path = osp.join(app.dirname, "pibooth{:03}.jpg".format(self.count))
         effects = cfg.gettyped('PICTURE', 'captures_effects')
         if not isinstance(effects, (list, tuple)):
             # Same effect for all captures
@@ -82,12 +79,12 @@ class CameraPlugin(object):
             raise ValueError("Not enough effects defined for {} captures {}".format(
                 app.capture_nbr, effects))
 
-        with timeit("Take a capture and save it in {}".format(capture_path)):
+        with timeit("Take a capture"):
             if cfg.getboolean('WINDOW', 'flash'):
                 with win.flash(2):  # Manage the window here, have no choice
-                    app.camera.capture(capture_path, effect)
+                    app.camera.capture(effect)
             else:
-                app.camera.capture(capture_path, effect)
+                app.camera.capture(effect)
 
         self.count += 1
 

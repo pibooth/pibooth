@@ -18,15 +18,18 @@ class HybridCamera(RpiCamera):
         self._gp_cam = GpCamera(*args, **kwargs)
         self._gp_cam._captures = self._captures  # Same dict for both cameras
 
-    def _post_process_capture(self, capture_path):
-        """Rework and return a Image object from file.
-        """
-        return self._gp_cam._post_process_capture(capture_path)
+    def _post_process_capture(self, capture_data):
+        """Rework capture data.
 
-    def capture(self, filename, effect=None):
+        :param capture_data: couple (GPhotoPath, effect)
+        :type capture_data: tuple
+        """
+        return self._gp_cam._post_process_capture(capture_data)
+
+    def capture(self, effect=None):
         """Capture a picture in a file.
         """
-        self._gp_cam.capture(filename, effect)
+        self._gp_cam.capture(effect)
 
         self._hide_overlay()  # If stop_preview() has not been called
 

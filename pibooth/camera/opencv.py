@@ -8,9 +8,8 @@ try:
 except ImportError:
     cv2 = None  # OpenCV is optional
 from PIL import Image
-from pibooth.utils import memorize
 from pibooth.pictures import sizing
-from pibooth.utils import PoolingTimer
+from pibooth.utils import PoolingTimer, memorize, LOGGER
 from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
@@ -102,12 +101,15 @@ class CvCamera(BaseCamera):
 
         return Image.fromarray(image)
 
-    def _post_process_capture(self, capture_path):
-        """Rework and return a Image object from file.
-        """
-        image, effect = self._captures[capture_path]
+    def _post_process_capture(self, capture_data):
+        """Rework capture data.
 
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        :param capture_data: couple (frame, effect)
+        :type capture_data: tuple
+        """
+        frame, effect = capture_data
+
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # Crop to keep aspect ratio of the resolution
         height, width = image.shape[:2]
         cropped = sizing.new_size_by_croping_ratio((width, height), self.resolution)
@@ -121,9 +123,8 @@ class CvCamera(BaseCamera):
             image = cv2.flip(image, 1)
 
         if effect != 'none':
-            pass  # To be implemented
+            LOGGER.warning("Effect with OpenCV camera is not implemented")
 
-        cv2.imwrite(capture_path, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
         return Image.fromarray(image)
 
     def preview(self, window, flip=True):
@@ -180,7 +181,7 @@ class CvCamera(BaseCamera):
         self._hide_overlay()
         self._window = None
 
-    def capture(self, filename, effect=None):
+    def capture(self, effect=None):
         """Capture a new picture.
         """
         effect = str(effect).lower()
@@ -191,7 +192,7 @@ class CvCamera(BaseCamera):
         if not ret:
             raise IOError("Can not capture frame")
 
-        self._captures[filename] = (image, effect)
+        self._captures.append((image, effect))
         time.sleep(0.5)  # To let time to see "Smile"
 
         self._hide_overlay()  # If stop_preview() has not been called

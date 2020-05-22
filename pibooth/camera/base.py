@@ -14,7 +14,7 @@ class BaseCamera(object):
         self._border = 50
         self._window = None
         self._overlay = None
-        self._captures = {}
+        self._captures = []
         self.resolution = resolution
         self.delete_internal_memory = delete_internal_memory
 
@@ -29,10 +29,10 @@ class BaseCamera(object):
         if self._overlay is not None:
             self._overlay = None
 
-    def _post_process_capture(self, capture_path):
-        """Rework and return a Image object from file.
+    def _post_process_capture(self, capture_data):
+        """Rework and return a PIL Image object from capture data.
         """
-        return Image.open(capture_path)
+        raise NotImplementedError
 
     def get_rect(self):
         """Return a Rect object (as defined in pygame) for resizing preview and images
@@ -79,7 +79,7 @@ class BaseCamera(object):
         """
         raise NotImplementedError
 
-    def capture(self, filename, effect=None):
+    def capture(self, effect=None):
         """Capture a new picture.
         """
         raise NotImplementedError
@@ -88,8 +88,8 @@ class BaseCamera(object):
         """Return all buffered captures as PIL images (buffer dropped after call).
         """
         images = []
-        for path in sorted(self._captures):
-            images.append(self._post_process_capture(path))
+        for data in self._captures:
+            images.append(self._post_process_capture(data))
         self.drop_captures()
         return images
 

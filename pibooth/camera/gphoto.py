@@ -114,10 +114,13 @@ class GpCamera(BaseCamera):
             image.paste(self._overlay, (0, 0), self._overlay)
         return image
 
-    def _post_process_capture(self, capture_path):
-        """Rework and return a Image object from file.
+    def _post_process_capture(self, capture_data):
+        """Rework capture data.
+
+        :param capture_data: couple (GPhotoPath, effect)
+        :type capture_data: tuple
         """
-        gp_path, effect = self._captures[capture_path]
+        gp_path, effect = capture_data
         camera_file = self._cam.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
         if self.delete_internal_memory:
             LOGGER.debug("Delete capture '%s' from internal memory", gp_path.name)
@@ -135,7 +138,6 @@ class GpCamera(BaseCamera):
         if effect != 'none':
             image = image.filter(getattr(ImageFilter, effect.upper()))
 
-        image.save(capture_path)
         return image
 
     def set_config_value(self, section, option, value):
@@ -246,7 +248,7 @@ class GpCamera(BaseCamera):
         self._hide_overlay()
         self._window = None
 
-    def capture(self, filename, effect=None):
+    def capture(self, effect=None):
         """Capture a new picture.
         """
         if self._preview_compatible:
@@ -256,7 +258,7 @@ class GpCamera(BaseCamera):
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
-        self._captures[filename] = (self._cam.capture(gp.GP_CAPTURE_IMAGE), effect)
+        self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         time.sleep(0.3)  # Necessary to let the time for the camera to save the image
 
         self._hide_overlay()  # If stop_preview() has not been called

@@ -11,7 +11,7 @@ Default configuration
     # User interface language: 'de', 'en', 'es', 'fr', 'hu' or 'nl'
     language = en
 
-    # Path to save pictures
+    # Path to save pictures (list of quoted paths accepted)
     directory = ~/Pictures/pibooth
 
     # Start pibooth at Raspberry Pi startup
@@ -20,7 +20,7 @@ Default configuration
     # In debug mode, exceptions are not caught, logs are more verbose, pictures are cleared at startup
     debug = False
 
-    # Path to custom plugin(s) not installed with pip (list of paths accepted)
+    # Path to custom plugin(s) not installed with pip (list of quoted paths accepted)
     plugins =
 
     [WINDOW]
@@ -91,10 +91,10 @@ Default configuration
     # Alignments used for footer texts: 'left', 'center' or 'right' (list of quoted names accepted)
     text_alignments = center
 
-    # Overlay path (PNG file) with same aspect ratio than final picture (list of paths accepted)
+    # Overlay path (PNG file) with same aspect ratio than final picture (list of quoted paths accepted)
     overlays =
 
-    # Background RGB color or image path (list of tuples or paths accepted)
+    # Background RGB color or image path (list of tuples or quoted paths accepted)
     backgrounds = (255, 255, 255)
 
     [CAMERA]
