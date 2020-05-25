@@ -3,6 +3,7 @@
 """Pibooth config menu.
 """
 
+from math import ceil
 import pygame
 import pygame_menu as pgm
 import pibooth
@@ -73,13 +74,24 @@ class PiConfigMenu(object):
                                    self.size[0],
                                    "Settings v{}".format(pibooth.__version__),
                                    theme=THEME_DARK,
+                                   columns=1,
+                                   column_max_width=[self.size[0]],
+                                   rows=20,
                                    onclose=self._on_close)
-
         for name in DEFAULT:
             submenu = self._build_submenu(name)
             if submenu._widgets:
                 self._main_menu.add_button(submenu.get_title(), submenu)
         self._main_menu.add_button('Exit', pgm.events.EXIT)
+
+        # check if number of submenus + exit is more than 5 to split on 2 columns
+        nb_submenus = len(self._main_menu._submenus)+1
+        if 5 < nb_submenus:
+            self._main_menu._rows = ceil(nb_submenus/2) # round up if odd number
+            self._main_menu._columns = 2
+            self._main_menu._column_max_width = [self.size[0]/2]*2
+            self._main_menu.center_content()
+
         self._main_menu.disable()
 
     def _build_submenu(self, section):
