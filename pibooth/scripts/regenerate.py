@@ -51,11 +51,10 @@ def regenerate_all_images(plugin_manager, config, basepath):
             LOGGER.warning("Folder %s doesn't contain the correct number of pictures", captures_folder_path)
             continue
 
-        factory = get_picture_factory(captures, config.get('PICTURE', 'orientation'))
-
-        plugin_manager.hook.pibooth_setup_picture_factory(cfg=config,
-                                                          opt_index=idx,
-                                                          factory=factory)
+        default_factory = get_picture_factory(captures, config.get('PICTURE', 'orientation'))
+        factory = plugin_manager.hook.pibooth_setup_picture_factory(cfg=config,
+                                                                    opt_index=idx,
+                                                                    factory=default_factory)
 
         picture_file = osp.join(basepath, captures_folder + "_pibooth.jpg")
         factory.save(picture_file)

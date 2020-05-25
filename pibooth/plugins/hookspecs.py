@@ -26,7 +26,7 @@ def pibooth_startup(cfg, app):
     """
 
 
-@hookspec
+@hookspec(firstresult=True)
 def pibooth_setup_picture_factory(cfg, opt_index, factory):
     """Hook used to setup the ``PictureFactory`` instance.
 
@@ -34,13 +34,13 @@ def pibooth_setup_picture_factory(cfg, opt_index, factory):
     configuration option for the current captures sequence. It represents
     the selected captures number.
 
-    A hook wrapper can be used to catch the current factory and return
-    a customized one.
-    (see details https://pluggy.readthedocs.io/en/latest/#wrappers)
+    A new ``PictureFactory`` instance can be returned by this hook, it will be
+    used indead of the default one. The returned object shall have the same
+    public API than :py:class:`pibooth.pictures.factory.PictureFactory`.
 
     :param cfg: application cfg
-    :param opt_index: index for tuple options
-    :param factory: ``PictureFactory`` instance
+    :param opt_index: index for tuple options related to captures number
+    :param factory: default ``PictureFactory`` instance (not configured yet)
     """
 
 
