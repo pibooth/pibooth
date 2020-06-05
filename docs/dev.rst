@@ -4,12 +4,12 @@ Install developing version
 --------------------------
 
 If you want to use an **unofficial version** of the ``pibooth`` application, you need to work from
-a clone of this ``git`` repository. Replace the step 7. of the `Install <https://github.com/werdeil/pibooth/blob/master/README.rst#Install>`_ procedure by the
+a clone of this ``git`` repository. Replace the step 7. of the `Install <https://github.com/pibooth/pibooth/blob/master/README.rst#Install>`_ procedure by the
 following actions:
 
 1. Clone from github ::
 
-    $ git clone https://github.com/werdeil/pibooth.git
+    $ git clone https://github.com/pibooth/pibooth.git
 
 2. Go in the cloned directory ::
 
