@@ -139,7 +139,7 @@ class PiApplication(object):
         self.capture_choices = choices
 
         # Handle autostart of the application
-        self._config.enable_autostart(self._config.getboolean('GENERAL', 'autostart'))
+        self._config.enable_autostart()
 
         self._window.arrow_location = self._config.get('WINDOW', 'arrows')
         self._window.arrow_offset = self._config.getint('WINDOW', 'arrows_x_offset')

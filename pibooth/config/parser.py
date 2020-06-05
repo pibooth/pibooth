@@ -251,7 +251,7 @@ class PiConfigParser(ConfigParser):
         # Overide
         if osp.isfile(self.filename) and not clear:
             self.read(self.filename, encoding="utf-8")
-            self.enable_autostart(self.getboolean('GENERAL', 'autostart'))
+            self.enable_autostart()
 
     def _get_abs_path(self, path):
         """Return absolute path. In case of relative path given, the absolute
@@ -283,7 +283,7 @@ class PiConfigParser(ConfigParser):
                         val = self.get(section, name)
                     fp.write("# {}\n{} = {}\n\n".format(value[1], name, val))
 
-        self.enable_autostart(self.getboolean('GENERAL', 'autostart'))
+        self.enable_autostart()
 
     def edit(self):
         """Open a text editor to edit the configuration.
@@ -291,13 +291,14 @@ class PiConfigParser(ConfigParser):
         if open_text_editor(self.filename):
             # Reload config to check if autostart has changed
             self.read(self.filename, encoding="utf-8")
-            self.enable_autostart(self.getboolean('GENERAL', 'autostart'))
+            self.enable_autostart()
 
-    def enable_autostart(self, enable=True):
+    def enable_autostart(self):
         """Auto-start pibooth at the Raspberry Pi startup.
         """
         filename = osp.expanduser('~/.config/autostart/pibooth.desktop')
         dirname = osp.dirname(filename)
+        enable = self.getboolean('GENERAL', 'autostart')
         if enable and not osp.isfile(filename):
 
             if not osp.isdir(dirname):
@@ -397,24 +398,10 @@ class PiConfigParser(ConfigParser):
         """
         return self._get_abs_path(self.get(section, option))
 
-    def gettuple(self, section, option, types, extend=0):
-        """Get a list of values from config. The values type shall be in the
-        list of authorized types. This method permits to get severals values
-        from the same configuration option.
-
-        If the option contains one value (with acceptable type), a tuple
-        with one element is created and returned.
-
-        :param section: config section name
-        :type section: str
-        :param option: option name
-        :type option: str
-        :param types: list of authorized types
-        :type types: list
-        :param extend: extend the tuple with the last value until length is reached
-        :type extend: int
+    @staticmethod
+    def _get_authorized_types(types):
+        """Get a tuple of authorized types and if the color and path are accepted
         """
-        values = self.gettyped(section, option)
         if not isinstance(types, (tuple, list)):
             types = [types]
         else:
@@ -437,6 +424,28 @@ class PiConfigParser(ConfigParser):
             path = True  # Option accept file path
 
         types = tuple(types)
+
+        return types, color, path
+
+    def gettuple(self, section, option, types, extend=0):
+        """Get a list of values from config. The values type shall be in the
+        list of authorized types. This method permits to get severals values
+        from the same configuration option.
+
+        If the option contains one value (with acceptable type), a tuple
+        with one element is created and returned.
+
+        :param section: config section name
+        :type section: str
+        :param option: option name
+        :type option: str
+        :param types: list of authorized types
+        :type types: list
+        :param extend: extend the tuple with the last value until length is reached
+        :type extend: int
+        """
+        values = self.gettyped(section, option)
+        types, color, path = self._get_authorized_types(types)
 
         if not isinstance(values, (tuple, list)):
             if not isinstance(values, types):
