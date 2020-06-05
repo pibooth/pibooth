@@ -54,11 +54,11 @@ class ViewPlugin(object):
     def state_wait_do(self, cfg, app, win, events):
         if app.previous_animated and self.animated_frame_timer.is_timeout():
             previous_picture = next(app.previous_animated)
-            win.show_intro(previous_picture, app.printer.is_available()
-                           and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'))
             self.animated_frame_timer.start()
         else:
             previous_picture = app.previous_picture
+        win.show_intro(previous_picture, app.printer.is_available()
+                       and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'))
 
         event = app.find_print_status_event(events)
         if event and app.printer.is_installed():
