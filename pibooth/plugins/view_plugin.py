@@ -57,10 +57,6 @@ class ViewPlugin(object):
             win.show_intro(previous_picture, app.printer.is_available()
                            and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'))
             self.animated_frame_timer.start()
-        elif not app.previous_picture:
-            previous_picture = app.previous_picture
-            win.show_intro(previous_picture, app.printer.is_available()
-                           and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'))
         else:
             previous_picture = app.previous_picture
 
@@ -68,7 +64,7 @@ class ViewPlugin(object):
         if event and app.printer.is_installed():
             win.set_print_number(len(event.tasks), not app.printer.is_available())
 
-        if app.find_print_event(events):
+        if app.find_print_event(events) or (win.get_image() and not previous_picture):
             win.show_intro(previous_picture, app.printer.is_available()
                            and app.nbr_duplicates < cfg.getint('PRINTER', 'max_duplicates'))
 

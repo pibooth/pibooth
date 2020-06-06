@@ -165,6 +165,13 @@ class PtbWindow(object):
         """
         return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
 
+    def get_image(self):
+        """Return the currently displayed foreground image.
+        """
+        if self._current_foreground:
+            return self._current_foreground[0]
+        return None
+
     def resize(self, size):
         """Resize the window keeping aspect ratio.
         """
@@ -201,6 +208,9 @@ class PtbWindow(object):
 
         if pil_image:
             self._update_foreground(pil_image, self.RIGHT)
+        elif self._current_foreground:
+            self._buffered_images.pop(id(self._current_foreground[0]), None)
+            self._current_foreground = None
 
     def show_choice(self, choices, selected=None):
         """Show the choice view.
