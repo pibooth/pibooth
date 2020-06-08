@@ -37,7 +37,7 @@ class Printer(object):
         self.nbr_printed = 0
         if not cups:
             LOGGER.warning("No printer found (pycups or pycups-notify not installed)")
-            return # CUPS is not installed
+            return  # CUPS is not installed
         elif not name or name.lower() == 'default':
             self.name = self._conn.getDefault()
             if not self.name and self._conn.getPrinters():
