@@ -251,7 +251,7 @@ class PiConfigParser(ConfigParser):
         # Overide
         if osp.isfile(self.filename) and not clear:
             self.read(self.filename, encoding="utf-8")
-            self.enable_autostart()
+            self.handle_autostart()
 
     def _get_abs_path(self, path):
         """Return absolute path. In case of relative path given, the absolute
@@ -283,7 +283,7 @@ class PiConfigParser(ConfigParser):
                         val = self.get(section, name)
                     fp.write("# {}\n{} = {}\n\n".format(value[1], name, val))
 
-        self.enable_autostart()
+        self.handle_autostart()
 
     def edit(self):
         """Open a text editor to edit the configuration.
@@ -291,10 +291,10 @@ class PiConfigParser(ConfigParser):
         if open_text_editor(self.filename):
             # Reload config to check if autostart has changed
             self.read(self.filename, encoding="utf-8")
-            self.enable_autostart()
+            self.handle_autostart()
 
-    def enable_autostart(self):
-        """Auto-start pibooth at the Raspberry Pi startup.
+    def handle_autostart(self):
+        """Handle desktop file to start pibooth at the Raspberry Pi startup.
         """
         filename = osp.expanduser('~/.config/autostart/pibooth.desktop')
         dirname = osp.dirname(filename)
