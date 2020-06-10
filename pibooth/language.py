@@ -115,6 +115,22 @@ DEFAULT = {
         'finished': "Bedankt",
         'oops': "Oeps er ging iets mis",
     },
+    'no': {
+        'intro': "Ta et bilde",
+        'intro_print': 'Eller du kan\nfremdeles printe\ndette bildet',
+        'choose': "Velg ditt utseende",
+        '1': "1 bilde",
+        '2': "2 bilder",
+        '3': "3 bilder",
+        '4': "4 bilder",
+        'chosen': "Start!",
+        'smile': "Smil !",
+        'processing': "Behandler...",
+        'print': "Printe bildet?",
+        'print_forget': "Glem\ndette\nbildet",
+        'finished': "Takk",
+        'oops': "Ops, noe gikk galt",
+    },
 }
 
 
