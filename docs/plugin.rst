@@ -13,7 +13,7 @@ A plugin is a set of functions (called ``hooks``) defined in a python module
 and participating to the ``pibooth`` execution when they are invoked.
 
 The list of available ``hooks`` are defined in the file
-`hookspecs.py <https://github.com/werdeil/pibooth/blob/master/pibooth/plugins/hookspecs.py>`_.
+`hookspecs.py <https://github.com/pibooth/pibooth/blob/master/pibooth/plugins/hookspecs.py>`_.
 A plugin implements a subset of those functions.
 
 There are 2 families of hooks implemented in `pibooth`:
@@ -37,7 +37,7 @@ The following states are defined:
  * ``finish``     : thank before going back to wait state
  * ``failsafe``   : oops message when an exception occurs
 
-.. image:: https://raw.githubusercontent.com/werdeil/pibooth/master/templates/state_sequence_details.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/state_sequence_details.png
     :align: center
     :alt: State sequence
 

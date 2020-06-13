@@ -170,13 +170,14 @@ class PiConfigMenu(object):
         is created, else LEFT event is created.
         """
         if isinstance(self._main_menu.get_selected_widget(), pgm.widgets.Button):
-            return pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_APPLY,
-                                      unicode='\r', mod=0, scancode=36,
-                                      window=None, test=True)
+            event = pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_APPLY,
+                                       unicode='\r', mod=0, scancode=36,
+                                       window=None, test=True)
         else:
-            return pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_RIGHT,
-                                      unicode=u'\uf703', mod=0, scancode=124,
-                                      window=None, test=True)
+            event = pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_RIGHT,
+                                       unicode=u'\uf703', mod=0, scancode=124,
+                                       window=None, test=True)
+        return event
 
     def create_next_event(self):
         """Create a pygame event to select the next widget.
