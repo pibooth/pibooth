@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os.path as osp
 import pibooth
 from pibooth.utils import timeit, PoolingTimer
 
@@ -25,14 +24,6 @@ class ViewPlugin(object):
         self.print_view_timer = PoolingTimer(0)
         # Seconds to display the selected layout
         self.finish_timer = PoolingTimer(0.5)
-
-    @pibooth.hookimpl
-    def pibooth_reset(self, cfg, hard):
-        """Reset the configuration.
-        (Questionable location, but don't want a new plugin for this).
-        """
-        if hard or not osp.isfile(cfg.filename):
-            cfg.save(True)
 
     @pibooth.hookimpl
     def state_failsafe_enter(self, win):
