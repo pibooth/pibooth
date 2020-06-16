@@ -414,7 +414,7 @@ def main():
     # Ensure config files are present in case of first pibooth launch
     if not options.reset:
         if not osp.isfile(config.filename):
-            config.save(True)
+            config.save(default=True)
         plugin_manager.hook.pibooth_reset(cfg=config, hard=False)
 
     if options.config:
@@ -427,7 +427,7 @@ def main():
         LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
     elif options.reset:
-        config.save(True)
+        config.save(default=True)
         plugin_manager.hook.pibooth_reset(cfg=config, hard=True)
     else:
         LOGGER.info("Starting the photo booth application %s", GPIO_INFO)

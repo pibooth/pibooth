@@ -19,10 +19,14 @@ def pibooth_configure(cfg):
 
 @hookspec
 def pibooth_reset(cfg, hard):
-    """Restore the default configuration.
+    """Restore the configuration.
 
-    In case of ``hard=False`` only missing folders/files have to be created else
-    all have to be overwritten with their default content.
+    This hook is called at least one time at ``pibooth`` startup with parameter
+    ``hard=False``. All plugins implementing this hook shall ensure that the
+    required folders/files exist (create the default ones if not).
+
+    If ``hard=True``, all folders/files have to be restored with their default
+    content.
 
     :param cfg: application configuration
     :param hard: do a hard-reset if True
