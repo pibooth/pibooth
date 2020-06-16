@@ -18,6 +18,7 @@ from gpiozero.exc import BadPinFactory, PinFactoryFallback
 import pibooth
 from pibooth import fonts
 from pibooth import language
+from pibooth.counters import Counters
 from pibooth.utils import (LOGGER, configure_logging,
                            set_logging_level, print_columns_words)
 from pibooth.states import StateMachine
@@ -94,10 +95,12 @@ class PiApplication(object):
         self.capture_nbr = None
         self.capture_date = None
         self.capture_choices = (4, 1)
-        self.nbr_duplicates = 0
         self.previous_picture = None
         self.previous_animated = None
         self.previous_picture_file = None
+
+        self.count = Counters(self._config.join_path("counters.pickle"),
+                              taken=0, printed=0, duplicated=0, forgotten=0)
 
         self.camera = camera.get_camera(config.getint('CAMERA', 'iso'),
                                         config.gettyped('CAMERA', 'resolution'),
@@ -116,7 +119,8 @@ class PiApplication(object):
                              printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
 
         self.printer = Printer(config.get('PRINTER', 'printer_name'),
-                               config.getint('PRINTER', 'max_pages'))
+                               config.getint('PRINTER', 'max_pages'),
+                               self.count)
         # ---------------------------------------------------------------------
 
     def _initialize(self):
@@ -166,7 +170,6 @@ class PiApplication(object):
 
         # Reset the print counter (in case of max_pages is reached)
         self.printer.max_pages = self._config.getint('PRINTER', 'max_pages')
-        self.printer.nbr_printed = 0
 
     def _on_button_capture_held(self):
         """Called when the capture button is pressed.
@@ -343,7 +346,7 @@ class PiApplication(object):
 
                 if not self._menu and self.find_settings_event(events):
                     self.leds.off()
-                    self._menu = PiConfigMenu(self._window, self._config)
+                    self._menu = PiConfigMenu(self._window, self._config, self.count)
                     self._menu.show()
                     self.leds.blink(on_time=0.1, off_time=1)
                 elif self._menu and self._menu.is_shown():
@@ -401,7 +404,7 @@ def main():
 
     # Load the configuration and languages
     config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager, options.reset)
-    language.init("~/.config/pibooth/translations.cfg", options.reset)
+    language.init(config.join_path("translations.cfg"), options.reset)
 
     # Register plugins
     custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
