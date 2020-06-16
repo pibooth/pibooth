@@ -243,15 +243,13 @@ class PiConfigParser(ConfigParser):
     """Enhenced configuration file parser.
     """
 
-    def __init__(self, filename, plugin_manager, clear=False):
+    def __init__(self, filename, plugin_manager):
         ConfigParser.__init__(self)
         self._pm = plugin_manager
         self.filename = osp.abspath(osp.expanduser(filename))
 
-        # Overide
-        if osp.isfile(self.filename) and not clear:
-            self.read(self.filename, encoding="utf-8")
-            self.handle_autostart()
+        if osp.isfile(self.filename):
+            self.load()
 
     def _get_abs_path(self, path):
         """Return absolute path. In case of relative path given, the absolute
@@ -285,13 +283,18 @@ class PiConfigParser(ConfigParser):
 
         self.handle_autostart()
 
+    def load(self):
+        """Load configuration from file.
+        """
+        self.read(self.filename, encoding="utf-8")
+        self.handle_autostart()
+
     def edit(self):
         """Open a text editor to edit the configuration.
         """
         if open_text_editor(self.filename):
             # Reload config to check if autostart has changed
-            self.read(self.filename, encoding="utf-8")
-            self.handle_autostart()
+            self.load()
 
     def handle_autostart(self):
         """Handle desktop file to start pibooth at the Raspberry Pi startup.
