@@ -70,6 +70,7 @@ def main():
         },
         zip_safe=False,  # Don't install the lib as an .egg zipfile
         entry_points={'console_scripts': ["pibooth = pibooth.booth:main",
+                                          "pibooth-count = pibooth.scripts.count:main",
                                           "pibooth-diag = pibooth.scripts.diagnostic:main",
                                           "pibooth-regen = pibooth.scripts.regenerate:main"]},
     )
