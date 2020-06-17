@@ -13,6 +13,16 @@ class Counters(object):
         if osp.isfile(self.filename):
             self.load()
 
+    def __iter__(self):
+        """Iterate over counters names.
+        """
+        return iter(self.data)
+
+    def __getitem__(self, name):
+        """Get value from counter name.
+        """
+        return self.__getattr__(name)
+
     def __getattr__(self, name):
         """Called only when an attribute does not exist.
         """
@@ -21,7 +31,7 @@ class Counters(object):
         return self.data[name]
 
     def __setattr__(self, name, value):
-        """Called each time a attribute is set.
+        """Called each time an attribute is set.
         """
         if name != 'data' and name in self.data:
             self.data[name] = value

@@ -3,6 +3,15 @@
 import pytest
 
 
+def test_iter(counters):
+    for name in counters:
+        assert name
+
+
+def test_getitem(counters):
+    assert counters['nbr_printed'] == 0
+
+
 def test_names(counters):
     assert len(counters.names()) == 1
     assert 'nbr_printed' in counters.names()
