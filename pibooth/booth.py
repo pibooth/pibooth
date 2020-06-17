@@ -403,7 +403,7 @@ def main():
     plugin_manager = create_plugin_manager()
 
     # Load the configuration and languages
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager, options.reset)
+    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
     language.init(config.join_path("translations.cfg"), options.reset)
 
     # Register plugins
@@ -413,8 +413,12 @@ def main():
 
     # Update configuration with plugins ones
     plugin_manager.hook.pibooth_configure(cfg=config)
-    if not osp.isfile(config.filename):
-        config.save()
+
+    # Ensure config files are present in case of first pibooth launch
+    if not options.reset:
+        if not osp.isfile(config.filename):
+            config.save(default=True)
+        plugin_manager.hook.pibooth_reset(cfg=config, hard=False)
 
     if options.config:
         LOGGER.info("Editing the pibooth configuration...")
@@ -426,7 +430,8 @@ def main():
         LOGGER.info("Listing all fonts available...")
         print_columns_words(get_available_fonts(), 3)
     elif options.reset:
-        config.save()
+        config.save(default=True)
+        plugin_manager.hook.pibooth_reset(cfg=config, hard=True)
     else:
         LOGGER.info("Starting the photo booth application %s", GPIO_INFO)
         app = PiApplication(config, plugin_manager)
