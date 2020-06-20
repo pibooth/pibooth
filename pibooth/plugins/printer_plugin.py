@@ -20,13 +20,13 @@ class PrinterPlugin(object):
     def state_failsafe_enter(self, app):
         """Reset variables set in this plugin.
         """
-        app.count.duplicated = 0
+        app.count.remaining_duplicates = 0
 
     @pibooth.hookimpl
     def state_wait_do(self, cfg, app, events):
         if app.find_print_event(events) and app.previous_picture_file and app.printer.is_installed():
 
-            if app.count.duplicated >= cfg.getint('PRINTER', 'max_duplicates'):
+            if app.count.remaining_duplicates < 0:
                 LOGGER.warning("Too many duplicates sent to the printer (%s max)",
                                cfg.getint('PRINTER', 'max_duplicates'))
                 return
@@ -41,11 +41,12 @@ class PrinterPlugin(object):
                                        cfg.getint('PRINTER', 'pictures_per_page'))
                 app.count.printed += 1
 
-            app.count.duplicated += 1
+            app.count.remaining_duplicates -= 1
 
     @pibooth.hookimpl
-    def state_processing_exit(self, app):
-        app.count.duplicated = 0   # Do it here because 'print' state can be skipped
+    def state_processing_exit(self, cfg, app):
+        app.count.remaining_duplicates = cfg.getint('PRINTER', 'max_duplicates')
+        # Do it here because 'print' state can be skipped
 
     @pibooth.hookimpl
     def state_print_do(self, cfg, app, events):
@@ -56,4 +57,4 @@ class PrinterPlugin(object):
                                        cfg.getint('PRINTER', 'pictures_per_page'))
                 app.count.printed += 1
 
-            app.count.duplicated += 1
+            app.count.remaining_duplicates -= 1

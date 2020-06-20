@@ -149,4 +149,4 @@ class PicturePlugin(object):
 
             # Deactivate the print function for the backuped picture
             # as we don't known how many times it has already been printed
-            app.count.duplicated = cfg.getint('PRINTER', 'max_duplicates') + 1
+            app.count.remaining_duplicates = 0

@@ -76,7 +76,7 @@ def _counters(counters):
     """
     long_name = max(counters.names(), key=len)
     pattern = '{:.<' + str(max(len(long_name) + 2, 25)) + '} {: >4}'
-    return [pattern.format(name.capitalize(), counters[name]) for name in counters]
+    return [pattern.format(name.replace("_", " ").capitalize(), counters[name]) for name in counters]
 
 
 class PiConfigMenu(object):
