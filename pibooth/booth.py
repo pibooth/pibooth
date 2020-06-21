@@ -100,7 +100,8 @@ class PiApplication(object):
         self.previous_picture_file = None
 
         self.count = Counters(self._config.join_path("counters.pickle"),
-                              taken=0, printed=0, remaining_duplicates=0, forgotten=0)
+                              taken=0, printed=0, forgotten=0,
+                              remaining_duplicates=self._config.getint('PRINTER', 'max_duplicates'))
 
         self.camera = camera.get_camera(config.getint('CAMERA', 'iso'),
                                         config.gettyped('CAMERA', 'resolution'),

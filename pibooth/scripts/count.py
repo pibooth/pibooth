@@ -19,7 +19,8 @@ def main():
     config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
 
     counters = Counters(config.join_path("counters.pickle"),
-                        taken=0, printed=0, remaining_duplicates=0, forgotten=0)
+                        taken=0, printed=0, forgotten=0,
+                        remaining_duplicates=config.getint('PRINTER', 'max_duplicates'))
 
     if '--json' in sys.argv:
         print(json.dumps(counters.data))
