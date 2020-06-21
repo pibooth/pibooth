@@ -318,6 +318,15 @@ class PiConfigParser(ConfigParser):
             LOGGER.info("Remove the auto-startup file in '%s'", dirname)
             os.remove(filename)
 
+    def join_path(self, *names):
+        """Return the directory path of the configuration file
+        and join it the given names.
+
+        :param names: names to join to the directory path
+        :type names: str
+        """
+        return osp.join(osp.dirname(self.filename), *names)
+
     def add_option(self, section, option, default, description, menu_name=None, menu_choices=None):
         """Add a new option to the configuration and defines its default value.
 

@@ -4,6 +4,11 @@ import os.path as osp
 import pytest
 
 
+def test_join_path_to_config_directory(cfg):
+    assert cfg.join_path() == osp.dirname(cfg.filename)
+    assert cfg.join_path('test') == osp.join(osp.dirname(cfg.filename), 'test')
+
+
 def test_not_in_config_option(cfg):
     assert cfg.get('GENERAL', 'autostart') == 'False'
 

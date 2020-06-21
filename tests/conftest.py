@@ -4,6 +4,7 @@
 import os
 import pytest
 from PIL import Image
+from pibooth.counters import Counters
 from pibooth.config.parser import PiConfigParser
 
 MOCKS_DIR = os.path.join(os.path.dirname(__file__), 'mocks')
@@ -36,6 +37,12 @@ def overlay_path():
 def cfg_path():
     return os.path.join(MOCKS_DIR, 'pibooth.cfg')
 
+
 @pytest.fixture(scope='session')
 def cfg(cfg_path):
     return PiConfigParser(cfg_path, None)
+
+
+@pytest.fixture
+def counters(tmpdir):
+    return Counters(str(tmpdir.join('data.pickle')), nbr_printed=0)

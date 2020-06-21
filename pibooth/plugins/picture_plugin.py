@@ -128,6 +128,10 @@ class PicturePlugin(object):
                     self.factory_pool.add(factory)
 
     @pibooth.hookimpl
+    def state_processing_exit(self, app):
+        app.count.taken += 1  # Do it here because 'print' state can be skipped
+
+    @pibooth.hookimpl
     def state_print_do(self, cfg, app, events):
         if app.find_capture_event(events):
 
@@ -140,8 +144,9 @@ class PicturePlugin(object):
                     os.rename(osp.join(savedir, app.picture_filename), osp.join(forgetdir, app.picture_filename))
 
             self._reset_vars(app)
+            app.count.forgotten += 1
             app.previous_picture = self.second_previous_picture
 
             # Deactivate the print function for the backuped picture
             # as we don't known how many times it has already been printed
-            app.nbr_duplicates = cfg.getint('PRINTER', 'max_duplicates') + 1
+            app.count.remaining_duplicates = 0

@@ -60,7 +60,7 @@ def list_plugin_names(plugin_manager):
     """
     values = []
     for plugin in plugin_manager.get_plugins():
-        # The internal plugins are classes, we don't want to include
+        # The core plugins are classes, we don't want to include
         # them here, thus we take only the modules objects.
         if inspect.ismodule(plugin):
             name = get_plugin_name(plugin_manager, plugin)

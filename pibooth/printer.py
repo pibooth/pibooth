@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+"""Pibooth printer handling.
+"""
+
 try:
     import cups
     from cups_notify import Subscriber, event
@@ -29,16 +32,17 @@ PAPER_FORMATS = {
 
 class Printer(object):
 
-    def __init__(self, name='default', max_pages=-1):
+    def __init__(self, name='default', max_pages=-1, counters=None):
         self._conn = cups.Connection() if cups else None
         self._notifier = Subscriber(self._conn) if cups else None
         self.name = None
         self.max_pages = max_pages
-        self.nbr_printed = 0
+        self.count = counters
         if not cups:
             LOGGER.warning("No printer found (pycups or pycups-notify not installed)")
             return  # CUPS is not installed
-        elif not name or name.lower() == 'default':
+
+        if not name or name.lower() == 'default':
             self.name = self._conn.getDefault()
             if not self.name and self._conn.getPrinters():
                 self.name = list(self._conn.getPrinters().keys())[0]  # Take first one
@@ -67,13 +71,13 @@ class Printer(object):
         return cups is not None and self.name is not None
 
     def is_available(self):
-        """Return True is paper/ink counter is reached or printing is disabled.
+        """Return False if paper/ink counter is reached or printing is disabled.
         """
         if not self.is_installed():
             return False
-        if self.max_pages < 0:  # No limit
+        if self.max_pages < 0 or self.count is None:  # No limit
             return True
-        return self.nbr_printed < self.max_pages
+        return self.count.printed < self.max_pages
 
     def print_file(self, filename, copies=1):
         """Send a file to the CUPS server to the default printer.
@@ -101,7 +105,6 @@ class Printer(object):
         else:
             self._conn.printFile(self.name, filename, osp.basename(filename), {})
         LOGGER.debug("File '%s' sent to the printer", filename)
-        self.nbr_printed += 1
 
     def cancel_all_tasks(self):
         """Cancel all tasks in the queue.
