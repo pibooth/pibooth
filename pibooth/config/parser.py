@@ -57,6 +57,10 @@ DEFAULT = odict((
                 ('',
                  "Path to custom plugin(s) not installed with pip (list of quoted paths accepted)",
                  None, None)),
+            ("split_menu",
+                (False,
+                 "Split menu on 2 columns instead scrollbar",
+                 "Split menu", ['True', 'False'])),
         ))
      ),
     ("WINDOW",
