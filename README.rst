@@ -28,7 +28,7 @@ Features
 * Custom texts can be added on the final picture (customizable fonts, colors, alignments)
 * Custom background(s) and overlay(s) can be added on the final picture
 * All settings available in a configuration file (most common options in a graphical interface)
-* Highly customizable thanks to it plugin system: you can develop your own plugin
+* Highly customizable thanks to it plugin system, you can develop your own plugin
 
 Output pictures gallery
 -----------------------
@@ -56,8 +56,8 @@ Hardware
   or any DSLR camera `compatible with gPhoto2 <http://www.gphoto.org/proj/libgphoto2/support.php>`_
   or any webcam `compatible with OpenCV <https://opencv.org>`_ )
 * 2 push buttons
-* 4 LEDs
-* 4 resistors of 100 Ohm
+* 2 LEDs
+* 2 resistors of 100 Ohm
 * 1 printer
 
 Software
