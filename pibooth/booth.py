@@ -6,6 +6,7 @@
 
 import os
 import os.path as osp
+import tempfile
 import shutil
 import logging
 import argparse
@@ -19,7 +20,7 @@ import pibooth
 from pibooth import fonts
 from pibooth import language
 from pibooth.counters import Counters
-from pibooth.utils import (LOGGER, configure_logging,
+from pibooth.utils import (LOGGER, configure_logging, get_crash_message,
                            set_logging_level, print_columns_words)
 from pibooth.states import StateMachine
 from pibooth.plugins import create_plugin_manager, load_plugins, list_plugin_names
@@ -363,6 +364,9 @@ class PiApplication(object):
                 pygame.display.update()
                 clock.tick(fps)  # Ensure the program will never run at more than <fps> frames per second
 
+        except Exception as ex:
+            LOGGER.error(str(ex), exc_info=True)
+            LOGGER.error(get_crash_message())
         finally:
             self._pm.hook.pibooth_cleanup(app=self)
             pygame.quit()
@@ -388,8 +392,8 @@ def main():
     parser.add_argument("--fonts", action='store_true',
                         help=u"display all available fonts and exit")
 
-    parser.add_argument("--log", default=None,
-                        help=u"save logs output to the given file")
+    parser.add_argument("--nolog", action='store_true', default=False,
+                        help=u"don't save console output in a file (avoid filling the /tmp directory)")
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-v", "--verbose", dest='logging', action='store_const', const=logging.DEBUG,
@@ -399,7 +403,11 @@ def main():
 
     options, _args = parser.parse_known_args()
 
-    configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=options.log)
+    if not options.nolog:
+        filename = osp.join(tempfile.gettempdir(), 'pibooth.log')
+    else:
+        filename = None
+    configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=filename)
 
     plugin_manager = create_plugin_manager()
 

@@ -3,7 +3,6 @@
 """Pibooth base states.
 """
 
-import traceback
 from pibooth.utils import LOGGER, BlockConsoleHandler
 
 
@@ -56,8 +55,7 @@ class StateMachine(object):
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
-                if BlockConsoleHandler.is_debug():
-                    traceback.print_exc()
+                LOGGER.debug('Back to failsafe state due to error:', exc_info=True)
                 new_state_name = self.failsafe_state
             else:
                 raise
@@ -76,8 +74,7 @@ class StateMachine(object):
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
-                if BlockConsoleHandler.is_debug():
-                    traceback.print_exc()
+                LOGGER.debug('Back to failsafe state due to error:', exc_info=True)
                 state_name = self.failsafe_state
             else:
                 raise
@@ -95,8 +92,7 @@ class StateMachine(object):
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
-                if BlockConsoleHandler.is_debug():
-                    traceback.print_exc()
+                LOGGER.debug('Back to failsafe state due to error:', exc_info=True)
                 self.set_state(self.failsafe_state)
             else:
                 raise

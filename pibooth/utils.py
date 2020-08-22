@@ -9,6 +9,7 @@ import time
 import os.path as osp
 import logging
 import psutil
+import platform
 import functools
 from fnmatch import fnmatchcase
 import contextlib
@@ -158,7 +159,7 @@ def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=N
             dirname = osp.dirname(filename)
             if not osp.isdir(dirname):
                 os.makedirs(dirname)
-            hdlr = logging.FileHandler(filename)
+            hdlr = logging.FileHandler(filename, mode='w')
             hdlr.setFormatter(logging.Formatter(msgfmt, datefmt))
             hdlr.setLevel(logging.DEBUG)
             root.addHandler(hdlr)
@@ -184,6 +185,26 @@ def set_logging_level(level=None):
                 # Restore the default level
                 level = BlockConsoleHandler.default_level
             hdlr.setLevel(level)
+
+
+def get_logging_filename():
+    """Return the absolute path to the logs filename if set.
+    """
+    for hdlr in logging.getLogger().handlers:
+        if isinstance(hdlr, logging.FileHandler):
+            return hdlr.baseFilename
+    return None
+
+
+def get_crash_message():
+    msg = "system='{}', node='{}', release='{}', version='{}', machine='{}', processor='{}'\n".format(*platform.uname())
+    msg += " " + "*" * 83 + "\n"
+    msg += " * " + "Oops! It seems that pibooth has crached".center(80) + "*\n"
+    msg += " * " + "You can report an issue on https://github.com/pibooth/pibooth/issues/new".center(80) + "*\n"
+    if get_logging_filename():
+        msg += " * " + ("and post the file: {}".format(get_logging_filename())).center(80) + "*\n"
+    msg += " " + "*" * 83
+    return msg
 
 
 @contextlib.contextmanager

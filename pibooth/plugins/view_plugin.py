@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pibooth
-from pibooth.utils import timeit, PoolingTimer
+from pibooth.utils import LOGGER, get_crash_message, timeit, PoolingTimer
 
 
 class ViewPlugin(object):
@@ -29,6 +29,7 @@ class ViewPlugin(object):
     def state_failsafe_enter(self, win):
         win.show_oops()
         self.failed_view_timer.start()
+        LOGGER.error(get_crash_message())
 
     @pibooth.hookimpl
     def state_failsafe_validate(self):
