@@ -5,6 +5,7 @@
 
 import pygame
 import pygame_menu as pgm
+import pygame_vkeyboard as vkb
 import pibooth
 from pibooth import fonts
 from pibooth.config.parser import DEFAULT
@@ -85,8 +86,8 @@ class PiConfigMenu(object):
         self.win = window
         self.cfg = config
         self.count = counters
-        self._main_menu = None
         self._close_callback = onclose
+        self._last_selected_input = None
 
         size = self.win.get_rect().size
         self.size = (min(600, size[0]), min(400, size[1]))
@@ -95,6 +96,12 @@ class PiConfigMenu(object):
                                    "Settings v{}".format(pibooth.__version__),
                                    theme=THEME_DARK,
                                    onclose=self._on_close)
+        self._keyboard = vkb.VKeyboard(self.win.surface,
+                                       self._on_keyboard_event,
+                                       vkb.VKeyboardLayout(vkb.VKeyboardLayout.QWERTY),
+                                       renderer=vkb.VKeyboardRenderer.DARK,
+                                       show_text=True,
+                                       joystick_navigation=True)
 
         for name in DEFAULT:
             submenu = self._build_submenu(name)
@@ -102,6 +109,7 @@ class PiConfigMenu(object):
                 self._main_menu.add_button(submenu.get_title(), submenu)
         self._main_menu.add_button('Exit', pgm.events.EXIT)
         self._main_menu.disable()
+        self._keyboard.disable()
 
     def _build_submenu(self, section):
         """Build sub-menu"""
@@ -166,6 +174,15 @@ class PiConfigMenu(object):
         menu.add_vertical_margin(40)
         menu.add_button("Reset all", self._on_reset_counters, labels)
         return menu
+
+    def _on_keyboard_event(self, text):
+        """Called after each option changed.
+        """
+        if self._main_menu.is_enabled():  # Menu may have been closed
+            selected = self._main_menu.get_current().get_selected_widget()
+            if isinstance(selected, pgm.widgets.TextInput):
+                selected.set_value(text)
+                selected.change()
 
     def _on_selector_changed(self, value, **kwargs):
         """Called after each option changed.
@@ -242,6 +259,31 @@ class PiConfigMenu(object):
     def process(self, events):
         """Process the events related to the menu.
         """
-        self._main_menu.update(events)
         if self._main_menu.is_enabled():  # Menu may have been closed
-            self._main_menu.draw(self.win.surface)
+            selected = self._main_menu.get_current().get_selected_widget()
+            if isinstance(selected, pgm.widgets.TextInput):
+                if self._last_selected_input != selected:
+                    self._last_selected_input = selected
+                    self._keyboard.enable()
+                    self._keyboard.set_text(selected.get_value())
+                    return
+            else:
+                self._last_selected_input = None
+
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN\
+                        and event.button in (1, 2, 3)\
+                        and not self._keyboard.get_rect().collidepoint(event.pos)\
+                        and self._keyboard.is_enabled():
+                    self._keyboard.disable()
+                    self._keyboard.draw()
+                    return
+
+            if self._last_selected_input and self._keyboard.is_enabled():
+                self._keyboard.update(events)
+                self._keyboard.draw(self.win.surface)
+
+            else:
+                self._main_menu.update(events)
+                if self._main_menu.is_enabled():  # Menu may have been closed
+                    self._main_menu.draw(self.win.surface)
