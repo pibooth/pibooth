@@ -8,7 +8,7 @@ Default configuration
 .. code-block:: ini
 
     [GENERAL]
-    # User interface language: 'de', 'en', 'es', 'fr', 'hu' or 'nl'
+    # User interface language: 'de', 'en', 'es', 'fr', 'hu', 'nl' or 'no'
     language = en
 
     # Path to save pictures (list of quoted paths accepted)
@@ -130,8 +130,11 @@ Default configuration
     pictures_per_page = 1
 
     [CONTROLS]
-    # How long to debounce the hardware buttons in seconds
+    # How long to press a single hardware button in seconds
     debounce_delay = 0.3
+
+    # How long to press multiple hardware buttons in seconds
+    multi_press_delay = 0.5
 
     # Physical GPIO IN pin to take a picture
     picture_btn_pin = 11

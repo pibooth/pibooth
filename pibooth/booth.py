@@ -20,7 +20,7 @@ import pibooth
 from pibooth import fonts
 from pibooth import language
 from pibooth.counters import Counters
-from pibooth.utils import (LOGGER, configure_logging, get_crash_message,
+from pibooth.utils import (LOGGER, PoolingTimer, configure_logging, get_crash_message,
                            set_logging_level, print_columns_words)
 from pibooth.states import StateMachine
 from pibooth.plugins import create_plugin_manager, load_plugins, list_plugin_names
@@ -78,6 +78,7 @@ class PiApplication(object):
                                      text_color=init_text_color, debug=init_debug)
 
         self._menu = None
+        self._multipress_timer = PoolingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
 
         # Define states of the application
         self._machine = StateMachine(self._pm, self._config, self, self._window)
@@ -177,17 +178,24 @@ class PiApplication(object):
         """Called when the capture button is pressed.
         """
         if all(self.buttons.value):
-            # capture was held while printer was pressed
-            if self._menu and self._menu.is_shown():
-                # Convert HW button events to keyboard events for menu
-                event = self._menu.create_back_event()
-                LOGGER.debug("BUTTONDOWN: generate MENU-ESC event")
-            else:
-                event = pygame.event.Event(BUTTONDOWN, capture=1, printer=1,
-                                           button=self.buttons)
-                LOGGER.debug("BUTTONDOWN: generate DOUBLE buttons event")
+            self.buttons.capture.hold_repeat = True
+            if self._multipress_timer.elapsed() == 0:
+                self._multipress_timer.start()
+            if self._multipress_timer.is_timeout():
+                # Capture was held while printer was pressed
+                if self._menu and self._menu.is_shown():
+                    # Convert HW button events to keyboard events for menu
+                    event = self._menu.create_back_event()
+                    LOGGER.debug("BUTTONDOWN: generate MENU-ESC event")
+                else:
+                    event = pygame.event.Event(BUTTONDOWN, capture=1, printer=1,
+                                               button=self.buttons)
+                    LOGGER.debug("BUTTONDOWN: generate DOUBLE buttons event")
+                self.buttons.capture.hold_repeat = False
+                self._multipress_timer.reset()
+                pygame.event.post(event)
         else:
-            # capture was held but printer not pressed
+            # Capture was held but printer not pressed
             if self._menu and self._menu.is_shown():
                 # Convert HW button events to keyboard events for menu
                 event = self._menu.create_next_event()
@@ -196,17 +204,19 @@ class PiApplication(object):
                 event = pygame.event.Event(BUTTONDOWN, capture=1, printer=0,
                                            button=self.buttons.capture)
                 LOGGER.debug("BUTTONDOWN: generate CAPTURE button event")
-        pygame.event.post(event)
+            self.buttons.capture.hold_repeat = False
+            self._multipress_timer.reset()
+            pygame.event.post(event)
 
     def _on_button_printer_held(self):
         """Called when the printer button is pressed.
         """
         if all(self.buttons.value):
-            # printer was held while capture was pressed
+            # Printer was held while capture was pressed
             # but don't do anything here, let capture_held handle it instead
             pass
         else:
-            # printer was held but capture not pressed
+            # Printer was held but capture not pressed
             if self._menu and self._menu.is_shown():
                 # Convert HW button events to keyboard events for menu
                 event = self._menu.create_click_event()

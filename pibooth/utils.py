@@ -93,6 +93,13 @@ class PoolingTimer(object):
         """
         self.time = None
 
+    def reset(self):
+        """Reset timer to its initial state.
+        """
+        self.time = None
+        self._paused_total = 0
+        self._paused_time = None
+
     def start(self):
         """Start the timer.
         """
