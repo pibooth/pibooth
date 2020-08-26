@@ -259,31 +259,31 @@ class PiConfigMenu(object):
     def process(self, events):
         """Process the events related to the menu.
         """
-        if self._main_menu.is_enabled():  # Menu may have been closed
-            selected = self._main_menu.get_current().get_selected_widget()
-            if isinstance(selected, pgm.widgets.TextInput):
-                if self._last_selected_input != selected:
-                    self._last_selected_input = selected
-                    self._keyboard.enable()
-                    self._keyboard.set_text(selected.get_value())
-                    return
-            else:
-                self._last_selected_input = None
+        if not self._keyboard.is_enabled():
+            self._main_menu.update(events)
+            if self._main_menu.is_enabled():  # Menu may have been closed
+                self._main_menu.draw(self.win.surface)
+                selected = self._main_menu.get_current().get_selected_widget()
+                if isinstance(selected, pgm.widgets.TextInput):
+                    for event in events:
+                        if event.type == pygame.MOUSEBUTTONDOWN\
+                                and self._main_menu.get_current()._scroll.to_real_position(selected.get_rect()).collidepoint(*event.pos):
+                            self._keyboard.enable()
+                            self._keyboard.set_text(selected.get_value())
+                            return
 
+        else:
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN\
                         and event.button in (1, 2, 3)\
-                        and not self._keyboard.get_rect().collidepoint(event.pos)\
-                        and self._keyboard.is_enabled():
+                        and not self._keyboard.get_rect().collidepoint(event.pos):
+                    self._keyboard.disable()
+                    self._keyboard.draw()
+                    return
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self._keyboard.disable()
                     self._keyboard.draw()
                     return
 
-            if self._last_selected_input and self._keyboard.is_enabled():
-                self._keyboard.update(events)
-                self._keyboard.draw(self.win.surface)
-
-            else:
-                self._main_menu.update(events)
-                if self._main_menu.is_enabled():  # Menu may have been closed
-                    self._main_menu.draw(self.win.surface)
+            self._keyboard.update(events)
+            self._keyboard.draw(self.win.surface)
