@@ -57,6 +57,10 @@ DEFAULT = odict((
                 ('',
                  "Path to custom plugin(s) not installed with pip (list of quoted paths accepted)",
                  None, None)),
+            ("vkeyboard",
+                (False,
+                 "Enable a virtual keyboard in the settings interface",
+                 "Virtual keyboard", ['True', 'False'])),
         ))
      ),
     ("WINDOW",

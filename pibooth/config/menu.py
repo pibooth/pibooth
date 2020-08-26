@@ -271,7 +271,7 @@ class PiConfigMenu(object):
             if self._main_menu.is_enabled():  # Menu may have been closed
                 self._main_menu.draw(self.win.surface)
                 selected = self._main_menu.get_current().get_selected_widget()
-                if isinstance(selected, pgm.widgets.TextInput):
+                if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
                     for event in events:
                         if event.type == pygame.MOUSEBUTTONDOWN\
                                 and self._main_menu.get_current()._scroll.to_real_position(selected.get_rect()).collidepoint(*event.pos):
