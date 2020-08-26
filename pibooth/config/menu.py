@@ -8,6 +8,7 @@ import pygame_menu as pgm
 import pygame_vkeyboard as vkb
 import pibooth
 from pibooth import fonts
+from pibooth.utils import LOGGER
 from pibooth.config.parser import DEFAULT
 
 
@@ -181,7 +182,13 @@ class PiConfigMenu(object):
         if self._main_menu.is_enabled():  # Menu may have been closed
             selected = self._main_menu.get_current().get_selected_widget()
             if isinstance(selected, pgm.widgets.TextInput):
-                selected.set_value(text)
+                if isinstance(selected, pgm.widgets.ColorInput):
+                    try:
+                        selected.set_value(tuple([int(c) for c in text.split(',')]))
+                    except Exception as ex:
+                        LOGGER.error("Invalid color value '%s' (%s)", text, ex)
+                else:
+                    selected.set_value(text)
                 selected.change()
 
     def _on_selector_changed(self, value, **kwargs):
@@ -269,9 +276,11 @@ class PiConfigMenu(object):
                         if event.type == pygame.MOUSEBUTTONDOWN\
                                 and self._main_menu.get_current()._scroll.to_real_position(selected.get_rect()).collidepoint(*event.pos):
                             self._keyboard.enable()
-                            self._keyboard.set_text(selected.get_value())
+                            if isinstance(selected, pgm.widgets.ColorInput):
+                                self._keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
+                            else:
+                                self._keyboard.set_text(selected.get_value())
                             return
-
         else:
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN\
