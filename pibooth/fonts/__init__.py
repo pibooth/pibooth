@@ -104,6 +104,7 @@ def get_pygame_font(text, font_name, max_width, max_height):
             end = k
         else:
             start = k + 1
+        del font  # Run garbage collector, to avoid opening too many files
     return pygame.font.Font(get_filename(font_name), start)
 
 
