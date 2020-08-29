@@ -22,7 +22,7 @@ Features
 * Support for hardware buttons and lamps on Raspberry Pi GPIO
 * Fully driven from hardware buttons / keyboard / mouse / touchscreen
 * Auto-start at the Raspberry Pi startup
-* Animate last pictures during idle time
+* Animate captures from the last sequence during idle time
 * Store final pictures and the individual captures
 * Printing final pictures using CUPS server (printing queue indication)
 * Custom texts can be added on the final picture (customizable fonts, colors, alignments)
