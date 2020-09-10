@@ -63,6 +63,7 @@ class GpCamera(BaseCamera):
         BaseCamera.__init__(self, resolution, delete_internal_memory)
         gp.check_result(gp.use_python_logging())
         self._preview_compatible = True
+        self._preview_viewfinder = False
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation
@@ -77,12 +78,18 @@ class GpCamera(BaseCamera):
         self._cam = gp.Camera()
         self._cam.init()
 
-        try:
-            self.get_config_value('actions', 'viewfinder')
-            self._preview_compatible = True
-        except ValueError:
+        abilities = self._cam.get_abilities()
+        self._preview_compatible = gp.GP_OPERATION_CAPTURE_PREVIEW ==\
+                                   abilities.operations & gp.GP_OPERATION_CAPTURE_PREVIEW
+        if not self._preview_compatible:
             LOGGER.warning("The connected DSLR camera is not compatible with preview")
-            self._preview_compatible = False
+        else:
+            try:
+                self.get_config_value('actions', 'viewfinder')
+                self._preview_viewfinder = True
+            except ValueError:
+                self._preview_viewfinder = False
+
         self.set_config_value('imgsettings', 'iso', self._iso)
         self.set_config_value('settings', 'capturetarget', 'Memory card')
 
@@ -182,7 +189,8 @@ class GpCamera(BaseCamera):
         self._preview_hflip = flip
 
         if self._preview_compatible:
-            self.set_config_value('actions', 'viewfinder', 1)
+            if self._preview_viewfinder:
+                self.set_config_value('actions', 'viewfinder', 1)
             self._window.show_image(self._get_preview_image())
 
     def preview_countdown(self, timeout, alpha=80):
@@ -251,7 +259,7 @@ class GpCamera(BaseCamera):
     def capture(self, effect=None):
         """Capture a new picture.
         """
-        if self._preview_compatible:
+        if self._preview_viewfinder:
             self.set_config_value('actions', 'viewfinder', 0)
 
         effect = str(effect).lower()
