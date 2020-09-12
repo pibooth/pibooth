@@ -10,6 +10,7 @@ import tempfile
 import shutil
 import logging
 import argparse
+import multiprocessing
 from warnings import filterwarnings
 
 import pygame
@@ -375,6 +376,10 @@ class PiApplication(object):
 def main():
     """Application entry point.
     """
+    if hasattr(multiprocessing, 'set_start_method'):
+        # Avoid use 'fork': safely forking a multithreaded process is problematic
+        multiprocessing.set_start_method('spawn')
+
     parser = argparse.ArgumentParser(usage="%(prog)s [options]", description=pibooth.__doc__)
 
     parser.add_argument('--version', action='version', version=pibooth.__version__,

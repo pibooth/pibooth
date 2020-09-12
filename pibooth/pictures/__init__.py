@@ -160,7 +160,7 @@ def get_best_orientation(captures):
     return orientation
 
 
-def get_picture_factory(captures, orientation=AUTO, paper_format=(4, 6), force_pil=False):
+def get_picture_factory(captures, orientation=AUTO, paper_format=(4, 6), force_pil=False, dpi=600):
     """Return the picture factory use to concatenate the captures.
 
     :param captures: list of captures to concatenate
@@ -171,6 +171,8 @@ def get_picture_factory(captures, orientation=AUTO, paper_format=(4, 6), force_p
     :type paper_format: tuple
     :param force_pil: force use PIL implementation
     :type force_pil: bool
+    :param dpi: dot-per-inche resolution
+    :type dpi: int
     """
     assert orientation in (AUTO, PORTRAIT, LANDSCAPE), "Unknown orientation '{}'".format(orientation)
     if orientation == AUTO:
@@ -180,8 +182,7 @@ def get_picture_factory(captures, orientation=AUTO, paper_format=(4, 6), force_p
     if paper_format[0] > paper_format[1]:
         paper_format = (paper_format[1], paper_format[0])
 
-    # Consider a resolution of 600 dpi
-    size = (paper_format[0] * 600, paper_format[1] * 600)
+    size = (paper_format[0] * dpi, paper_format[1] * dpi)
     if orientation == LANDSCAPE:
         size = (size[1], size[0])
 

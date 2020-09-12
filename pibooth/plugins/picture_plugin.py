@@ -121,10 +121,11 @@ class PicturePlugin(object):
         if cfg.getboolean('WINDOW', 'animate') and app.capture_nbr > 1:
             with timeit("Asyncronously generate pictures for animation"):
                 for capture in captures:
-                    default_factory = get_picture_factory((capture,), cfg.get('PICTURE', 'orientation'), force_pil=True)
+                    default_factory = get_picture_factory((capture,), cfg.get('PICTURE', 'orientation'), force_pil=True, dpi=200)
                     factory = self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
                                                                           opt_index=idx,
                                                                           factory=default_factory)
+                    factory.set_margin(factory._margin // 3)  # 1/3 since DPI is divided by 3
                     self.factory_pool.add(factory)
 
     @pibooth.hookimpl
