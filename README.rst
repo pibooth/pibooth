@@ -117,7 +117,7 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo pip3 install pibooth[dslr,printer]
 
    .. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/or 6. skipped), remove
-             printer or dslr under the []
+             printer or dslr under the ``[]``
 
 .. note:: An editable/customizable version of ``pibooth`` can be installed by following
           these `instructions <https://github.com/pibooth/pibooth/blob/master/docs/dev.rst>`_ .
@@ -299,6 +299,7 @@ The print button (see `Commands`_) and print states are automatically activated/
 
 * `pycups <https://pypi.python.org/pypi/pycups>`_ and `pycups-notify <https://github.com/anxuae/pycups-notify>`_ are installed
 * at least one printer is configured in ``CUPS``
+* the key ``[PRINTER][printer_name]`` is equal to ``default`` or an existing printer name
 
 To avoid paper waste, set the option ``[PRINTER][max_duplicates]`` to the maximum
 of identical pictures that can be sent to the printer.
