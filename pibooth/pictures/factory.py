@@ -273,9 +273,9 @@ class PictureFactory(object):
         assert align in [self.CENTER, self.RIGHT, self.LEFT], "Unknown aligment '{}'".format(align)
         self._texts.append((text, fonts.get_filename(font_name), color, align))
         if self.is_portrait:
-            self._texts_height = int(self.height * 0.167)
+            self._texts_height = int(self.height // 6)
         else:
-            self._texts_height = int(self.height * 0.125)
+            self._texts_height = int(self.height // 8)
         self._final = None  # Force rebuild
 
     def set_background(self, color_or_path):
