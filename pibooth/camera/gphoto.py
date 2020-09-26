@@ -36,6 +36,12 @@ def gp_camera_connected():
     return False
 
 
+def gp_log_callback(level, domain, string):
+    """Logging callback for gphoto2.
+    """
+    LOGGER.getChild('gphoto2').debug(domain.decode("utf-8") + u': ' + string.decode("utf-8"))
+
+
 class GpCamera(BaseCamera):
 
     """gPhoto2 camera management.
@@ -61,6 +67,7 @@ class GpCamera(BaseCamera):
                  delete_internal_memory=False,
                  init=True):
         BaseCamera.__init__(self, resolution, delete_internal_memory)
+        self._gp_logcb = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_log_callback))
         self._preview_compatible = True
         self._preview_viewfinder = False
         self._preview_hflip = False
@@ -274,4 +281,5 @@ class GpCamera(BaseCamera):
         """Close the camera driver, it's definitive.
         """
         if self._cam:
+            del self._gp_logcb  # Uninstall log callback
             self._cam.exit()
