@@ -18,6 +18,10 @@ LOGFILE = None
 APPNAME = 'diagnostic'
 
 
+def gp_logging(level, domain, string, data=None):
+    write_log('Gphoto2: {}: {}'.format(domain, string))
+
+
 def write_log(text, new_section=False):
     """Write text in the log file"""
     global LOGFILE
@@ -126,7 +130,7 @@ def main():
         write_log("gPhoto2 not installed, cannot diagnose connected DSLR")
         sys.exit(1)
 
-    gp.check_result(gp.use_python_logging())
+    gp_log_callback = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_logging))
 
     write_log("Pibooth version installed: {}".format(pibooth.__version__))
     write_log("Listing all connected DSLR camera")
@@ -188,6 +192,7 @@ def main():
     if not error:
         write_log("SUCCESS : diagnostic completed", True)
 
+    del gp_log_callback
     camera.exit()
 
     write_log("If you are investigating why pibooth does not work with your DSLR camera,")

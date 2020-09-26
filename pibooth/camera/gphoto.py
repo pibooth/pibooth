@@ -61,7 +61,6 @@ class GpCamera(BaseCamera):
                  delete_internal_memory=False,
                  init=True):
         BaseCamera.__init__(self, resolution, delete_internal_memory)
-        gp.check_result(gp.use_python_logging())
         self._preview_compatible = True
         self._preview_viewfinder = False
         self._preview_hflip = False
