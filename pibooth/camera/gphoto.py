@@ -36,7 +36,7 @@ def gp_camera_connected():
     return False
 
 
-def gp_log_callback(level, domain, string):
+def gp_log_callback(level, domain, string, data=None):
     """Logging callback for gphoto2.
     """
     LOGGER.getChild('gphoto2').debug(domain.decode("utf-8") + u': ' + string.decode("utf-8"))
