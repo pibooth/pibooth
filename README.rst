@@ -74,7 +74,7 @@ Install
 A brief description on how to set-up a Raspberry Pi to use this software.
 
 1. Download the Raspbian image and set-up an SD-card. You can follow
-   `these instructions <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_ .
+   `these instructions <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_.
 
 2. Insert the SD-card into the Raspberry Pi and fire it up. Use the ``raspi-config`` tool
    to configure your system (e.g., expand partition, change hostname, password, enable SSH,
