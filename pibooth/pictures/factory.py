@@ -273,9 +273,9 @@ class PictureFactory(object):
         assert align in [self.CENTER, self.RIGHT, self.LEFT], "Unknown aligment '{}'".format(align)
         self._texts.append((text, fonts.get_filename(font_name), color, align))
         if self.is_portrait:
-            self._texts_height = 600
+            self._texts_height = int(self.height // 6)
         else:
-            self._texts_height = 300
+            self._texts_height = int(self.height // 8)
         self._final = None  # Force rebuild
 
     def set_background(self, color_or_path):
@@ -305,13 +305,19 @@ class PictureFactory(object):
         self._overlay_image = image_path
         self._final = None  # Force rebuild
 
-    def set_margin(self, margin):
+    def set_margin(self, margin, margin_text=None):
         """Set margin between concatenated images.
 
         :param margin: margin in pixels
         :type margin: int
+        :param margin_text: margin between texts in pixels
+        :type margin_text: int
         """
         self._margin = margin
+        if margin_text is None:
+            self._margin_text = margin
+        else:
+            self._margin_text = margin_text
         self._final = None  # Force rebuild
 
     def set_cropping(self, crop=True):
