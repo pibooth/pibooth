@@ -215,7 +215,7 @@ class PiConfigMenu(object):
         widget on the menu. If the widget is a button, ENTER event
         is created, else LEFT event is created.
         """
-        if isinstance(self._main_menu.get_selected_widget(), pgm.widgets.Button):
+        if isinstance(self._main_menu.get_current().get_selected_widget(), pgm.widgets.Button):
             event = pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_APPLY,
                                        unicode='\r', mod=0, scancode=36,
                                        window=None, test=True)
