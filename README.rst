@@ -13,6 +13,8 @@ to discover some realizations from GitHub users, and don't hesitate to send us p
 .. note:: Even if designed for a Raspberry Pi, this software may be installed on any Unix/Linux
           based OS (tested on Ubuntu 16 and Mac OSX 10.14.6).
 
+.. contents::
+
 Features
 --------
 
@@ -30,10 +32,8 @@ Features
 * All settings available in a configuration file (most common options in a graphical interface)
 * Highly customizable thanks to it plugin system, you can develop your own plugin
 
-Output pictures gallery
------------------------
-
-You can see some examples of the output picture formats you can get with ``pibooth`` on the following page.
+Gallery
+-------
 
 .. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/gallery.png
    :align: center
@@ -47,6 +47,9 @@ Requirements
 The requirements listed below are the ones used for the development of ``pibooth``, but
 other configuration may work fine. **All hardware buttons, lights and printer are optional**,
 the application can be entirely controlled using a keyboard, a mouse or a touchscreen.
+
+.. warning:: Using a Pi Camera, the preview is visible only on a screen connected to the HDMI or
+             DSI connectors (the preview is an overlay managed at GPU low level).
 
 Hardware
 ^^^^^^^^
