@@ -18,7 +18,7 @@ to discover some realizations from GitHub users, and don't hesitate to send us p
 Features
 --------
 
-* Interface available in Dutch, English, French, German, Hungarian, Norwegian and Spanish (customizable)
+* Interface available in Danish, Dutch, English, French, German, Hungarian, Norwegian and Spanish (customizable)
 * Capture from 1 to 4 photos and concatenate them in a final picture
 * Support all cameras compatible with gPhoto2, OpenCV and Raspberry Pi
 * Support for hardware buttons and lamps on Raspberry Pi GPIO
@@ -30,10 +30,12 @@ Features
 * Custom texts can be added on the final picture (customizable fonts, colors, alignments)
 * Custom background(s) and overlay(s) can be added on the final picture
 * All settings available in a configuration file (most common options in a graphical interface)
-* Highly customizable thanks to it plugin system, you can develop your own plugin
+* Highly customizable thanks to its plugin system, you can develop your own plugin
 
 Gallery
 -------
+
+You can see some examples of the output picture formats you can get with ``pibooth`` on the following page.
 
 .. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/gallery.png
    :align: center
@@ -180,7 +182,7 @@ Change option value     LEFT or RIGHT    Button 2
 Final picture rendering
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``pibooth`` application  handle the rendering of the final picture using 2 variables defined in
+The ``pibooth`` application handle the rendering of the final picture using 2 variables defined in
 the configuration (see `Configuration`_ below):
 
 * ``[CAMERA][resolution] = (width, height)`` is the resolution of the captured picture in pixels.
@@ -287,8 +289,8 @@ key of the configuration. See guidelines to
 GUI translations
 ^^^^^^^^^^^^^^^^
 
-The graphical interface texts are available in 4 languages by default: English, French,
-German, Dutch and Spanish. The default translations can be easily edited using the command::
+The graphical interface texts are available in 8 languages by default: Danish, Dutch, English, 
+French, German, Hungarian, Norwegian and Spanish. The default translations can be easily edited using the command::
 
     $ pibooth --translate
 
