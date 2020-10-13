@@ -197,7 +197,7 @@ class IntroBackground(Background):
                 self.left_arrow = pictures.get_pygame_image("camera.png", size, vflip=False, color=self._text_color)
 
                 x = int(self._rect.width * 0.18)
-                y = int(self._rect.height // 2)
+                y = int(self._rect.height // 6)
             else:
                 size = (self._rect.width * 0.3, self._rect.height * 0.3)
 
@@ -229,7 +229,7 @@ class IntroBackground(Background):
         elif self.arrow_location == TOUCHSCREEN:
             rect = pygame.Rect(self._text_border, self._text_border,
                                self._rect.width / 2 - 2 * self._text_border,
-                               self._rect.height * 0.4 - self._text_border)
+                               self._rect.height * 0.6 - self._text_border)
             align = 'bottom-center'
         else:
             rect = pygame.Rect(self._text_border, self._rect.height * 0.4,
@@ -262,20 +262,17 @@ class IntroWithPrintBackground(IntroBackground):
     def resize(self, screen):
         IntroBackground.resize(self, screen)
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
+            size = (self._rect.width * 0.1, self._rect.height * 0.1)
             if self.arrow_location == TOUCHSCREEN:
-                size = (self._rect.width * 0.07, self._rect.height * 0.07)
                 self.right_arrow = pictures.get_pygame_image("printer.png", size, hflip=False,
                                                              vflip=False, angle=0, color=self._text_color)
-                x = int(self._rect.left + self._rect.width // 2
-                        - self.right_arrow.get_rect().width // 2) * 1.995
-                y = int(self._rect.bottom - self.right_arrow.get_rect().height * 1.2)
             else:
-                size = (self._rect.width * 0.1, self._rect.height * 0.1)
                 vflip = True if self.arrow_location == ARROW_TOP else False
                 angle = -70 if self.arrow_location == ARROW_TOP else 70
                 self.right_arrow = pictures.get_pygame_image("arrow.png", size, hflip=False,
                                                              vflip=vflip, angle=angle, color=self._text_color)
-                x = int(self._rect.left + self._rect.width // 2
+
+            x = int(self._rect.left + self._rect.width // 2
                         - self.right_arrow.get_rect().width // 2)
             if self.arrow_location == ARROW_TOP:
                 y = self._rect.top + 10
@@ -485,7 +482,7 @@ class PrintBackground(Background):
                     "printer.png", size, hflip=False, vflip=False, color=self._text_color)
                 x = int(self._rect.left + self._rect.width * 0.75
                         - self.right_arrow.get_rect().width // 2)
-                y = int(self._rect.top + self._rect.height // 2)
+                y = int(self._rect.top + self._rect.height // 6)
             else:
                 size = (self._rect.width * 0.3, self._rect.height * 0.3)
 
@@ -505,19 +502,18 @@ class PrintBackground(Background):
             self.right_arrow_pos = (x + self.arrow_offset, y)
 
             # Left arrow
+            size = (self._rect.width * 0.1, self._rect.height * 0.1)
+
             if self.arrow_location == TOUCHSCREEN:
-                size = (self._rect.width * 0.2, self._rect.height * 0.2)
                 self.left_arrow = pictures.get_pygame_image(
-                    "trash.png", size, hflip=False, vflip=False, angle=0, color=self._text_color)
-                x = 7 + self.arrow_offset
+                    "trash.png", size, hflip=True, vflip=False, angle=0, color=self._text_color)
             else:
-                size = (self._rect.width * 0.1, self._rect.height * 0.1)
                 vflip = True if self.arrow_location == ARROW_TOP else False
                 angle = 70 if self.arrow_location == ARROW_TOP else -70
                 self.left_arrow = pictures.get_pygame_image(
                     "arrow.png", size, hflip=False, vflip=vflip, angle=angle, color=self._text_color)
 
-                x = int(self._rect.left + self._rect.width // 2
+            x = int(self._rect.left + self._rect.width // 2
                         - self.left_arrow.get_rect().width // 2)
 
             if self.arrow_location == ARROW_TOP:
@@ -543,7 +539,7 @@ class PrintBackground(Background):
         elif self.arrow_location == TOUCHSCREEN:
             rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._text_border,
                                self._rect.width / 2 - 2 * self._text_border,
-                               self._rect.height * 0.4 - self._text_border)
+                               self._rect.height * 0.6 - self._text_border)
             align = 'bottom-center'
         else:
             rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._rect.height * 0.4,
