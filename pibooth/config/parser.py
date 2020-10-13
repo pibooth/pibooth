@@ -92,7 +92,7 @@ DEFAULT = odict((
             ("arrows",
                 ('bottom',
                  "Show arrows to indicate physical buttons: 'bottom', 'top' or 'hidden'",
-                 "Show button arrows", ['bottom', 'top', 'hidden'])),
+                 "Show button arrows", ['bottom', 'top', 'hidden', 'touchscreen'])),
             ("arrows_x_offset",
                 (0,
                  "Apply horizontal offset to arrows position",

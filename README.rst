@@ -370,6 +370,10 @@ Icons from the Noun Project (https://thenounproject.com/)
 - Polaroid by icon 54
 - Up hand drawn arrow by Kid A
 - Cameraman and Friends Posing For Camera by Gan Khoon Lay
+- Camera by Alfa Design
+- Garbage by Alice Design
+- Print Photo by Kmg Design
+- Pointer hand by Peter van Driel
 
 Support us on Beerpay
 ---------------------
