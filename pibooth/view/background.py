@@ -197,7 +197,7 @@ class IntroBackground(Background):
                 self.left_arrow = pictures.get_pygame_image("camera.png", size, vflip=False, color=self._text_color)
 
                 x = int(self._rect.width * 0.2)
-                y = int(self._rect.height // 6)
+                y = int(self._rect.height // 2)
             else:
                 size = (self._rect.width * 0.3, self._rect.height * 0.3)
 
@@ -229,7 +229,7 @@ class IntroBackground(Background):
         elif self.arrow_location == TOUCHSCREEN:
             rect = pygame.Rect(self._text_border, self._text_border,
                                self._rect.width / 2 - 2 * self._text_border,
-                               self._rect.height * 0.6 - self._text_border)
+                               self._rect.height * 0.4 - self._text_border)
             align = 'bottom-center'
         else:
             rect = pygame.Rect(self._text_border, self._rect.height * 0.4,
@@ -482,7 +482,7 @@ class PrintBackground(Background):
                     "printer_touch.png", size, hflip=False, vflip=False, color=self._text_color)
                 x = int(self._rect.left + self._rect.width * 0.70
                         - self.right_arrow.get_rect().width // 2)
-                y = int(self._rect.top + self._rect.height // 6)
+                y = int(self._rect.top + self._rect.height * 0.45)
             else:
                 size = (self._rect.width * 0.3, self._rect.height * 0.3)
 
@@ -539,7 +539,7 @@ class PrintBackground(Background):
         elif self.arrow_location == TOUCHSCREEN:
             rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._text_border,
                                self._rect.width / 2 - 2 * self._text_border,
-                               self._rect.height * 0.6 - self._text_border)
+                               self._rect.height * 0.4 - self._text_border)
             align = 'bottom-center'
         else:
             rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._rect.height * 0.4,
