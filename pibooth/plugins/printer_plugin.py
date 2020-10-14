@@ -44,7 +44,7 @@ class PrinterPlugin(object):
             app.count.remaining_duplicates -= 1
 
     @pibooth.hookimpl
-    def state_processing_exit(self, cfg, app):
+    def state_processing_enter(self, cfg, app):
         app.count.remaining_duplicates = cfg.getint('PRINTER', 'max_duplicates')
 
     @pibooth.hookimpl
