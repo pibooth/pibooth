@@ -91,7 +91,7 @@ DEFAULT = odict((
                  "Final image display time", ['-1'] + [str(i) for i in range(0, 121, 5)])),
             ("arrows",
                 ('bottom',
-                 "Show arrows to indicate physical buttons: 'bottom', 'top' or 'hidden'",
+                 "Show arrows to indicate physical buttons: 'bottom', 'top', 'hidden' or 'touchscreen'",
                  "Show button arrows", ['bottom', 'top', 'hidden', 'touchscreen'])),
             ("arrows_x_offset",
                 (0,

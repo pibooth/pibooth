@@ -45,7 +45,7 @@ Default configuration
     # How long is displayed the final picture in seconds before being hidden (-1 if never hidden)
     final_image_delay = -1
 
-    # Show arrows to indicate physical buttons: 'bottom', 'top' or 'hidden'
+    # Show arrows to indicate physical buttons: 'bottom', 'top', 'hidden' or 'touchscreen'
     arrows = bottom
 
     # Apply horizontal offset to arrows position
