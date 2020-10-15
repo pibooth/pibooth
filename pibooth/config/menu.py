@@ -5,8 +5,10 @@
 
 import pygame
 import pygame_menu as pgm
+import pygame_vkeyboard as vkb
 import pibooth
 from pibooth import fonts
+from pibooth.utils import LOGGER
 from pibooth.config.parser import DEFAULT
 
 
@@ -85,8 +87,8 @@ class PiConfigMenu(object):
         self.win = window
         self.cfg = config
         self.count = counters
-        self._main_menu = None
         self._close_callback = onclose
+        self._last_selected_input = None
 
         size = self.win.get_rect().size
         self.size = (min(600, size[0]), min(400, size[1]))
@@ -95,6 +97,12 @@ class PiConfigMenu(object):
                                    "Settings v{}".format(pibooth.__version__),
                                    theme=THEME_DARK,
                                    onclose=self._on_close)
+        self._keyboard = vkb.VKeyboard(self.win.surface,
+                                       self._on_keyboard_event,
+                                       vkb.VKeyboardLayout(vkb.VKeyboardLayout.QWERTY),
+                                       renderer=vkb.VKeyboardRenderer.DARK,
+                                       show_text=True,
+                                       joystick_navigation=True)
 
         for name in DEFAULT:
             submenu = self._build_submenu(name)
@@ -102,6 +110,7 @@ class PiConfigMenu(object):
                 self._main_menu.add_button(submenu.get_title(), submenu)
         self._main_menu.add_button('Exit', pgm.events.EXIT)
         self._main_menu.disable()
+        self._keyboard.disable()
 
     def _build_submenu(self, section):
         """Build sub-menu"""
@@ -166,6 +175,21 @@ class PiConfigMenu(object):
         menu.add_vertical_margin(40)
         menu.add_button("Reset all", self._on_reset_counters, labels)
         return menu
+
+    def _on_keyboard_event(self, text):
+        """Called after each option changed.
+        """
+        if self._main_menu.is_enabled():  # Menu may have been closed
+            selected = self._main_menu.get_current().get_selected_widget()
+            if isinstance(selected, pgm.widgets.TextInput):
+                if isinstance(selected, pgm.widgets.ColorInput):
+                    try:
+                        selected.set_value(tuple([int(c) for c in text.split(',')]))
+                    except Exception as ex:
+                        LOGGER.error("Invalid color value '%s' (%s)", text, ex)
+                else:
+                    selected.set_value(text)
+                selected.change()
 
     def _on_selector_changed(self, value, **kwargs):
         """Called after each option changed.
@@ -242,6 +266,33 @@ class PiConfigMenu(object):
     def process(self, events):
         """Process the events related to the menu.
         """
-        self._main_menu.update(events)
-        if self._main_menu.is_enabled():  # Menu may have been closed
-            self._main_menu.draw(self.win.surface)
+        if not self._keyboard.is_enabled():
+            self._main_menu.update(events)
+            if self._main_menu.is_enabled():  # Menu may have been closed
+                self._main_menu.draw(self.win.surface)
+                selected = self._main_menu.get_current().get_selected_widget()
+                if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
+                    for event in events:
+                        if event.type == pygame.MOUSEBUTTONDOWN\
+                                and self._main_menu.get_current()._scroll.to_real_position(selected.get_rect()).collidepoint(*event.pos):
+                            self._keyboard.enable()
+                            if isinstance(selected, pgm.widgets.ColorInput):
+                                self._keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
+                            else:
+                                self._keyboard.set_text(selected.get_value())
+                            return
+        else:
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN\
+                        and event.button in (1, 2, 3)\
+                        and not self._keyboard.get_rect().collidepoint(event.pos):
+                    self._keyboard.disable()
+                    self._keyboard.draw()
+                    return
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    self._keyboard.disable()
+                    self._keyboard.draw()
+                    return
+
+            self._keyboard.update(events)
+            self._keyboard.draw(self.win.surface)

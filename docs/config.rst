@@ -23,6 +23,9 @@ Default configuration
     # Path to custom plugin(s) not installed with pip (list of quoted paths accepted)
     plugins =
 
+    # Enable a virtual keyboard in the settings interface
+    vkeyboard = False
+
     [WINDOW]
     # The (width, height) of the display window or 'fullscreen'
     size = (800, 480)
