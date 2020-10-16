@@ -60,8 +60,8 @@ class CvCamera(BaseCamera):
         self._overlay_alpha = 255
 
         self._cam = cv2.VideoCapture(0)
-        self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
-        self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
+        self.preview_resolution = (self._cam.get(cv2.CAP_PROP_FRAME_WIDTH), self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        LOGGER.debug("Preview resolution is {0}".format(self.preview_resolution))
         self._cam.set(cv2.CAP_PROP_ISO_SPEED, self._iso)
 
     def _show_overlay(self, text, alpha):
@@ -188,9 +188,17 @@ class CvCamera(BaseCamera):
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
+        self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
+        self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
+
+        LOGGER.debug("Taking capture at resolution {0}".format(self.resolution))
         ret, image = self._cam.read()
         if not ret:
             raise IOError("Can not capture frame")
+
+        LOGGER.debug("Putting preview resolution back to {0}".format(self.preview_resolution))
+        self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.preview_resolution[0])
+        self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.preview_resolution[1])
 
         self._captures.append((image, effect))
         time.sleep(0.5)  # To let time to see "Smile"
