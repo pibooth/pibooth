@@ -60,14 +60,16 @@ class PtbWindow(object):
                         (192, 0, 224, 0, 240, 0, 248, 0, 252, 0, 254, 0, 255, 0, 255,
                          128, 255, 192, 255, 224, 254, 0, 239, 0, 207, 0, 135, 128, 7, 128, 3, 0))
 
-    def _update_foreground(self, pil_image, pos=CENTER, resize=True):
+    def _update_foreground(self, pil_image, pos=CENTER, resize=True, fullscreen=False):
         """Show a PIL image on the foreground.
-        Only once is bufferized to avoid memory leak.
+        Only one is bufferized to avoid memory leak.
         """
         image_name = id(pil_image)
 
-        image_size_max = (2 * self.surface.get_size()[1] // 3, self.surface.get_size()[1])
-
+        if not fullscreen:
+            image_size_max = (2 * self.surface.get_size()[1] // 3, self.surface.get_size()[1])
+        else:
+            image_size_max = (self.surface.get_size()[0]*0.7, self.surface.get_size()[1])
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
             image = buff_image
@@ -250,11 +252,14 @@ class PtbWindow(object):
         if pil_image:
             self._update_foreground(pil_image, self.LEFT)
 
-    def show_finished(self):
+    def show_finished(self, pil_image=None):
         """Show finished view.
         """
         self._capture_number = (0, self._capture_number[1])
         self._update_background(background.FinishedBackground())
+        if pil_image:
+            self._update_foreground(pil_image, self.CENTER, fullscreen=True)
+    
 
     @contextlib.contextmanager
     def flash(self, count):

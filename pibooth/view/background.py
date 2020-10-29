@@ -542,8 +542,8 @@ class FinishedBackground(Background):
     def resize_texts(self):
         """Update text surfaces.
         """
-        rect = pygame.Rect(self._rect.width * 0.3, self._rect.height * 0.6 - self._text_border,
-                           self._rect.width * 0.4, self._rect.height * 0.4)
+        rect = pygame.Rect(self._rect.width * 0.85 + self._text_border, self._rect.height * 0.6 - self._text_border,
+                           self._rect.width * 0.15 - 2*self._text_border, self._rect.height * 0.4)
         Background.resize_texts(self, rect)
 
 
