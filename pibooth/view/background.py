@@ -9,7 +9,7 @@ from pibooth.language import get_translated_text
 ARROW_TOP = 'top'
 ARROW_BOTTOM = 'bottom'
 ARROW_HIDDEN = 'hidden'
-TOUCHSCREEN = 'touchscreen'
+ARROW_TOUCH = 'touchscreen'
 
 
 def multiline_text_to_surfaces(text, color, rect, align='center'):
@@ -191,7 +191,7 @@ class IntroBackground(Background):
     def resize(self, screen):
         Background.resize(self, screen)
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
-            if self.arrow_location == TOUCHSCREEN:
+            if self.arrow_location == ARROW_TOUCH:
                 size = (self._rect.width * 0.2, self._rect.height * 0.2)
 
                 self.left_arrow = pictures.get_pygame_image("camera.png", size, vflip=False, color=self._text_color)
@@ -226,7 +226,7 @@ class IntroBackground(Background):
                                self._rect.width / 2 - 2 * self._text_border,
                                self._rect.height * 0.6 - self._text_border)
             align = 'bottom-center'
-        elif self.arrow_location == TOUCHSCREEN:
+        elif self.arrow_location == ARROW_TOUCH:
             rect = pygame.Rect(self._text_border, self._text_border,
                                self._rect.width / 2 - 2 * self._text_border,
                                self._rect.height * 0.4 - self._text_border)
@@ -263,7 +263,7 @@ class IntroWithPrintBackground(IntroBackground):
         IntroBackground.resize(self, screen)
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
             size = (self._rect.width * 0.1, self._rect.height * 0.1)
-            if self.arrow_location == TOUCHSCREEN:
+            if self.arrow_location == ARROW_TOUCH:
                 self.right_arrow = pictures.get_pygame_image("hand.png", size, hflip=False,
                                                              vflip=False, angle=-70, color=self._text_color)
             else:
@@ -475,7 +475,7 @@ class PrintBackground(Background):
         Background.resize(self, screen)
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
             
-            if self.arrow_location == TOUCHSCREEN:
+            if self.arrow_location == ARROW_TOUCH:
                 size = (self._rect.width // 4, self._rect.height // 4)
                 # Right arrow
                 self.right_arrow = pictures.get_pygame_image(
@@ -504,7 +504,7 @@ class PrintBackground(Background):
             # Left arrow
             size = (self._rect.width * 0.1, self._rect.height * 0.1)
 
-            if self.arrow_location == TOUCHSCREEN:
+            if self.arrow_location == ARROW_TOUCH:
                 self.left_arrow = pictures.get_pygame_image(
                     "hand.png", size, hflip=False, vflip=False, angle=70, color=self._text_color)
             else:
@@ -536,7 +536,7 @@ class PrintBackground(Background):
                                self._rect.width / 2 - 2 * self._text_border,
                                self._rect.height * 0.6 - self._text_border)
             align = 'bottom-center'
-        elif self.arrow_location == TOUCHSCREEN:
+        elif self.arrow_location == ARROW_TOUCH:
             rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._text_border,
                                self._rect.width / 2 - 2 * self._text_border,
                                self._rect.height * 0.4 - self._text_border)
