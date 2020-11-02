@@ -282,6 +282,13 @@ class PiApplication(object):
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     return event
+            if event.type == pygame.FINGERDOWN:
+                LOGGER.debug("Touch action dectected: %s", event)
+                display_size = pygame.display.get_surface().get_size()
+                finger_pos = (event.x * display_size[0], event.y * display_size[1])
+                rect = self._window.get_rect()
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
+                    return event
             if event.type == BUTTONDOWN and event.capture:
                 return event
         return None
@@ -297,6 +304,13 @@ class PiApplication(object):
                 # Don't consider the mouse wheel (button 4 & 5):
                 rect = self._window.get_rect()
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
+                    return event
+            if event.type == pygame.FINGERDOWN:
+                LOGGER.debug("Touch action dectected: %s", event)
+                display_size = pygame.display.get_surface().get_size()
+                finger_pos = (event.x * display_size[0], event.y * display_size[1])
+                rect = self._window.get_rect()
+                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
                     return event
             if event.type == BUTTONDOWN and event.printer:
                 return event
@@ -322,6 +336,16 @@ class PiApplication(object):
                 # Don't consider the mouse wheel (button 4 & 5):
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
+                    event.key = pygame.K_LEFT
+                else:
+                    event.key = pygame.K_RIGHT
+                return event
+            if event.type == pygame.FINGERDOWN:
+                LOGGER.debug("Touch action dectected: %s", event)
+                rect = self._window.get_rect()
+                display_size = pygame.display.get_surface().get_size()
+                finger_pos = (event.x * display_size[0], event.y * display_size[1])
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
                     event.key = pygame.K_LEFT
                 else:
                     event.key = pygame.K_RIGHT
