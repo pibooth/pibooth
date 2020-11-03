@@ -341,7 +341,7 @@ class PiApplication(object):
                     event.key = pygame.K_RIGHT
                 return event
             if event.type == pygame.FINGERDOWN:
-                LOGGER.debug("Touch action dectected: %s", event)
+                LOGGER.debug("Touch action detected: %s", event)
                 rect = self._window.get_rect()
                 display_size = pygame.display.get_surface().get_size()
                 finger_pos = (event.x * display_size[0], event.y * display_size[1])
