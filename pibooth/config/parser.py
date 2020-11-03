@@ -16,10 +16,10 @@ from pibooth.plugins import get_plugin_name
 
 
 try:
-    from configparser import ConfigParser
+    from configparser import RawConfigParser
 except ImportError:
     # Python 2.x fallback
-    from ConfigParser import ConfigParser
+    from ConfigParser import RawConfigParser
 
 try:
     basestring
@@ -246,13 +246,13 @@ DEFAULT = odict((
 ))
 
 
-class PiConfigParser(ConfigParser):
+class PiConfigParser(RawConfigParser):
 
     """Enhenced configuration file parser.
     """
 
     def __init__(self, filename, plugin_manager):
-        ConfigParser.__init__(self)
+        super(PiConfigParser, self).__init__(self)
         self._pm = plugin_manager
         self.filename = osp.abspath(osp.expanduser(filename))
 
@@ -382,7 +382,7 @@ class PiConfigParser(ConfigParser):
         :type option: str
         """
         if self.has_section(section) and self.has_option(section, option):
-            return ConfigParser.get(self, section, option, **kwargs)
+            return super(PiConfigParser, self).get(section, option, **kwargs)
         return str(DEFAULT[section][option][0])
 
     def set(self, section, option, value=None):
