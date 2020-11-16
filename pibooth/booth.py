@@ -283,9 +283,8 @@ class PiApplication(object):
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     return event
             if event.type == pygame.FINGERDOWN:
-                LOGGER.debug("Touch action dectected: %s", event)
-                display_size = pygame.display.get_surface().get_size()
-                finger_pos = (event.x * display_size[0], event.y * display_size[1])
+                LOGGER.debug("Touch action detected: %s", event)
+                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
                     return event
@@ -307,8 +306,7 @@ class PiApplication(object):
                     return event
             if event.type == pygame.FINGERDOWN:
                 LOGGER.debug("Touch action dectected: %s", event)
-                display_size = pygame.display.get_surface().get_size()
-                finger_pos = (event.x * display_size[0], event.y * display_size[1])
+                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
                 rect = self._window.get_rect()
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
                     return event
@@ -343,8 +341,7 @@ class PiApplication(object):
             if event.type == pygame.FINGERDOWN:
                 LOGGER.debug("Touch action detected: %s", event)
                 rect = self._window.get_rect()
-                display_size = pygame.display.get_surface().get_size()
-                finger_pos = (event.x * display_size[0], event.y * display_size[1])
+                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
                     event.key = pygame.K_LEFT
                 else:
