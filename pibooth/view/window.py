@@ -19,6 +19,7 @@ class PtbWindow(object):
     CENTER = 'center'
     RIGHT = 'right'
     LEFT = 'left'
+    FULLSCREEN = 'fullscreen'
 
     def __init__(self, title,
                  size=(800, 480),
@@ -51,7 +52,8 @@ class PtbWindow(object):
 
         self._pos_map = {self.CENTER: self._center_pos,
                          self.RIGHT: self._right_pos,
-                         self.LEFT: self._left_pos}
+                         self.LEFT: self._left_pos,
+                         self.FULLSCREEN: self._center_pos}
 
         # Don't use pygame.mouse.get_cursor() because will be removed in pygame2
         self._cursor = ((16, 16), (0, 0),
@@ -60,16 +62,16 @@ class PtbWindow(object):
                         (192, 0, 224, 0, 240, 0, 248, 0, 252, 0, 254, 0, 255, 0, 255,
                          128, 255, 192, 255, 224, 254, 0, 239, 0, 207, 0, 135, 128, 7, 128, 3, 0))
 
-    def _update_foreground(self, pil_image, pos=CENTER, resize=True, fullscreen=False):
+    def _update_foreground(self, pil_image, pos=CENTER, resize=True):
         """Show a PIL image on the foreground.
         Only one is bufferized to avoid memory leak.
         """
         image_name = id(pil_image)
 
-        if not fullscreen:
-            image_size_max = (2 * self.surface.get_size()[1] // 3, self.surface.get_size()[1])
-        else:
+        if pos == self.FULLSCREEN:
             image_size_max = (self.surface.get_size()[0]*0.7, self.surface.get_size()[1])
+        else:
+            image_size_max = (2 * self.surface.get_size()[1] // 3, self.surface.get_size()[1])
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
             image = buff_image
@@ -258,8 +260,8 @@ class PtbWindow(object):
         self._capture_number = (0, self._capture_number[1])
         self._update_background(background.FinishedBackground())
         if pil_image:
-            self._update_foreground(pil_image, self.CENTER, fullscreen=True)
-    
+            self._update_foreground(pil_image, self.FULLSCREEN)
+
 
     @contextlib.contextmanager
     def flash(self, count):
