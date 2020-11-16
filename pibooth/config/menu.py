@@ -87,8 +87,8 @@ class PiConfigMenu(object):
         self.win = window
         self.cfg = config
         self.count = counters
+        self._changed = False
         self._close_callback = onclose
-        self._last_selected_input = None
 
         size = self.win.get_rect().size
         self.size = (min(600, size[0]), min(400, size[1]))
@@ -97,20 +97,21 @@ class PiConfigMenu(object):
                                    "Settings v{}".format(pibooth.__version__),
                                    theme=THEME_DARK,
                                    onclose=self._on_close)
+        self._main_menu.disable()
+
         self._keyboard = vkb.VKeyboard(self.win.surface,
                                        self._on_keyboard_event,
                                        vkb.VKeyboardLayout(vkb.VKeyboardLayout.QWERTY),
                                        renderer=vkb.VKeyboardRenderer.DARK,
                                        show_text=True,
                                        joystick_navigation=True)
+        self._keyboard.disable()
 
         for name in DEFAULT:
             submenu = self._build_submenu(name)
             if submenu._widgets:
                 self._main_menu.add_button(submenu.get_title(), submenu)
-        self._main_menu.add_button('Exit', pgm.events.EXIT)
-        self._main_menu.disable()
-        self._keyboard.disable()
+        self._main_menu.add_button('Exit', self._on_exit)
 
     def _build_submenu(self, section):
         """Build sub-menu"""
@@ -196,18 +197,21 @@ class PiConfigMenu(object):
         """
         if self._main_menu.is_enabled():  # Menu may have been closed
             self.cfg.set(kwargs['section'], kwargs['option'], str(value[0]))
+            self._changed = True
 
     def _on_text_changed(self, value, **kwargs):
         """Called after each text input changed.
         """
         if self._main_menu.is_enabled():  # Menu may have been closed
             self.cfg.set(kwargs['section'], kwargs['option'], '"{}"'.format(str(value)))
+            self._changed = True
 
     def _on_color_changed(self, value, **kwargs):
         """Called after each text input changed.
         """
         if self._main_menu.is_enabled():  # Menu may have been closed
             self.cfg.set(kwargs['section'], kwargs['option'], str(value))
+            self._changed = True
 
     def _on_reset_counters(self, labels):
         """Called when the counters are reset.
@@ -220,9 +224,17 @@ class PiConfigMenu(object):
         """Called when the menu is closed.
         """
         self._main_menu.disable()
-        self.cfg.save()
+        if self._changed:
+            self.cfg.save()
+            self._changed = False
         if self._close_callback:
             self._close_callback()
+
+    def _on_exit(self):
+        """Called when the application is exited by menu.
+        """
+        self._on_close()
+        exit(0)
 
     def show(self):
         """Show the menu.
@@ -274,7 +286,7 @@ class PiConfigMenu(object):
                 if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
                     for event in events:
                         if event.type == pygame.MOUSEBUTTONDOWN\
-                                and self._main_menu.get_current()._scroll.to_real_position(selected.get_rect()).collidepoint(*event.pos):
+                                and self._main_menu.get_current()._scroll.collide(selected, event):
                             self._keyboard.enable()
                             if isinstance(selected, pgm.widgets.ColorInput):
                                 self._keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
