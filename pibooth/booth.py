@@ -358,6 +358,7 @@ class PiApplication(object):
                     self._window.resize(event.size)
 
                 if not self._menu and self.find_settings_event(events):
+                    self.camera.stop_preview()
                     self.leds.off()
                     self._menu = PiConfigMenu(self._window, self._config, self.count)
                     self._menu.show()
