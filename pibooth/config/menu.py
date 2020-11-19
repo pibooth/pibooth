@@ -285,7 +285,7 @@ class PiConfigMenu(object):
                 selected = self._main_menu.get_current().get_selected_widget()
                 if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
                     for event in events:
-                        if event.type == pygame.MOUSEBUTTONDOWN\
+                        if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN) \
                                 and self._main_menu.get_current()._scroll.collide(selected, event):
                             self._keyboard.enable()
                             if isinstance(selected, pgm.widgets.ColorInput):
