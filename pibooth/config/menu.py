@@ -196,7 +196,7 @@ class PiConfigMenu(object):
         """Called after each option changed.
         """
         if self._main_menu.is_enabled():  # Menu may have been closed
-            self.cfg.set(kwargs['section'], kwargs['option'], str(value[0]))
+            self.cfg.set(kwargs['section'], kwargs['option'], str(value[0][0]))
             self._changed = True
 
     def _on_text_changed(self, value, **kwargs):
