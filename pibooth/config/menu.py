@@ -92,9 +92,9 @@ class PiConfigMenu(object):
 
         size = self.win.get_rect().size
         self.size = (min(600, size[0]), min(400, size[1]))
-        self._main_menu = pgm.Menu(self.size[1],
-                                   self.size[0],
-                                   "Settings v{}".format(pibooth.__version__),
+        self._main_menu = pgm.Menu(title="Settings v{}".format(pibooth.__version__),
+                                   width=self.size[0],
+                                   height=self.size[1],
                                    theme=THEME_DARK,
                                    onclose=self._on_close)
         self._main_menu.disable()
@@ -121,9 +121,9 @@ class PiConfigMenu(object):
                 length = len(option[2])
         pattern = '{:.<' + str(max(length + 2, 25)) + '} '
 
-        menu = pgm.Menu(self.size[1],
-                        self.size[0],
-                        section.capitalize(),
+        menu = pgm.Menu(title=section.capitalize(),
+                        width=self.size[0],
+                        height=self.size[1],
                         theme=SUBTHEME1_DARK)
 
         for name, option in DEFAULT[section].items():
@@ -166,9 +166,9 @@ class PiConfigMenu(object):
         return menu
 
     def _build_submenu_counters(self, title):
-        menu = pgm.Menu(self.size[1],
-                        self.size[0],
-                        title.capitalize(),
+        menu = pgm.Menu(title=title.capitalize(),
+                        width=self.size[0],
+                        height=self.size[1],
                         theme=SUBTHEME2_DARK)
         labels = []
         for text in _counters(self.count):
