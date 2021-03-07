@@ -218,6 +218,14 @@ class PictureFactory(object):
         """
         raise NotImplementedError
 
+    def _build_foreground(self, image):
+        """Create an image with the given foreground.
+
+        :return: image object which depends on the child class implementation.
+        :rtype: object
+        """
+        raise NotImplementedError
+
     def _build_texts(self, image):
         """Draw texts on a PIL image (PIL is used instead of OpenCV
         because it is able to draw any fonts without ext).
@@ -357,6 +365,9 @@ class PictureFactory(object):
 
             with timeit("Use {} to concatenate images".format(self.name)):
                 image = self._build_matrix(image)
+            
+            with timeit("Use {} to put a foregound onto the concatenated image".format(self.name)):
+                image = self._build_foreground(image)
 
             with timeit("Use {} to assemble final image".format(self.name)):
                 self._final = self._build_final_image(image)
@@ -430,6 +441,11 @@ class PilPictureFactory(PictureFactory):
             image, _, _ = self._image_resize_keep_ratio(bg, self.width, self.height, True)
         else:
             image = Image.new('RGB', (self.width, self.height), color=self._background_color)
+        return image
+
+    def _build_foreground(self, image):
+        """See upper class description.
+        """
         return image
 
 
@@ -521,4 +537,9 @@ class OpenCvPictureFactory(PictureFactory):
                 image = np.zeros((self.height, self.width, 3), np.uint8)
                 image[:] = (self._background_color[0], self._background_color[1], self._background_color[2])
 
+        return image
+    
+    def _build_foreground(self, image):
+        """See upper class description.
+        """
         return image
