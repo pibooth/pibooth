@@ -53,7 +53,7 @@ def main():
         include_package_data=True,
         install_requires=[
             'picamera>=1.13 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
-            'Pillow>=6.1.0',
+            'Pillow>=7.1.2',
             'pygame>=1.9.6',
             'pygame-menu==3.5.5',
             'pygame-vkeyboard>=2.0.7',
