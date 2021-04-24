@@ -258,7 +258,7 @@ class PiApplication(object):
                 self._fingerdown_events.append(event)
             if event.type == pygame.FINGERUP:
                 # resetting touch_events
-                self._touch_events = []
+                self._fingerdown_events = []
             if len(self._fingerdown_events) > 3:
                 # 4 fingers on the screen trigger the menu
                 self._fingerdown_events = []
@@ -295,7 +295,6 @@ class PiApplication(object):
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     return event
             if event.type == pygame.FINGERUP:
-                LOGGER.debug("Touch action detected: %s", event)
                 finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
@@ -317,7 +316,6 @@ class PiApplication(object):
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     return event
             if event.type == pygame.FINGERUP:
-                LOGGER.debug("Touch action detected: %s", event)
                 finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
                 rect = self._window.get_rect()
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
@@ -351,7 +349,6 @@ class PiApplication(object):
                     event.key = pygame.K_RIGHT
                 return event
             if event.type == pygame.FINGERUP:
-                LOGGER.debug("Touch action detected: %s", event)
                 rect = self._window.get_rect()
                 finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
