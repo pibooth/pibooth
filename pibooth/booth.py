@@ -80,6 +80,7 @@ class PiApplication(object):
 
         self._menu = None
         self._multipress_timer = PoolingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
+        self._fingerdown_events = []
 
         # Define states of the application
         self._machine = StateMachine(self._pm, self._config, self, self._window)
@@ -252,6 +253,17 @@ class PiApplication(object):
                 return event
             if event.type == BUTTONDOWN and event.capture and event.printer:
                 return event
+            if event.type == pygame.FINGERDOWN:
+                # press but not release
+                self._fingerdown_events.append(event)
+            if event.type == pygame.FINGERUP:
+                # resetting touch_events
+                self._touch_events = []
+            if len(self._fingerdown_events) > 3:
+                # 4 fingers on the screen trigger the menu
+                self._fingerdown_events = []
+                return pygame.event.Event(BUTTONDOWN, capture=1, printer=1,
+                                               button=self.buttons)
         return None
 
     def find_fullscreen_event(self, events):
@@ -282,6 +294,12 @@ class PiApplication(object):
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
                     return event
+            if event.type == pygame.FINGERUP:
+                LOGGER.debug("Touch action detected: %s", event)
+                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
+                rect = self._window.get_rect()
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
+                    return event
             if event.type == BUTTONDOWN and event.capture:
                 return event
         return None
@@ -297,6 +315,12 @@ class PiApplication(object):
                 # Don't consider the mouse wheel (button 4 & 5):
                 rect = self._window.get_rect()
                 if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
+                    return event
+            if event.type == pygame.FINGERUP:
+                LOGGER.debug("Touch action detected: %s", event)
+                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
+                rect = self._window.get_rect()
+                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
                     return event
             if event.type == BUTTONDOWN and event.printer:
                 return event
@@ -322,6 +346,15 @@ class PiApplication(object):
                 # Don't consider the mouse wheel (button 4 & 5):
                 rect = self._window.get_rect()
                 if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
+                    event.key = pygame.K_LEFT
+                else:
+                    event.key = pygame.K_RIGHT
+                return event
+            if event.type == pygame.FINGERUP:
+                LOGGER.debug("Touch action detected: %s", event)
+                rect = self._window.get_rect()
+                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
                     event.key = pygame.K_LEFT
                 else:
                     event.key = pygame.K_RIGHT
