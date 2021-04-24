@@ -59,6 +59,7 @@ def main():
             'pygame-vkeyboard>=2.0.7',
             'psutil>=5.5.1',
             'pluggy>=0.13.1',
+            'RPi.GPIO>=0.7.0 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
             'gpiozero>=1.5.1'
         ],
         extras_require={
