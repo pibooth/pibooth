@@ -15,6 +15,8 @@ def get_camera(iso, resolution, rotation, flip, delete_internal_memory):
     The priority order is chosen in order to have best rendering during preview
     and to take captures.
     """
+    if rotation not in (0, 90, 180, 270):
+        raise ValueError("Invalid camera rotation value '{}' (should be 0, 90, 180 or 270)".format(rotation))
     if gp_camera_connected() and rpi_camera_connected():
         LOGGER.info("Configuring hybrid camera (Picamera + gPhoto2) ...")
         cam_class = HybridRpiCamera

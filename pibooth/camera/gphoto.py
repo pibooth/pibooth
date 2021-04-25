@@ -106,6 +106,17 @@ class GpCamera(BaseCamera):
             rect = self.get_rect()
             self._overlay = self.build_overlay((rect.width, rect.height), str(text), alpha)
 
+    def _rotate_image(self, image):
+        """Rotate a PIL image, same direction than RpiCamera.
+        """
+        if self._rotation == 90:
+            return image.transpose(Image.ROTATE_90)
+        elif self._rotation == 180:
+            return image.transpose(Image.ROTATE_180)
+        elif self._rotation == 270:
+            return image.transpose(Image.ROTATE_270)
+        return image
+
     def _get_preview_image(self):
         """Capture a new preview image.
         """
@@ -113,6 +124,7 @@ class GpCamera(BaseCamera):
         if self._preview_compatible:
             cam_file = self._cam.capture_preview()
             image = Image.open(io.BytesIO(cam_file.get_data_and_size()))
+            image = self._rotate_image(image)
             # Crop to keep aspect ratio of the resolution
             image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
             # Resize to fit the available space in the window
@@ -139,6 +151,7 @@ class GpCamera(BaseCamera):
             LOGGER.debug("Delete capture '%s' from internal memory", gp_path.name)
             self._cam.file_delete(gp_path.folder, gp_path.name)
         image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
+        image = self._rotate_image(image)
 
         # Crop to keep aspect ratio of the resolution
         image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
