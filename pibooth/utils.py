@@ -279,7 +279,7 @@ def memorize(func):
 def open_text_editor(filename):
     """Open a text editor to edit the configuration file.
     """
-    editors = ['leafpad', 'vi', 'emacs']
+    editors = ['leafpad', 'mousepad', 'vi', 'emacs']
     for editor in editors:
         try:
             process = subprocess.Popen([editor, filename])
