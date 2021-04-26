@@ -83,9 +83,10 @@ def _counters(counters):
 
 class PiConfigMenu(object):
 
-    def __init__(self, window, config, counters, onclose=None):
+    def __init__(self, plugin_manager, configuration, window, counters, onclose=None):
         self.win = window
-        self.cfg = config
+        self.cfg = configuration
+        self.pm = plugin_manager
         self.count = counters
         self._changed = False
         self._close_callback = onclose
@@ -96,6 +97,7 @@ class PiConfigMenu(object):
                                    width=self.size[0],
                                    height=self.size[1],
                                    theme=THEME_DARK,
+                                   touchscreen=True,
                                    onclose=self._on_close)
         self._main_menu.disable()
 
@@ -110,8 +112,8 @@ class PiConfigMenu(object):
         for name in DEFAULT:
             submenu = self._build_submenu(name)
             if submenu._widgets:
-                self._main_menu.add_button(submenu.get_title(), submenu)
-        self._main_menu.add_button('Exit', self._on_exit)
+                self._main_menu.add.button(submenu.get_title(), submenu)
+        self._main_menu.add.button('Exit', self._on_exit)
 
     def _build_submenu(self, section):
         """Build sub-menu"""
@@ -124,13 +126,14 @@ class PiConfigMenu(object):
         menu = pgm.Menu(title=section.capitalize(),
                         width=self.size[0],
                         height=self.size[1],
-                        theme=SUBTHEME1_DARK)
+                        theme=SUBTHEME1_DARK,
+                        touchscreen=True)
 
         for name, option in DEFAULT[section].items():
             if option[2]:
                 title = pattern.format(option[2])
                 if isinstance(option[3], str):
-                    menu.add_text_input(title,
+                    menu.add.text_input(title,
                                         onchange=self._on_text_changed,
                                         default=self.cfg.get(section, name).strip('"'),
                                         # Parameters passed to callback:
@@ -138,7 +141,7 @@ class PiConfigMenu(object):
                                         option=name)
                 elif isinstance(option[3], (list, tuple)) and len(option[3]) == 3\
                         and all(isinstance(i, int) for i in option[3]):
-                    menu.add_color_input(title,
+                    menu.add.color_input(title,
                                          "rgb",
                                          default=self.cfg.gettyped(section, name),
                                          input_separator=',',
@@ -149,7 +152,7 @@ class PiConfigMenu(object):
                                          option=name)
                 else:
                     values = [(v,) for v in option[3]]
-                    menu.add_selector(title,
+                    menu.add.selector(title,
                                       values,
                                       onchange=self._on_selector_changed,
                                       default=_find(values, self.cfg.get(section, name)),
@@ -158,10 +161,14 @@ class PiConfigMenu(object):
                                       option=name)
 
         if section.lower() == 'general':
-            menu.add_vertical_margin(40)
-            menu.add_button("View counters",
+            menu.add.vertical_margin(40)
+            menu.add.button("View counters",
                             self._build_submenu_counters("Counters"),
                             margin=(self.size[0] // 2 - 100, 0))
+            menu.add.vertical_margin(20)
+            menu.add.button("Manage plugins",
+                            self._build_submenu_plugins("Plugins"),
+                            margin=(self.size[0] // 2 - 105, 0))
 
         return menu
 
@@ -169,12 +176,33 @@ class PiConfigMenu(object):
         menu = pgm.Menu(title=title.capitalize(),
                         width=self.size[0],
                         height=self.size[1],
-                        theme=SUBTHEME2_DARK)
+                        theme=SUBTHEME2_DARK,
+                        touchscreen=True)
         labels = []
         for text in _counters(self.count):
-            labels.append(menu.add_label(text))
-        menu.add_vertical_margin(40)
-        menu.add_button("Reset all", self._on_reset_counters, labels)
+            labels.append(menu.add.label(text))
+        menu.add.vertical_margin(40)
+        menu.add.button("Reset all", self._on_counters_reset, labels)
+        return menu
+
+    def _build_submenu_plugins(self, title):
+        menu = pgm.Menu(title=title.capitalize(),
+                        width=self.size[0],
+                        height=self.size[1],
+                        theme=SUBTHEME2_DARK,
+                        touchscreen=True)
+
+        plugins = self.pm.list_extern_plugins()
+        long_name = max([p.fullname for p in plugins], key=len)
+        pattern = '{:.<' + str(max(len(long_name) + 2, 25)) + '}'
+
+        for plugin in plugins:
+            enabled = self.pm.is_registered(plugin)
+            menu.add.toggle_switch(pattern.format(plugin.fullname),
+                                   enabled,
+                                   onchange=self._on_plugin_toggled,
+                                   # Parameters passed to callback:
+                                   plugin=plugin)
         return menu
 
     def _on_keyboard_event(self, text):
@@ -213,12 +241,21 @@ class PiConfigMenu(object):
             self.cfg.set(kwargs['section'], kwargs['option'], str(value))
             self._changed = True
 
-    def _on_reset_counters(self, labels):
+    def _on_counters_reset(self, labels):
         """Called when the counters are reset.
         """
         self.count.reset()
         for label, text in zip(labels, _counters(self.count)):
             label.set_title(text)
+
+    def _on_plugin_toggled(self, activated, **kwargs):
+        """Called when a plugin active state is toggled.
+        """
+        plugin = kwargs['plugin']
+        if activated and not self.pm.is_registered(plugin):
+            self.pm.register(plugin)
+        elif not activated and self.pm.is_registered(plugin):
+            self.pm.unregister(plugin)
 
     def _on_close(self):
         """Called when the menu is closed.

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import pibooth
 import sys
 from io import open
 import os.path as osp
@@ -9,7 +10,6 @@ from setuptools import setup, find_packages
 
 HERE = osp.abspath(osp.dirname(__file__))
 sys.path.insert(0, HERE)
-import pibooth
 
 
 def main():
@@ -56,7 +56,7 @@ def main():
             # Pillow freeze: higher versions bugged (see PR #5434)
             'Pillow==7.1.2',
             'pygame>=1.9.6',
-            'pygame-menu==3.5.5',
+            'pygame-menu>=4.0.3',
             'pygame-vkeyboard>=2.0.7',
             'psutil>=5.5.1',
             'pluggy>=0.13.1',

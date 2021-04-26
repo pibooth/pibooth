@@ -12,7 +12,6 @@ import inspect
 from collections import OrderedDict as odict
 from pibooth.utils import LOGGER, open_text_editor
 from pibooth import language
-from pibooth.plugins import get_plugin_name
 
 
 try:
@@ -56,6 +55,10 @@ DEFAULT = odict((
             ("plugins",
                 ('',
                  "Path to custom plugin(s) not installed with pip (list of quoted paths accepted)",
+                 None, None)),
+            ("plugins_disabled",
+                ('',
+                 "Plugin names to be disabled after startup (list of quoted names accepted)",
                  None, None)),
             ("vkeyboard",
                 (False,
@@ -361,7 +364,7 @@ class PiConfigParser(RawConfigParser):
             plugin_name = "Unknown"
         else:
             plugin = inspect.getmodule(inspect.stack()[1][0])
-            plugin_name = get_plugin_name(self._pm, plugin, False)
+            plugin_name = self._pm.get_friendly_name(plugin, False)
 
         # Check that the option is not already created
         if section in DEFAULT and option in DEFAULT[section]:
