@@ -66,7 +66,7 @@ class PtbWindow(object):
         """
         image_name = id(pil_image)
 
-        image_size_max = (2 * self.surface.get_size()[1] // 3, self.surface.get_size()[1])
+        image_size_max = (self.surface.get_size()[0] * 0.45, self.surface.get_size()[1])
 
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
