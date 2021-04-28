@@ -152,7 +152,6 @@ class Background(object):
                 self._overlay = pictures.get_pygame_image(
                     pictures.get_filename(overlay_name), (self._rect.width, self._rect.height), color=self._text_color, bg_color=self._background_color)
 
-
             self.resize_texts()
 
             self._need_update = True
@@ -273,7 +272,7 @@ class IntroWithPrintBackground(IntroBackground):
                                                              vflip=vflip, angle=angle, color=self._text_color)
 
             x = int(self._rect.left + self._rect.width // 2
-                        - self.right_arrow.get_rect().width // 2)
+                    - self.right_arrow.get_rect().width // 2)
             if self.arrow_location == ARROW_TOP:
                 y = self._rect.top + 10
             else:
@@ -287,8 +286,8 @@ class IntroWithPrintBackground(IntroBackground):
         text = get_translated_text("intro_print")
         if text:
             rect = pygame.Rect(self._rect.width * 0.30 + self._text_border, 0,
-                                   self._rect.width * 0.20 - 2 * self._text_border,
-                                   self._rect.height * 0.3 - 2 * self._text_border)
+                               self._rect.width * 0.20 - 2 * self._text_border,
+                               self._rect.height * 0.3 - 2 * self._text_border)
             if self.arrow_location == ARROW_TOP:
                 rect.top = self._rect.height * 0.08
             else:
@@ -320,7 +319,7 @@ class ChooseBackground(Background):
     def resize(self, screen):
         Background.resize(self, screen)
         if self._need_update:
-            size = (self._rect.width * 0.6, self._rect.height * 0.6)
+            size = (self._rect.width * 0.45, self._rect.height * 0.6)
             self.layout0 = pictures.get_pygame_layout_image(
                 self._text_color, self._background_color, self.choices[0], size)
             self.layout1 = pictures.get_pygame_layout_image(
@@ -474,7 +473,7 @@ class PrintBackground(Background):
     def resize(self, screen):
         Background.resize(self, screen)
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
-            
+
             if self.arrow_location == ARROW_TOUCH:
                 size = (self._rect.width // 4, self._rect.height // 4)
                 # Right arrow
@@ -514,7 +513,7 @@ class PrintBackground(Background):
                     "arrow.png", size, hflip=False, vflip=vflip, angle=angle, color=self._text_color)
 
             x = int(self._rect.left + self._rect.width // 2
-                        - self.left_arrow.get_rect().width // 2)
+                    - self.left_arrow.get_rect().width // 2)
 
             if self.arrow_location == ARROW_TOP:
                 y = self._rect.top + 10
@@ -551,8 +550,8 @@ class PrintBackground(Background):
         text = get_translated_text("print_forget")
         if text:
             rect = pygame.Rect(self._rect.width // 2, 0,
-                                   self._rect.width // 5 - 2 * self._text_border,
-                                   self._rect.height * 0.3 - 2 * self._text_border)
+                               self._rect.width // 5 - 2 * self._text_border,
+                               self._rect.height * 0.3 - 2 * self._text_border)
             if self.arrow_location == ARROW_TOP:
                 rect.top = self._rect.height * 0.08
             else:
