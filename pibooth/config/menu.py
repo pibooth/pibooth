@@ -166,9 +166,10 @@ class PiConfigMenu(object):
                             self._build_submenu_counters("Counters"),
                             margin=(self.size[0] // 2 - 100, 0))
             menu.add.vertical_margin(20)
-            menu.add.button("Manage plugins",
-                            self._build_submenu_plugins("Plugins"),
-                            margin=(self.size[0] // 2 - 105, 0))
+            if self.pm.list_extern_plugins():
+                menu.add.button("Manage plugins",
+                                self._build_submenu_plugins("Plugins"),
+                                margin=(self.size[0] // 2 - 105, 0))
 
         return menu
 
