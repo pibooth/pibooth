@@ -464,7 +464,8 @@ def main():
     # Register plugins
     plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
                                     config.gettuple('GENERAL', 'plugins_disabled', str))
-    LOGGER.info("Installed plugins: %s", ", ".join([p.fullname for p in plugin_manager.list_extern_plugins()]))
+    LOGGER.info("Installed plugins: %s", ", ".join(
+        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_extern_plugins()]))
 
     # Update configuration with plugins ones
     plugin_manager.hook.pibooth_configure(cfg=config)

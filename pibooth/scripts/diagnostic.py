@@ -11,7 +11,9 @@ try:
 except ImportError:
     gp = None  # gphoto2 is optional
 import pibooth
+from pibooth.config import PiConfigParser
 from pibooth.utils import configure_logging
+from pibooth.plugins import create_plugin_manager
 
 
 LOGFILE = None
@@ -126,13 +128,22 @@ def camera_connected():
 def main():
     error = False
     configure_logging()
+
+    plugin_manager = create_plugin_manager()
+    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
+
+    # Register plugins
+    plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
+                                    config.gettuple('GENERAL', 'plugins_disabled', str))
+    write_log("Pibooth version installed: {}".format(pibooth.__version__))
+    write_log("Plugins installed: {}".format(", ".join(
+        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_extern_plugins()])))
+
     if not gp:
         write_log("gPhoto2 not installed, cannot diagnose connected DSLR")
         sys.exit(1)
 
     gp_log_callback = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_logging))
-
-    write_log("Pibooth version installed: {}".format(pibooth.__version__))
     write_log("Listing all connected DSLR camera")
     cameras_list = camera_connected()
 
@@ -150,10 +161,10 @@ def main():
 
     abilities = camera.get_abilities()
     preview_compat = gp.GP_OPERATION_CAPTURE_PREVIEW ==\
-                     abilities.operations & gp.GP_OPERATION_CAPTURE_PREVIEW
+        abilities.operations & gp.GP_OPERATION_CAPTURE_PREVIEW
     write_log("* Preview compatible: {}".format(preview_compat))
     capture_compat = gp.GP_OPERATION_CAPTURE_IMAGE ==\
-                     abilities.operations & gp.GP_OPERATION_CAPTURE_IMAGE
+        abilities.operations & gp.GP_OPERATION_CAPTURE_IMAGE
     write_log("* Capture compatible: {}".format(capture_compat))
 
     if capture_compat:

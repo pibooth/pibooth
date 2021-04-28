@@ -193,12 +193,12 @@ class PiConfigMenu(object):
                         touchscreen=True)
 
         plugins = self.pm.list_extern_plugins()
-        long_name = max([p.fullname for p in plugins], key=len)
+        long_name = max([self.pm.get_friendly_name(p) for p in plugins], key=len)
         pattern = '{:.<' + str(max(len(long_name) + 2, 25)) + '}'
 
         for plugin in plugins:
             enabled = self.pm.is_registered(plugin)
-            menu.add.toggle_switch(pattern.format(plugin.fullname),
+            menu.add.toggle_switch(pattern.format(self.pm.get_friendly_name(plugin)),
                                    enabled,
                                    state_color=((178, 178, 178), SUBTHEME2_DARK.title_background_color),
                                    onchange=self._on_plugin_toggled,

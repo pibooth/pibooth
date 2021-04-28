@@ -98,7 +98,6 @@ class PiPluginManager(pluggy.PluginManager):
             # The core plugins are classes, we don't want to include
             # them here, thus we take only the modules objects.
             if inspect.ismodule(plugin):
-                plugin.fullname = self.get_friendly_name(plugin)
                 if plugin not in values:
                     values.append(plugin)
         return values
