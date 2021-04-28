@@ -57,7 +57,7 @@ def main():
             'Pillow==7.1.2',
             'pygame>=1.9.6',
             'pygame-menu==3.5.5',
-            'pygame-vkeyboard>=2.0.7',
+            'pygame-vkeyboard>=2.0.8',
             'psutil>=5.5.1',
             'pluggy>=0.13.1',
             'gpiozero>=1.5.1',
