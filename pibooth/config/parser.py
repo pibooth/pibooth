@@ -473,7 +473,11 @@ class PiConfigParser(RawConfigParser):
         if not isinstance(values, (tuple, list)):
             if not isinstance(values, types):
                 raise ValueError("Invalid config value [{}][{}]={}".format(section, option, values))
-            values = (values,)
+            if values == '' and extend == 0:
+                # Empty config key and empty tuple accepted
+                values = ()
+            else:
+                values = (values,)
         else:
             # Check if one value is given or if it is a list of value
             if color and len(values) == 3 and all(isinstance(elem, int) for elem in values):
