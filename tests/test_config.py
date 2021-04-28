@@ -57,8 +57,11 @@ def test_color_list(cfg):
 
 
 def test_string_list(cfg):
+    assert cfg.gettuple('PICTURE', 'overlays', str) == ()
     assert cfg.gettuple('PICTURE', 'text_fonts', str) == ('Amatic-Bold', 'AmaticSC-Regular')
 
 
 def test_string_list_extended(cfg):
-    assert cfg.gettuple('PICTURE', 'backgrounds', str, 3) == ('fond2.jpg', 'fond2.jpg', 'fond2.jpg')
+    assert cfg.gettuple('PICTURE', 'overlays', str, 1) == ('',)
+    assert cfg.gettuple('PICTURE', 'backgrounds', str) == ('fond1.jpg', 'fond2.jpg')
+    assert cfg.gettuple('PICTURE', 'backgrounds', str, 3) == ('fond1.jpg', 'fond2.jpg', 'fond2.jpg')
