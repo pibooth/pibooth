@@ -68,9 +68,8 @@ def main():
     config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
 
     # Register plugins
-    custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
-    disabled = [p for p in config.gettuple('GENERAL', 'plugins_disabled', str) if p]
-    plugin_manager.load_all_plugins(custom_paths, disabled)
+    plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
+                                    config.gettuple('GENERAL', 'plugins_disabled', str))
 
     # Update configuration with plugins ones
     plugin_manager.hook.pibooth_configure(cfg=config)

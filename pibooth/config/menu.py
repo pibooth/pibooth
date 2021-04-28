@@ -83,11 +83,11 @@ def _counters(counters):
 
 class PiConfigMenu(object):
 
-    def __init__(self, plugin_manager, configuration, window, counters, onclose=None):
+    def __init__(self, plugins_manager, configuration, application, window, onclose=None):
+        self.app = application
         self.win = window
         self.cfg = configuration
-        self.pm = plugin_manager
-        self.count = counters
+        self.pm = plugins_manager
         self._changed = False
         self._close_callback = onclose
 
@@ -179,7 +179,7 @@ class PiConfigMenu(object):
                         theme=SUBTHEME2_DARK,
                         touchscreen=True)
         labels = []
-        for text in _counters(self.count):
+        for text in _counters(self.app.count):
             labels.append(menu.add.label(text))
         menu.add.vertical_margin(40)
         menu.add.button("Reset all", self._on_counters_reset, labels)
@@ -200,8 +200,11 @@ class PiConfigMenu(object):
             enabled = self.pm.is_registered(plugin)
             menu.add.toggle_switch(pattern.format(plugin.fullname),
                                    enabled,
+                                   state_color=((178, 178, 178), SUBTHEME2_DARK.title_background_color),
                                    onchange=self._on_plugin_toggled,
                                    # Parameters passed to callback:
+                                   section='GENERAL',
+                                   option='plugins_disabled',
                                    plugin=plugin)
         return menu
 
@@ -244,18 +247,40 @@ class PiConfigMenu(object):
     def _on_counters_reset(self, labels):
         """Called when the counters are reset.
         """
-        self.count.reset()
-        for label, text in zip(labels, _counters(self.count)):
+        self.app.count.reset()
+        for label, text in zip(labels, _counters(self.app.count)):
             label.set_title(text)
 
     def _on_plugin_toggled(self, activated, **kwargs):
         """Called when a plugin active state is toggled.
         """
         plugin = kwargs['plugin']
+        disabled = self.cfg.gettuple(kwargs['section'], kwargs['option'], str)
         if activated and not self.pm.is_registered(plugin):
             self.pm.register(plugin)
+            plugin_name = self.pm.get_name(plugin)
+            disabled = tuple([name for name in disabled if plugin_name != name])
+            self._changed = True
+
+            # Ensure that mandatory hooks has been called at least once during
+            # pibboth program life
+            if 'pibooth_configure' not in self.pm.get_calls_history(plugin):
+                hook = self.pm.subset_hook_caller_for_plugin('pibooth_configure', plugin)
+                hook(cfg=self.cfg)
+            if 'pibooth_startup' not in self.pm.get_calls_history(plugin):
+                hook = self.pm.subset_hook_caller_for_plugin('pibooth_startup', plugin)
+                hook(cfg=self.cfg, app=self.app)
+
         elif not activated and self.pm.is_registered(plugin):
+            plugin_name = self.pm.get_name(plugin)
             self.pm.unregister(plugin)
+            if plugin_name not in disabled:
+                disabled += (plugin_name,)
+                self._changed = True
+
+        if not disabled:
+            disabled = ''
+        self.cfg.set(kwargs['section'], kwargs['option'], str(disabled))
 
     def _on_close(self):
         """Called when the menu is closed.

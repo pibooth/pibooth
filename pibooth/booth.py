@@ -390,7 +390,7 @@ class PiApplication(object):
                 if not self._menu and self.find_settings_event(events):
                     self.camera.stop_preview()
                     self.leds.off()
-                    self._menu = PiConfigMenu(self._pm, self._config, self._window, self.count)
+                    self._menu = PiConfigMenu(self._pm, self._config, self, self._window)
                     self._menu.show()
                     self.leds.blink(on_time=0.1, off_time=1)
                 elif self._menu and self._menu.is_shown():
@@ -462,9 +462,8 @@ def main():
     language.init(config.join_path("translations.cfg"), options.reset)
 
     # Register plugins
-    custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
-    disabled = [p for p in config.gettuple('GENERAL', 'plugins_disabled', str) if p]
-    plugin_manager.load_all_plugins(custom_paths, disabled)
+    plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
+                                    config.gettuple('GENERAL', 'plugins_disabled', str))
     LOGGER.info("Installed plugins: %s", ", ".join([p.fullname for p in plugin_manager.list_extern_plugins()]))
 
     # Update configuration with plugins ones
