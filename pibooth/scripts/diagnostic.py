@@ -128,6 +128,7 @@ def camera_connected():
 def main():
     error = False
     configure_logging()
+    write_log("Pibooth version installed: {}".format(pibooth.__version__))
 
     plugin_manager = create_plugin_manager()
     config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
@@ -135,8 +136,8 @@ def main():
     # Register plugins
     plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
                                     config.gettuple('GENERAL', 'plugins_disabled', str))
-    write_log("Pibooth version installed: {}".format(pibooth.__version__))
-    write_log("Plugins installed: {}".format(", ".join(
+
+    write_log("Installed plugins: {}".format(", ".join(
         [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_extern_plugins()])))
 
     if not gp:
