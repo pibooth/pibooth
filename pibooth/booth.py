@@ -457,14 +457,16 @@ def main():
 
     plugin_manager = create_plugin_manager()
 
-    # Load the configuration and languages
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
-    language.init(config.join_path("translations.cfg"), options.reset)
+    # Load the configuration
+    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager, not options.reset)
 
     # Register plugins
     custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
     load_plugins(plugin_manager, *custom_paths)
     LOGGER.info("Installed plugins: %s", ", ".join(list_plugin_names(plugin_manager)))
+
+    # Load the languages
+    language.init(config.join_path("translations.cfg"), options.reset)
 
     # Update configuration with plugins ones
     plugin_manager.hook.pibooth_configure(cfg=config)
