@@ -84,6 +84,13 @@ class PtbWindow(object):
             self._buffered_images[image_name] = (image_size_max, image)
 
         self._current_foreground = (pil_image, pos, resize)
+
+        if self.debug and resize:
+            # Build rectangle around picture area for debuging purpose
+            outlines = pygame.Surface(image_size_max, pygame.SRCALPHA, 32)
+            pygame.draw.rect(outlines, pygame.Color(255, 0, 0), outlines.get_rect(), 2)
+            self.surface.blit(outlines, self._pos_map[pos](outlines))
+
         return self.surface.blit(image, self._pos_map[pos](image))
 
     def _update_background(self, bkgd):
