@@ -44,7 +44,7 @@ class GpOmxCamera(GpCamera):
         """
         self._cam = gp.Camera()
         self._cam.init()
-        self.set_config_value('imgsettings', 'iso', self._iso)
+        self.set_config_value('imgsettings', 'iso', self.iso_preview)
         self.set_config_value('settings', 'capturetarget', 'Memory card')
 
     def _show_overlay(self, text, alpha):
@@ -119,6 +119,10 @@ class GpOmxCamera(GpCamera):
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
         self._initialize()
+
+        if self.iso != self.iso_preview:
+            self.set_config_value('imgsettings', 'iso', self.iso)
+
         self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         time.sleep(1)  # Necessary to let the time for the camera to save the image
         self.quit()
