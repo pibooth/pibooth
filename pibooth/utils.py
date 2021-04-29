@@ -15,6 +15,7 @@ from fnmatch import fnmatchcase
 import contextlib
 import errno
 import subprocess
+import pygame
 try:
     from itertools import zip_longest, islice
 except ImportError:
@@ -311,3 +312,17 @@ def load_module(path):
             return loader.load_module(modname)
 
     LOGGER.warning("Can not load Python module '%s' from '%s'", modname, path)
+
+
+def get_event_pos(display_size, event):
+    """
+    Return the position from finger or mouse event on x-axis and y-axis (x, y).
+
+    :param display_size: size of display for relative positioning in finger events
+    :param event: pygame event object
+    :return: position (x, y) in px
+    """
+    if event.type in (pygame.FINGERDOWN, pygame.FINGERMOTION, pygame.FINGERUP):
+        finger_pos = (event.x * display_size[0], event.y * display_size[1])
+        return finger_pos
+    return event.pos

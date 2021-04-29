@@ -8,7 +8,7 @@ import pygame_menu as pgm
 import pygame_vkeyboard as vkb
 import pibooth
 from pibooth import fonts
-from pibooth.utils import LOGGER
+from pibooth.utils import LOGGER, get_event_pos
 from pibooth.config.parser import DEFAULT
 
 
@@ -348,7 +348,7 @@ class PiConfigMenu(object):
                 selected = self._main_menu.get_current().get_selected_widget()
                 if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
                     for event in events:
-                        if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN) \
+                        if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN)\
                                 and selected.get_scrollarea().collide(selected, event):
                             self._keyboard.enable()
                             if isinstance(selected, pgm.widgets.ColorInput):
@@ -358,9 +358,9 @@ class PiConfigMenu(object):
                             return
         else:
             for event in events:
-                if event.type == pygame.MOUSEBUTTONDOWN\
-                        and event.button in (1, 2, 3)\
-                        and not self._keyboard.get_rect().collidepoint(event.pos):
+                if (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3)
+                        or event.type == pygame.FINGERDOWN)\
+                        and not self._keyboard.get_rect().collidepoint(get_event_pos(self.win.display_size, event)):
                     self._keyboard.disable()
                     self._keyboard.draw()
                     return

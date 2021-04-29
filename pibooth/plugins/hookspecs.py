@@ -9,9 +9,9 @@ hookspec = pluggy.HookspecMarker('pibooth')
 
 @hookspec
 def pibooth_configure(cfg):
-    """Actions performed after loading of the configuration file.
-    The ``cfg`` object is an instance of :py:class:`ConfigParser`
-    class.
+    """Actions performed after loading of the configuration file or when the
+    plugin is enabled for the first time. The ``cfg`` object is an instance
+    of :py:class:`ConfigParser` class.
 
     :param cfg: application configuration
     """
@@ -35,7 +35,8 @@ def pibooth_reset(cfg, hard):
 
 @hookspec
 def pibooth_startup(cfg, app):
-    """Actions performed at the startup of pibooth.
+    """Actions performed at the startup of pibooth or when the plugin is enabled
+    for the first time.
 
     :param cfg: application configuration
     :param app: application instance

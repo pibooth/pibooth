@@ -22,7 +22,7 @@ from pibooth import fonts
 from pibooth import language
 from pibooth.counters import Counters
 from pibooth.utils import (LOGGER, PoolingTimer, configure_logging, get_crash_message,
-                           set_logging_level, print_columns_words)
+                           set_logging_level, print_columns_words, get_event_pos)
 from pibooth.states import StateMachine
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import PtbWindow
@@ -289,15 +289,10 @@ class PiApplication(object):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
-                # Don't consider the mouse wheel (button 4 & 5):
+            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
+                pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
-                    return event
-            if event.type == pygame.FINGERUP:
-                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
-                rect = self._window.get_rect()
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(pos):
                     return event
             if event.type == BUTTONDOWN and event.capture:
                 return event
@@ -310,15 +305,10 @@ class PiApplication(object):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e\
                     and pygame.key.get_mods() & pygame.KMOD_CTRL:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
-                # Don't consider the mouse wheel (button 4 & 5):
+            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
+                pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
-                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
-                    return event
-            if event.type == pygame.FINGERUP:
-                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
-                rect = self._window.get_rect()
-                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
+                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(pos):
                     return event
             if event.type == BUTTONDOWN and event.printer:
                 return event
@@ -340,18 +330,10 @@ class PiApplication(object):
                 return event
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
-                # Don't consider the mouse wheel (button 4 & 5):
+            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
+                pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
-                    event.key = pygame.K_LEFT
-                else:
-                    event.key = pygame.K_RIGHT
-                return event
-            if event.type == pygame.FINGERUP:
-                rect = self._window.get_rect()
-                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(pos):
                     event.key = pygame.K_LEFT
                 else:
                     event.key = pygame.K_RIGHT
