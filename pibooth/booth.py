@@ -58,10 +58,6 @@ class PiApplication(object):
             if not osp.isdir(savedir):
                 os.makedirs(savedir)
 
-        # Prepare the pygame module for use
-        os.environ['SDL_VIDEO_CENTERED'] = '1'
-        pygame.init()
-
         # Create window of (width, height)
         init_size = self._config.gettyped('WINDOW', 'size')
         init_debug = self._config.getboolean('GENERAL', 'debug')

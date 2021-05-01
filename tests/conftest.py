@@ -4,11 +4,17 @@
 import os
 import pytest
 from PIL import Image
+from pibooth import language
 from pibooth.counters import Counters
 from pibooth.config.parser import PiConfigParser
 
 MOCKS_DIR = os.path.join(os.path.dirname(__file__), 'mocks')
 CAPTURES_DIR = os.path.join(os.path.dirname(__file__), 'captures')
+
+
+@pytest.fixture
+def init(tmpdir):
+    return language.init(str(tmpdir.join('translations.cfg')))
 
 
 @pytest.fixture(scope='session')

@@ -61,7 +61,6 @@ class Background(object):
 
     def __init__(self, image_name, color=(0, 0, 0), text_color=(255, 255, 255)):
         self._rect = None
-        self._outlines = True
         self._name = image_name
         self._need_update = False
 
@@ -75,6 +74,10 @@ class Background(object):
         self._text_border = 20  # Distance to other elements
         self._text_color = text_color
 
+        # Build rectangles around some areas for debuging purpose
+        self._show_outlines = True
+        self._outlines = []
+
     def __str__(self):
         """Return background final name.
 
@@ -83,16 +86,20 @@ class Background(object):
         """
         return "{}({})".format(self.__class__.__name__, self._name)
 
+    def _make_outlines(self, size):
+        """Return a red rectangle surface.
+        """
+        outlines = pygame.Surface(size, pygame.SRCALPHA, 32)
+        pygame.draw.rect(outlines, pygame.Color(255, 0, 0), outlines.get_rect(), 2)
+        return outlines
+
     def _write_text(self, text, rect=None, align='center'):
         """Write a text in the given rectangle.
         """
         if not rect:
             rect = self._rect.inflate(-self._text_border, -self._text_border)
-        if self._outlines:
-            # Build rectangle around text area for debuging purpose
-            outlines = pygame.Surface(rect.size, pygame.SRCALPHA, 32)
-            pygame.draw.rect(outlines, pygame.Color(255, 0, 0), outlines.get_rect(), 2)
-            self._texts.append((outlines, rect))
+        if self._show_outlines:
+            self._outlines.append((self._make_outlines(rect.size), rect))
         self._texts.extend(multiline_text_to_surfaces(text, self._text_color, rect, align))
 
     def set_color(self, color_or_path):
@@ -131,8 +138,8 @@ class Background(object):
         :param outlines: enable / disable outlines
         :type outlines: bool
         """
-        if outlines != self._outlines:
-            self._outlines = outlines
+        if outlines != self._show_outlines:
+            self._show_outlines = outlines
             self._need_update = True
 
     def resize(self, screen):
@@ -140,6 +147,7 @@ class Background(object):
         """
         if self._rect != screen.get_rect():
             self._rect = screen.get_rect()
+            self._outlines = []
 
             if self._background_image:
                 self._background = pictures.get_pygame_image(
@@ -151,9 +159,7 @@ class Background(object):
                 self._overlay = pictures.get_pygame_image(
                     pictures.get_filename(overlay_name), (self._rect.width, self._rect.height), color=self._text_color, bg_color=self._background_color)
 
-
             self.resize_texts()
-
             self._need_update = True
 
     def resize_texts(self, rect=None, align='center'):
@@ -175,6 +181,8 @@ class Background(object):
             screen.blit(self._overlay, self._overlay.get_rect(center=self._rect.center))
         for text_surface, pos in self._texts:
             screen.blit(text_surface, pos)
+        for outline_surface, pos in self._outlines:
+            screen.blit(outline_surface, pos)
         self._need_update = False
 
 
@@ -412,18 +420,22 @@ class CaptureBackground(Background):
         Background.resize(self, screen)
         if self._need_update:
             images_height = self._rect.height / 4
-            size = (3 * images_height, images_height)
+            size = (images_height * 2, images_height)
 
-            self.left_people = pictures.get_pygame_image("capture_left_image.png", size=size,
+            self.left_people = pictures.get_pygame_image("capture_left.png", size=size,
                                                          color=self._text_color)
-            self.right_people = pictures.get_pygame_image("capture_right_image.png", size=size,
+            self.right_people = pictures.get_pygame_image("capture_right.png", size=size,
                                                           color=self._text_color)
 
-            x = int(self._rect.right - 2 * self.right_people.get_rect().width)
+            x = int(self._rect.right - size[0])
             y = int(self._rect.bottom - images_height)
 
             self.left_people_pos = (0, y)
-            self.right_people_pos = (x, y)
+            self.right_people_pos = (x + size[0] - 1.5 * self.right_people.get_rect().width, y)
+
+            if self._show_outlines:
+                self._outlines.append((self._make_outlines(size), (0, y)))
+                self._outlines.append((self._make_outlines(size), (x, y)))
 
     def paint(self, screen):
         Background.paint(self, screen)
@@ -538,13 +550,88 @@ class FinishedBackground(Background):
 
     def __init__(self):
         Background.__init__(self, "finished")
+        self.left_people = None
+        self.left_people_pos = None
+        self.right_people = None
+        self.right_people_pos = None
+
+    def resize(self, screen):
+        Background.resize(self, screen)
+        if self._need_update:
+            left_rect = pygame.Rect(10, 0, self._rect.width * 0.4, self._rect.height * 0.5)
+            left_rect.top = self._rect.centery - left_rect.centery
+            right_rect = pygame.Rect(0, 0, self._rect.width * 0.3, self._rect.height * 0.5)
+            right_rect.top = self._rect.centery - right_rect.centery
+            right_rect.right = self._rect.right - 10
+
+            self.left_people = pictures.get_pygame_image("finished_left.png", size=left_rect.size,
+                                                         color=self._text_color)
+            self.right_people = pictures.get_pygame_image("finished_right.png", size=right_rect.size,
+                                                          color=self._text_color)
+
+            self.left_people_pos = self.left_people.get_rect(center=left_rect.center).topleft
+            self.right_people_pos = self.right_people.get_rect(center=right_rect.center).topleft
+
+            if self._show_outlines:
+                self._outlines.append((self._make_outlines(left_rect.size), left_rect.topleft))
+                self._outlines.append((self._make_outlines(right_rect.size), right_rect.topleft))
 
     def resize_texts(self):
         """Update text surfaces.
         """
-        rect = pygame.Rect(self._rect.width * 0.85 + self._text_border, self._rect.height * 0.6 - self._text_border,
-                           self._rect.width * 0.15 - 2*self._text_border, self._rect.height * 0.4)
+        rect = pygame.Rect(0, 0, self._rect.width * 0.35, self._rect.height * 0.4)
+        rect.center = self._rect.center
+        rect.bottom = self._rect.bottom - 10
         Background.resize_texts(self, rect)
+
+    def paint(self, screen):
+        Background.paint(self, screen)
+        if self.left_people:
+            screen.blit(self.left_people, self.left_people_pos)
+        if self.right_people:
+            screen.blit(self.right_people, self.right_people_pos)
+
+
+class FinishedWithImageBackground(FinishedBackground):
+
+    def __init__(self, foreground_size):
+        FinishedBackground.__init__(self)
+        self._name = "finishedwithimage"
+        self.foreground_size = foreground_size
+
+    def resize(self, screen):
+        Background.resize(self, screen)
+        if self._need_update:
+            frgnd_rect = pygame.Rect(0, 0, *pictures.sizing.new_size_keep_aspect_ratio(
+                self.foreground_size, self._rect.size))
+            xmargin = abs(self._rect.width - frgnd_rect.width) // 2
+            ymargin = abs(self._rect.height - frgnd_rect.height) // 2
+
+            if xmargin > 20:
+                margin = min(xmargin, self._rect.height)
+            elif ymargin > 20:
+                margin = min(ymargin, self._rect.width)
+            else: # Too small
+                self.left_people = None
+                self.right_people = None
+                return
+
+            left_rect = pygame.Rect(0, 0, margin, margin)
+            right_rect = pygame.Rect(0, 0, margin, margin)
+            left_rect.bottom = self._rect.bottom
+            right_rect.right = self._rect.right
+
+            self.left_people = pictures.get_pygame_image("finished_left.png", size=left_rect.size,
+                                                         color=self._text_color)
+            self.right_people = pictures.get_pygame_image("finished_right.png", size=right_rect.size,
+                                                          color=self._text_color)
+
+            self.left_people_pos = self.left_people.get_rect(center=left_rect.center).topleft
+            self.right_people_pos = self.right_people.get_rect(center=right_rect.center).topleft
+
+            if self._show_outlines and left_rect and right_rect:
+                self._outlines.append((self._make_outlines(left_rect.size), left_rect.topleft))
+                self._outlines.append((self._make_outlines(right_rect.size), right_rect.topleft))
 
 
 class OopsBackground(Background):

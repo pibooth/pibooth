@@ -23,7 +23,7 @@ class ViewPlugin(object):
         # Seconds to display the selected layout
         self.print_view_timer = PoolingTimer(0)
         # Seconds to display the selected layout
-        self.finish_timer = PoolingTimer(3)
+        self.finish_timer = PoolingTimer(0.5)
 
     @pibooth.hookimpl
     def state_failsafe_enter(self, win):
@@ -156,8 +156,16 @@ class ViewPlugin(object):
             return 'finish'
 
     @pibooth.hookimpl
-    def state_finish_enter(self, app, win):
-        win.show_finished(app.previous_picture)
+    def state_finish_enter(self, cfg, app, win):
+        if cfg.getfloat('WINDOW', 'finish_image_delay') > 0:
+            win.show_finished(app.previous_picture)
+            timeout = cfg.getfloat('WINDOW', 'finish_image_delay')
+        else:
+            win.show_finished()
+            timeout = 1
+
+        # Reset timeout in case of settings changed
+        self.finish_timer.timeout = timeout
         self.finish_timer.start()
 
     @pibooth.hookimpl
