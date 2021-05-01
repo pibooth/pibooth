@@ -284,13 +284,13 @@ class GpCamera(BaseCamera):
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
-        if self.iso != self.iso_preview:
-            self.set_config_value('imgsettings', 'iso', self.iso)
+        if self.iso_capture != self.iso_preview:
+            self.set_config_value('imgsettings', 'iso', self.iso_capture)
 
         self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         time.sleep(0.3)  # Necessary to let the time for the camera to save the image
 
-        if self.iso != self.iso_preview:
+        if self.iso_capture != self.iso_preview:
             self.set_config_value('imgsettings', 'iso', self.iso_preview)
 
         self._hide_overlay()  # If stop_preview() has not been called

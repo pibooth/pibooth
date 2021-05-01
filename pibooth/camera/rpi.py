@@ -144,14 +144,14 @@ class RpiCamera(BaseCamera):
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
         try:
-            if self.iso != self.iso_preview:
-                self._cam.iso = self.iso
+            if self.iso_capture != self.iso_preview:
+                self._cam.iso = self.iso_capture
 
             stream = BytesIO()
             self._cam.image_effect = effect
             self._cam.capture(stream, format='jpeg')
 
-            if self.iso != self.iso_preview:
+            if self.iso_capture != self.iso_preview:
                 self._cam.iso = self.iso_preview
 
             self._captures.append(stream)

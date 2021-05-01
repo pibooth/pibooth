@@ -206,9 +206,8 @@ class CvCamera(BaseCamera):
         self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
         self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
 
-        if self.iso != self.iso_preview:
-            self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso)
-            print(self.iso)
+        if self.iso_capture != self.iso_preview:
+            self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_capture)
 
         LOGGER.debug("Taking capture at resolution %s", self.resolution)
         ret, image = self._cam.read()
@@ -220,7 +219,7 @@ class CvCamera(BaseCamera):
         self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.preview_resolution[0])
         self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.preview_resolution[1])
 
-        if self.iso != self.iso_preview:
+        if self.iso_capture != self.iso_preview:
             self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_preview)
             print(self.iso_preview)
 
