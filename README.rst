@@ -97,9 +97,9 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
 4. Install SDL2 (and extras) which is required by ``pygame 2+``:
 
-::
+   ::
 
-     $ sudo apt-get libsdl2-*
+        $ sudo apt-get libsdl2-*
 
 5. Optionally install the last stable ``gPhoto2`` version (required only for DSLR camera):
 

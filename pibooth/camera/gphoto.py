@@ -86,7 +86,7 @@ class GpCamera(BaseCamera):
 
         abilities = self._cam.get_abilities()
         self._preview_compatible = gp.GP_OPERATION_CAPTURE_PREVIEW ==\
-                                   abilities.operations & gp.GP_OPERATION_CAPTURE_PREVIEW
+            abilities.operations & gp.GP_OPERATION_CAPTURE_PREVIEW
         if not self._preview_compatible:
             LOGGER.warning("The connected DSLR camera is not compatible with preview")
         else:
@@ -167,9 +167,7 @@ class GpCamera(BaseCamera):
         return image
 
     def set_config_value(self, section, option, value):
-        """Set camera configuration. This method don't send the updated
-        configuration to the camera (avoid connection flooding if several
-        values have to be changed)
+        """Set camera configuration.
         """
         try:
             LOGGER.debug('Setting option %s/%s=%s', section, option, value)
@@ -182,8 +180,11 @@ class GpCamera(BaseCamera):
             data_type = type(child.get_value())
             value = data_type(value)  # Cast value
             if choices and value not in choices:
-                LOGGER.warning(
-                    "Invalid value '%s' for option %s (possible choices: %s), trying to set it anyway", value, option, choices)
+                if value == 'Memory card' and 'card' in choices:
+                    value = 'card'  # Fix for Sony ZV-1
+                else:
+                    LOGGER.warning("Invalid value '%s' for option %s (possible choices: %s), trying to set it anyway",
+                                   value, option, choices)
             child.set_value(value)
             self._cam.set_config(config)
         except gp.GPhoto2Error as ex:
