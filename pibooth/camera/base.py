@@ -19,8 +19,7 @@ class BaseCamera(object):
         self.delete_internal_memory = delete_internal_memory
         if not isinstance(iso, (tuple, list)):
             iso = (iso, iso)
-        self.iso_preview = iso[0]
-        self.iso_capture = iso[1]
+        self.iso_preview, self.iso_capture = iso
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
