@@ -221,7 +221,6 @@ class CvCamera(BaseCamera):
 
         if self.iso_capture != self.iso_preview:
             self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_preview)
-            print(self.iso_preview)
 
         self._captures.append((image, effect))
         time.sleep(0.5)  # To let time to see "Smile"
