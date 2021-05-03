@@ -9,7 +9,7 @@ from pibooth.pictures import sizing
 
 class BaseCamera(object):
 
-    def __init__(self, resolution, delete_internal_memory):
+    def __init__(self, iso, resolution, delete_internal_memory):
         self._cam = None
         self._border = 50
         self._window = None
@@ -17,6 +17,9 @@ class BaseCamera(object):
         self._captures = []
         self.resolution = resolution
         self.delete_internal_memory = delete_internal_memory
+        if not isinstance(iso, (tuple, list)):
+            iso = (iso, iso)
+        self.iso_preview, self.iso_capture = iso
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.

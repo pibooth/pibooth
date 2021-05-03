@@ -46,14 +46,14 @@ class RpiCamera(BaseCamera):
                  rotation=0,
                  flip=False,
                  delete_internal_memory=False):
-        BaseCamera.__init__(self, resolution, delete_internal_memory)
+        BaseCamera.__init__(self, iso, resolution, delete_internal_memory)
         self._cam = picamera.PiCamera()
         self._cam.framerate = 15  # Slower is necessary for high-resolution
         self._cam.video_stabilization = True
         self._cam.vflip = False
         self._cam.hflip = flip
         self._cam.resolution = resolution
-        self._cam.iso = iso
+        self._cam.iso = self.iso_preview
         self._cam.rotation = rotation
 
     def _show_overlay(self, text, alpha):
@@ -144,9 +144,16 @@ class RpiCamera(BaseCamera):
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
         try:
+            if self.iso_capture != self.iso_preview:
+                self._cam.iso = self.iso_capture
+
             stream = BytesIO()
             self._cam.image_effect = effect
             self._cam.capture(stream, format='jpeg')
+
+            if self.iso_capture != self.iso_preview:
+                self._cam.iso = self.iso_preview
+
             self._captures.append(stream)
         finally:
             self._cam.image_effect = 'none'

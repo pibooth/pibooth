@@ -101,7 +101,7 @@ Default configuration
     backgrounds = (255, 255, 255)
 
     [CAMERA]
-    # Adjust for lighting issues, normal is 100 or 200 and dark is 800 max
+    # Adjust ISO for lighting issues, can be different for preview and capture (list of integer accepted)
     iso = 100
 
     # Flip horizontally the capture

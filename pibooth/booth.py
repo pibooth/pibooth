@@ -107,7 +107,7 @@ class PiApplication(object):
                               taken=0, printed=0, forgotten=0,
                               remaining_duplicates=self._config.getint('PRINTER', 'max_duplicates'))
 
-        self.camera = camera.get_camera(config.getint('CAMERA', 'iso'),
+        self.camera = camera.get_camera(config.gettuple('CAMERA', 'iso', int, 2),
                                         config.gettyped('CAMERA', 'resolution'),
                                         config.getint('CAMERA', 'rotation'),
                                         config.getboolean('CAMERA', 'flip'),

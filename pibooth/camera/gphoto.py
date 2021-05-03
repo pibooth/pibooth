@@ -66,14 +66,13 @@ class GpCamera(BaseCamera):
                  flip=False,
                  delete_internal_memory=False,
                  init=True):
-        BaseCamera.__init__(self, resolution, delete_internal_memory)
+        BaseCamera.__init__(self, iso, resolution, delete_internal_memory)
         self._gp_logcb = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_log_callback))
         self._preview_compatible = True
         self._preview_viewfinder = False
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation
-        self._iso = iso
 
         if init:
             self._initialize()
@@ -96,7 +95,7 @@ class GpCamera(BaseCamera):
             except ValueError:
                 self._preview_viewfinder = False
 
-        self.set_config_value('imgsettings', 'iso', self._iso)
+        self.set_config_value('imgsettings', 'iso', self.iso_preview)
         self.set_config_value('settings', 'capturetarget', 'Memory card')
 
     def _show_overlay(self, text, alpha):
@@ -286,8 +285,14 @@ class GpCamera(BaseCamera):
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
+        if self.iso_capture != self.iso_preview:
+            self.set_config_value('imgsettings', 'iso', self.iso_capture)
+
         self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         time.sleep(0.3)  # Necessary to let the time for the camera to save the image
+
+        if self.iso_capture != self.iso_preview:
+            self.set_config_value('imgsettings', 'iso', self.iso_preview)
 
         self._hide_overlay()  # If stop_preview() has not been called
 
