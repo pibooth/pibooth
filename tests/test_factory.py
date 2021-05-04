@@ -49,15 +49,33 @@ def test_save_pil_landscape(captures_nbr, captures_landscape, fond_path, tmpdir)
     factory.save(str(path))
 
 
-def test_save_pil_overlay(captures_landscape, fond_path, overlay_path, tmpdir):
-    factory = PilPictureFactory(3600, 2400, *captures_landscape)
-    setup_factory(factory, fond_path, overlay_path)
-    path = tmpdir.join("PIL-overlay-4.jpg")
+@pytest.mark.parametrize('captures_nbr', [1, 2, 3, 4])
+def test_save_pil_overlay_portrait(captures_nbr, captures_portrait, fond_path, overlays_portrait_path, tmpdir):
+    factory = PilPictureFactory(2400, 3600, *captures_portrait[:captures_nbr])
+    setup_factory(factory, fond_path, overlays_portrait_path[captures_nbr - 1])
+    path = tmpdir.join("PIL-portrait-overlay-{}.jpg".format(captures_nbr))
     factory.save(str(path))
 
 
-def test_save_cv2_overlay(captures_landscape, fond_path, overlay_path, tmpdir):
-    factory = OpenCvPictureFactory(3600, 2400, *captures_landscape)
-    setup_factory(factory, fond_path, overlay_path)
-    path = tmpdir.join("OpenCV-overlay-4.jpg")
+@pytest.mark.parametrize('captures_nbr', [1, 2, 3, 4])
+def test_save_pil_overlay_landscape(captures_nbr, captures_landscape, fond_path, overlays_landscape_path, tmpdir):
+    factory = PilPictureFactory(3600, 2400, *captures_landscape[:captures_nbr])
+    setup_factory(factory, fond_path, overlays_landscape_path[captures_nbr - 1])
+    path = tmpdir.join("PIL-landscape-overlay-{}.jpg".format(captures_nbr))
+    factory.save(str(path))
+
+
+@pytest.mark.parametrize('captures_nbr', [1, 2, 3, 4])
+def test_save_cv2_overlay_portrait(captures_nbr, captures_portrait, fond_path, overlays_portrait_path, tmpdir):
+    factory = OpenCvPictureFactory(2400, 3600, *captures_portrait[:captures_nbr])
+    setup_factory(factory, fond_path, overlays_portrait_path[captures_nbr - 1])
+    path = tmpdir.join("OpenCV-portrait-overlay-{}.jpg".format(captures_nbr))
+    factory.save(str(path))
+
+
+@pytest.mark.parametrize('captures_nbr', [1, 2, 3, 4])
+def test_save_cv2_overlay_landscape(captures_nbr, captures_landscape, fond_path, overlays_landscape_path, tmpdir):
+    factory = OpenCvPictureFactory(3600, 2400, *captures_landscape[:captures_nbr])
+    setup_factory(factory, fond_path, overlays_landscape_path[captures_nbr - 1])
+    path = tmpdir.join("OpenCV-landscape-overlay-{}.jpg".format(captures_nbr))
     factory.save(str(path))
