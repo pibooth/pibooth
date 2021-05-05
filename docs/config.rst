@@ -116,6 +116,12 @@ Default configuration
     # Delete captures from camera internal memory (when applicable)
     delete_internal_memory = False
 
+    # Force preview to be captured with gPhoto2 for some DSLR camera
+    force_gphoto2_for_preview = False
+
+    # Configure the camera device address for preview and capture
+    camera_device_address = /dev/video0
+
     [PRINTER]
     # Name of the printer defined in CUPS (or use the 'default' one)
     printer_name = default

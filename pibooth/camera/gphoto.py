@@ -65,6 +65,7 @@ class GpCamera(BaseCamera):
                  rotation=0,
                  flip=False,
                  delete_internal_memory=False,
+                 camera_device_address=0,
                  init=True):
         BaseCamera.__init__(self, iso, resolution, delete_internal_memory)
         self._gp_logcb = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_log_callback))

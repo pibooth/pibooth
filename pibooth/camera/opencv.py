@@ -15,13 +15,13 @@ from pibooth.camera.base import BaseCamera
 
 
 @memorize
-def cv_camera_connected():
+def cv_camera_connected(camera_preview_address):
     """Return True if a camera compatible with OpenCV is found.
     """
     if not cv2:
         return False  # OpenCV is not installed
 
-    camera = cv2.VideoCapture(0)
+    camera = cv2.VideoCapture(camera_preview_address)
     if camera.isOpened():
         camera.release()
         return True
@@ -51,14 +51,15 @@ class CvCamera(BaseCamera):
                  resolution=(1920, 1080),
                  rotation=0,
                  flip=False,
-                 delete_internal_memory=False):
+                 delete_internal_memory=False,
+                 camera_device_address=0):
         BaseCamera.__init__(self, iso, resolution, delete_internal_memory)
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation
         self._overlay_alpha = 255
 
-        self._cam = cv2.VideoCapture(0)
+        self._cam = cv2.VideoCapture(camera_device_address)
         self.preview_resolution = (self._cam.get(cv2.CAP_PROP_FRAME_WIDTH), self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
         LOGGER.debug("Preview resolution is %s", self.preview_resolution)
         self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_preview)

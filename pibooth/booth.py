@@ -111,7 +111,10 @@ class PiApplication(object):
                                         config.gettyped('CAMERA', 'resolution'),
                                         config.getint('CAMERA', 'rotation'),
                                         config.getboolean('CAMERA', 'flip'),
-                                        config.getboolean('CAMERA', 'delete_internal_memory'))
+                                        config.getboolean('CAMERA', 'delete_internal_memory'),
+                                        config.getboolean('CAMERA', 'force_gphoto2_for_preview'),
+                                        config.get('CAMERA', 'camera_device_address')
+                                        )
 
         self.buttons = ButtonBoard(capture="BOARD" + config.get('CONTROLS', 'picture_btn_pin'),
                                    printer="BOARD" + config.get('CONTROLS', 'print_btn_pin'),

@@ -45,7 +45,8 @@ class RpiCamera(BaseCamera):
                  resolution=(1920, 1080),
                  rotation=0,
                  flip=False,
-                 delete_internal_memory=False):
+                 delete_internal_memory=False,
+                 camera_device_address=0):
         BaseCamera.__init__(self, iso, resolution, delete_internal_memory)
         self._cam = picamera.PiCamera()
         self._cam.framerate = 15  # Slower is necessary for high-resolution
