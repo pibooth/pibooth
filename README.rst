@@ -150,6 +150,9 @@ A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is created to store the single raw captu
           this is called the **Hybrid** mode. The preview is taken using the ``Pi`` one for a better
           video rendering and the capture is taken using the ``DSLR`` one for better picture rendering.
 
+.. warning:: don't start ``pibooth`` throught ssh tuneling. Even with X11 forwarding enabled
+             (``ssh -X ...``) the preview will not be visible.
+
 You can display a basic help on application options by using the command::
 
     $ pibooth --help

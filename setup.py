@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 
 HERE = osp.abspath(osp.dirname(__file__))
 sys.path.insert(0, HERE)
-import pibooth
+import pibooth  # nopep8 : import shall be done after adding setup to paths
 
 
 def main():
