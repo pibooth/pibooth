@@ -263,7 +263,7 @@ class PiApplication(object):
                 # 4 fingers on the screen trigger the menu
                 self._fingerdown_events = []
                 return pygame.event.Event(BUTTONDOWN, capture=1, printer=1,
-                                               button=self.buttons)
+                                          button=self.buttons)
         return None
 
     def find_fullscreen_event(self, events):
@@ -308,7 +308,7 @@ class PiApplication(object):
         """
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e\
-                        and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                    and pygame.key.get_mods() & pygame.KMOD_CTRL:
                 return event
             if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
                 # Don't consider the mouse wheel (button 4 & 5):
@@ -423,6 +423,9 @@ def main():
 
     parser = argparse.ArgumentParser(usage="%(prog)s [options]", description=pibooth.__doc__)
 
+    parser.add_argument("directory", nargs='?', default="~/.config/pibooth",
+                        help=u"path to configuration directory (default: %(default)s)")
+
     parser.add_argument('--version', action='version', version=pibooth.__version__,
                         help=u"show program's version number and exit")
 
@@ -447,7 +450,7 @@ def main():
     group.add_argument("-q", "--quiet", dest='logging', action='store_const', const=logging.WARNING,
                        help=u"report only errors and warnings", default=logging.INFO)
 
-    options, _args = parser.parse_known_args()
+    options = parser.parse_args()
 
     if not options.nolog:
         filename = osp.join(tempfile.gettempdir(), 'pibooth.log')
@@ -458,7 +461,7 @@ def main():
     plugin_manager = create_plugin_manager()
 
     # Load the configuration
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager, not options.reset)
+    config = PiConfigParser(osp.join(options.directory, "pibooth.cfg"), plugin_manager, not options.reset)
 
     # Register plugins
     custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
