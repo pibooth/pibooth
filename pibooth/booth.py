@@ -107,7 +107,7 @@ class PiApplication(object):
                               taken=0, printed=0, forgotten=0,
                               remaining_duplicates=self._config.getint('PRINTER', 'max_duplicates'))
 
-        self.camera = camera.get_camera(config.getint('CAMERA', 'iso'),
+        self.camera = camera.get_camera(config.gettuple('CAMERA', 'iso', int, 2),
                                         config.gettyped('CAMERA', 'resolution'),
                                         config.getint('CAMERA', 'rotation'),
                                         config.getboolean('CAMERA', 'flip'),
@@ -439,15 +439,17 @@ def main():
 
     plugin_manager = create_plugin_manager()
 
-    # Load the configuration and languages
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
-    language.init(config.join_path("translations.cfg"), options.reset)
+    # Load the configuration
+    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager, not options.reset)
 
     # Register plugins
     plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
                                     config.gettuple('GENERAL', 'plugins_disabled', str))
     LOGGER.info("Installed plugins: %s", ", ".join(
         [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_extern_plugins()]))
+
+    # Load the languages
+    language.init(config.join_path("translations.cfg"), options.reset)
 
     # Update configuration with plugins ones
     plugin_manager.hook.pibooth_configure(cfg=config)

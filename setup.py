@@ -10,6 +10,7 @@ from setuptools import setup, find_packages
 
 HERE = osp.abspath(osp.dirname(__file__))
 sys.path.insert(0, HERE)
+import pibooth  # nopep8 : import shall be done after adding setup to paths
 
 
 def main():
@@ -56,7 +57,7 @@ def main():
             # Pillow freeze: higher versions bugged (see PR #5434)
             'Pillow==7.1.2',
             'pygame>=1.9.6',
-            'pygame-menu>=4.0.3',
+            'pygame-menu==4.0.4',
             'pygame-vkeyboard>=2.0.8',
             'psutil>=5.5.1',
             'pluggy>=0.13.1',

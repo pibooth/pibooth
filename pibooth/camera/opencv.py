@@ -52,17 +52,16 @@ class CvCamera(BaseCamera):
                  rotation=0,
                  flip=False,
                  delete_internal_memory=False):
-        BaseCamera.__init__(self, resolution, delete_internal_memory)
+        BaseCamera.__init__(self, iso, resolution, delete_internal_memory)
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation
-        self._iso = iso
         self._overlay_alpha = 255
 
         self._cam = cv2.VideoCapture(0)
         self.preview_resolution = (self._cam.get(cv2.CAP_PROP_FRAME_WIDTH), self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
         LOGGER.debug("Preview resolution is %s", self.preview_resolution)
-        self._cam.set(cv2.CAP_PROP_ISO_SPEED, self._iso)
+        self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_preview)
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
@@ -207,6 +206,9 @@ class CvCamera(BaseCamera):
         self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
         self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
 
+        if self.iso_capture != self.iso_preview:
+            self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_capture)
+
         LOGGER.debug("Taking capture at resolution %s", self.resolution)
         ret, image = self._cam.read()
         if not ret:
@@ -216,6 +218,9 @@ class CvCamera(BaseCamera):
         LOGGER.debug("Putting preview resolution back to %s", self.preview_resolution)
         self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.preview_resolution[0])
         self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.preview_resolution[1])
+
+        if self.iso_capture != self.iso_preview:
+            self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_preview)
 
         self._captures.append((image, effect))
         time.sleep(0.5)  # To let time to see "Smile"

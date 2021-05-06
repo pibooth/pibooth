@@ -174,7 +174,7 @@ DEFAULT = odict((
         odict((
             ("iso",
                 (100,
-                 "Adjust for lighting issues, normal is 100 or 200 and dark is 800 max",
+                 "Adjust ISO for lighting issues, can be different for preview and capture (list of integer accepted)",
                  None, None)),
             ("flip",
                 (False,
@@ -254,12 +254,12 @@ class PiConfigParser(RawConfigParser):
     """Enhenced configuration file parser.
     """
 
-    def __init__(self, filename, plugin_manager):
-        super(PiConfigParser, self).__init__(self)
+    def __init__(self, filename, plugin_manager, load=True):
+        super(PiConfigParser, self).__init__()
         self._pm = plugin_manager
         self.filename = osp.abspath(osp.expanduser(filename))
 
-        if osp.isfile(self.filename):
+        if osp.isfile(self.filename) and load:
             self.load()
 
     def _get_abs_path(self, path):

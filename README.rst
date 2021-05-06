@@ -97,9 +97,9 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
 4. Install SDL2 (and extras) which is required by ``pygame 2+``:
 
-::
+   ::
 
-     $ sudo apt-get libsdl2-*
+        $ sudo apt-get libsdl2-*
 
 5. Optionally install the last stable ``gPhoto2`` version (required only for DSLR camera):
 
@@ -149,6 +149,9 @@ A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is created to store the single raw captu
 .. note:: if you have both ``Pi`` and ``DSLR`` cameras connected to the Raspberry Pi, **both are used**,
           this is called the **Hybrid** mode. The preview is taken using the ``Pi`` one for a better
           video rendering and the capture is taken using the ``DSLR`` one for better picture rendering.
+
+.. warning:: don't start ``pibooth`` throught ssh tuneling. Even with X11 forwarding enabled
+             (``ssh -X ...``) the preview will not be visible.
 
 You can display a basic help on application options by using the command::
 
