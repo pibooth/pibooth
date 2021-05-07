@@ -76,7 +76,7 @@ class PtbWindow(object):
         if pos == self.FULLSCREEN:
             image_size_max = (self.surface.get_size()[0] * 0.9, self.surface.get_size()[1] * 0.9)
         else:
-            image_size_max = (self.surface.get_size()[1] * 0.48, self.surface.get_size()[1])
+            image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1])
 
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
