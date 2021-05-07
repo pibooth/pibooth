@@ -14,91 +14,139 @@ from pibooth.plugins.view_plugin import ViewPlugin
 
 def create_plugin_manager():
     """Create plugin manager and defined hooks specification."""
-    plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
+    plugin_manager = PiPluginManager(hookspecs.hookspec.project_name)
     plugin_manager.add_hookspecs(hookspecs)
-    plugin_manager.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
     return plugin_manager
 
 
-def load_plugins(plugin_manager, *paths):
-    """Register the core plugins and load those from the given paths.
+class PiPluginManager(pluggy.PluginManager):
 
-    note:: by default hooks are called in LIFO registered order thus
-           plugins register order is important.
+    def __init__(self, *args, **kwargs):
+        super(PiPluginManager, self).__init__(*args, **kwargs)
+        self._plugin2calls = {}
 
-    :param plugin_manager: plugins manager instance
-    :type plugin_manager: :py:class:`pluggy.PluginManager`
-    :param paths: list of Python module paths to load
-    :type paths: str
-    """
-    plugins = []
-    for path in paths:
-        plugin = load_module(path)
-        if plugin:
-            LOGGER.debug("Plugin found at '%s'", path)
-            plugins.append(plugin)
+        def before(hook_name, methods, kwargs):
+            """Keep the list of already called hook per plugin to know if a
+            plugin has already been initialized in case of hot-registration.
+            """
+            for hookimpl in methods:
+                self._plugin2calls[hookimpl.plugin].add(hook_name)
 
-    plugins += [LightsPlugin(plugin_manager),  # Last called
-                ViewPlugin(plugin_manager),
-                PrinterPlugin(plugin_manager),
-                PicturePlugin(plugin_manager),
-                CameraPlugin(plugin_manager)]  # First called
+        def after(outcome, hook_name, methods, kwargs):
+            pass
 
-    for plugin in plugins:
-        plugin_manager.register(plugin)
+        self.add_hookcall_monitoring(before, after)
 
-    # Check that each hookimpl is defined in the hookspec
-    # except for hookimpl with kwarg 'optionalhook=True'.
-    plugin_manager.check_pending()
+    def register(self, plugin, name=None):
+        """Override to keep all plugins that have already been registered
+        at least one time.
+        """
+        plugin_name = super(PiPluginManager, self).register(plugin, name)
+        if plugin not in self._plugin2calls:
+            self._plugin2calls[plugin] = set()
+        return plugin_name
 
+    def load_all_plugins(self, paths, disabled=None):
+        """Register the core plugins, load plugins from setuptools entry points
+        and the load given module/package paths.
 
-def list_plugin_names(plugin_manager):
-    """Return the list of registered plugins.
+        note:: by default hooks are called in LIFO registered order thus
+               plugins register order is important.
 
-    :param plugin_manager: plugins manager instance
-    :type plugin_manager: :py:class:`pluggy.PluginManager`
-    """
-    values = []
-    for plugin in plugin_manager.get_plugins():
-        # The core plugins are classes, we don't want to include
-        # them here, thus we take only the modules objects.
-        if inspect.ismodule(plugin):
-            name = get_plugin_name(plugin_manager, plugin)
-            if name not in values:
-                values.append(name)
-    return values
+        :param paths: list of Python module/package paths to load
+        :type paths: list
+        :param disabled: list of plugins name to be disabled after loaded
+        :type disabled: list
+        """
+        # Load plugins declared by setuptools entry points
+        self.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
 
+        plugins = []
+        for path in paths:
+            plugin = load_module(path)
+            if plugin:
+                LOGGER.debug("Plugin found at '%s'", path)
+                plugins.append(plugin)
 
-def get_plugin_name(plugin_manager, plugin, version=True):
-    """Return the canonical name of the given plugin and
-    optionally sits version.
+        plugins += [LightsPlugin(self),  # Last called
+                    ViewPlugin(self),
+                    PrinterPlugin(self),
+                    PicturePlugin(self),
+                    CameraPlugin(self)]  # First called
 
-    :param plugin_manager: plugins manager instance
-    :type plugin_manager: :py:class:`pluggy.PluginManager`
-    :param plugin: registered plugin object
-    :type plugin: object
-    :param version: include the version number
-    :type version: bool
-    """
-    # List of all setuptools registered plugins
-    distinfo = dict(plugin_manager.list_plugin_distinfo())
+        for plugin in plugins:
+            self.register(plugin)
 
-    if plugin in distinfo:
-        name = distinfo[plugin].project_name
-        vnumber = distinfo[plugin].version
-    else:
-        name = plugin_manager.get_name(plugin)
-        if not name:
-            name = getattr(plugin, '__name__', "unknown")
-        vnumber = getattr(plugin, '__version__', '?.?.?')
+        # Check that each hookimpl is defined in the hookspec
+        # except for hookimpl with kwarg 'optionalhook=True'.
+        self.check_pending()
 
-    if version:
-        name = "{}-{}".format(name, vnumber)
-    else:
-        name = "{}".format(name)
+        # Disable unwanted plugins
+        if disabled:
+            for name in disabled:
+                self.unregister(name=name)
 
-    # Questionable convenience, but it keeps things short
-    if name.startswith("pibooth-") or name.startswith("pibooth_"):
-        name = name[8:]
+    def list_extern_plugins(self):
+        """Return the list of loaded plugins except ``pibooth`` core plugins.
+        (can be registered or unregistered)
 
-    return name
+        :return: list of plugins
+        :rtype: list
+        """
+        values = []
+        for plugin in self._plugin2calls:
+            # The core plugins are classes, we don't want to include
+            # them here, thus we take only the modules objects.
+            if inspect.ismodule(plugin):
+                if plugin not in values:
+                    values.append(plugin)
+        return values
+
+    def get_friendly_name(self, plugin, version=True):
+        """Return the friendly name of the given plugin and
+        optionally its version.
+
+        :param plugin: registered plugin object
+        :type plugin: object
+        :param version: include the version number
+        :type version: bool
+        """
+        # List of all setuptools registered plugins
+        distinfo = dict(self.list_plugin_distinfo())
+
+        if plugin in distinfo:
+            name = distinfo[plugin].project_name
+            vnumber = distinfo[plugin].version
+        else:
+            name = self.get_name(plugin)
+            if not name:
+                name = getattr(plugin, '__name__', "unknown")
+            vnumber = getattr(plugin, '__version__', '?.?.?')
+
+        if version:
+            name = "{}-{}".format(name, vnumber)
+        else:
+            name = "{}".format(name)
+
+        # Questionable convenience, but it keeps things short
+        if name.startswith("pibooth-") or name.startswith("pibooth_"):
+            name = name[8:]
+
+        return name
+
+    def get_calls_history(self, plugin):
+        """Return the ist of the hook names that has already been called at
+        least one time fr the given plugins.
+
+        :param plugin: plugin for which calls history is requested
+        :type plugin: object
+        """
+        if plugin in self._plugin2calls:
+            return list(self._plugin2calls[plugin])
+        return []
+
+    def subset_hook_caller_for_plugin(self, name, plugin):
+        """ Return a new :py:class:`.hooks._HookCaller` instance for the named
+        method which manages calls to the given plugins."""
+        exluded_plugins = [p for p in self.get_plugins() if self.get_name(p) != self.get_name(plugin)]
+        return self.subset_hook_caller(name, exluded_plugins)

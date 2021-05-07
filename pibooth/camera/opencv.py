@@ -52,17 +52,16 @@ class CvCamera(BaseCamera):
                  rotation=0,
                  flip=False,
                  delete_internal_memory=False):
-        BaseCamera.__init__(self, resolution, delete_internal_memory)
+        BaseCamera.__init__(self, iso, resolution, delete_internal_memory)
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation
-        self._iso = iso
         self._overlay_alpha = 255
 
         self._cam = cv2.VideoCapture(0)
-        self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
-        self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
-        self._cam.set(cv2.CAP_PROP_ISO_SPEED, self._iso)
+        self.preview_resolution = (self._cam.get(cv2.CAP_PROP_FRAME_WIDTH), self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        LOGGER.debug("Preview resolution is %s", self.preview_resolution)
+        self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_preview)
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
@@ -74,6 +73,19 @@ class CvCamera(BaseCamera):
             # Remove alpha from overlay
             self._overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGBA2RGB)
 
+    def _rotate_image(self, image):
+        """Rotate an OpenCV image, same direction than RpiCamera.
+        """
+        if self._rotation == 90:
+            image = cv2.transpose(image)
+            return cv2.flip(image, 1)
+        elif self._rotation == 180:
+            return cv2.flip(image, -1)
+        elif self._rotation == 270:
+            image = cv2.transpose(image)
+            return cv2.flip(image, 0)
+        return image
+
     def _get_preview_image(self):
         """Capture a new preview image.
         """
@@ -82,6 +94,7 @@ class CvCamera(BaseCamera):
         ret, image = self._cam.read()
         if not ret:
             raise IOError("Can not get camera preview image")
+        image = self._rotate_image(image)
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # Crop to keep aspect ratio of the resolution
@@ -97,8 +110,10 @@ class CvCamera(BaseCamera):
             image = cv2.flip(image, 1)
 
         if self._overlay is not None:
+            if self._overlay.shape != image.shape:
+                # Previous operations may create a size with one pixel gap
+                self._overlay = cv2.resize(self._overlay, (image.shape[1], image.shape[0]))
             image = cv2.addWeighted(image, 1, self._overlay, self._overlay_alpha / 255., 0)
-
         return Image.fromarray(image)
 
     def _post_process_capture(self, capture_data):
@@ -188,9 +203,24 @@ class CvCamera(BaseCamera):
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
+        self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
+        self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
+
+        if self.iso_capture != self.iso_preview:
+            self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_capture)
+
+        LOGGER.debug("Taking capture at resolution %s", self.resolution)
         ret, image = self._cam.read()
         if not ret:
             raise IOError("Can not capture frame")
+        image = self._rotate_image(image)
+
+        LOGGER.debug("Putting preview resolution back to %s", self.preview_resolution)
+        self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.preview_resolution[0])
+        self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.preview_resolution[1])
+
+        if self.iso_capture != self.iso_preview:
+            self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_preview)
 
         self._captures.append((image, effect))
         time.sleep(0.5)  # To let time to see "Smile"

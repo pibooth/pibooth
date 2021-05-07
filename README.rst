@@ -68,10 +68,11 @@ Hardware
 Software
 ^^^^^^^^
 
-* Raspbian ``Buster with desktop and recommended software``
-* Python ``3.5.3``
-* libgphoto2 ``2.5.23``
-* libcups ``2.2.1``
+* Raspbian ``Raspberry Pi OS with desktop``
+* Python ``3.7.3``
+* libsdl2 ``2.0``
+* libgphoto2 ``2.5.27``
+* libcups ``2.2.10``
 
 Install
 -------
@@ -92,9 +93,15 @@ A brief description on how to set-up a Raspberry Pi to use this software.
    ::
 
         $ sudo apt-get update
-        $ sudo apt-get upgrade
+        $ sudo apt-get full-upgrade
 
-4. Optionally install the last stable ``gPhoto2`` version (required only for DSLR camera):
+4. Install SDL2 (and extras) which is required by ``pygame 2+``:
+
+   ::
+
+        $ sudo apt-get libsdl2-*
+
+5. Optionally install the last stable ``gPhoto2`` version (required only for DSLR camera):
 
    ::
 
@@ -102,20 +109,20 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         $ sudo chmod 755 gphoto2-updater.sh
         $ sudo ./gphoto2-updater.sh
 
-5. Optionally install ``CUPS`` to handle printers (more instructions to add a new printer can be found
+6. Optionally install ``CUPS`` to handle printers (more instructions to add a new printer can be found
    `here <https://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer>`_):
 
    ::
 
         $ sudo apt-get install cups libcups2-dev
 
-6. Optionally install ``OpenCV`` to improve images generation efficiency or if a Webcam is used:
+7. Optionally install ``OpenCV`` to improve images generation efficiency or if a Webcam is used:
 
    ::
 
         $ sudo apt-get install python3-opencv
 
-7. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
+8. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
 
    ::
 
@@ -142,6 +149,9 @@ A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is created to store the single raw captu
 .. note:: if you have both ``Pi`` and ``DSLR`` cameras connected to the Raspberry Pi, **both are used**,
           this is called the **Hybrid** mode. The preview is taken using the ``Pi`` one for a better
           video rendering and the capture is taken using the ``DSLR`` one for better picture rendering.
+
+.. warning:: don't start ``pibooth`` throught ssh tuneling. Even with X11 forwarding enabled
+             (``ssh -X ...``) the preview will not be visible.
 
 You can display a basic help on application options by using the command::
 
@@ -289,7 +299,7 @@ key of the configuration. See guidelines to
 GUI translations
 ^^^^^^^^^^^^^^^^
 
-The graphical interface texts are available in 8 languages by default: Danish, Dutch, English, 
+The graphical interface texts are available in 8 languages by default: Danish, Dutch, English,
 French, German, Hungarian, Norwegian and Spanish. The default translations can be easily edited using the command::
 
     $ pibooth --translate
@@ -303,7 +313,7 @@ Printer
 The print button (see `Commands`_) and print states are automatically activated/shown if:
 
 * `pycups <https://pypi.python.org/pypi/pycups>`_ and `pycups-notify <https://github.com/anxuae/pycups-notify>`_ are installed
-* at least one printer is configured in ``CUPS``
+* at least one printer is configured in `CUPS <http://localhost:631/printers>`_
 * the key ``[PRINTER][printer_name]`` is equal to ``default`` or an existing printer name
 
 To avoid paper waste, set the option ``[PRINTER][max_duplicates]`` to the maximum
@@ -370,6 +380,9 @@ Icons from the Noun Project (https://thenounproject.com/)
 - Polaroid by icon 54
 - Up hand drawn arrow by Kid A
 - Cameraman and Friends Posing For Camera by Gan Khoon Lay
+- Camera by Alfa Design
+- Print Photo by Kmg Design
+- Pointer hand by Peter van Driel
 
 Support us on Beerpay
 ---------------------

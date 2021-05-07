@@ -20,23 +20,34 @@ def init(tmpdir):
 @pytest.fixture(scope='session')
 def captures_portrait():
     return [Image.open(os.path.join(CAPTURES_DIR, 'portrait', img))
-            for img in os.listdir(os.path.join(CAPTURES_DIR, 'portrait'))]
+            for img in os.listdir(os.path.join(CAPTURES_DIR, 'portrait'))
+            if img.startswith('capture')]
+
+
+@pytest.fixture(scope='session')
+def overlays_portrait_path():
+    return [os.path.join(CAPTURES_DIR, 'portrait', img)
+            for img in os.listdir(os.path.join(CAPTURES_DIR, 'portrait'))
+            if img.startswith('overlay')]
 
 
 @pytest.fixture(scope='session')
 def captures_landscape():
     return [Image.open(os.path.join(CAPTURES_DIR, 'landscape', img))
-            for img in os.listdir(os.path.join(CAPTURES_DIR, 'landscape'))]
+            for img in os.listdir(os.path.join(CAPTURES_DIR, 'landscape'))
+            if img.startswith('capture')]
+
+
+@pytest.fixture(scope='session')
+def overlays_landscape_path():
+    return [os.path.join(CAPTURES_DIR, 'landscape', img)
+            for img in os.listdir(os.path.join(CAPTURES_DIR, 'landscape'))
+            if img.startswith('overlay')]
 
 
 @pytest.fixture(scope='session')
 def fond_path():
     return os.path.join(CAPTURES_DIR, 'fond.jpg')
-
-
-@pytest.fixture(scope='session')
-def overlay_path():
-    return os.path.join(CAPTURES_DIR, 'overlay.png')
 
 
 @pytest.fixture(scope='session')

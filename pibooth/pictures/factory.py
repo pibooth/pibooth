@@ -417,9 +417,10 @@ class PilPictureFactory(PictureFactory):
         """See upper class description.
         """
         if self._overlay_image:
-            overlay = Image.open(self._overlay_image)
+            overlay = Image.open(self._overlay_image).convert('RGBA')
             overlay, _, _ = self._image_resize_keep_ratio(overlay, self.width, self.height, True)
-            image.paste(overlay, (0, 0), overlay)
+            image = Image.alpha_composite(image.convert('RGBA'), overlay)
+            image = image.convert('RGB')
         return image
 
     def _build_background(self):
@@ -480,31 +481,33 @@ class OpenCvPictureFactory(PictureFactory):
             overlay = cv2.cvtColor(cv2.imread(self._overlay_image, cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2RGBA)
             overlay, _, _ = self._image_resize_keep_ratio(overlay, self.width, self.height, True)
 
-            # Fix the overlay. Why we have to do this? If we don't, pixels are marked
-            # as opaque when they shouldn't be. See:
-            # https://www.pyimagesearch.com/2016/04/25/watermarking-images-with-opencv-and-python
-            RR, GG, BB, A = cv2.split(overlay)
-            RR = cv2.bitwise_and(RR, RR, mask=A)
-            GG = cv2.bitwise_and(GG, GG, mask=A)
-            BB = cv2.bitwise_and(BB, BB, mask=A)
-            overlay = cv2.merge([RR, GG, BB, A])
+            x, y = 0, 0
+            image_width = image.shape[1]
+            image_height = image.shape[0]
 
-            # Add an extra dimension to the image (i.e., the alpha transparency)
-            if image.shape[2] == 3:
-                image = cv2.cvtColor(image, cv2.COLOR_RGB2RGBA)
+            h, w = overlay.shape[0], overlay.shape[1]
 
-            # Now create a mask of overlay and create its inverse mask also
-            img2gray = cv2.cvtColor(overlay, cv2.COLOR_RGB2GRAY)
-            _ret, mask = cv2.threshold(img2gray, 30, 255, cv2.THRESH_BINARY)
-            mask_inv = cv2.bitwise_not(mask)
-            # Now black-out the area of overlay in ROI (ie image)
-            img1_bg = cv2.bitwise_and(image, image, mask=mask_inv)
-            # Take only region of overlay from overlay image
-            img2_fg = cv2.bitwise_and(overlay, overlay, mask=mask)
-            # Generate the main image
-            image = cv2.add(img1_bg, img2_fg)
-            # Remove alpha dimension
-            image = cv2.cvtColor(image, cv2.COLOR_RGBA2RGB)
+            if x + w > image_width:
+                w = image_width - x
+                overlay = overlay[:, :w]
+
+            if y + h > image_height:
+                h = image_height - y
+                overlay = overlay[:h]
+
+            if overlay.shape[2] < 4:
+                overlay = np.concatenate(
+                    [
+                        overlay,
+                        np.ones((overlay.shape[0], overlay.shape[1], 1), dtype=overlay.dtype) * 255
+                    ],
+                    axis=2,
+                )
+
+            overlay_image = overlay[..., :3]
+            mask = overlay[..., 3:] / 255.0
+
+            image[y:y+h, x:x+w] = (1.0 - mask) * image[y:y+h, x:x+w] + mask * overlay_image
 
         return Image.fromarray(image)
 

@@ -23,6 +23,9 @@ Default configuration
     # Path to custom plugin(s) not installed with pip (list of quoted paths accepted)
     plugins =
 
+    # Plugin names to be disabled after startup (list of quoted names accepted)
+    plugins_disabled =
+
     # Enable a virtual keyboard in the settings interface
     vkeyboard = False
 
@@ -51,7 +54,7 @@ Default configuration
     # On 'wait' state: how long is displayed the final picture in seconds before being hidden (-1 if never hidden)
     wait_image_delay = -1
 
-    # Show arrows to indicate physical buttons: 'bottom', 'top' or 'hidden'
+    # Show arrows to indicate physical buttons: 'bottom', 'top', 'hidden' or 'touchscreen'
     arrows = bottom
 
     # Apply horizontal offset to arrows position
@@ -104,7 +107,7 @@ Default configuration
     backgrounds = (255, 255, 255)
 
     [CAMERA]
-    # Adjust for lighting issues, normal is 100 or 200 and dark is 800 max
+    # Adjust ISO for lighting issues, can be different for preview and capture (list of integer accepted)
     iso = 100
 
     # Flip horizontally the capture

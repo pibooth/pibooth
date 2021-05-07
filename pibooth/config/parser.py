@@ -12,14 +12,13 @@ import inspect
 from collections import OrderedDict as odict
 from pibooth.utils import LOGGER, open_text_editor
 from pibooth import language
-from pibooth.plugins import get_plugin_name
 
 
 try:
-    from configparser import ConfigParser
+    from configparser import RawConfigParser
 except ImportError:
     # Python 2.x fallback
-    from ConfigParser import ConfigParser
+    from ConfigParser import RawConfigParser
 
 try:
     basestring
@@ -56,6 +55,10 @@ DEFAULT = odict((
             ("plugins",
                 ('',
                  "Path to custom plugin(s) not installed with pip (list of quoted paths accepted)",
+                 None, None)),
+            ("plugins_disabled",
+                ('',
+                 "Plugin names to be disabled after startup (list of quoted names accepted)",
                  None, None)),
             ("vkeyboard",
                 (False,
@@ -99,8 +102,8 @@ DEFAULT = odict((
                  "Wait image display time", ['-1'] + [str(i) for i in range(0, 121, 5)])),
             ("arrows",
                 ('bottom',
-                 "Show arrows to indicate physical buttons: 'bottom', 'top' or 'hidden'",
-                 "Show button arrows", ['bottom', 'top', 'hidden'])),
+                 "Show arrows to indicate physical buttons: 'bottom', 'top', 'hidden' or 'touchscreen'",
+                 "Show button arrows", ['bottom', 'top', 'hidden', 'touchscreen'])),
             ("arrows_x_offset",
                 (0,
                  "Apply horizontal offset to arrows position",
@@ -175,7 +178,7 @@ DEFAULT = odict((
         odict((
             ("iso",
                 (100,
-                 "Adjust for lighting issues, normal is 100 or 200 and dark is 800 max",
+                 "Adjust ISO for lighting issues, can be different for preview and capture (list of integer accepted)",
                  None, None)),
             ("flip",
                 (False,
@@ -250,17 +253,17 @@ DEFAULT = odict((
 ))
 
 
-class PiConfigParser(ConfigParser):
+class PiConfigParser(RawConfigParser):
 
     """Enhenced configuration file parser.
     """
 
-    def __init__(self, filename, plugin_manager):
-        ConfigParser.__init__(self)
+    def __init__(self, filename, plugin_manager, load=True):
+        super(PiConfigParser, self).__init__()
         self._pm = plugin_manager
         self.filename = osp.abspath(osp.expanduser(filename))
 
-        if osp.isfile(self.filename):
+        if osp.isfile(self.filename) and load:
             self.load()
 
     def _get_abs_path(self, path):
@@ -365,7 +368,7 @@ class PiConfigParser(ConfigParser):
             plugin_name = "Unknown"
         else:
             plugin = inspect.getmodule(inspect.stack()[1][0])
-            plugin_name = get_plugin_name(self._pm, plugin, False)
+            plugin_name = self._pm.get_friendly_name(plugin, False)
 
         # Check that the option is not already created
         if section in DEFAULT and option in DEFAULT[section]:
@@ -386,7 +389,7 @@ class PiConfigParser(ConfigParser):
         :type option: str
         """
         if self.has_section(section) and self.has_option(section, option):
-            return ConfigParser.get(self, section, option, **kwargs)
+            return super(PiConfigParser, self).get(section, option, **kwargs)
         return str(DEFAULT[section][option][0])
 
     def set(self, section, option, value=None):
@@ -474,7 +477,11 @@ class PiConfigParser(ConfigParser):
         if not isinstance(values, (tuple, list)):
             if not isinstance(values, types):
                 raise ValueError("Invalid config value [{}][{}]={}".format(section, option, values))
-            values = (values,)
+            if values == '' and extend == 0:
+                # Empty config key and empty tuple accepted
+                values = ()
+            else:
+                values = (values,)
         else:
             # Check if one value is given or if it is a list of value
             if color and len(values) == 3 and all(isinstance(elem, int) for elem in values):

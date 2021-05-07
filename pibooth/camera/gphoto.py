@@ -66,14 +66,13 @@ class GpCamera(BaseCamera):
                  flip=False,
                  delete_internal_memory=False,
                  init=True):
-        BaseCamera.__init__(self, resolution, delete_internal_memory)
+        BaseCamera.__init__(self, iso, resolution, delete_internal_memory)
         self._gp_logcb = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_log_callback))
         self._preview_compatible = True
         self._preview_viewfinder = False
         self._preview_hflip = False
         self._capture_hflip = flip
         self._rotation = rotation
-        self._iso = iso
 
         if init:
             self._initialize()
@@ -86,7 +85,7 @@ class GpCamera(BaseCamera):
 
         abilities = self._cam.get_abilities()
         self._preview_compatible = gp.GP_OPERATION_CAPTURE_PREVIEW ==\
-                                   abilities.operations & gp.GP_OPERATION_CAPTURE_PREVIEW
+            abilities.operations & gp.GP_OPERATION_CAPTURE_PREVIEW
         if not self._preview_compatible:
             LOGGER.warning("The connected DSLR camera is not compatible with preview")
         else:
@@ -96,7 +95,7 @@ class GpCamera(BaseCamera):
             except ValueError:
                 self._preview_viewfinder = False
 
-        self.set_config_value('imgsettings', 'iso', self._iso)
+        self.set_config_value('imgsettings', 'iso', self.iso_preview)
         self.set_config_value('settings', 'capturetarget', 'Memory card')
 
     def _show_overlay(self, text, alpha):
@@ -106,6 +105,17 @@ class GpCamera(BaseCamera):
             rect = self.get_rect()
             self._overlay = self.build_overlay((rect.width, rect.height), str(text), alpha)
 
+    def _rotate_image(self, image):
+        """Rotate a PIL image, same direction than RpiCamera.
+        """
+        if self._rotation == 90:
+            return image.transpose(Image.ROTATE_90)
+        elif self._rotation == 180:
+            return image.transpose(Image.ROTATE_180)
+        elif self._rotation == 270:
+            return image.transpose(Image.ROTATE_270)
+        return image
+
     def _get_preview_image(self):
         """Capture a new preview image.
         """
@@ -113,6 +123,7 @@ class GpCamera(BaseCamera):
         if self._preview_compatible:
             cam_file = self._cam.capture_preview()
             image = Image.open(io.BytesIO(cam_file.get_data_and_size()))
+            image = self._rotate_image(image)
             # Crop to keep aspect ratio of the resolution
             image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
             # Resize to fit the available space in the window
@@ -139,6 +150,7 @@ class GpCamera(BaseCamera):
             LOGGER.debug("Delete capture '%s' from internal memory", gp_path.name)
             self._cam.file_delete(gp_path.folder, gp_path.name)
         image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
+        image = self._rotate_image(image)
 
         # Crop to keep aspect ratio of the resolution
         image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
@@ -154,9 +166,7 @@ class GpCamera(BaseCamera):
         return image
 
     def set_config_value(self, section, option, value):
-        """Set camera configuration. This method don't send the updated
-        configuration to the camera (avoid connection flooding if several
-        values have to be changed)
+        """Set camera configuration.
         """
         try:
             LOGGER.debug('Setting option %s/%s=%s', section, option, value)
@@ -169,8 +179,11 @@ class GpCamera(BaseCamera):
             data_type = type(child.get_value())
             value = data_type(value)  # Cast value
             if choices and value not in choices:
-                LOGGER.warning(
-                    "Invalid value '%s' for option %s (possible choices: %s), trying to set it anyway", value, option, choices)
+                if value == 'Memory card' and 'card' in choices:
+                    value = 'card'  # Fix for Sony ZV-1
+                else:
+                    LOGGER.warning("Invalid value '%s' for option %s (possible choices: %s), trying to set it anyway",
+                                   value, option, choices)
             child.set_value(value)
             self._cam.set_config(config)
         except gp.GPhoto2Error as ex:
@@ -272,8 +285,14 @@ class GpCamera(BaseCamera):
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
+        if self.iso_capture != self.iso_preview:
+            self.set_config_value('imgsettings', 'iso', self.iso_capture)
+
         self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         time.sleep(0.3)  # Necessary to let the time for the camera to save the image
+
+        if self.iso_capture != self.iso_preview:
+            self.set_config_value('imgsettings', 'iso', self.iso_preview)
 
         self._hide_overlay()  # If stop_preview() has not been called
 

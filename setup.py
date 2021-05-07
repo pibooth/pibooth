@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import pibooth
 import sys
 from io import open
 import os.path as osp
@@ -9,7 +10,7 @@ from setuptools import setup, find_packages
 
 HERE = osp.abspath(osp.dirname(__file__))
 sys.path.insert(0, HERE)
-import pibooth
+import pibooth  # nopep8 : import shall be done after adding setup to paths
 
 
 def main():
@@ -53,13 +54,16 @@ def main():
         include_package_data=True,
         install_requires=[
             'picamera>=1.13 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
-            'Pillow>=6.1.0',
+            # Pillow freeze: higher versions bugged (see PR #5434)
+            'Pillow==7.1.2',
             'pygame>=1.9.6',
-            'pygame-menu>=3.1.0',
-            'pygame-vkeyboard>=2.0.7',
+            'pygame-menu==4.0.4',
+            'pygame-vkeyboard>=2.0.8',
             'psutil>=5.5.1',
             'pluggy>=0.13.1',
-            'gpiozero>=1.5.1'
+            'gpiozero>=1.5.1',
+            # RPi.GPIO backend for gpiozero (not always installed by default)
+            'RPi.GPIO>=0.7.0 ; platform_machine>="armv0l" and platform_machine<="armv9l"'
         ],
         extras_require={
             'dslr': ['gphoto2>=2.0.0'],

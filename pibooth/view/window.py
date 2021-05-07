@@ -76,7 +76,7 @@ class PtbWindow(object):
         if pos == self.FULLSCREEN:
             image_size_max = (self.surface.get_size()[0] * 0.9, self.surface.get_size()[1] * 0.9)
         else:
-            image_size_max = (2 * self.surface.get_size()[1] // 3, self.surface.get_size()[1])
+            image_size_max = (self.surface.get_size()[1] * 0.48, self.surface.get_size()[1])
 
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
@@ -94,6 +94,13 @@ class PtbWindow(object):
             self._buffered_images[image_name] = (image_size_max, image)
 
         self._current_foreground = (pil_image, pos, resize)
+
+        if self.debug and resize:
+            # Build rectangle around picture area for debuging purpose
+            outlines = pygame.Surface(image_size_max, pygame.SRCALPHA, 32)
+            pygame.draw.rect(outlines, pygame.Color(255, 0, 0), outlines.get_rect(), 2)
+            self.surface.blit(outlines, self._pos_map[pos](outlines))
+
         return self.surface.blit(image, self._pos_map[pos](image))
 
     def _update_background(self, bkgd):
