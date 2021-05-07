@@ -3,6 +3,7 @@
 """Pibooth view management.
 """
 
+import os
 import time
 import contextlib
 import pygame
@@ -19,6 +20,7 @@ class PtbWindow(object):
     CENTER = 'center'
     RIGHT = 'right'
     LEFT = 'left'
+    FULLSCREEN = 'fullscreen'
 
     def __init__(self, title,
                  size=(800, 480),
@@ -33,6 +35,10 @@ class PtbWindow(object):
         self.text_color = text_color
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
+
+        # Prepare the pygame module for use
+        os.environ['SDL_VIDEO_CENTERED'] = '1'
+        pygame.init()
 
         # Save the desktop mode, shall be done before `setmode` (SDL 1.2.10, and pygame 1.8.0)
         info = pygame.display.Info()
@@ -51,7 +57,8 @@ class PtbWindow(object):
 
         self._pos_map = {self.CENTER: self._center_pos,
                          self.RIGHT: self._right_pos,
-                         self.LEFT: self._left_pos}
+                         self.LEFT: self._left_pos,
+                         self.FULLSCREEN: self._center_pos}
 
         # Don't use pygame.mouse.get_cursor() because will be removed in pygame2
         self._cursor = ((16, 16), (0, 0),
@@ -62,11 +69,14 @@ class PtbWindow(object):
 
     def _update_foreground(self, pil_image, pos=CENTER, resize=True):
         """Show a PIL image on the foreground.
-        Only once is bufferized to avoid memory leak.
+        Only one is bufferized to avoid memory leak.
         """
         image_name = id(pil_image)
 
-        image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1])
+        if pos == self.FULLSCREEN:
+            image_size_max = (self.surface.get_size()[0] * 0.9, self.surface.get_size()[1] * 0.9)
+        else:
+            image_size_max = (self.surface.get_size()[1] * 0.48, self.surface.get_size()[1])
 
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
@@ -131,7 +141,7 @@ class PtbWindow(object):
             return  # Dont show counter: no file in queue, no failure
 
         smaller = self.surface.get_size()[1] if self.surface.get_size(
-            )[1] < self.surface.get_size()[0] else self.surface.get_size()[0]
+        )[1] < self.surface.get_size()[0] else self.surface.get_size()[0]
         side = int(smaller * 0.05)  # 5% of the window
 
         if side > 0:
@@ -249,7 +259,7 @@ class PtbWindow(object):
         self._update_background(background.ProcessingBackground())
 
     def show_print(self, pil_image=None):
-        """Show print view.
+        """Show print view (image resized on the left).
         """
         self._capture_number = (0, self._capture_number[1])
         self._update_background(background.PrintBackground(self.arrow_location,
@@ -257,11 +267,18 @@ class PtbWindow(object):
         if pil_image:
             self._update_foreground(pil_image, self.LEFT)
 
-    def show_finished(self):
-        """Show finished view.
+    def show_finished(self, pil_image=None):
+        """Show finished view (image resized fullscreen).
         """
         self._capture_number = (0, self._capture_number[1])
-        self._update_background(background.FinishedBackground())
+        if pil_image:
+            bg = background.FinishedWithImageBackground(pil_image.size)
+            if self._buffered_images.get(str(bg), bg).foreground_size != pil_image.size:
+                self._buffered_images.pop(str(bg))  # Drop cache, foreground size ratio has changed
+            self._update_background(background.FinishedWithImageBackground(pil_image.size))
+            self._update_foreground(pil_image, self.FULLSCREEN)
+        else:
+            self._update_background(background.FinishedBackground())
 
     @contextlib.contextmanager
     def flash(self, count):

@@ -48,8 +48,11 @@ Default configuration
     # How long is displayed the capture in seconds before switching to the next one
     animate_delay = 0.2
 
-    # How long is displayed the final picture in seconds before being hidden (-1 if never hidden)
-    final_image_delay = -1
+    # On 'finish' state: how long is displayed the final picture in seconds (0 if never shown)
+    finish_image_delay = 0
+
+    # On 'wait' state: how long is displayed the final picture in seconds before being hidden (-1 if never hidden)
+    wait_image_delay = -1
 
     # Show arrows to indicate physical buttons: 'bottom', 'top', 'hidden' or 'touchscreen'
     arrows = bottom
