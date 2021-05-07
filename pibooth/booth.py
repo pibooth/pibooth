@@ -423,7 +423,7 @@ def main():
 
     parser = argparse.ArgumentParser(usage="%(prog)s [options]", description=pibooth.__doc__)
 
-    parser.add_argument("directory", nargs='?', default="~/.config/pibooth",
+    parser.add_argument("config_directory", nargs='?', default="~/.config/pibooth",
                         help=u"path to configuration directory (default: %(default)s)")
 
     parser.add_argument('--version', action='version', version=pibooth.__version__,
@@ -461,7 +461,7 @@ def main():
     plugin_manager = create_plugin_manager()
 
     # Load the configuration
-    config = PiConfigParser(osp.join(options.directory, "pibooth.cfg"), plugin_manager, not options.reset)
+    config = PiConfigParser(osp.join(options.config_directory, "pibooth.cfg"), plugin_manager, not options.reset)
 
     # Register plugins
     custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
