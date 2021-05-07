@@ -265,7 +265,7 @@ Configuration
 -------------
 
 At the first run, a configuration file is generated in ``~/.config/pibooth/pibooth.cfg``
-which permits to configure the behavior of the application.
+by default. This file permits to configure the behavior of the application.
 
 A quick configuration GUI menu (see `Commands`_ ) gives access to the most common options:
 
@@ -282,6 +282,13 @@ The default configuration can be restored with the command (strongly recommended
 upgrading ``pibooth``)::
 
     $ pibooth --reset
+
+The configuration directory can be chosen at startup. This feature gives the possibility
+to keep several configurations on the same Raspberry Pi and quickly switch from one
+configuration to another. The following command will start ``pibooth`` using configuration
+files from ``myconfig1/`` directory::
+
+    $ pibooth myconfig1/
 
 See the `default configuration file <https://github.com/pibooth/pibooth/blob/master/docs/config.rst>`_
 for further details.
