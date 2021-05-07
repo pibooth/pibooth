@@ -22,9 +22,9 @@ from pibooth import fonts
 from pibooth import language
 from pibooth.counters import Counters
 from pibooth.utils import (LOGGER, PoolingTimer, configure_logging, get_crash_message,
-                           set_logging_level, print_columns_words)
+                           set_logging_level, print_columns_words, get_event_pos)
 from pibooth.states import StateMachine
-from pibooth.plugins import create_plugin_manager, load_plugins, list_plugin_names
+from pibooth.plugins import create_plugin_manager
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth import camera
@@ -263,7 +263,7 @@ class PiApplication(object):
                 # 4 fingers on the screen trigger the menu
                 self._fingerdown_events = []
                 return pygame.event.Event(BUTTONDOWN, capture=1, printer=1,
-                                               button=self.buttons)
+                                          button=self.buttons)
         return None
 
     def find_fullscreen_event(self, events):
@@ -289,15 +289,10 @@ class PiApplication(object):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
-                # Don't consider the mouse wheel (button 4 & 5):
+            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
+                pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
-                    return event
-            if event.type == pygame.FINGERUP:
-                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
-                rect = self._window.get_rect()
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(pos):
                     return event
             if event.type == BUTTONDOWN and event.capture:
                 return event
@@ -308,17 +303,12 @@ class PiApplication(object):
         """
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e\
-                        and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                    and pygame.key.get_mods() & pygame.KMOD_CTRL:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
-                # Don't consider the mouse wheel (button 4 & 5):
+            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
+                pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
-                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
-                    return event
-            if event.type == pygame.FINGERUP:
-                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
-                rect = self._window.get_rect()
-                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
+                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(pos):
                     return event
             if event.type == BUTTONDOWN and event.printer:
                 return event
@@ -340,18 +330,10 @@ class PiApplication(object):
                 return event
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
-                # Don't consider the mouse wheel (button 4 & 5):
+            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
+                pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
-                    event.key = pygame.K_LEFT
-                else:
-                    event.key = pygame.K_RIGHT
-                return event
-            if event.type == pygame.FINGERUP:
-                rect = self._window.get_rect()
-                finger_pos = (event.x * self._window.display_size[0], event.y * self._window.display_size[1])
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(finger_pos):
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(pos):
                     event.key = pygame.K_LEFT
                 else:
                     event.key = pygame.K_RIGHT
@@ -390,7 +372,7 @@ class PiApplication(object):
                 if not self._menu and self.find_settings_event(events):
                     self.camera.stop_preview()
                     self.leds.off()
-                    self._menu = PiConfigMenu(self._window, self._config, self.count)
+                    self._menu = PiConfigMenu(self._pm, self._config, self, self._window)
                     self._menu.show()
                     self.leds.blink(on_time=0.1, off_time=1)
                 elif self._menu and self._menu.is_shown():
@@ -461,9 +443,10 @@ def main():
     config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager, not options.reset)
 
     # Register plugins
-    custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
-    load_plugins(plugin_manager, *custom_paths)
-    LOGGER.info("Installed plugins: %s", ", ".join(list_plugin_names(plugin_manager)))
+    plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
+                                    config.gettuple('GENERAL', 'plugins_disabled', str))
+    LOGGER.info("Installed plugins: %s", ", ".join(
+        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_extern_plugins()]))
 
     # Load the languages
     language.init(config.join_path("translations.cfg"), options.reset)

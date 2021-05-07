@@ -4,14 +4,14 @@ import pluggy
 
 hookspec = pluggy.HookspecMarker('pibooth')
 
-#--- Pibooth state-independent hooks ------------------------------------------
+# --- Pibooth state-independent hooks ------------------------------------------
 
 
 @hookspec
 def pibooth_configure(cfg):
-    """Actions performed after loading of the configuration file.
-    The ``cfg`` object is an instance of :py:class:`ConfigParser`
-    class.
+    """Actions performed after loading of the configuration file or when the
+    plugin is enabled for the first time. The ``cfg`` object is an instance
+    of :py:class:`ConfigParser` class.
 
     :param cfg: application configuration
     """
@@ -35,7 +35,8 @@ def pibooth_reset(cfg, hard):
 
 @hookspec
 def pibooth_startup(cfg, app):
-    """Actions performed at the startup of pibooth.
+    """Actions performed at the startup of pibooth or when the plugin is enabled
+    for the first time.
 
     :param cfg: application configuration
     :param app: application instance
@@ -68,7 +69,7 @@ def pibooth_cleanup(app):
     """
 
 
-#--- FailSafe State -----------------------------------------------------------
+# --- FailSafe State -----------------------------------------------------------
 
 
 @hookspec
@@ -116,7 +117,7 @@ def state_failsafe_exit(cfg, app, win):
     """
 
 
-#--- Wait State ---------------------------------------------------------------
+# --- Wait State ---------------------------------------------------------------
 
 
 @hookspec
@@ -164,7 +165,7 @@ def state_wait_exit(cfg, app, win):
     """
 
 
-#--- Choose State -------------------------------------------------------------
+# --- Choose State -------------------------------------------------------------
 
 
 @hookspec
@@ -212,7 +213,7 @@ def state_choose_exit(cfg, app, win):
     """
 
 
-#--- Chosen State -------------------------------------------------------------
+# --- Chosen State -------------------------------------------------------------
 
 
 @hookspec
@@ -260,7 +261,7 @@ def state_chosen_exit(cfg, app, win):
     """
 
 
-#--- Preview State ------------------------------------------------------------
+# --- Preview State ------------------------------------------------------------
 
 
 @hookspec
@@ -308,7 +309,7 @@ def state_preview_exit(cfg, app, win):
     """
 
 
-#--- Capture State ------------------------------------------------------------
+# --- Capture State ------------------------------------------------------------
 
 
 @hookspec
@@ -356,7 +357,7 @@ def state_capture_exit(cfg, app, win):
     """
 
 
-#--- Processing State ---------------------------------------------------------
+# --- Processing State ---------------------------------------------------------
 
 
 @hookspec
@@ -404,7 +405,7 @@ def state_processing_exit(cfg, app, win):
     """
 
 
-#--- PrintView State ----------------------------------------------------------
+# --- PrintView State ----------------------------------------------------------
 
 
 @hookspec
@@ -452,7 +453,7 @@ def state_print_exit(cfg, app, win):
     """
 
 
-#--- Finish State -------------------------------------------------------------
+# --- Finish State -------------------------------------------------------------
 
 
 @hookspec

@@ -9,7 +9,7 @@ from os import path as osp
 from PIL import Image
 
 from pibooth.utils import LOGGER, configure_logging
-from pibooth.plugins import create_plugin_manager, load_plugins
+from pibooth.plugins import create_plugin_manager
 from pibooth.config import PiConfigParser
 from pibooth.pictures import get_picture_factory
 
@@ -68,8 +68,11 @@ def main():
     config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
 
     # Register plugins
-    custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
-    load_plugins(plugin_manager, *custom_paths)
+    plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
+                                    config.gettuple('GENERAL', 'plugins_disabled', str))
+
+    LOGGER.info("Installed plugins: %s", ", ".join(
+        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_extern_plugins()]))
 
     # Update configuration with plugins ones
     plugin_manager.hook.pibooth_configure(cfg=config)

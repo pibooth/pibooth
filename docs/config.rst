@@ -23,6 +23,9 @@ Default configuration
     # Path to custom plugin(s) not installed with pip (list of quoted paths accepted)
     plugins =
 
+    # Plugin names to be disabled after startup (list of quoted names accepted)
+    plugins_disabled =
+
     # Enable a virtual keyboard in the settings interface
     vkeyboard = False
 
