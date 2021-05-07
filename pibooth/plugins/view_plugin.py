@@ -12,6 +12,7 @@ class ViewPlugin(object):
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.count = 0
+        self.forgotten = False
         # Seconds to display the failed message
         self.failed_view_timer = PoolingTimer(2)
         # Seconds between each animated frame
@@ -23,7 +24,7 @@ class ViewPlugin(object):
         # Seconds to display the selected layout
         self.print_view_timer = PoolingTimer(0)
         # Seconds to display the selected layout
-        self.finish_timer = PoolingTimer(0.5)
+        self.finish_timer = PoolingTimer(1)
 
     @pibooth.hookimpl
     def state_failsafe_enter(self, win):
@@ -38,6 +39,7 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_wait_enter(self, cfg, app, win):
+        self.forgotten = False
         if app.previous_animated:
             previous_picture = next(app.previous_animated)
             # Reset timeout in case of settings changed
@@ -149,15 +151,15 @@ class ViewPlugin(object):
     @pibooth.hookimpl
     def state_print_validate(self, app, win, events):
         printed = app.find_print_event(events)
-        forgotten = app.find_capture_event(events)
-        if self.print_view_timer.is_timeout() or printed or forgotten:
+        self.forgotten = app.find_capture_event(events)
+        if self.print_view_timer.is_timeout() or printed or self.forgotten:
             if printed:
                 win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_available())
             return 'finish'
 
     @pibooth.hookimpl
     def state_finish_enter(self, cfg, app, win):
-        if cfg.getfloat('WINDOW', 'finish_image_delay') > 0:
+        if cfg.getfloat('WINDOW', 'finish_image_delay') > 0 and not self.forgotten:
             win.show_finished(app.previous_picture)
             timeout = cfg.getfloat('WINDOW', 'finish_image_delay')
         else:
