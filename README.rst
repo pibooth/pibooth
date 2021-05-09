@@ -51,7 +51,9 @@ other configuration may work fine. **All hardware buttons, lights and printer ar
 the application can be entirely controlled using a keyboard, a mouse or a touchscreen.
 
 .. warning:: Using a Pi Camera, the preview is visible only on a screen connected to the HDMI or
-             DSI connectors (the preview is an overlay managed at GPU low level).
+             DSI connectors (the preview is an overlay managed at GPU low level). It also means
+             that ``pibooth`` can not be started throught SSH tuneling. Even with X11 forwarding
+             enabled (``ssh -X ...``) the preview will not be visible.
 
 Hardware
 ^^^^^^^^
@@ -68,7 +70,7 @@ Hardware
 Software
 ^^^^^^^^
 
-* Raspbian ``Raspberry Pi OS with desktop``
+* Raspberry Pi OS with desktop
 * Python ``3.7.3``
 * libsdl2 ``2.0``
 * libgphoto2 ``2.5.27``
@@ -149,9 +151,6 @@ A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is created to store the single raw captu
 .. note:: if you have both ``Pi`` and ``DSLR`` cameras connected to the Raspberry Pi, **both are used**,
           this is called the **Hybrid** mode. The preview is taken using the ``Pi`` one for a better
           video rendering and the capture is taken using the ``DSLR`` one for better picture rendering.
-
-.. warning:: don't start ``pibooth`` throught ssh tuneling. Even with X11 forwarding enabled
-             (``ssh -X ...``) the preview will not be visible.
 
 You can display a basic help on application options by using the command::
 
