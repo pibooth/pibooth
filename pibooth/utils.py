@@ -15,12 +15,8 @@ from fnmatch import fnmatchcase
 import contextlib
 import errno
 import subprocess
+from itertools import zip_longest, islice
 import pygame
-try:
-    from itertools import zip_longest, islice
-except ImportError:
-    # Python 2.x fallback
-    from itertools import izip_longest as zip_longest, islice
 
 
 LOGGER = logging.getLogger("pibooth")

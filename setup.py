@@ -27,10 +27,10 @@ def main():
             'Intended Audience :: End Users/Desktop',
             'License :: OSI Approved :: MIT License',
             'Operating System :: POSIX :: Linux',
-            'Programming Language :: Python :: 2.7',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8',
+            'Programming Language :: Python :: 3.9',
             'Natural Language :: Danish',
             'Natural Language :: Dutch',
             'Natural Language :: English',
@@ -74,10 +74,6 @@ def main():
         extras_require={
             'dslr': ['gphoto2>=2.0.0'],
             'printer': ['pycups>=1.9.73', 'pycups-notify>=0.0.4'],
-        },
-        options={
-            'bdist_wheel':
-                {'universal': True}
         },
         zip_safe=False,  # Don't install the lib as an .egg zipfile
         entry_points={'console_scripts': ["pibooth = pibooth.booth:main",

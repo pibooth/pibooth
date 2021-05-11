@@ -6,13 +6,9 @@
 import io
 import os
 import os.path as osp
+from configparser import ConfigParser
 from pibooth.utils import LOGGER, open_text_editor
 
-try:
-    from configparser import ConfigParser
-except ImportError:
-    # Python 2.x fallback
-    from ConfigParser import ConfigParser
 
 PARSER = ConfigParser()
 
