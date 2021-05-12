@@ -9,22 +9,10 @@ import os
 import os.path as osp
 import itertools
 import inspect
+from configparser import RawConfigParser
 from collections import OrderedDict as odict
 from pibooth.utils import LOGGER, open_text_editor
 from pibooth import language
-
-
-try:
-    from configparser import RawConfigParser
-except ImportError:
-    # Python 2.x fallback
-    from ConfigParser import RawConfigParser
-
-try:
-    basestring
-except NameError:
-    # Python 3.x fallback
-    basestring = str
 
 
 def values_list_repr(values):
@@ -434,9 +422,6 @@ class PiConfigParser(RawConfigParser):
         else:
             types = list(types)
 
-        if str in types:  # Python 2.x compat
-            types[types.index(str)] = basestring
-
         color = False
         if 'color' in types:
             types.remove('color')
@@ -447,7 +432,7 @@ class PiConfigParser(RawConfigParser):
         path = False
         if 'path' in types:
             types.remove('path')
-            types.append(basestring)
+            types.append(str)
             path = True  # Option accept file path
 
         types = tuple(types)
@@ -492,7 +477,7 @@ class PiConfigParser(RawConfigParser):
         if path:
             new_values = []
             for v in values:
-                if isinstance(v, basestring):
+                if isinstance(v, str):
                     new_values.append(self._get_abs_path(v))
                 else:
                     new_values.append(v)

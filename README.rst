@@ -408,9 +408,9 @@ If you want to help us you can by clicking on the following links!
 .. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/pibooth.png
    :align: middle
 
-.. |PythonVersions| image:: https://img.shields.io/badge/python-2.7+ / 3.6+-red.svg
+.. |PythonVersions| image:: https://img.shields.io/badge/python-3.6+-red.svg
    :target: https://www.python.org/downloads
-   :alt: Python 2.7+/3.6+
+   :alt: Python 3.6+
 
 .. |PypiPackage| image:: https://badge.fury.io/py/pibooth.svg
    :target: https://pypi.org/project/pibooth
