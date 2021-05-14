@@ -181,6 +181,8 @@ class GpCamera(BaseCamera):
             if choices and value not in choices:
                 if value == 'Memory card' and 'card' in choices:
                     value = 'card'  # Fix for Sony ZV-1
+                elif value == 'Memory card' and 'card+sdram' in choices:
+                    value = 'card+sdram'  # Fix for Sony ILCE-6400
                 else:
                     LOGGER.warning("Invalid value '%s' for option %s (possible choices: %s), trying to set it anyway",
                                    value, option, choices)
