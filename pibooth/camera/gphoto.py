@@ -42,8 +42,12 @@ def find_gp_camera(port=None):
             port_info_list.load()
             idx = port_info_list.lookup_path(port)
             camera.set_port_info(port_info_list[idx])
-        camera.init()
-        return camera
+
+        try:
+            camera.init()
+            return camera
+        except gp.GPhoto2Error as ex:
+            LOGGER.warning("Could not connect gPhoto2 camera: %s", ex)
 
     return None
 
