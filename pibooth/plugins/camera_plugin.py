@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os
-import os.path as osp
 import time
 import pygame
 import pibooth
+from pibooth import camera
 from pibooth.utils import LOGGER, timeit
 
 
@@ -16,6 +15,46 @@ class CameraPlugin(object):
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.count = 0
+
+    @pibooth.hookimpl(hookwrapper=True)
+    def pibooth_setup_camera(self, cfg):
+        outcome = yield  # all corresponding hookimpls are invoked here
+        cam = outcome.get_result()
+
+        if not cam:
+            LOGGER.debug("Fallback to pibooth default camera management system")
+            # Initialize the camera depending of the connected one. The priority order
+            # is chosen in order to have best rendering during preview and to take
+            # captures. The gPhoto2 camera is first (drivers most restrictive) to avoid
+            # connection concurence in case of DSLR compatible with OpenCV.
+            rpi_cam = camera.find_rpi_camera()
+            gp_cam = camera.find_gp_camera()
+            cv_cam = camera.find_cv_camera()
+
+            if rpi_cam and gp_cam:
+                LOGGER.info("Configuring hybrid camera (Picamera + gPhoto2) ...")
+                cam = camera.HybridRpiCamera(rpi_cam, gp_cam)
+            elif cv_cam and gp_cam:
+                LOGGER.info("Configuring hybrid camera (OpenCV + gPhoto2) ...")
+                cam = camera.HybridCvCamera(cv_cam, gp_cam)
+            elif gp_cam:
+                LOGGER.info("Configuring gPhoto2 camera ...")
+                cam = camera.GpCamera(gp_cam)
+            elif rpi_cam:
+                LOGGER.info("Configuring Picamera camera ...")
+                cam = camera.RpiCamera(rpi_cam)
+            elif cv_cam:
+                LOGGER.info("Configuring OpenCV camera ...")
+                cam = camera.CvCamera(cv_cam)
+            else:
+                raise EnvironmentError("Neither Raspberry Pi nor GPhoto2 nor OpenCV camera detected")
+
+        cam.initialize(cfg.gettuple('CAMERA', 'iso', int, 2),
+                       cfg.gettyped('CAMERA', 'resolution'),
+                       cfg.getint('CAMERA', 'rotation'),
+                       cfg.getboolean('CAMERA', 'flip'),
+                       cfg.getboolean('CAMERA', 'delete_internal_memory'))
+        outcome.force_result(cam)
 
     @pibooth.hookimpl
     def pibooth_cleanup(self, app):

@@ -16,6 +16,7 @@ from pibooth.camera.base import BaseCamera
 
 def find_gp_camera(port=None):
     """Return camera proxy if a camera compatible with gPhoto2 is found.
+    Try to kill any process using gPhoto2 as it may block camera access.
 
     :param port: look on given port number
     :type port: str
