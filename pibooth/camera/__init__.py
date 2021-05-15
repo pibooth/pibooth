@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from pibooth.utils import LOGGER, pkill
-from pibooth.camera.rpi import RpiCamera, rpi_camera_connected
-from pibooth.camera.gphoto import GpCamera, gp_camera_connected
-from pibooth.camera.opencv import CvCamera, cv_camera_connected
+from pibooth.utils import LOGGER
+from pibooth.camera.rpi import RpiCamera, find_rpi_camera
+from pibooth.camera.gphoto import GpCamera, find_gp_camera
+from pibooth.camera.opencv import CvCamera, find_cv_camera
 from pibooth.camera.hybrid import HybridRpiCamera, HybridCvCamera
 
 
@@ -16,25 +16,30 @@ def get_camera(iso, resolution, rotation, flip, delete_internal_memory):
     """
     if rotation not in (0, 90, 180, 270):
         raise ValueError("Invalid camera rotation value '{}' (should be 0, 90, 180 or 270)".format(rotation))
-    if gp_camera_connected() and rpi_camera_connected():
+
+    # Initialize the gPhoto2 camera first (drivers most restrictive) to avoid
+    # connection concurence in case of DSLR compatible with OpenCV.
+    rpi_cam = find_rpi_camera()
+    gp_cam = find_gp_camera()
+    cv_cam = find_cv_camera()
+
+    if rpi_cam and gp_cam:
         LOGGER.info("Configuring hybrid camera (Picamera + gPhoto2) ...")
-        cam_class = HybridRpiCamera
-        pkill('*gphoto2*')
-    elif gp_camera_connected() and cv_camera_connected():
+        camera = HybridRpiCamera(rpi_cam, gp_cam)
+    elif cv_cam and gp_cam:
         LOGGER.info("Configuring hybrid camera (OpenCV + gPhoto2) ...")
-        cam_class = HybridCvCamera
-        pkill('*gphoto2*')
-    elif gp_camera_connected():
+        camera = HybridCvCamera(cv_cam, gp_cam)
+    elif gp_cam:
         LOGGER.info("Configuring gPhoto2 camera ...")
-        cam_class = GpCamera
-        pkill('*gphoto2*')
-    elif rpi_camera_connected():
+        camera = GpCamera(gp_cam)
+    elif rpi_cam:
         LOGGER.info("Configuring Picamera camera ...")
-        cam_class = RpiCamera
-    elif cv_camera_connected():
+        camera = RpiCamera(rpi_cam)
+    elif cv_cam:
         LOGGER.info("Configuring OpenCV camera ...")
-        cam_class = CvCamera
+        camera = CvCamera(cv_cam)
     else:
         raise EnvironmentError("Neither Raspberry Pi nor GPhoto2 nor OpenCV camera detected")
 
-    return cam_class(iso, resolution, rotation, flip, delete_internal_memory)
+    camera.initialize(iso, resolution, rotation, flip, delete_internal_memory)
+    return camera

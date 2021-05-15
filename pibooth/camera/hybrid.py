@@ -14,10 +14,16 @@ class HybridRpiCamera(RpiCamera):
 
     IMAGE_EFFECTS = GpCamera.IMAGE_EFFECTS
 
-    def __init__(self, *args, **kwargs):
-        super(HybridRpiCamera, self).__init__(*args, **kwargs)
-        self._gp_cam = GpCamera(*args, **kwargs)
+    def __init__(self, rpi_camera_proxy, gp_camera_proxy):
+        super(HybridRpiCamera, self).__init__(rpi_camera_proxy)
+        self._gp_cam = GpCamera(gp_camera_proxy)
         self._gp_cam._captures = self._captures  # Same dict for both cameras
+
+    def initialize(self, *args, **kwargs):
+        """Ensure that both cameras are initialized.
+        """
+        super(HybridRpiCamera, self).initialize(*args, **kwargs)
+        self._gp_cam.initialize(*args, **kwargs)
 
     def _post_process_capture(self, capture_data):
         """Rework capture data.
@@ -50,12 +56,16 @@ class HybridCvCamera(CvCamera):
 
     IMAGE_EFFECTS = GpCamera.IMAGE_EFFECTS
 
-    def __init__(self, *args, **kwargs):
-        # Initialize the gPhoto2 camera first (drivers most restrictive) to avoid
-        # connection concurence in case of DSLR compatible with OpenCV.
-        self._gp_cam = GpCamera(*args, **kwargs)
-        super(HybridCvCamera, self).__init__(*args, **kwargs)
+    def __init__(self, cv_camera_proxy, gp_camera_proxy):
+        super(HybridCvCamera, self).__init__(cv_camera_proxy)
+        self._gp_cam = GpCamera(gp_camera_proxy)
         self._gp_cam._captures = self._captures  # Same dict for both cameras
+
+    def initialize(self, *args, **kwargs):
+        """Ensure that both cameras are initialized.
+        """
+        super(HybridCvCamera, self).initialize(*args, **kwargs)
+        self._gp_cam.initialize(*args, **kwargs)
 
     def _post_process_capture(self, capture_data):
         """Rework capture data.

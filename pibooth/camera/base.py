@@ -9,17 +9,35 @@ from pibooth.pictures import sizing
 
 class BaseCamera(object):
 
-    def __init__(self, iso, resolution, delete_internal_memory):
-        self._cam = None
+    def __init__(self, camera_proxy):
+        self._cam = camera_proxy
         self._border = 50
         self._window = None
         self._overlay = None
         self._captures = []
+
+        self.rotation = 0
+        self.resolution = None
+        self.delete_internal_memory = False
+        self.preview_iso, self.capture_iso = (100, 100)
+        self.preview_flip, self.capture_flip = (False, False)
+
+    def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False):
+        """Initialize the camera.
+        """
+        self.rotation = rotation
         self.resolution = resolution
-        self.delete_internal_memory = delete_internal_memory
+        self.capture_flip = flip
         if not isinstance(iso, (tuple, list)):
             iso = (iso, iso)
-        self.iso_preview, self.iso_capture = iso
+        self.preview_iso, self.capture_iso = iso
+        self.delete_internal_memory = delete_internal_memory
+        self._initialize()
+
+    def _initialize(self):
+        """Specific camera initialization.
+        """
+        pass
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
