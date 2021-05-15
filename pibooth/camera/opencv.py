@@ -30,7 +30,7 @@ def find_cv_camera(port=None):
         if camera.isOpened():
             return camera
     else:
-        for i in range(3):
+        for i in range(3):  # Test 3 first ports
             camera = cv2.VideoCapture(i)
             if camera.isOpened():
                 return camera

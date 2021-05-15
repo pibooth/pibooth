@@ -27,8 +27,7 @@ def find_rpi_camera(port=None):
         if stdout and u'detected=1' in stdout.decode('utf-8'):
             if port is not None:
                 return picamera.PiCamera(camera_num=port)
-            else:
-                return picamera.PiCamera()
+            return picamera.PiCamera()
     except OSError:
         pass
     return None

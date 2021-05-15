@@ -7,7 +7,12 @@ from PIL import Image
 from pibooth import language
 from pibooth.counters import Counters
 from pibooth.config.parser import PiConfigParser
+from pibooth.camera import find_rpi_camera, find_gp_camera, find_cv_camera
+from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
 
+
+ISO = 100
+RESOLUTION = (1934, 2464)
 MOCKS_DIR = os.path.join(os.path.dirname(__file__), 'mocks')
 CAPTURES_DIR = os.path.join(os.path.dirname(__file__), 'captures')
 
@@ -63,3 +68,58 @@ def cfg(cfg_path):
 @pytest.fixture
 def counters(tmpdir):
     return Counters(str(tmpdir.join('data.pickle')), nbr_printed=0)
+
+
+@pytest.fixture(scope='session')
+def proxy_rpi():
+    return find_rpi_camera()
+
+
+@pytest.fixture(scope='session')
+def camera_rpi(proxy_rpi):
+    cam = RpiCamera(proxy_rpi)
+    cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
+    yield cam
+    cam.quit()
+
+
+@pytest.fixture(scope='session')
+def camera_rpi_gp(proxy_rpi, proxy_gp):
+    cam = HybridRpiCamera(proxy_rpi, proxy_gp)
+    cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
+    yield cam
+    cam.quit()
+
+
+@pytest.fixture(scope='session')
+def proxy_cv():
+    return find_cv_camera()
+
+
+@pytest.fixture(scope='session')
+def camera_cv(proxy_cv):
+    cam = CvCamera(proxy_cv)
+    cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
+    yield cam
+    cam.quit()
+
+
+@pytest.fixture(scope='session')
+def camera_cv_gp(proxy_cv, proxy_gp):
+    cam = HybridCvCamera(proxy_cv, proxy_gp)
+    cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
+    yield cam
+    cam.quit()
+
+
+@pytest.fixture(scope='session')
+def proxy_gp():
+    return find_gp_camera()
+
+
+@pytest.fixture(scope='session')
+def camera_gp(proxy_gp):
+    cam = GpCamera(proxy_gp)
+    cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
+    yield cam
+    cam.quit()
