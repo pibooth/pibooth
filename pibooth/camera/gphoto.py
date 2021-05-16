@@ -80,13 +80,14 @@ class GpCamera(BaseCamera):
         if not isinstance(camera_proxy, gp.camera.Camera):
             raise TypeError("Invalid camera proxy object '{}'".format(type(camera_proxy)))
         super(GpCamera, self).__init__(camera_proxy)
-        self._gp_logcb = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_log_callback))
+        self._gp_logcb = None
         self._preview_compatible = True
         self._preview_viewfinder = False
 
     def _initialize(self):
         """Camera initialisation.
         """
+        self._gp_logcb = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_log_callback))
         abilities = self._cam.get_abilities()
         self._preview_compatible = gp.GP_OPERATION_CAPTURE_PREVIEW ==\
             abilities.operations & gp.GP_OPERATION_CAPTURE_PREVIEW
