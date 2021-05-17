@@ -58,6 +58,7 @@ def main():
             'pibooth.pictures': ['*/*.png'],
         },
         include_package_data=True,
+        python_requires=">=3.6",
         install_requires=[
             'picamera>=1.13 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
             # Pillow freeze: higher versions bugged (see PR #5434)
