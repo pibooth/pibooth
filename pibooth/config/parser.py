@@ -184,6 +184,10 @@ DEFAULT = odict((
                 (False,
                  "Delete captures from camera internal memory (when applicable)",
                  None, None)),
+            ("download_after_capture",
+                (False,
+                 "Get file after each capture instead of during 'processing' state, imply delay between each capture",
+                 None, None)),
         ))
      ),
     ("PRINTER",

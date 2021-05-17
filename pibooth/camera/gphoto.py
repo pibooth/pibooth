@@ -149,12 +149,16 @@ class GpCamera(BaseCamera):
         :param capture_data: couple (GPhotoPath, effect)
         :type capture_data: tuple
         """
-        gp_path, effect = capture_data
-        camera_file = self._cam.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
-        if self.delete_internal_memory:
-            LOGGER.debug("Delete capture '%s' from internal memory", gp_path.name)
-            self._cam.file_delete(gp_path.folder, gp_path.name)
-        image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
+        if self.download_after_capture:
+            image, effect = capture_data
+        else:
+            gp_path, effect = capture_data
+            camera_file = self._cam.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
+            if self.delete_internal_memory:
+                LOGGER.debug("Delete capture '%s' from internal memory", gp_path.name)
+                self._cam.file_delete(gp_path.folder, gp_path.name)
+            image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
+
         image = self._rotate_image(image)
 
         # Crop to keep aspect ratio of the resolution
@@ -295,8 +299,18 @@ class GpCamera(BaseCamera):
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.capture_iso)
 
-        self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
+        gp_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
         time.sleep(0.3)  # Necessary to let the time for the camera to save the image
+
+        if self.download_after_capture:
+            camera_file = self._cam.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
+            if self.delete_internal_memory:
+                LOGGER.debug("Delete capture '%s' from internal memory", gp_path.name)
+                self._cam.file_delete(gp_path.folder, gp_path.name)
+            image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
+            self._captures.append((image, effect))
+        else:
+            self._captures.append((gp_path, effect))
 
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.preview_iso)

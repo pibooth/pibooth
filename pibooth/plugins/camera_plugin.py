@@ -18,6 +18,7 @@ class CameraPlugin(object):
 
     @pibooth.hookimpl(hookwrapper=True)
     def pibooth_setup_camera(self, cfg):
+
         outcome = yield  # all corresponding hookimpls are invoked here
         cam = outcome.get_result()
 
@@ -29,7 +30,8 @@ class CameraPlugin(object):
                        cfg.gettyped('CAMERA', 'resolution'),
                        cfg.getint('CAMERA', 'rotation'),
                        cfg.getboolean('CAMERA', 'flip'),
-                       cfg.getboolean('CAMERA', 'delete_internal_memory'))
+                       cfg.getboolean('CAMERA', 'delete_internal_memory'),
+                       cfg.getboolean('CAMERA', 'download_after_capture'))
         outcome.force_result(cam)
 
     @pibooth.hookimpl
