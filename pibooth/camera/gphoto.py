@@ -76,6 +76,15 @@ class GpCamera(BaseCamera):
                      u'smooth_more',
                      u'sharpen']
 
+    if gp:
+        EVENTS = dict((getattr(gp, name), name) for name in ('GP_EVENT_UNKNOWN',
+                                                             'GP_EVENT_TIMEOUT',
+                                                             'GP_EVENT_FILE_ADDED',
+                                                             'GP_EVENT_FOLDER_ADDED',
+                                                             'GP_EVENT_CAPTURE_COMPLETE'))
+    else:
+        EVENTS = {}
+
     def __init__(self, camera_proxy):
         if not isinstance(camera_proxy, gp.camera.Camera):
             raise TypeError("Invalid camera proxy object '{}'".format(type(camera_proxy)))
@@ -299,13 +308,22 @@ class GpCamera(BaseCamera):
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.capture_iso)
 
-        try:
-            gp_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
-        except gp.GPhoto2Error:
-            time.sleep(0.3)  # Try again one time
-            gp_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
+        retry = 0
+        max_retry = 2
+        gp_path = None
+        while not gp_path:
+            try:
+                gp_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
+            except gp.GPhoto2Error:
+                if retry < max_retry:
+                    LOGGER.warning("Gphoto2 fails to capture, trying again...")
+                else:
+                    raise
 
-        time.sleep(0.3)  # Necessary to let the time for the camera to save the image
+            # Check for events
+            ev_type, ev_data = self._cam.wait_for_event(1000)
+            LOGGER.debug("%s : %s", self.EVENTS.get(ev_type, 'GP_EVENT_UNKNOWN'), ev_data or '')
+            retry += 1
 
         if self.download_after_capture:
             camera_file = self._cam.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
