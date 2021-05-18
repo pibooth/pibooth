@@ -299,7 +299,12 @@ class GpCamera(BaseCamera):
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.capture_iso)
 
-        gp_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
+        try:
+            gp_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
+        except gp.GPhoto2Error:
+            time.sleep(0.3)  # Try again one time
+            gp_path = self._cam.capture(gp.GP_CAPTURE_IMAGE)
+
         time.sleep(0.3)  # Necessary to let the time for the camera to save the image
 
         if self.download_after_capture:
