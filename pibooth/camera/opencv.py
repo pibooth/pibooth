@@ -5,11 +5,8 @@ import pygame
 try:
     import cv2
     import numpy as np
-    # Depending on OS/OpenCV implementation: cv2.VideoCapture can be a class or a function
-    CV2_VIDEO_CLASS = type(cv2.VideoCapture(123456))
 except ImportError:
     cv2 = None  # OpenCV is optional
-    CV2_VIDEO_CLASS = type
 from PIL import Image
 from pibooth.pictures import sizing
 from pibooth.utils import PoolingTimer, LOGGER
@@ -59,8 +56,6 @@ class CvCamera(BaseCamera):
                      u'sharpen']
 
     def __init__(self, camera_proxy):
-        if not isinstance(camera_proxy, CV2_VIDEO_CLASS):
-            raise TypeError("Invalid camera proxy object '{}'".format(type(camera_proxy)))
         super(CvCamera, self).__init__(camera_proxy)
         self._overlay_alpha = 255
         self._preview_resolution = None

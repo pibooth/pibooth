@@ -43,11 +43,6 @@ class RpiCamera(BaseCamera):
     else:
         IMAGE_EFFECTS = []
 
-    def __init__(self, camera_proxy):
-        if not isinstance(camera_proxy, picamera.PiCamera):
-            raise TypeError("Invalid camera proxy object '{}'".format(type(camera_proxy)))
-        super(RpiCamera, self).__init__(camera_proxy)
-
     def _initialize(self):
         """Camera initialisation.
         """

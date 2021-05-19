@@ -77,8 +77,6 @@ class GpCamera(BaseCamera):
                      u'sharpen']
 
     def __init__(self, camera_proxy):
-        if not isinstance(camera_proxy, gp.camera.Camera):
-            raise TypeError("Invalid camera proxy object '{}'".format(type(camera_proxy)))
         super(GpCamera, self).__init__(camera_proxy)
         self._gp_logcb = None
         self._preview_compatible = True
