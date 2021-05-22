@@ -8,26 +8,30 @@ try:
     import picamera
 except ImportError:
     picamera = None  # picamera is optional
-from pibooth.utils import memorize
 from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
 
-@memorize
-def rpi_camera_connected():
-    """Return True if a RPi camera is found.
+def get_rpi_camera_proxy(port=None):
+    """Return camera proxy if a Raspberry Pi compatible camera is found
+    else return None.
+
+    :param port: look on given port number
+    :type port: int
     """
     if not picamera:
-        return False  # picamera is not installed
+        return None  # picamera is not installed
     try:
         process = subprocess.Popen(['vcgencmd', 'get_camera'],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, _stderr = process.communicate()
         if stdout and u'detected=1' in stdout.decode('utf-8'):
-            return True
+            if port is not None:
+                return picamera.PiCamera(camera_num=port)
+            return picamera.PiCamera()
     except OSError:
         pass
-    return False
+    return None
 
 
 class RpiCamera(BaseCamera):
@@ -40,21 +44,16 @@ class RpiCamera(BaseCamera):
     else:
         IMAGE_EFFECTS = []
 
-    def __init__(self,
-                 iso=200,
-                 resolution=(1920, 1080),
-                 rotation=0,
-                 flip=False,
-                 delete_internal_memory=False):
-        BaseCamera.__init__(self, iso, resolution, delete_internal_memory)
-        self._cam = picamera.PiCamera()
+    def _specific_initialization(self):
+        """Camera initialization.
+        """
         self._cam.framerate = 15  # Slower is necessary for high-resolution
         self._cam.video_stabilization = True
         self._cam.vflip = False
-        self._cam.hflip = flip
-        self._cam.resolution = resolution
-        self._cam.iso = self.iso_preview
-        self._cam.rotation = rotation
+        self._cam.hflip = self.capture_flip
+        self._cam.resolution = self.resolution
+        self._cam.iso = self.preview_iso
+        self._cam.rotation = self.rotation
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
@@ -144,15 +143,15 @@ class RpiCamera(BaseCamera):
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
         try:
-            if self.iso_capture != self.iso_preview:
-                self._cam.iso = self.iso_capture
+            if self.capture_iso != self.preview_iso:
+                self._cam.iso = self.capture_iso
 
             stream = BytesIO()
             self._cam.image_effect = effect
             self._cam.capture(stream, format='jpeg')
 
-            if self.iso_capture != self.iso_preview:
-                self._cam.iso = self.iso_preview
+            if self.capture_iso != self.preview_iso:
+                self._cam.iso = self.preview_iso
 
             self._captures.append(stream)
         finally:

@@ -27,7 +27,6 @@ from pibooth.states import StateMachine
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
-from pibooth import camera
 from pibooth.fonts import get_available_fonts
 from pibooth.printer import PRINTER_TASKS_UPDATED, Printer
 
@@ -103,11 +102,7 @@ class PiApplication(object):
                               taken=0, printed=0, forgotten=0,
                               remaining_duplicates=self._config.getint('PRINTER', 'max_duplicates'))
 
-        self.camera = camera.get_camera(config.gettuple('CAMERA', 'iso', int, 2),
-                                        config.gettyped('CAMERA', 'resolution'),
-                                        config.getint('CAMERA', 'rotation'),
-                                        config.getboolean('CAMERA', 'flip'),
-                                        config.getboolean('CAMERA', 'delete_internal_memory'))
+        self.camera = self._pm.hook.pibooth_setup_camera(cfg=self._config)
 
         self.buttons = ButtonBoard(capture="BOARD" + config.get('CONTROLS', 'picture_btn_pin'),
                                    printer="BOARD" + config.get('CONTROLS', 'print_btn_pin'),

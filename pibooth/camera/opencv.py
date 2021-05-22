@@ -9,24 +9,34 @@ except ImportError:
     cv2 = None  # OpenCV is optional
 from PIL import Image
 from pibooth.pictures import sizing
-from pibooth.utils import PoolingTimer, memorize, LOGGER
+from pibooth.utils import PoolingTimer, LOGGER
 from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
 
-@memorize
-def cv_camera_connected():
-    """Return True if a camera compatible with OpenCV is found.
+def get_cv_camera_proxy(port=None):
+    """Return camera proxy if an OpenCV compatible camera is found
+    else return None.
+
+    :param port: look on given port number
+    :type port: int
     """
     if not cv2:
-        return False  # OpenCV is not installed
+        return None  # OpenCV is not installed
 
-    camera = cv2.VideoCapture(0)
-    if camera.isOpened():
-        camera.release()
-        return True
+    if port is not None:
+        if not isinstance(port, int):
+            raise TypeError("Invalid OpenCV camera port '{}'".format(type(port)))
+        camera = cv2.VideoCapture(port)
+        if camera.isOpened():
+            return camera
+    else:
+        for i in range(3):  # Test 3 first ports
+            camera = cv2.VideoCapture(i)
+            if camera.isOpened():
+                return camera
 
-    return False
+    return None
 
 
 class CvCamera(BaseCamera):
@@ -46,22 +56,17 @@ class CvCamera(BaseCamera):
                      u'smooth_more',
                      u'sharpen']
 
-    def __init__(self,
-                 iso=200,
-                 resolution=(1920, 1080),
-                 rotation=0,
-                 flip=False,
-                 delete_internal_memory=False):
-        BaseCamera.__init__(self, iso, resolution, delete_internal_memory)
-        self._preview_hflip = False
-        self._capture_hflip = flip
-        self._rotation = rotation
+    def __init__(self, camera_proxy):
+        super(CvCamera, self).__init__(camera_proxy)
         self._overlay_alpha = 255
+        self._preview_resolution = None
 
-        self._cam = cv2.VideoCapture(0)
-        self.preview_resolution = (self._cam.get(cv2.CAP_PROP_FRAME_WIDTH), self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        LOGGER.debug("Preview resolution is %s", self.preview_resolution)
-        self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_preview)
+    def _specific_initialization(self):
+        """Camera initialization.
+        """
+        self._preview_resolution = (self._cam.get(cv2.CAP_PROP_FRAME_WIDTH), self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        LOGGER.debug("Preview resolution is %s", self._preview_resolution)
+        self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.preview_iso)
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
@@ -76,12 +81,12 @@ class CvCamera(BaseCamera):
     def _rotate_image(self, image):
         """Rotate an OpenCV image, same direction than RpiCamera.
         """
-        if self._rotation == 90:
+        if self.rotation == 90:
             image = cv2.transpose(image)
             return cv2.flip(image, 1)
-        elif self._rotation == 180:
+        elif self.rotation == 180:
             return cv2.flip(image, -1)
-        elif self._rotation == 270:
+        elif self.rotation == 270:
             image = cv2.transpose(image)
             return cv2.flip(image, 0)
         return image
@@ -106,7 +111,7 @@ class CvCamera(BaseCamera):
         size = sizing.new_size_keep_aspect_ratio((width, height), (rect.width, rect.height), 'outer')
         image = cv2.resize(image, size, interpolation=cv2.INTER_AREA)
 
-        if self._preview_hflip:
+        if self.preview_flip:
             image = cv2.flip(image, 1)
 
         if self._overlay is not None:
@@ -134,7 +139,7 @@ class CvCamera(BaseCamera):
         size = sizing.new_size_keep_aspect_ratio((width, height), self.resolution, 'outer')
         image = cv2.resize(image, size, interpolation=cv2.INTER_AREA)
 
-        if self._capture_hflip:
+        if self.capture_flip:
             image = cv2.flip(image, 1)
 
         if effect != 'none':
@@ -146,7 +151,7 @@ class CvCamera(BaseCamera):
         """Setup the preview.
         """
         self._window = window
-        self._preview_hflip = flip
+        self.preview_flip = flip
         self._window.show_image(self._get_preview_image())
 
     def preview_countdown(self, timeout, alpha=80):
@@ -206,8 +211,8 @@ class CvCamera(BaseCamera):
         self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
         self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
 
-        if self.iso_capture != self.iso_preview:
-            self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_capture)
+        if self.capture_iso != self.preview_iso:
+            self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.capture_iso)
 
         LOGGER.debug("Taking capture at resolution %s", self.resolution)
         ret, image = self._cam.read()
@@ -215,12 +220,12 @@ class CvCamera(BaseCamera):
             raise IOError("Can not capture frame")
         image = self._rotate_image(image)
 
-        LOGGER.debug("Putting preview resolution back to %s", self.preview_resolution)
-        self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.preview_resolution[0])
-        self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.preview_resolution[1])
+        LOGGER.debug("Putting preview resolution back to %s", self._preview_resolution)
+        self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self._preview_resolution[0])
+        self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self._preview_resolution[1])
 
-        if self.iso_capture != self.iso_preview:
-            self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.iso_preview)
+        if self.capture_iso != self.preview_iso:
+            self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.preview_iso)
 
         self._captures.append((image, effect))
         time.sleep(0.5)  # To let time to see "Smile"

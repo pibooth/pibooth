@@ -61,6 +61,17 @@ def pibooth_setup_picture_factory(cfg, opt_index, factory):
     """
 
 
+@hookspec(firstresult=True)
+def pibooth_setup_camera(cfg):
+    """Hook used to setup the ``camera`` interface.
+
+    A new camera instance (inheriting from :py:class:`pibooth.camera.base.BaseCamera`)
+    shall be returned by this hook, it will be used indead of the default one.
+
+    :param cfg: application configuration
+    """
+
+
 @hookspec
 def pibooth_cleanup(app):
     """Actions performed at the cleanup of pibooth.

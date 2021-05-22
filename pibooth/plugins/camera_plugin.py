@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os
-import os.path as osp
 import time
 import pygame
 import pibooth
+from pibooth import camera
 from pibooth.utils import LOGGER, timeit
 
 
@@ -16,6 +15,22 @@ class CameraPlugin(object):
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.count = 0
+
+    @pibooth.hookimpl(hookwrapper=True)
+    def pibooth_setup_camera(self, cfg):
+        outcome = yield  # all corresponding hookimpls are invoked here
+        cam = outcome.get_result()
+
+        if not cam:
+            LOGGER.debug("Fallback to pibooth default camera management system")
+            cam = camera.find_camera()
+
+        cam.initialize(cfg.gettuple('CAMERA', 'iso', int, 2),
+                       cfg.gettyped('CAMERA', 'resolution'),
+                       cfg.getint('CAMERA', 'rotation'),
+                       cfg.getboolean('CAMERA', 'flip'),
+                       cfg.getboolean('CAMERA', 'delete_internal_memory'))
+        outcome.force_result(cam)
 
     @pibooth.hookimpl
     def pibooth_cleanup(self, app):

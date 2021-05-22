@@ -258,21 +258,6 @@ def pkill(pattern):
                                        "(kill it manually before starting pibooth)".format(proc.name()))
 
 
-def memorize(func):
-    """Decorator to memorize and return the latest result
-    of a function.
-    """
-    cache = {}
-
-    @functools.wraps(func)
-    def memorized_func_wrapper(*args, **kwargs):
-        if func not in cache:
-            cache[func] = func(*args, **kwargs)
-        return cache[func]
-
-    return memorized_func_wrapper
-
-
 def open_text_editor(filename):
     """Open a text editor to edit the configuration file.
     """
