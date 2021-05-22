@@ -2,7 +2,7 @@
 
 """A photo booth application in pure Python for the Raspberry Pi."""
 
-__version__ = "2.0.2"
+__version__ = "2.0.3"
 
 try:
 
