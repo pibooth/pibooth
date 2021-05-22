@@ -14,9 +14,11 @@ from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
 
-def find_gp_camera(port=None):
-    """Return camera proxy if a camera compatible with gPhoto2 is found.
-    Try to kill any process using gPhoto2 as it may block camera access.
+def get_gp_camera_proxy(port=None):
+    """Return camera proxy if a gPhoto2 compatible camera is found
+    else return None.
+
+    .. note:: try to kill any process using gPhoto2 as it may block camera access.
 
     :param port: look on given port number
     :type port: str
@@ -82,8 +84,8 @@ class GpCamera(BaseCamera):
         self._preview_compatible = True
         self._preview_viewfinder = False
 
-    def _initialize(self):
-        """Camera initialisation.
+    def _specific_initialization(self):
+        """Camera initialization.
         """
         self._gp_logcb = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_log_callback))
         abilities = self._cam.get_abilities()

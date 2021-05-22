@@ -14,8 +14,9 @@ from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
 
-def find_cv_camera(port=None):
-    """Return camera proxy if a camera compatible with OpenCV is found.
+def get_cv_camera_proxy(port=None):
+    """Return camera proxy if an OpenCV compatible camera is found
+    else return None.
 
     :param port: look on given port number
     :type port: int
@@ -60,8 +61,8 @@ class CvCamera(BaseCamera):
         self._overlay_alpha = 255
         self._preview_resolution = None
 
-    def _initialize(self):
-        """Camera initialisation.
+    def _specific_initialization(self):
+        """Camera initialization.
         """
         self._preview_resolution = (self._cam.get(cv2.CAP_PROP_FRAME_WIDTH), self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
         LOGGER.debug("Preview resolution is %s", self._preview_resolution)

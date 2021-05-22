@@ -12,8 +12,9 @@ from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
 
-def find_rpi_camera(port=None):
-    """Return camera proxy if a Raspberry Pi camera is found.
+def get_rpi_camera_proxy(port=None):
+    """Return camera proxy if a Raspberry Pi compatible camera is found
+    else return None.
 
     :param port: look on given port number
     :type port: int
@@ -43,8 +44,8 @@ class RpiCamera(BaseCamera):
     else:
         IMAGE_EFFECTS = []
 
-    def _initialize(self):
-        """Camera initialisation.
+    def _specific_initialization(self):
+        """Camera initialization.
         """
         self._cam.framerate = 15  # Slower is necessary for high-resolution
         self._cam.video_stabilization = True
