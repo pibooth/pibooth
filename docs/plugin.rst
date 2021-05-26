@@ -37,7 +37,7 @@ The following states are defined:
  * ``finish``     : thank before going back to wait state
  * ``failsafe``   : oops message when an exception occurs
 
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/state_sequence_details.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/state_sequence_details.png
     :align: center
     :alt: State sequence
 

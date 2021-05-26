@@ -6,7 +6,7 @@ The ``pibooth`` project provides a photobooth application *out-of-the-box* in pu
 for Raspberry Pi. Have a look to the `wiki <https://github.com/pibooth/pibooth/wiki>`_
 to discover some realizations from GitHub users, and don't hesitate to send us photos of your version.
 
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/background_samples.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/background_samples.png
    :align: center
    :alt: Settings
 
@@ -37,7 +37,7 @@ Gallery
 
 You can see some examples of the output picture formats you can get with ``pibooth`` on the following page.
 
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/gallery.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/gallery.png
    :align: center
    :alt: gallery
    :target: https://github.com/pibooth/pibooth/blob/master/docs/examples.rst
@@ -162,7 +162,7 @@ States and lights management
 The application follows the states sequence defined in the simplified diagram
 below:
 
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/state_sequence.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/state_sequence.png
    :align: center
    :alt: State sequence
 
@@ -268,7 +268,7 @@ by default. This file permits to configure the behavior of the application.
 
 A quick configuration GUI menu (see `Commands`_ ) gives access to the most common options:
 
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/settings.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/settings.png
    :align: center
    :alt: Settings
 
@@ -351,7 +351,7 @@ Here is the diagram for hardware connections. Please refer to the
 `default configuration file <https://github.com/pibooth/pibooth/blob/master/docs/config.rst>`_
 to know the default pins used (`physical pin numbering <https://pinout.xyz>`_).
 
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/sketch.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/sketch.png
    :align: center
    :alt: Electronic sketch
 
@@ -405,7 +405,7 @@ If you want to help us you can by clicking on the following links!
    :align: middle
    :target: https://beerpay.io/werdeil/pibooth?focus=wish
 
-.. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/templates/pibooth.png
+.. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/pibooth.png
    :align: middle
 
 .. |PythonVersions| image:: https://img.shields.io/badge/python-3.6+-red.svg
