@@ -1,0 +1,7 @@
+{%- if show_headings %}
+{{- [basename, "script"] | join(' ') | e | heading }}
+
+{% endif -%}
+.. autoprogram:: ../library/{{ qualname }}.py:parser()
+    :prog: {{ qualname }}.py
+    :groups:

@@ -1,0 +1,7 @@
+autodocsumm>=0.1.13
+autodoc>=0.3
+sphinx>=3.1.2
+sphinx_automodapi>=0.12
+sphinxcontrib-napoleon>=0.7
+sphinxcontrib-autoprogram
+BioPython

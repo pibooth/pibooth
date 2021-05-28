@@ -1,0 +1,4 @@
+{% set list1 = qualname.split('.') %}
+.. autoprogram:: {{ list1[1] }}:build_parser()
+    :prog: {{ list1[1] }}.py
+    :groups:
