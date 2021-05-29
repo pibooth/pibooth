@@ -72,7 +72,7 @@ def main():
                                     config.gettuple('GENERAL', 'plugins_disabled', str))
 
     LOGGER.info("Installed plugins: %s", ", ".join(
-        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_extern_plugins()]))
+        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_external_plugins()]))
 
     # Update configuration with plugins ones
     plugin_manager.hook.pibooth_configure(cfg=config)

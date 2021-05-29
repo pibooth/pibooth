@@ -166,7 +166,7 @@ class PiConfigMenu(object):
                             self._build_submenu_counters("Counters"),
                             margin=(self.size[0] // 2 - 100, 0))
             menu.add.vertical_margin(20)
-            if self.pm.list_extern_plugins():
+            if self.pm.list_external_plugins():
                 menu.add.button("Manage plugins",
                                 self._build_submenu_plugins("Plugins"),
                                 margin=(self.size[0] // 2 - 105, 0))
@@ -193,7 +193,7 @@ class PiConfigMenu(object):
                         theme=SUBTHEME2_DARK,
                         touchscreen=True)
 
-        plugins = self.pm.list_extern_plugins()
+        plugins = self.pm.list_external_plugins()
         long_name = max([self.pm.get_friendly_name(p) for p in plugins], key=len)
         pattern = '{:.<' + str(max(len(long_name) + 2, 25)) + '}'
 
@@ -263,8 +263,8 @@ class PiConfigMenu(object):
             disabled = tuple([name for name in disabled if plugin_name != name])
             self._changed = True
 
-            # Ensure that mandatory hooks has been called at least once during
-            # pibboth program life
+            # Because no hook is called for plugins disabled at pibooth startup, need to
+            # ensure that mandatory hooks have been called when enabling a plugin
             if 'pibooth_configure' not in self.pm.get_calls_history(plugin):
                 hook = self.pm.subset_hook_caller_for_plugin('pibooth_configure', plugin)
                 hook(cfg=self.cfg)

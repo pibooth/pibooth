@@ -86,9 +86,9 @@ class PiPluginManager(pluggy.PluginManager):
             for name in disabled:
                 self.unregister(name=name)
 
-    def list_extern_plugins(self):
+    def list_external_plugins(self):
         """Return the list of loaded plugins except ``pibooth`` core plugins.
-        (can be registered or unregistered)
+        (external plugins can be registered or unregistered)
 
         :return: list of plugins
         :rtype: list

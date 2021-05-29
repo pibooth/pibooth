@@ -138,7 +138,7 @@ def main():
                                     config.gettuple('GENERAL', 'plugins_disabled', str))
 
     write_log("Installed plugins: {}".format(", ".join(
-        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_extern_plugins()])))
+        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_external_plugins()])))
 
     if not gp:
         write_log("gPhoto2 not installed, cannot diagnose connected DSLR")

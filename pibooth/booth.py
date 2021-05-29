@@ -245,10 +245,10 @@ class PiApplication(object):
             if event.type == BUTTONDOWN and event.capture and event.printer:
                 return event
             if event.type == pygame.FINGERDOWN:
-                # press but not release
+                # Press but not release
                 self._fingerdown_events.append(event)
             if event.type == pygame.FINGERUP:
-                # resetting touch_events
+                # Resetting touch_events
                 self._fingerdown_events = []
             if len(self._fingerdown_events) > 3:
                 # 4 fingers on the screen trigger the menu
@@ -440,7 +440,7 @@ def main():
     plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
                                     config.gettuple('GENERAL', 'plugins_disabled', str))
     LOGGER.info("Installed plugins: %s", ", ".join(
-        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_extern_plugins()]))
+        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_external_plugins()]))
 
     # Load the languages
     language.init(config.join_path("translations.cfg"), options.reset)
