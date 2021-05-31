@@ -223,7 +223,7 @@ Circuit diagram
 ---------------
 
 Here is the diagram for hardware connections. Please refer to the
-`default configuration file <https://github.com/pibooth/pibooth/blob/master/docs/config.rst>`_
+:ref:`default configuration file<Default configuration>`.
 to know the default pins used (`physical pin numbering <https://pinout.xyz>`_).
 
 .. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/sketch.png
