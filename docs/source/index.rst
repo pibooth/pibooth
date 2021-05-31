@@ -1,50 +1,50 @@
-Welcome to pibooth documentation!
-===========================================
+.. Pibooth documentation master file, created by
+   sphinx-quickstart on Mon May 31 10:22:20 2021.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
+Welcome to Pibooth's documentation!
+===================================
 
-.. image:: ./SupplementaryFiles/pibooth.png
-   :target: ./SupplementaryFiles/pibooth.png
+.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/sources/images/pibooth.png
+   :align: center
    :alt: pibooth Logo
 
-About this package
-------------------
-
 .. toctree::
-   :caption: Readme
-   :name: Readme
+   :caption: About Pibooth
+   :name: About Pibooth
    :maxdepth: 3
 
-   ./README.rst
+   ./about_pibooth.rst
 
 .. toctree::
-   :caption: Examples
-   :name: Examples
+   :caption: Install Pibooth
+   :name: Install Pibooth
    :maxdepth: 3
+
+   ./install.rst
+
+.. toctree::
+   :caption: Start Pibooth
+   :name: Start Pibooth
+   :maxdepth: 3
+
+   ./start.rst
+
+.. toctree::
+   :caption: Plugins
+   :name: Plugins
+   :maxdepth: 3
+
+   ./plugins.rst
+
+.. toctree::
+   :hidden:
 
    ./examples.rst
-
-.. toctree::
-   :caption: Dev
-   :name: Dev
-   :maxdepth: 3
-
-   ./dev.rst
-
-.. toctree::
-   :caption: Plugin
-   :name: Plugin
-   :maxdepth: 3
-
-   ./plugin.rst
-
-.. toctree::
-   :caption: lychee
-   :name: lychee
-   :maxdepth: 3
-
+   ./config.rst
    ./lychee.rst
-
-
+   ./release.rst
 
 Indices and tables
 ==================
