@@ -6,7 +6,7 @@
 Welcome to Pibooth's documentation!
 ===================================
 
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/sources/images/pibooth.png
+.. image:: images/pibooth.png
    :align: center
    :alt: pibooth Logo
 
