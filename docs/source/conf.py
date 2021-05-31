@@ -13,7 +13,7 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-
+import pibooth
 
 # -- Project information -----------------------------------------------------
 
@@ -24,7 +24,7 @@ github_doc_root = 'https://github.com/pibooth/pibooth/tree/master/docs/'
 issues_github_path = 'https://github.com/pibooth/pibooth/issues'
 
 # The full version, including alpha/beta/rc tags
-release = '2.0.3'
+release = pibooth.__version__
 
 # -- General configuration ---------------------------------------------------
 
