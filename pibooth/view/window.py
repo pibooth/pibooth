@@ -176,11 +176,15 @@ class PtbWindow(object):
         pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
         return image.get_rect(center=pos) if image else pos
 
-    def get_rect(self):
-        """Return a Rect object (as defined in pygame) for this window. The position represent
-        the absolute position considering the window centered on screen.
+    def get_rect(self, absolute=False):
+        """Return a Rect object (as defined in pygame) for this window.
+
+        :param absolute: absolute position considering the window centered on screen
+        :type absolute: bool
         """
-        return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
+        if absolute:
+            return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
+        return self.surface.get_rect()
 
     def get_image(self):
         """Return the currently displayed foreground image.
