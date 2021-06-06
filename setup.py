@@ -62,7 +62,7 @@ def main():
         install_requires=[
             'picamera>=1.13 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
             # Pillow freeze: higher versions bugged (see PR #5434)
-            'Pillow==7.1.2',
+            'Pillow==8.1.1',
             'pygame>=1.9.6',
             'pygame-menu==4.0.7',
             'pygame-vkeyboard>=2.0.8',
