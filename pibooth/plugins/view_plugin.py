@@ -141,8 +141,8 @@ class ViewPlugin(object):
     @pibooth.hookimpl
     def state_print_enter(self, cfg, app, win):
         with timeit("Display the final picture"):
-            win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_available())
             win.show_print(app.previous_picture)
+            win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_available())
 
         # Reset timeout in case of settings changed
         self.print_view_timer.timeout = cfg.getfloat('PRINTER', 'printer_delay')
