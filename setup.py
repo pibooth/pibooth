@@ -75,6 +75,7 @@ def main():
         extras_require={
             'dslr': ['gphoto2>=2.0.0'],
             'printer': ['pycups>=1.9.73', 'pycups-notify>=0.0.4'],
+            'doc': ['sphinx', 'sphinx_rtd_theme', 'sphinx-copybutton']
         },
         zip_safe=False,  # Don't install the lib as an .egg zipfile
         entry_points={'console_scripts': ["pibooth = pibooth.booth:main",

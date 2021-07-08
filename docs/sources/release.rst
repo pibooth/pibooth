@@ -34,7 +34,8 @@ Release ``pibooth`` for Pypi
 
         $ twine check dist/*
 
-7. Upload the package on Pypi (replace XXXXXX by username and password of your Pypi account):
+7. Upload the package on Pypi (replace XXXXXX by username and password of your
+   Pypi account):
 
    ::
 

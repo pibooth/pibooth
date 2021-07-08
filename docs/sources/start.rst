@@ -7,13 +7,15 @@ Start the photobooth application using the command:
 
     pibooth
 
-All pictures taken are stored in the folder defined in ``[GENERAL][directory]``. They are named
-**YYYY-mm-dd-hh-mm-ss_pibooth.jpg** which is the time when first capture of the sequence was taken.
-A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is created to store the single raw captures.
+All pictures taken are stored in the folder defined in ``[GENERAL][directory]``.
+They are named **YYYY-mm-dd-hh-mm-ss_pibooth.jpg** which is the time when first
+capture of the sequence was taken. A subfolder **raw/YYYY-mm-dd-hh-mm-ss** is
+created to store the single raw captures.
 
-.. note:: if you have both ``Pi`` and ``DSLR`` cameras connected to the Raspberry Pi, **both are used**,
-          this is called the **Hybrid** mode. The preview is taken using the ``Pi`` one for a better
-          video rendering and the capture is taken using the ``DSLR`` one for better picture rendering.
+.. note:: if you have both ``Pi`` and ``DSLR`` cameras connected to the Raspberry
+          Pi, **both are used**, this is called the **Hybrid** mode. The preview
+          is taken using the ``Pi`` one for a better video rendering and the
+          capture is taken using the ``DSLR`` one for better picture rendering.
 
 You can display a basic help on application options by using the command:
 
@@ -27,12 +29,12 @@ States and lights management
 The application follows the states sequence defined in the simplified diagram
 below:
 
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/state_sequence.png
+.. image:: ../images/state_sequence.png
    :align: center
    :alt: State sequence
 
-The states of the **LED 1** and **LED 2** are modified depending on the actions available
-for the user.
+The states of the **LED 1** and **LED 2** are modified depending on the actions
+available for the user.
 
 Detailed state diagram can be found on this page section :ref:`on this page section<state_sequence_details>`.
 
@@ -56,14 +58,15 @@ Change option value     LEFT or RIGHT    Button 2
 Final picture rendering
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``pibooth`` application handle the rendering of the final picture using 2 variables defined in
-the configuration (see :ref:`Configuration` below):
+The ``pibooth`` application handle the rendering of the final picture using 2
+variables defined in the configuration (see :ref:`Configuration` below):
 
-* ``[CAMERA][resolution] = (width, height)`` is the resolution of the captured picture in pixels.
-  As explained in the configuration file, the preview size is directly dependent from this parameter.
-* ``[PICTURE][orientation] = auto/landscape/portrait`` is the orientation of the final picture
-  (after concatenation of all captures). If the value is **auto**, the orientation is automatically
-  chosen depending on the resolution.
+* ``[CAMERA][resolution] = (width, height)`` is the resolution of the captured
+  picture in pixels. As explained in the configuration file, the preview size is
+  directly dependent from this parameter.
+* ``[PICTURE][orientation] = auto/landscape/portrait`` is the orientation of the
+  final picture (after concatenation of all captures). If the value is **auto**,
+  the orientation is automatically chosen depending on the resolution.
 
 .. note:: The resolution is an important parameter, it is responsible for the quality of the final
           picture. Have a look to `picamera possible resolutions <http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes>`_ .
@@ -137,7 +140,7 @@ by default. This file permits to configure the behavior of the application.
 
 A quick configuration GUI menu (see `Commands`_ ) gives access to the most common options:
 
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/settings.png
+.. image:: ../images/settings.png
    :align: center
    :alt: Settings
 
@@ -226,7 +229,7 @@ Here is the diagram for hardware connections. Please refer to the
 :ref:`default configuration file<Default configuration>`.
 to know the default pins used (`physical pin numbering <https://pinout.xyz>`_).
 
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/sketch.png
+.. image:: ../images/sketch.png
    :align: center
    :alt: Electronic sketch
 

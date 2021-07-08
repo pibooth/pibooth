@@ -1,4 +1,4 @@
-|Pibooth| |BeerPay|
+|Pibooth|
 
 |PythonVersions| |PypiPackage| |Downloads|
 
@@ -6,7 +6,7 @@ The ``pibooth`` project provides a photobooth application *out-of-the-box* in pu
 for Raspberry Pi. Have a look to the `wiki <https://github.com/pibooth/pibooth/wiki>`_
 to discover some realizations from GitHub users, and don't hesitate to send us photos of your version.
 
-.. image:: images/background_samples.png
+.. image:: ../images/background_samples.png
    :align: center
    :alt: Settings
 
@@ -35,7 +35,7 @@ Gallery
 
 You can see some examples of the output picture formats you can get with ``pibooth`` on the following page.
 
-.. image:: images/gallery.png
+.. image:: ../images/gallery.png
    :align: center
    :alt: gallery
    :target: examples.html
@@ -74,7 +74,6 @@ Software
 * libgphoto2 ``2.5.27``
 * libcups ``2.2.10``
 
-
 Terms and conditions
 --------------------
 
@@ -102,21 +101,6 @@ Icons from the Noun Project (https://thenounproject.com/)
 - Camera by Alfa Design
 - Print Photo by Kmg Design
 - Pointer hand by Peter van Driel
-
-Support us on Beerpay
----------------------
-
-If you want to help us you can by clicking on the following links!
-
-|BeerPay| |BeerPay2|
-
-.. |BeerPay| image:: https://beerpay.io/werdeil/pibooth/badge.svg?style=beer-square
-   :align: middle
-   :target: https://beerpay.io/werdeil/pibooth
-
-.. |BeerPay2| image:: https://beerpay.io/werdeil/pibooth/make-wish.svg?style=flat-square
-   :align: middle
-   :target: https://beerpay.io/werdeil/pibooth?focus=wish
 
 .. |Pibooth| image:: images/pibooth.png
    :align: middle

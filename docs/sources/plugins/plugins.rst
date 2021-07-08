@@ -40,7 +40,7 @@ The following states are defined:
 
 .. _state_sequence_details:
 
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/state_sequence_details.png
+.. image:: ../images/state_sequence_details.png
     :align: center
     :alt: State sequence
 

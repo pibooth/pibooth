@@ -6,9 +6,9 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 1. Download the Raspbian image and set-up an SD-card. You can follow
    `these instructions <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_.
 
-2. Insert the SD-card into the Raspberry Pi and fire it up. Use the ``raspi-config`` tool
-   to configure your system (e.g., expand partition, change hostname, password, enable SSH,
-   configure to boot into GUI, etc.).
+2. Insert the SD-card into the Raspberry Pi and fire it up. Use the
+   ``raspi-config`` tool to configure your system (e.g., expand partition,
+   change hostname, password, enable SSH, configure to boot into GUI, etc.).
 
 .. hint:: Don't forget to enable the camera in raspi-config.
 
@@ -25,7 +25,8 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
         sudo apt-get install libsdl2-*
 
-5. Optionally install the last stable ``gPhoto2`` version (required only for DSLR camera):
+5. Optionally install the last stable ``gPhoto2`` version (required only for
+   DSLR camera):
 
 .. code-block:: bash
 
@@ -33,14 +34,16 @@ A brief description on how to set-up a Raspberry Pi to use this software.
         sudo chmod 755 gphoto2-updater.sh
         sudo ./gphoto2-updater.sh
 
-6. Optionally install ``CUPS`` to handle printers (more instructions to add a new printer can be found
-   `here <https://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer>`_):
+6. Optionally install ``CUPS`` to handle printers (more instructions to add a
+   new printer can be found `here <https://www.howtogeek.com/169679/how-to-add-a-printer-to-your-raspberry-pi-or-other-linux-computer>`_
+   ):
 
 .. code-block:: bash
 
         sudo apt-get install cups libcups2-dev
 
-7. Optionally install ``OpenCV`` to improve images generation efficiency or if a Webcam is used:
+7. Optionally install ``OpenCV`` to improve images generation efficiency or if a
+   Webcam is used:
 
 .. code-block:: bash
 
@@ -52,16 +55,17 @@ A brief description on how to set-up a Raspberry Pi to use this software.
 
         sudo pip3 install pibooth[dslr,printer]
 
-.. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/or 6. skipped), remove printer or dslr under the ``[]``
+.. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/
+          or 6. skipped), remove printer or dslr under the ``[]``
 
 Install developing version
 --------------------------
 
 .. warning:: Be aware that the code on the `master` branch may be unstable.
 
-If you want to use an **unofficial version** of the ``pibooth`` application, you need to work from
-a clone of this ``git`` repository. Replace the step 8. of the :ref:`install` procedure by the
-following actions:
+If you want to use an **unofficial version** of the ``pibooth`` application, you
+need to work from a clone of this ``git`` repository. Replace the step 8. of the
+:ref:`install` procedure by the following actions:
 
 1. Clone from github :
 
@@ -81,8 +85,9 @@ following actions:
 
     sudo pip3 install -e .[dslr,printer]
 
-4. Start the application exactly in the same way as installed from pypi. All modifications performed
-   in the cloned repository are taken into account when the application starts.
+4. Start the application exactly in the same way as installed from pypi. All
+   modifications performed in the cloned repository are taken into account when
+   the application starts.
 
 Naming
 ^^^^^^
@@ -103,6 +108,3 @@ will be updated as we go along.
      a concatenation of capture(s) and text(s).
    - ``image`` shall be used for pictograms displayed in Pygame view or
      intermediate PIL/OpenCv objects.
-
-
-

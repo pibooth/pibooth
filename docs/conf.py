@@ -9,10 +9,11 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+
+import sys
+import os.path as osp
+
+sys.path.insert(0, osp.dirname(osp.dirname(osp.abspath(__file__))))
 import pibooth
 
 # -- Project information -----------------------------------------------------
@@ -20,8 +21,6 @@ import pibooth
 project = 'Pibooth'
 copyright = '2021, Vincent Verdeil, Antoine Rousseaux'
 author = 'Vincent Verdeil, Antoine Rousseaux'
-github_doc_root = 'https://github.com/pibooth/pibooth/tree/master/docs/'
-issues_github_path = 'https://github.com/pibooth/pibooth/issues'
 
 # The full version, including alpha/beta/rc tags
 release = pibooth.__version__
@@ -59,12 +58,12 @@ html_static_path = ['_static']
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = './images/pibooth.png'
+html_logo = 'images/pibooth.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = './images/icon.png'
+html_favicon = 'images/icon.png'
 
 # If false, no index is generated.
 html_use_index = True
