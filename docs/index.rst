@@ -2,44 +2,64 @@
 Welcome to Pibooth's documentation!
 ===================================
 
-.. image:: images/pibooth.png
+|Pibooth|
+
+|PythonVersions| |PypiPackage| |Downloads|
+
+The ``pibooth`` project provides a photobooth application *out-of-the-box* in
+pure Python for Raspberry Pi. Have a look to the `wiki <https://github.com/pibooth/pibooth/wiki>`_
+to discover some realizations from GitHub users, and don't hesitate to send us
+photos of your version.
+
+.. image:: images/background_samples.png
    :align: center
-   :alt: pibooth Logo
+   :alt: Background samples
+
+.. note:: Even if designed for a Raspberry Pi, this software may be installed on
+          any Unix/Linux based OS (tested on Ubuntu 16 and Mac OSX 10.14.6).
+
+.. image:: images/gallery.png
+   :align: center
+   :alt: Gallery
+   :target: sources/examples.html
+   :height: 300px
+
 
 .. toctree::
-   :caption: About Pibooth
+   :caption: About
    :name: About Pibooth
-   :maxdepth: 3
+   :maxdepth: 2
 
    sources/about.rst
 
 .. toctree::
-   :caption: Install Pibooth
+   :caption: Install
    :name: Install Pibooth
-   :maxdepth: 3
+   :maxdepth: 2
 
    sources/install.rst
 
 .. toctree::
-   :caption: Start Pibooth
+   :caption: Start
    :name: Start Pibooth
-   :maxdepth: 3
+   :maxdepth: 2
 
    sources/start.rst
 
 .. toctree::
    :caption: Plugins
    :name: Plugins
-   :maxdepth: 3
+   :maxdepth: 2
 
-   sources/plugins.rst
+   sources/plugins/plugins.rst
 
 .. toctree::
+   :caption: Developer
    :hidden:
 
-   sources/examples.rst
-   sources/config.rst
-   sources/release.rst
+   sources/dev/install.rst
+   sources/dev/rules.rst
+   sources/dev/release.rst
 
 Indices and tables
 ==================
@@ -47,3 +67,18 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. |Pibooth| image:: images/pibooth.png
+   :align: middle
+
+.. |PythonVersions| image:: https://img.shields.io/badge/python-3.6+-red.svg
+   :target: https://www.python.org/downloads
+   :alt: Python 3.6+
+
+.. |PypiPackage| image:: https://badge.fury.io/py/pibooth.svg
+   :target: https://pypi.org/project/pibooth
+   :alt: PyPi package
+
+.. |Downloads| image:: https://img.shields.io/pypi/dm/pibooth?color=purple
+   :target: https://pypi.org/project/pibooth
+   :alt: PyPi downloads

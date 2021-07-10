@@ -1,14 +1,20 @@
 .. _extend_pibooth_functionalities:
 
-Extend ``pibooth`` functionalities
-----------------------------------
+Customize using plugins
+-----------------------
 
 The ``pibooth`` application is built on the top of
 `pluggy <https://pluggy.readthedocs.io/en/latest/index.html>`_
-that gives users the ability to extend or modify its behavior.
+that gives users the ability to extend or modify its behavior thanks to plugins.
+
+Several plugins maintained by the community are available. They add extra features to
+``pibooth``. Have a look to the `plugins on PyPI  <https://pypi.org/search/?q=pibooth>`_.
+
+You can also easily develop your own plugin, and declare it in the ``[GENERAL][plugins]``
+key of the configuration.
 
 What is a plugin?
-^^^^^^^^^^^^^^^^^
+-----------------
 
 A plugin is a set of functions (called ``hooks``) defined in a python module
 and participating to the ``pibooth`` execution when they are invoked.
@@ -40,7 +46,7 @@ The following states are defined:
 
 .. _state_sequence_details:
 
-.. image:: ../images/state_sequence_details.png
+.. image:: ../../images/state_sequence_details.png
     :align: center
     :alt: State sequence
 
@@ -104,39 +110,39 @@ Examples Codes
 Hello from plugin
 ~~~~~~~~~~~~~~~~~
 
-:download:`pibooth_hello.py<./python_plugins/pibooth_hello.py>`
+:download:`pibooth_hello.py<pibooth_hello.py>`
 
-.. literalinclude:: ./python_plugins/pibooth_hello.py
+.. literalinclude:: pibooth_hello.py
     :language: python
 
 Upload to FTP
 ~~~~~~~~~~~~~
 
-:download:`pibooth_ftp.py<./python_plugins/pibooth_ftp.py>`
+:download:`pibooth_ftp.py<pibooth_ftp.py>`
 
-.. literalinclude:: ./python_plugins/pibooth_ftp.py
+.. literalinclude:: pibooth_ftp.py
     :language: python
 
 Control a RGB LED
 ~~~~~~~~~~~~~~~~~
 
-:download:`pibooth_rgb_led.py<./python_plugins/pibooth_rgb_led.py>`
+:download:`pibooth_rgb_led.py<pibooth_rgb_led.py>`
 
-.. literalinclude:: ./python_plugins/pibooth_rgb_led.py
+.. literalinclude:: pibooth_rgb_led.py
     :language: python
 
 Add 'Get Ready' text before captures sequence
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:download:`pibooth_getready_text.py<./python_plugins/pibooth_getready_text.py>`
+:download:`pibooth_getready_text.py<pibooth_getready_text.py>`
 
-.. literalinclude:: ./python_plugins/pibooth_getready_text.py
+.. literalinclude:: pibooth_getready_text.py
     :language: python
 
 Setup a custom camera
 ~~~~~~~~~~~~~~~~~~~~~
 
-:download:`pibooth_custom_camera.py<./python_plugins/pibooth_custom_camera.py>`
+:download:`pibooth_custom_camera.py<pibooth_custom_camera.py>`
 
-.. literalinclude:: ./python_plugins/pibooth_custom_camera.py
+.. literalinclude:: pibooth_custom_camera.py
     :language: python

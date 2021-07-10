@@ -38,22 +38,59 @@ available for the user.
 
 Detailed state diagram can be found on this page section :ref:`on this page section<state_sequence_details>`.
 
-Commands
+Controls
 ^^^^^^^^
 
 After the graphical interface is started, the following actions are available:
 
-======================= ================ =====================
-Action                  Keyboard key     Physical button
-======================= ================ =====================
-Toggle Full screen      Ctrl + F         \-
-Choose layout           LEFT or RIGHT    Button 1 or Button 2
-Take pictures           P                Button 1
-Export Printer/Cloud    Ctrl + E         Button 2
-Open/close settings     ESC              Button 1 + Button 2
-Select option           UP or DOWN       Button 1
-Change option value     LEFT or RIGHT    Button 2
-======================= ================ =====================
+======================= ================ ===================== =====================
+Action                  Keyboard key     Physical button       Touch event
+======================= ================ ===================== =====================
+Toggle Full screen      Ctrl + F         \-                    \-
+Choose layout           LEFT or RIGHT    Button 1 or Button 2  Tap 1 finger
+Take pictures           P                Button 1              Tap 1 finger
+Export Printer/Cloud    Ctrl + E         Button 2              Tap 1 finger
+Open/close settings     ESC              Button 1 + Button 2   Tap 4 finger
+Select option           UP or DOWN       Button 1              Tap 1 finger
+Change option value     LEFT or RIGHT    Button 2              Tap 1 finger
+======================= ================ ===================== =====================
+
+Configuration
+-------------
+
+At the first run, a configuration file is generated in ``~/.config/pibooth/pibooth.cfg``
+by default. This file permits to configure the behavior of the application.
+
+A quick configuration GUI menu (see `Controls`_ ) gives access to the most common options:
+
+.. image:: ../images/settings.png
+   :align: center
+   :alt: Settings
+
+More options are available by editing the configuration file which is easily
+done using the command:
+
+.. code-block:: bash
+
+    pibooth --config
+
+The default configuration can be restored with the command (strongly recommended when
+upgrading ``pibooth``):
+
+.. code-block:: bash
+
+    pibooth --reset
+
+The configuration directory can be chosen at startup. This feature gives the possibility
+to keep several configurations on the same Raspberry Pi and quickly switch from one
+configuration to another. The following command will start ``pibooth`` using configuration
+files from ``myconfig1/`` directory:
+
+.. code-block:: bash
+
+    pibooth myconfig1/
+
+:ref:`See the default configuration file for further details<Default configuration>`.
 
 Final picture rendering
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -132,52 +169,6 @@ To regenerate the final pictures afterwards, from the originals captures present
 It permits to adjust the configuration to enhance the previous pictures with better
 parameters (title, more effects, etc...)
 
-Configuration
--------------
-
-At the first run, a configuration file is generated in ``~/.config/pibooth/pibooth.cfg``
-by default. This file permits to configure the behavior of the application.
-
-A quick configuration GUI menu (see `Commands`_ ) gives access to the most common options:
-
-.. image:: ../images/settings.png
-   :align: center
-   :alt: Settings
-
-More options are available by editing the configuration file which is easily
-done using the command:
-
-.. code-block:: bash
-
-    pibooth --config
-
-The default configuration can be restored with the command (strongly recommended when
-upgrading ``pibooth``):
-
-.. code-block:: bash
-
-    pibooth --reset
-
-The configuration directory can be chosen at startup. This feature gives the possibility
-to keep several configurations on the same Raspberry Pi and quickly switch from one
-configuration to another. The following command will start ``pibooth`` using configuration
-files from ``myconfig1/`` directory:
-
-.. code-block:: bash
-
-    pibooth myconfig1/
-
-:ref:`See the default configuration file for further details<Default configuration>`.
-
-Customize using plugins
-^^^^^^^^^^^^^^^^^^^^^^^
-
-Several plugins maintained by the community are available. They add extra features to
-``pibooth``. Have a look to the `plugins on PyPI  <https://pypi.org/search/?q=pibooth>`_.
-
-You can also easily develop your own plugin, and declare it in the ``[GENERAL][plugins]``
-key of the configuration. See guidelines to :ref:`develop custom plugin<extend_pibooth_functionalities>`.
-
 GUI translations
 ^^^^^^^^^^^^^^^^
 
@@ -194,7 +185,7 @@ If you want to have ``pibooth`` in your language feel free to send us the corres
 Printer
 ^^^^^^^
 
-The print button (see `Commands`_) and print states are automatically activated/shown if:
+The print button (see `Controls`_) and print states are automatically activated/shown if:
 
 * `pycups <https://pypi.python.org/pypi/pycups>`_ and `pycups-notify <https://github.com/anxuae/pycups-notify>`_ are installed
 * at least one printer is configured in `CUPS <http://localhost:631/printers>`_
@@ -206,7 +197,7 @@ of identical pictures that can be sent to the printer.
 Set the option ``[PRINTER][max_pages]`` to the number of paper sheets available on the
 printer. When this number is reached, the print function will be disabled and an icon
 indicates the printer failure. To reset the counter, open then close the settings
-graphical interface (see `Commands`_).
+graphical interface (see `Controls`_).
 
 Here is the default configuration used for this project in CUPS, it may depend on
 the printer used:
@@ -221,23 +212,3 @@ Resolution       Automatic
 2-Sided Printing Off
 Shrink page ...  Shrink (print the whole page)
 ================ =============================
-
-Circuit diagram
----------------
-
-Here is the diagram for hardware connections. Please refer to the
-:ref:`default configuration file<Default configuration>`.
-to know the default pins used (`physical pin numbering <https://pinout.xyz>`_).
-
-.. image:: ../images/sketch.png
-   :align: center
-   :alt: Electronic sketch
-
-An extra button can be added to start and shutdown properly the Raspberry Pi.
-Edit the file ``/boot/config.txt`` and set the line:
-
-.. code-block:: bash
-
-    dtoverlay=gpio-shutdown
-
-Then connect a push button between physical *pin 5* and *pin 6*.

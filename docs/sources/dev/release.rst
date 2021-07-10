@@ -1,6 +1,5 @@
-
-Release ``pibooth`` for Pypi
-----------------------------
+Release for Pypi
+----------------
 
 1. Install packaging libraries:
 
