@@ -22,8 +22,6 @@ photos of your version.
    :align: center
    :alt: Gallery
    :target: sources/examples.html
-   :height: 300px
-
 
 .. toctree::
    :caption: About

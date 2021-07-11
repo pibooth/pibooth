@@ -36,12 +36,13 @@ parameters (title, more effects, etc...)
 Manage counters
 ^^^^^^^^^^^^^^^
 
-Several counters are registered during ``pibooth`` usage to keep in track:
+Several counters are registered during ``pibooth`` usage to keep in track the
+number of:
 
-- The number of **taken** pictures since last reset
-- The number of **printed** pictures since last reset
-- The number of **forgotten** pictures since last reset
-- The number remaining duplicate for the currently display picture
+- **taken** pictures since last reset
+- **printed** pictures since last reset
+- **forgotten** pictures since last reset
+- remaining duplicate for the currently displayed picture
 
 Pictures counters can be displayed using the command:
 
