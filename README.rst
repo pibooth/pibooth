@@ -28,17 +28,6 @@ Features
 * All settings available in a configuration file (most common options in a graphical interface)
 * Highly customizable thanks to its plugin system, you can develop your own plugin
 
-Gallery
--------
-
-You can see some examples of the output picture formats you can get with ``pibooth`` on the following page.
-
-.. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/gallery.png
-   :align: center
-   :alt: Gallery
-   :target: https://github.com/pibooth/pibooth/blob/master/docs/sources/examples.rst
-   :height: 200px
-
 Documentation
 -------------
 
