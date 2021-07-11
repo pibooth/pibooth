@@ -55,8 +55,8 @@ Select option           UP or DOWN       Button 1              Tap 1 finger
 Change option value     LEFT or RIGHT    Button 2              Tap 1 finger
 ======================= ================ ===================== =====================
 
-Configuration
--------------
+Configure
+---------
 
 At the first run, a configuration file is generated in ``~/.config/pibooth/pibooth.cfg``
 by default. This file permits to configure the behavior of the application.
