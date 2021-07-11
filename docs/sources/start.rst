@@ -153,22 +153,6 @@ This key can also take two names or TTF file paths:
     # 'arial' font applied on footer_text1, 'Roboto-BoldItalic' font on footer_text2
     text_fonts = ('arial', 'Roboto-BoldItalic')
 
-The available fonts can be listed using the following the command:
-
-.. code-block:: bash
-
-    pibooth --fonts
-
-To regenerate the final pictures afterwards, from the originals captures present in the
-``raw`` folder, use the command:
-
-.. code-block:: bash
-
-    pibooth-regen
-
-It permits to adjust the configuration to enhance the previous pictures with better
-parameters (title, more effects, etc...)
-
 GUI translations
 ^^^^^^^^^^^^^^^^
 

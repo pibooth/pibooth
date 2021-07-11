@@ -45,6 +45,8 @@ photos of your version.
    :maxdepth: 2
 
    sources/start.rst
+   sources/config/config.rst
+   sources/scripts.rst
 
 .. toctree::
    :caption: Plugins
@@ -54,7 +56,7 @@ photos of your version.
    sources/plugins/plugins.rst
 
 .. toctree::
-   :caption: Developer
+   :caption: Developers
    :hidden:
 
    sources/dev/install.rst
