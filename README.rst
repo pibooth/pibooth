@@ -37,7 +37,7 @@ Documentation
    :target: https://pibooth.readthedocs.io/en/latest
    :height: 200px
 
-.. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/pibooth.png
+.. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/_static/pibooth.png
    :align: middle
 
 .. |PythonVersions| image:: https://img.shields.io/badge/python-3.6+-red.svg
