@@ -1,7 +1,7 @@
 .. _hooks:
 
-Hooks definition
-----------------
+Hooks specification
+-------------------
 
 .. note:: Hooks specification defines all arguments that can be used by the hook
           implementation, but there is no need to put them in the function

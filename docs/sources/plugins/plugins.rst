@@ -54,16 +54,20 @@ The following states are defined:
 There are four hooks defined for each state.
 
  - ``state_<name>_enter``
+
    Invoked one time when the state is activating.
 
  - ``state_<name>_do``
+
    Invoked in a loop until the state is switching to an other one.
 
  - ``state_<name>_validate``
+
    Invoked in a loop, returns the name of the next state if all conditions
    are met (else return ``None``).
 
  - ``state_<name>_exit``
+
    Invoked one time when the state is exiting.
 
 Code skeleton
