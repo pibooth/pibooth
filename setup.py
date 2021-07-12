@@ -85,6 +85,7 @@ def main():
         entry_points={'console_scripts': ["pibooth = pibooth.booth:main",
                                           "pibooth-count = pibooth.scripts.count:main",
                                           "pibooth-diag = pibooth.scripts.diagnostic:main",
+                                          "pibooth-fonts = pibooth.scripts.fonts:main",
                                           "pibooth-regen = pibooth.scripts.regenerate:main"]},
     )
 

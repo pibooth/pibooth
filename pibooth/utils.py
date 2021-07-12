@@ -10,12 +10,10 @@ import os.path as osp
 import logging
 import psutil
 import platform
-import functools
 from fnmatch import fnmatchcase
 import contextlib
 import errno
 import subprocess
-from itertools import zip_longest, islice
 import pygame
 
 
@@ -223,23 +221,6 @@ def timeit(description):
     finally:
         BlockConsoleHandler.dedent()
         LOGGER.debug("took %0.3f seconds", time.time() - start)
-
-
-def take(n, iterable):
-    """Return first n items of the iterable as a list.
-    """
-    return list(islice(iterable, n))
-
-
-def print_columns_words(words, column_count=3):
-    """Print a list of words into columns.
-    """
-    columns, dangling = divmod(len(words), column_count)
-    iter_words = iter(words)
-    columns = [take(columns + (dangling > i), iter_words) for i in range(column_count)]
-    paddings = [max(map(len, column)) for column in columns]
-    for row in zip_longest(*columns, fillvalue=''):
-        print('  '.join(word.ljust(pad) for word, pad in zip(row, paddings)))
 
 
 def pkill(pattern):

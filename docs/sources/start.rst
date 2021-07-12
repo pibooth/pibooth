@@ -96,7 +96,7 @@ Final picture rendering
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``pibooth`` application handle the rendering of the final picture using 2
-variables defined in the configuration (see :ref:`Configuration` below):
+variables defined in the configuration (see :ref:`Configure` below):
 
 * ``[CAMERA][resolution] = (width, height)`` is the resolution of the captured
   picture in pixels. As explained in the configuration file, the preview size is

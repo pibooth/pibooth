@@ -8,7 +8,7 @@ The available fonts can be listed using the following the command:
 
 .. code-block:: bash
 
-    pibooth --fonts
+    pibooth-fonts
 
 *Output example*::
 

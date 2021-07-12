@@ -22,12 +22,11 @@ from pibooth import fonts
 from pibooth import language
 from pibooth.counters import Counters
 from pibooth.utils import (LOGGER, PoolingTimer, configure_logging, get_crash_message,
-                           set_logging_level, print_columns_words, get_event_pos)
+                           set_logging_level, get_event_pos)
 from pibooth.states import StateMachine
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import PtbWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
-from pibooth.fonts import get_available_fonts
 from pibooth.printer import PRINTER_TASKS_UPDATED, Printer
 
 
@@ -411,9 +410,6 @@ def main():
     parser.add_argument("--reset", action='store_true',
                         help=u"restore the default configuration/translations and exit")
 
-    parser.add_argument("--fonts", action='store_true',
-                        help=u"display all available fonts and exit")
-
     parser.add_argument("--nolog", action='store_true', default=False,
                         help=u"don't save console output in a file (avoid filling the /tmp directory)")
 
@@ -460,9 +456,6 @@ def main():
     elif options.translate:
         LOGGER.info("Editing the GUI translations...")
         language.edit()
-    elif options.fonts:
-        LOGGER.info("Listing all fonts available...")
-        print_columns_words(get_available_fonts(), 3)
     elif options.reset:
         config.save(default=True)
         plugin_manager.hook.pibooth_reset(cfg=config, hard=True)
