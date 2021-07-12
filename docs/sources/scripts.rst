@@ -1,3 +1,5 @@
+.. _scripts:
+
 Tools and scripts
 -----------------
 

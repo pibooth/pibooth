@@ -1,7 +1,7 @@
-Start
------
+Run ``pibooth``
+---------------
 
-Start the photobooth application using the command:
+Start the ``pibooth`` application using the command:
 
 .. code-block:: bash
 
@@ -92,8 +92,8 @@ files from ``myconfig1/`` directory:
 
 :ref:`See the default configuration file for further details<Default configuration>`.
 
-Final picture rendering
-^^^^^^^^^^^^^^^^^^^^^^^
+Final picture resolution
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``pibooth`` application handle the rendering of the final picture using 2
 variables defined in the configuration (see :ref:`Configure` below):
@@ -107,6 +107,9 @@ variables defined in the configuration (see :ref:`Configure` below):
 
 .. note:: The resolution is an important parameter, it is responsible for the quality of the final
           picture. Have a look to `picamera possible resolutions <http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes>`_ .
+
+Captures effects
+^^^^^^^^^^^^^^^^
 
 Image effects can be applied on the capture using the ``[PICTURE][effect]`` variable defined in the
 configuration.
@@ -133,9 +136,12 @@ Have a look to the predefined effects available depending on the camera used:
 * `picamera effects <https://picamera.readthedocs.io/en/latest/api_camera.html#picamera.PiCamera.image_effect>`_
 * `gPhoto2 effects (PIL based) <https://pillow.readthedocs.io/en/latest/reference/ImageFilter.html>`_
 
+Texts fonts
+^^^^^^^^^^^
+
 Texts can be defined by setting the option ``[PICTURE][footer_text1]`` and ``[PICTURE][footer_text2]``
 (lets them empty to hide any text). For each one, the font, the color and the alignment can be chosen.
-For instance:
+For instance, to change the font:
 
 .. code-block:: ini
 
@@ -144,7 +150,8 @@ For instance:
     # Same font applied on footer_text1 and footer_text2
     text_fonts = Amatic-Bold
 
-This key can also take two names or TTF file paths:
+Different fonts can be defined for each text. It is achieved by setting two names (or TTF file paths)
+in the ``[PICTURE][text_fonts]`` option:
 
 .. code-block:: ini
 
@@ -152,6 +159,20 @@ This key can also take two names or TTF file paths:
 
     # 'arial' font applied on footer_text1, 'Roboto-BoldItalic' font on footer_text2
     text_fonts = ('arial', 'Roboto-BoldItalic')
+
+Here is the list of the fonts installed with ``pibooth``:
+
+- Amatic-Bold
+- AmaticSC-Regular
+- DancingScript-Bold
+- DancingScript-Regular
+- Monoid-Bold
+- Monoid-Regular
+- Monoid-Retina
+- Roboto-BoldItalic
+- Roboto-LightItalic
+
+Use the script :ref:`pibooth-fonts<scripts>` to list all available system fonts.
 
 GUI translations
 ^^^^^^^^^^^^^^^^
