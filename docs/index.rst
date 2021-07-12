@@ -68,7 +68,7 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. |Pibooth| image:: _static/pibooth.png
+.. |Pibooth| image:: pibooth.png
    :align: middle
 
 .. |PythonVersions| image:: https://img.shields.io/badge/python-3.6+-red.svg

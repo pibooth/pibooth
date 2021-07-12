@@ -61,7 +61,9 @@ html_static_path = ['_static']
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = '_static/pibooth.png'
+# NOTE: can not put it in the _static folder, else it will not be displayed
+# on Read The Doc (seems to be a bug..??)
+html_logo = 'pibooth.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
