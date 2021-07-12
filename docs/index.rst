@@ -52,6 +52,7 @@ photos of your version.
    :maxdepth: 2
 
    sources/plugins/plugins.rst
+   sources/plugins/hooks.rst
 
 .. toctree::
    :caption: Developers

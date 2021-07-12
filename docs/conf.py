@@ -33,6 +33,7 @@ release = pibooth.__version__
 extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.viewcode',
+    'sphinx.ext.autodoc',
     'sphinx_copybutton'
 ]
 

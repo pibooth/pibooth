@@ -19,13 +19,13 @@ What is a plugin?
 A plugin is a set of functions (called ``hooks``) defined in a python module
 and participating to the ``pibooth`` execution when they are invoked.
 
-The list of available ``hooks`` are defined in the file
-`hookspecs.py <https://github.com/pibooth/pibooth/blob/master/pibooth/plugins/hookspecs.py>`_.
-A plugin implements a subset of those functions.
+The list of available ``hooks`` are defined :ref:`on this chapter<hooks>`. A plugin
+implements a subset of those functions.
 
 There are 2 families of hooks implemented in `pibooth`:
- * Pibooth state-independent hooks
- * State dependant hooks (see below)
+
+ - Pibooth state-independent hooks
+ - State dependant hooks (see below)
 
 Influencing states
 ^^^^^^^^^^^^^^^^^^
@@ -34,15 +34,16 @@ The ``pibooth`` application is built on the principle of states. Each state
 is defined by a specific screen and possible actions available to the user.
 
 The following states are defined:
- * ``wait``       : wait for starting a new capture sequence
- * ``choose``     : selection of the number of captures
- * ``chosen``     : confirm the number of captures
- * ``preview``    : show preview and countdown
- * ``capture``    : take a capture
- * ``processing`` : build the final picture
- * ``print``      : show preview and ask for printing
- * ``finish``     : thank before going back to wait state
- * ``failsafe``   : oops message when an exception occurs
+
+ - ``wait``       : wait for starting a new capture sequence
+ - ``choose``     : selection of the number of captures
+ - ``chosen``     : confirm the number of captures
+ - ``preview``    : show preview and countdown
+ - ``capture``    : take a capture
+ - ``processing`` : build the final picture
+ - ``print``      : show preview and ask for printing
+ - ``finish``     : thank before going back to wait state
+ - ``failsafe``   : oops message when an exception occurs
 
 .. _state_sequence_details:
 
@@ -52,26 +53,18 @@ The following states are defined:
 
 There are four hooks defined for each state.
 
-- ``state_<name>_enter``
+ - ``state_<name>_enter``
+   Invoked one time when the state is activating.
 
-  Invoked one time when the state is activating.
+ - ``state_<name>_do``
+   Invoked in a loop until the state is switching to an other one.
 
-- ``state_<name>_do``
+ - ``state_<name>_validate``
+   Invoked in a loop, returns the name of the next state if all conditions
+   are met (else return ``None``).
 
-  Invoked in a loop until the state is switching to an other one.
-
-- ``state_<name>_validate``
-
-  Invoked in a loop, returns the name of the next state if all conditions
-  are met (else return ``None``).
-
-- ``state_<name>_exit``
-
-  Invoked one time when the state is exiting.
-
-.. note:: Hooks specification defines all arguments that can be used by the hook
-          implementation, but there is no need to put them in the function
-          signature if they are not used in the code.
+ - ``state_<name>_exit``
+   Invoked one time when the state is exiting.
 
 Code skeleton
 ^^^^^^^^^^^^^
