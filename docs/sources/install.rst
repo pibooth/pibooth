@@ -40,8 +40,8 @@ Install
 Here is a brief description on how to set-up a Raspberry Pi to use this software.
 
 If you intend to develop on ``pibooth``, an editable/customizable version can be
-installed by following :ref:`instructions here<install_developing_version>`
-instead of doing the last step of this procedure.
+installed. Instead of doing step 8. of the below procedure, follow
+:ref:`instructions here<install_developing_version>`.
 
 1. Download the Raspbian image and set-up an SD-card. You can follow
    `these instructions <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_.
@@ -96,7 +96,7 @@ instead of doing the last step of this procedure.
         sudo pip3 install pibooth[dslr,printer]
 
    .. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/
-          or 6. skipped), remove printer or dslr under the ``[]``
+          or 6. skipped), remove **printer** and/or **dslr** under the ``[]``
 
 Circuit diagram
 ---------------

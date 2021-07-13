@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import pibooth
 import sys
 from io import open
 import os.path as osp
