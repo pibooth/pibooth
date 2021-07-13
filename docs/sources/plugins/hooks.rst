@@ -3,9 +3,20 @@
 Hooks specification
 -------------------
 
+The ``pibooth`` application provide a decorator to implement specific hooks.
+Each hook have to be decorated has follow:
+
+.. code-block:: python
+
+    import pibooth
+
+    @pibooth.hookimpl
+    def pibooth_configure(cfg):
+        ...
+
 .. note:: Hooks specification defines all arguments that can be used by the hook
-          implementation, but there is no need to put them in the function
-          signature if they are not used in the code.
+          implementation. But there is no need to put in the hook signature
+          the arguments that are not used in the code.
 
 .. automodule:: pibooth.plugins.hookspecs
    :members:

@@ -55,6 +55,13 @@ html_theme_options = {
     'logo_only': True,
 }
 
+# This value selects if automatically documented members are sorted alphabetical
+# (value 'alphabetical'), by member type (value 'groupwise') or by source order
+# (value 'bysource'). The default is alphabetical.
+autodoc_member_order = 'bysource'
+
+add_module_names = False
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
