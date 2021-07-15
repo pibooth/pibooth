@@ -17,19 +17,19 @@ CURRENT = 'en'  # Dynamically set at startup
 DEFAULT = {
     'de': {
         'intro': "Foto aufnehmen",
-        'intro_print': "Sie können dieses\nfoto immer noch\nausdrucken",
-        'choose': "Wähle dein Layout",
+        'intro_print': "Du kannst dieses\nFoto immer noch\nausdrucken",
+        'choose': "Wähle Dein Layout",
         '1': "1 Foto",
         '2': "2 Fotos",
         '3': "3 Fotos",
         '4': "4 Fotos",
-        'chosen': "Los gehts!",
+        'chosen': "Los geht's!",
         'smile': "Bitte lächeln!",
         'processing': "Bearbeitung...",
         'print': "Foto drucken?",
         'print_forget': "Dieses Foto\nbitte löschen",
         'finished': "Danke",
-        'oops': "Ups! Irgendwas lief schief",
+        'oops': "Ups! Etwas ist schiefgelaufen",
     },
     'dk': {
         'intro': "Tag et foto",
