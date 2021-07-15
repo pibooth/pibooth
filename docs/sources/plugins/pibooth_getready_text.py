@@ -10,7 +10,7 @@ __version__ = "0.0.2"
 
 @pibooth.hookimpl
 def state_wait_exit(win):
-    win_rect = win.surface.get_rect()
+    win_rect = win.get_rect()
     text = "Get Reatdy!"
 
     # Get best font size according to window size

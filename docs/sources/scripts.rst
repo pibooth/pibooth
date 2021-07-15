@@ -1,10 +1,7 @@
 .. _scripts:
 
-Tools and scripts
------------------
-
 List available fonts
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 The available fonts can be listed using the following the command:
 
@@ -23,7 +20,7 @@ The available fonts can be listed using the following the command:
     ...
 
 Regenerate pictures
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 To regenerate the final pictures afterwards, from the originals captures present in the
 ``raw`` folder, use the command:
@@ -36,7 +33,7 @@ It permits to adjust the configuration to enhance the previous pictures with bet
 parameters (title, more effects, etc...)
 
 Manage counters
-^^^^^^^^^^^^^^^
+---------------
 
 Several counters are registered during ``pibooth`` usage to keep in track the
 number of:
@@ -78,7 +75,7 @@ The counters can be updated/rest using the ``--update`` option:
     pibooth-count --update
 
 Errors diagnosis
-^^^^^^^^^^^^^^^^
+----------------
 
 Use the following command to generate a debug report on your Raspberry-Pi, then
 paste it in a GitHb issue to gives details about your ``pibooth`` environment:

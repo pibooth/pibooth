@@ -2,10 +2,10 @@
 
 import pytest
 import pygame
-from pibooth.view.window import PtbWindow
+from pibooth.view.window import PiWindow
 
 
-WIN = PtbWindow("Test", debug=True)
+WIN = PiWindow("Test", debug=True)
 
 
 def loop(func, *args, **kwargs):

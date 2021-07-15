@@ -25,34 +25,36 @@ photos of your version.
 
 .. toctree::
    :caption: About
-   :name: About Pibooth
    :maxdepth: 2
 
    sources/about.rst
 
 .. toctree::
    :caption: Install
-   :name: Install Pibooth
    :maxdepth: 2
 
    sources/install.rst
 
 .. toctree::
    :caption: Start
-   :name: Start Pibooth
    :maxdepth: 2
 
    sources/start.rst
    sources/config/config.rst
+
+.. toctree::
+   :caption: Scripts and tools
+   :maxdepth: 2
+
    sources/scripts.rst
 
 .. toctree::
    :caption: Plugins
-   :name: Plugins
    :maxdepth: 2
 
    sources/plugins/plugins.rst
    sources/plugins/hooks.rst
+   sources/plugins/examples.rst
 
 .. toctree::
    :caption: Developers

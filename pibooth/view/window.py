@@ -15,7 +15,19 @@ from pibooth.utils import LOGGER
 from pibooth.pictures import sizing
 
 
-class PtbWindow(object):
+class PiWindow(object):
+
+    """Window.
+
+    Window has the follosing attributes:
+
+    :attr surface: surface on which sprites are displayed
+    :type surface: :py:class:`pygame.Surface`
+    :attr is_fullscreen: set to True if the window is display in full screen
+    :type is_fullscreen: bool
+    :attr display_size: tuple (width, height) represneting the size of the screen
+    :type display_size: tuple
+    """
 
     CENTER = 'center'
     RIGHT = 'right'

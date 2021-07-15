@@ -136,8 +136,8 @@ Have a look to the predefined effects available depending on the camera used:
 * `picamera effects <https://picamera.readthedocs.io/en/latest/api_camera.html#picamera.PiCamera.image_effect>`_
 * `gPhoto2 effects (PIL based) <https://pillow.readthedocs.io/en/latest/reference/ImageFilter.html>`_
 
-Texts fonts
-^^^^^^^^^^^
+Texts and fonts
+^^^^^^^^^^^^^^^
 
 Texts can be defined by setting the option ``[PICTURE][footer_text1]`` and ``[PICTURE][footer_text2]``
 (lets them empty to hide any text). For each one, the font, the color and the alignment can be chosen.

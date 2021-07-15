@@ -243,7 +243,10 @@ DEFAULT = odict((
 
 class PiConfigParser(RawConfigParser):
 
-    """Enhenced configuration file parser.
+    """Configuration file parser.
+
+    :attr filename: absolute path to the laoded config file
+    :type filename: str
     """
 
     def __init__(self, filename, plugin_manager, load=True):
@@ -368,21 +371,31 @@ class PiConfigParser(RawConfigParser):
         DEFAULT.setdefault(section, odict())[option] = (default, description, menu_name, menu_choices)
 
     def get(self, section, option, **kwargs):
-        """Override the default function of ConfigParser to add a
-        default value if section or option is not found.
+        """Get a value from config. Return the default value if the section
+        or option is not defined.
 
         :param section: config section name
         :type section: str
         :param option: option name
         :type option: str
+
+        :return: value
+        :rtype: str
         """
         if self.has_section(section) and self.has_option(section, option):
             return super(PiConfigParser, self).get(section, option, **kwargs)
         return str(DEFAULT[section][option][0])
 
     def set(self, section, option, value=None):
-        """Override the default function of ConfigParser to create
-        the section if it does not exist."""
+        """Set a value to config. Create the section if it is not defined.
+
+        :param section: config section name
+        :type section: str
+        :param option: option name
+        :type option: str
+        :param value: value to set
+        :type value: str
+        """
         if not self.has_section(section):
             self.add_section(section)
         super(PiConfigParser, self).set(section, option, value)

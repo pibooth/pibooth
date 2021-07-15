@@ -635,7 +635,7 @@ class FinishedWithImageBackground(FinishedBackground):
     def resize(self, screen):
         Background.resize(self, screen)
         if self._need_update:
-            # Note: '0.9' ratio comes from PtbWindow._update_foreground() method which
+            # Note: '0.9' ratio comes from PiWindow._update_foreground() method which
             # lets a margin between window borders and fullscreen foreground picture
             frgnd_rect = pygame.Rect(0, 0, *pictures.sizing.new_size_keep_aspect_ratio(
                 self.foreground_size, (self._rect.size[0] * 0.9, self._rect.size[1]*0.9)))

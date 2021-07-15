@@ -101,45 +101,24 @@ to the application instance in the ``pibooth_startup`` hook:
     def pibooth_startup(cfg, app):
         app.led_startup = LED("BOARD" + cfg.get('CONTROLS', 'startup_led_pin'))
 
-Examples Codes
-^^^^^^^^^^^^^^
+Access to internal variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Hello from plugin
-~~~~~~~~~~~~~~~~~
+cfg
+~~~
 
-:download:`pibooth_hello.py<pibooth_hello.py>`
+.. autoclass:: pibooth.config.parser.PiConfigParser
+   :members: set, get, getint, getfloat, getboolean, gettyped, getpath, gettuple, add_option, join_path
+   :undoc-members:
 
-.. literalinclude:: pibooth_hello.py
-    :language: python
+app
+~~~
 
-Upload to FTP
-~~~~~~~~~~~~~
+.. autoclass:: pibooth.booth.PiApplication
+   :members:
 
-:download:`pibooth_ftp.py<pibooth_ftp.py>`
+win
+~~~
 
-.. literalinclude:: pibooth_ftp.py
-    :language: python
-
-Control a RGB LED
-~~~~~~~~~~~~~~~~~
-
-:download:`pibooth_rgb_led.py<pibooth_rgb_led.py>`
-
-.. literalinclude:: pibooth_rgb_led.py
-    :language: python
-
-Add 'Get Ready' text before captures sequence
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-:download:`pibooth_getready_text.py<pibooth_getready_text.py>`
-
-.. literalinclude:: pibooth_getready_text.py
-    :language: python
-
-Setup a custom camera
-~~~~~~~~~~~~~~~~~~~~~
-
-:download:`pibooth_custom_camera.py<pibooth_custom_camera.py>`
-
-.. literalinclude:: pibooth_custom_camera.py
-    :language: python
+.. autoclass:: pibooth.view.window.PiWindow
+   :members:

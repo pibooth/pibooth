@@ -25,7 +25,7 @@ from pibooth.utils import (LOGGER, PoolingTimer, configure_logging, get_crash_me
                            set_logging_level, get_event_pos)
 from pibooth.states import StateMachine
 from pibooth.plugins import create_plugin_manager
-from pibooth.view import PtbWindow
+from pibooth.view import PiWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth.printer import PRINTER_TASKS_UPDATED, Printer
 
@@ -44,6 +44,34 @@ BUTTONDOWN = pygame.USEREVENT + 1
 
 
 class PiApplication(object):
+
+    """Application.
+
+    Application has the follosing attributes:
+
+    :attr capture_nbr: number of capture to be done in the current sequence
+    :type capture_nbr: int
+    :attr capture_date: date (%Y-%m-%d-%H-%M-%S) of the first capture of the current sequence
+    :type capture_date: str
+    :attr capture_choices: possible choices of captures numbers.
+    :type capture_choices: tuple
+    :attr previous_picture: picture generated during last sequence
+    :type previous_picture: :py:class:`PIL.Image`
+    :attr previous_animated: infinite list of picture to display during animation
+    :type previous_animated: :py:func:`itertools.cycle`
+    :attr previous_picture_file: file name of the picture generated during last sequence
+    :type previous_picture_file: str
+    :attr count: holder for counter values
+    :type count: :py:class:`pibooth.counters.Counters`
+    :attr camera: camera used
+    :type camera: :py:class:`pibooth.camera.base.BaseCamera`
+    :attr buttons: access to hardware buttons ``capture`` and ``printer``
+    :type buttons: :py:class:`gpiozero.ButtonBoard`
+    :attr leds: access to hardware LED ``capture`` and ``printer``
+    :attr leds: :py:class:`gpiozero.LEDBoard`
+    :attr printer: printer used
+    :type printer: :py:class:`pibooth.printer.Printer`
+    """
 
     def __init__(self, config, plugin_manager):
         self._pm = plugin_manager
@@ -66,11 +94,11 @@ class PiApplication(object):
 
         title = 'Pibooth v{}'.format(pibooth.__version__)
         if not isinstance(init_size, str):
-            self._window = PtbWindow(title, init_size, color=init_color,
-                                     text_color=init_text_color, debug=init_debug)
+            self._window = PiWindow(title, init_size, color=init_color,
+                                    text_color=init_text_color, debug=init_debug)
         else:
-            self._window = PtbWindow(title, color=init_color,
-                                     text_color=init_text_color, debug=init_debug)
+            self._window = PiWindow(title, color=init_color,
+                                    text_color=init_text_color, debug=init_debug)
 
         self._menu = None
         self._multipress_timer = PoolingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)

@@ -7,7 +7,7 @@ from PIL import Image
 from pibooth import language
 from pibooth.counters import Counters
 from pibooth.config.parser import PiConfigParser
-from pibooth.camera import find_rpi_camera, find_gp_camera, find_cv_camera
+from pibooth.camera import get_rpi_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
 from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
 
 
@@ -72,7 +72,7 @@ def counters(tmpdir):
 
 @pytest.fixture(scope='session')
 def proxy_rpi():
-    return find_rpi_camera()
+    return get_rpi_camera_proxy()
 
 
 @pytest.fixture(scope='session')
@@ -93,7 +93,7 @@ def camera_rpi_gp(proxy_rpi, proxy_gp):
 
 @pytest.fixture(scope='session')
 def proxy_cv():
-    return find_cv_camera()
+    return get_cv_camera_proxy()
 
 
 @pytest.fixture(scope='session')
@@ -114,7 +114,7 @@ def camera_cv_gp(proxy_cv, proxy_gp):
 
 @pytest.fixture(scope='session')
 def proxy_gp():
-    return find_gp_camera()
+    return get_gp_camera_proxy()
 
 
 @pytest.fixture(scope='session')
