@@ -243,7 +243,8 @@ DEFAULT = odict((
 
 class PiConfigParser(RawConfigParser):
 
-    """Configuration file parser.
+    """Class to parse and store the configuration values.
+    The following attributes are available for use in plugins:
 
     :attr filename: absolute path to the laoded config file
     :type filename: str

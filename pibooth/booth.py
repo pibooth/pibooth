@@ -45,9 +45,8 @@ BUTTONDOWN = pygame.USEREVENT + 1
 
 class PiApplication(object):
 
-    """Application.
-
-    Application has the follosing attributes:
+    """Main class representing the ``pibooth`` software.
+    The following attributes are available for use in plugins:
 
     :attr capture_nbr: number of capture to be done in the current sequence
     :type capture_nbr: int
@@ -365,8 +364,6 @@ class PiApplication(object):
         return None
 
     def main_loop(self):
-        """Run the main game loop.
-        """
         try:
             fps = 40
             clock = pygame.time.Clock()

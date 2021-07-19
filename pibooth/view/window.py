@@ -17,9 +17,8 @@ from pibooth.pictures import sizing
 
 class PiWindow(object):
 
-    """Window.
-
-    Window has the follosing attributes:
+    """Class to handle the window.
+    The following attributes are available for use in plugins:
 
     :attr surface: surface on which sprites are displayed
     :type surface: :py:class:`pygame.Surface`
