@@ -13,6 +13,9 @@ class Counters(object):
         if osp.isfile(self.filename):
             self.load()
 
+    def __str__(self):
+        return ", ".join("{}:{}".format(key, value) for key, value in self.data.items())
+
     def __iter__(self):
         """Iterate over counters names.
         """

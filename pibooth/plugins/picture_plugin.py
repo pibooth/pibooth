@@ -3,6 +3,7 @@
 import os
 import os.path as osp
 import itertools
+from datetime import datetime
 import pibooth
 from pibooth.utils import timeit, PoolingTimer
 from pibooth.pictures import get_picture_factory
@@ -19,6 +20,7 @@ class PicturePlugin(object):
         self.factory_pool = PicturesFactoryPool()
         self.picture_destroy_timer = PoolingTimer(0)
         self.second_previous_picture = None
+        self.texts_vars = {}
 
     def _reset_vars(self, app):
         """Destroy final picture (can not be used anymore).
@@ -43,8 +45,8 @@ class PicturePlugin(object):
         if overlays[opt_index]:
             factory.set_overlay(overlays[opt_index])
 
-        texts = [cfg.get('PICTURE', 'footer_text1').strip('"'),
-                 cfg.get('PICTURE', 'footer_text2').strip('"')]
+        texts = [cfg.get('PICTURE', 'footer_text1').strip('"').format(**self.texts_vars),
+                 cfg.get('PICTURE', 'footer_text2').strip('"').format(**self.texts_vars)]
         colors = cfg.gettuple('PICTURE', 'text_colors', 'color', len(texts))
         text_fonts = cfg.gettuple('PICTURE', 'text_fonts', str, len(texts))
         alignments = cfg.gettuple('PICTURE', 'text_alignments', str, len(texts))
@@ -95,6 +97,8 @@ class PicturePlugin(object):
     @pibooth.hookimpl
     def state_processing_do(self, cfg, app):
         idx = app.capture_choices.index(app.capture_nbr)
+        self.texts_vars['date'] = datetime.strptime(app.capture_date, "%Y-%m-%d-%H-%M-%S")
+        self.texts_vars['count'] = app.count
 
         with timeit("Saving raw captures"):
             captures = app.camera.get_captures()

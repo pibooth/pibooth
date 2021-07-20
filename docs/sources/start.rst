@@ -140,8 +140,23 @@ Texts and fonts
 ^^^^^^^^^^^^^^^
 
 Texts can be defined by setting the option ``[PICTURE][footer_text1]`` and ``[PICTURE][footer_text2]``
-(lets them empty to hide any text). For each one, the font, the color and the alignment can be chosen.
-For instance, to change the font:
+(lets them empty to hide any text). Some text can be inserted dynamically using some state variables.
+Available variables to forge the footer texts are:
+
+ - **date** : `datetime <https://docs.python.org/3/library/datetime.html#datetime-objects>`_ of the first capture of the current sequence
+ - **count** : current counters (see counters in configuration menu)
+
+For instance, insert the date in the footer text:
+
+.. code-block:: ini
+
+    [PICTURE]
+
+    footer_text1 = The full date is {date}
+
+    footer_text2 = A custom date is {date.year}-{date.month}-{date.day}
+
+For each text, the font, the color and the alignment can be chosen. For instance, to change the font:
 
 .. code-block:: ini
 
