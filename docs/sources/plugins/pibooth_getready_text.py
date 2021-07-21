@@ -11,7 +11,7 @@ __version__ = "0.0.2"
 @pibooth.hookimpl
 def state_wait_exit(win):
     win_rect = win.get_rect()
-    text = "Get Reatdy!"
+    text = "Get Ready!"
 
     # Get best font size according to window size
     font = fonts.get_pygame_font(text, fonts.CURRENT,
