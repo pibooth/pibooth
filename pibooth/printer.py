@@ -111,7 +111,7 @@ class Printer(object):
                 self._conn.printFile(self.name, fp.name, osp.basename(filename), self.options)
         else:
             self._conn.printFile(self.name, filename, osp.basename(filename), self.options)
-        LOGGER.debug("File '%s' sent to the printer", filename)
+        LOGGER.debug("File '%s' sent to the printer with options %s", filename, self.options)
 
     def cancel_all_tasks(self):
         """Cancel all tasks in the queue.

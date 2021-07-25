@@ -44,14 +44,14 @@ def main():
             values = list(map(lambda x: x["choice"], opt.choices))
             texts = list(map(lambda x: x["text"], opt.choices))
             print("{} = {}".format(opt.keyword, opt.defchoice))
-            print("     {}".format(opt.text))
+            print("     Description: {}".format(opt.text))
             if values != texts:
                 choices = ["{} = {}".format(v, texts[values.index(v)]) for v in values]
-                print("     Choices: {}".format(choices[0]))
+                print("     Choices:     {}".format(choices[0]))
                 for choice in choices[1:]:
-                    print("              {}".format(choice))
+                    print("                  {}".format(choice))
             else:
-                print("     Choices: {}".format(", ".join(values)))
+                print("     Choices:     {}".format(", ".join(values)))
 
             print()
 
