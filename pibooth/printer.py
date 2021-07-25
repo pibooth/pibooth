@@ -38,6 +38,7 @@ class Printer(object):
         self.name = None
         self.max_pages = max_pages
         self.count = counters
+
         if not cups:
             LOGGER.warning("No printer found (pycups or pycups-notify not installed)")
             return  # CUPS is not installed
@@ -56,6 +57,20 @@ class Printer(object):
                 LOGGER.warning("No printer named '%s' in CUPS (see http://localhost:631)", name)
         else:
             LOGGER.info("Connected to printer '%s'", self.name)
+
+        self.printersettings = dict()
+        f = self._conn.getPPD(self.name)
+        ppd = cups.PPD(f)
+        #ppd.markDefaults()
+        groups = ppd.optionGroups
+        option2selection = dict()
+        for group in groups:
+            for opt in group.options:
+                selection = list(map(lambda x: x["text"], opt.choices))
+                option2selection[opt] = selection
+        self.printersettings[self.name] = option2selection
+
+        LOGGER.info("printer settings: %s", str(self.printersettings))
 
     def _on_event(self, evt):
         """
