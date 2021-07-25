@@ -83,3 +83,13 @@ paste it in a GitHb issue to gives details about your ``pibooth`` environment:
 .. code-block:: bash
 
     pibooth-diag
+
+List printer options
+--------------------
+
+Use the following command to list all options as defined in the
+`PPD <https://www.cups.org/doc/spec-ppd.html>`_ file:
+
+.. code-block:: bash
+
+    pibooth-printcfg
