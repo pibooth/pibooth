@@ -116,9 +116,9 @@ class Printer(object):
                 # are the one necessary to render several pictures on same page.
                 factory.set_margin(2)
                 factory.save(fp.name)
-                self._conn.printFile(self.name, fp.name, osp.basename(filename), {})
+                self._conn.printFile(self.name, fp.name, osp.basename(filename), {'StpBorderless': 'True', 'StpiShrinkOutput': 'Expand', 'StpColorPrecision': 'Best', 'StpImageType': 'Photo'})
         else:
-            self._conn.printFile(self.name, filename, osp.basename(filename), {})
+            self._conn.printFile(self.name, filename, osp.basename(filename), {'StpBorderless': 'True', 'StpiShrinkOutput': 'Expand', 'StpColorPrecision': 'Best', 'StpImageType': 'Photo'})
         LOGGER.debug("File '%s' sent to the printer", filename)
 
     def cancel_all_tasks(self):
