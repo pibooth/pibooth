@@ -76,7 +76,8 @@ class ViewPlugin(object):
         if app.find_capture_event(events):
             if len(app.capture_choices) > 1:
                 return 'choose'
-            return 'preview'  # No choice
+            app.capture_nbr = app.capture_choices[0]
+            return 'chosen'  # No choice
 
     @pibooth.hookimpl
     def state_wait_exit(self, win):
