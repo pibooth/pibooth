@@ -100,6 +100,7 @@ class PiConfigMenu(object):
                                    touchscreen=True,
                                    onclose=self._on_close)
         self._main_menu.disable()
+        self._main_menu.add.vertical_margin(20)
 
         self._keyboard = vkb.VKeyboard(self.win.surface,
                                        self._on_keyboard_event,
@@ -111,9 +112,10 @@ class PiConfigMenu(object):
 
         for name in DEFAULT:
             submenu = self._build_submenu(name)
-            if submenu._widgets:
+            if len(submenu._widgets) > 2:
                 self._main_menu.add.button(submenu.get_title(), submenu)
         self._main_menu.add.button('Exit', self._on_exit)
+        self._main_menu.add.vertical_margin(20)
 
     def _build_submenu(self, section):
         """Build sub-menu"""
@@ -128,6 +130,7 @@ class PiConfigMenu(object):
                         height=self.size[1],
                         theme=SUBTHEME1_DARK,
                         touchscreen=True)
+        menu.add.vertical_margin(20)
 
         for name, option in DEFAULT[section].items():
             if option[2]:
@@ -171,6 +174,7 @@ class PiConfigMenu(object):
                                 self._build_submenu_plugins("Plugins"),
                                 margin=(self.size[0] // 2 - 105, 0))
 
+        menu.add.vertical_margin(20)
         return menu
 
     def _build_submenu_counters(self, title):

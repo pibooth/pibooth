@@ -72,12 +72,16 @@ class ViewPlugin(object):
                            and app.count.remaining_duplicates > 0)
 
     @pibooth.hookimpl
-    def state_wait_validate(self, app, events):
+    def state_wait_validate(self, cfg, app, events):
         if app.find_capture_event(events):
             if len(app.capture_choices) > 1:
                 return 'choose'
+
             app.capture_nbr = app.capture_choices[0]
-            return 'chosen'  # No choice
+            if cfg.getfloat('WINDOW', 'chosen_delay') > 0:
+                return 'chosen'
+
+            return 'preview'
 
     @pibooth.hookimpl
     def state_wait_exit(self, win):
@@ -99,9 +103,12 @@ class ViewPlugin(object):
             return 'wait'
 
     @pibooth.hookimpl
-    def state_chosen_enter(self, app, win):
+    def state_chosen_enter(self, cfg, app, win):
         with timeit("Show picture choice ({} captures selected)".format(app.capture_nbr)):
             win.show_choice(app.capture_choices, selected=app.capture_nbr)
+
+        # Reset timeout in case of settings changed
+        self.layout_timer.timeout = cfg.getfloat('WINDOW', 'chosen_delay')
         self.layout_timer.start()
 
     @pibooth.hookimpl
