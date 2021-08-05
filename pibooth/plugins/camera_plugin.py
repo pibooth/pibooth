@@ -47,7 +47,10 @@ class CameraPlugin(object):
     @pibooth.hookimpl
     def state_wait_enter(self, app):
         app.capture_date = None
-        app.capture_nbr = None
+        if len(app.capture_choices) > 1:
+            app.capture_nbr = None
+        else:
+            app.capture_nbr = app.capture_choices[0]
 
     @pibooth.hookimpl
     def state_choose_do(self, app, events):
@@ -61,8 +64,6 @@ class CameraPlugin(object):
     @pibooth.hookimpl
     def state_preview_enter(self, cfg, app, win):
         LOGGER.info("Show preview before next capture")
-        if not app.capture_nbr:
-            app.capture_nbr = app.capture_choices[0]
         if not app.capture_date:
             app.capture_date = time.strftime("%Y-%m-%d-%H-%M-%S")
         app.camera.preview(win)

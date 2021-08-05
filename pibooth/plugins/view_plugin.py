@@ -76,11 +76,8 @@ class ViewPlugin(object):
         if app.find_capture_event(events):
             if len(app.capture_choices) > 1:
                 return 'choose'
-
-            app.capture_nbr = app.capture_choices[0]
             if cfg.getfloat('WINDOW', 'chosen_delay') > 0:
                 return 'chosen'
-
             return 'preview'
 
     @pibooth.hookimpl
@@ -96,9 +93,12 @@ class ViewPlugin(object):
         self.choose_timer.start()
 
     @pibooth.hookimpl
-    def state_choose_validate(self, app):
+    def state_choose_validate(self, cfg, app):
         if app.capture_nbr:
-            return 'chosen'
+            if cfg.getfloat('WINDOW', 'chosen_delay') > 0:
+                return 'chosen'
+            else:
+                return 'preview'
         elif self.choose_timer.is_timeout():
             return 'wait'
 
