@@ -53,7 +53,7 @@ class RpiCamera(BaseCamera):
         self._cam.hflip = self.capture_flip
         self._cam.resolution = self.resolution
         self._cam.iso = self.preview_iso
-        self._cam.rotation = self.rotation
+        self._cam.rotation = self.preview_rotation
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
@@ -145,6 +145,8 @@ class RpiCamera(BaseCamera):
         try:
             if self.capture_iso != self.preview_iso:
                 self._cam.iso = self.capture_iso
+            if self.capture_rotation != self.preview_rotation:
+                self._cam.rotation = self.capture_rotation
 
             stream = BytesIO()
             self._cam.image_effect = effect
@@ -152,6 +154,8 @@ class RpiCamera(BaseCamera):
 
             if self.capture_iso != self.preview_iso:
                 self._cam.iso = self.preview_iso
+            if self.capture_rotation != self.preview_rotation:
+                self._cam.rotation = self.preview_rotation
 
             self._captures.append(stream)
         finally:

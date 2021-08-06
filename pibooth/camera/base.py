@@ -16,18 +16,23 @@ class BaseCamera(object):
         self._overlay = None
         self._captures = []
 
-        self.rotation = 0
         self.resolution = None
         self.delete_internal_memory = False
+        self.preview_rotation, self.capture_rotation = (0, 0)
         self.preview_iso, self.capture_iso = (100, 100)
         self.preview_flip, self.capture_flip = (False, False)
 
     def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False):
         """Initialize the camera.
         """
-        if rotation not in (0, 90, 180, 270):
-            raise ValueError("Invalid camera rotation value '{}' (should be 0, 90, 180 or 270)".format(rotation))
-        self.rotation = rotation
+        if not isinstance(rotation, (tuple, list)):
+            rotation = (rotation, rotation)
+        self.preview_rotation, self.capture_rotation = rotation
+        for name in ('preview', 'capture'):
+            rotation = getattr(self, '{}_rotation'.format(name))
+            if rotation not in (0, 90, 180, 270):
+                raise ValueError(
+                    "Invalid {} camera rotation value '{}' (should be 0, 90, 180 or 270)".format(name, rotation))
         self.resolution = resolution
         self.capture_flip = flip
         if not isinstance(iso, (tuple, list)):

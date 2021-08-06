@@ -27,7 +27,7 @@ class CameraPlugin(object):
 
         cam.initialize(cfg.gettuple('CAMERA', 'iso', int, 2),
                        cfg.gettyped('CAMERA', 'resolution'),
-                       cfg.getint('CAMERA', 'rotation'),
+                       cfg.gettuple('CAMERA', 'rotation', int, 2),
                        cfg.getboolean('CAMERA', 'flip'),
                        cfg.getboolean('CAMERA', 'delete_internal_memory'))
         outcome.force_result(cam)

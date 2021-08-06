@@ -78,15 +78,15 @@ class CvCamera(BaseCamera):
             # Remove alpha from overlay
             self._overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGBA2RGB)
 
-    def _rotate_image(self, image):
+    def _rotate_image(self, image, rotation):
         """Rotate an OpenCV image, same direction than RpiCamera.
         """
-        if self.rotation == 90:
+        if rotation == 90:
             image = cv2.transpose(image)
             return cv2.flip(image, 1)
-        elif self.rotation == 180:
+        elif rotation == 180:
             return cv2.flip(image, -1)
-        elif self.rotation == 270:
+        elif rotation == 270:
             image = cv2.transpose(image)
             return cv2.flip(image, 0)
         return image
@@ -99,7 +99,7 @@ class CvCamera(BaseCamera):
         ret, image = self._cam.read()
         if not ret:
             raise IOError("Can not get camera preview image")
-        image = self._rotate_image(image)
+        image = self._rotate_image(image, self.preview_rotation)
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # Crop to keep aspect ratio of the resolution
@@ -218,7 +218,7 @@ class CvCamera(BaseCamera):
         ret, image = self._cam.read()
         if not ret:
             raise IOError("Can not capture frame")
-        image = self._rotate_image(image)
+        image = self._rotate_image(image, self.capture_rotation)
 
         LOGGER.debug("Putting preview resolution back to %s", self._preview_resolution)
         self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self._preview_resolution[0])

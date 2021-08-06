@@ -170,7 +170,7 @@ DEFAULT = odict((
         odict((
             ("iso",
                 (100,
-                 "Adjust ISO for lighting issues, can be different for preview and capture (list of integer accepted)",
+                 "Adjust ISO for lighting issues, can be different for preview and capture (list of integers accepted)",
                  None, None)),
             ("flip",
                 (False,
@@ -178,7 +178,7 @@ DEFAULT = odict((
                  None, None)),
             ("rotation",
                 (0,
-                 "Rotation of the camera: 0, 90, 180 or 270",
+                 "Rotation of the camera: 0, 90, 180 or 270, can be different for preview and capture (list of integers accepted)",
                  None, None)),
             ("resolution",
                 ((1934, 2464),
