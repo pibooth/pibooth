@@ -73,19 +73,19 @@ class PicturePlugin(object):
     @pibooth.hookimpl
     def state_wait_enter(self, cfg, app):
         animated = self.factory_pool.get()
-        if cfg.getfloat('WINDOW', 'wait_image_delay') == 0:
+        if cfg.getfloat('WINDOW', 'wait_picture_delay') == 0:
             # Do it here to avoid a transient display of the picture
             self._reset_vars(app)
         elif animated:
             app.previous_animated = itertools.cycle(animated)
 
         # Reset timeout in case of settings changed
-        self.picture_destroy_timer.timeout = max(0, cfg.getfloat('WINDOW', 'wait_image_delay'))
+        self.picture_destroy_timer.timeout = max(0, cfg.getfloat('WINDOW', 'wait_picture_delay'))
         self.picture_destroy_timer.start()
 
     @pibooth.hookimpl
     def state_wait_do(self, cfg, app):
-        if cfg.getfloat('WINDOW', 'wait_image_delay') > 0 and self.picture_destroy_timer.is_timeout()\
+        if cfg.getfloat('WINDOW', 'wait_picture_delay') > 0 and self.picture_destroy_timer.is_timeout()\
                 and app.previous_picture_file:
             self._reset_vars(app)
 

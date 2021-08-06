@@ -167,9 +167,9 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_finish_enter(self, cfg, app, win):
-        if cfg.getfloat('WINDOW', 'finish_image_delay') > 0 and not self.forgotten:
+        if cfg.getfloat('WINDOW', 'finish_picture_delay') > 0 and not self.forgotten:
             win.show_finished(app.previous_picture)
-            timeout = cfg.getfloat('WINDOW', 'finish_image_delay')
+            timeout = cfg.getfloat('WINDOW', 'finish_picture_delay')
         else:
             win.show_finished()
             timeout = 1
