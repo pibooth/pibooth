@@ -31,7 +31,7 @@ class PrinterPlugin(object):
                                cfg.getint('PRINTER', 'max_duplicates'))
                 return
 
-            elif not app.printer.is_available():
+            elif not app.printer.is_ready():
                 LOGGER.warning("Maximum number of printed pages reached (%s/%s max)", app.count.printed,
                                cfg.getint('PRINTER', 'max_pages'))
                 return

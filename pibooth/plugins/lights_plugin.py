@@ -14,7 +14,7 @@ class LightsPlugin(object):
 
     @pibooth.hookimpl
     def state_wait_enter(self, app):
-        if app.previous_picture_file and app.printer.is_available()\
+        if app.previous_picture_file and app.printer.is_ready()\
                 and app.count.remaining_duplicates > 0:
             app.leds.blink(on_time=self.blink_time, off_time=self.blink_time)
         else:
@@ -23,7 +23,7 @@ class LightsPlugin(object):
 
     @pibooth.hookimpl
     def state_wait_do(self, app, events):
-        if app.find_print_event(events) and app.previous_picture_file and app.printer.is_available():
+        if app.find_print_event(events) and app.previous_picture_file and app.printer.is_ready():
             if app.count.remaining_duplicates <= 0:
                 app.leds.printer.off()
             else:

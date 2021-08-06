@@ -77,7 +77,7 @@ class Printer(object):
         """
         return cups is not None and self.name is not None
 
-    def is_available(self):
+    def is_ready(self):
         """Return False if paper/ink counter is reached or printing is disabled.
         """
         if not self.is_installed():

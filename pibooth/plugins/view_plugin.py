@@ -48,16 +48,16 @@ class ViewPlugin(object):
         else:
             previous_picture = app.previous_picture
 
-        win.show_intro(previous_picture, app.printer.is_available()
+        win.show_intro(previous_picture, app.printer.is_ready()
                        and app.count.remaining_duplicates > 0)
         if app.printer.is_installed():
-            win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_available())
+            win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
 
     @pibooth.hookimpl
     def state_wait_do(self, app, win, events):
         if app.previous_animated and self.animated_frame_timer.is_timeout():
             previous_picture = next(app.previous_animated)
-            win.show_intro(previous_picture, app.printer.is_available()
+            win.show_intro(previous_picture, app.printer.is_ready()
                            and app.count.remaining_duplicates > 0)
             self.animated_frame_timer.start()
         else:
@@ -65,10 +65,10 @@ class ViewPlugin(object):
 
         event = app.find_print_status_event(events)
         if event and app.printer.is_installed():
-            win.set_print_number(len(event.tasks), not app.printer.is_available())
+            win.set_print_number(len(event.tasks), not app.printer.is_ready())
 
         if app.find_print_event(events) or (win.get_image() and not previous_picture):
-            win.show_intro(previous_picture, app.printer.is_available()
+            win.show_intro(previous_picture, app.printer.is_ready()
                            and app.count.remaining_duplicates > 0)
 
     @pibooth.hookimpl
@@ -141,7 +141,7 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_processing_validate(self, cfg, app):
-        if app.printer.is_available() and cfg.getfloat('PRINTER', 'printer_delay') > 0\
+        if app.printer.is_ready() and cfg.getfloat('PRINTER', 'printer_delay') > 0\
                 and app.count.remaining_duplicates > 0:
             return 'print'
         return 'finish'  # Can not print
@@ -150,7 +150,7 @@ class ViewPlugin(object):
     def state_print_enter(self, cfg, app, win):
         with timeit("Display the final picture"):
             win.show_print(app.previous_picture)
-            win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_available())
+            win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
 
         # Reset timeout in case of settings changed
         self.print_view_timer.timeout = cfg.getfloat('PRINTER', 'printer_delay')
@@ -162,7 +162,7 @@ class ViewPlugin(object):
         self.forgotten = app.find_capture_event(events)
         if self.print_view_timer.is_timeout() or printed or self.forgotten:
             if printed:
-                win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_available())
+                win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
             return 'finish'
 
     @pibooth.hookimpl
