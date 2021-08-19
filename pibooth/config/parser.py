@@ -207,7 +207,7 @@ DEFAULT = odict((
             ("auto_print",
                 (0,
                  "Number of pages automatically sent to the printer (or use 'max' to reach max duplicate)",
-                 "Automatically printed pages", [str(i) for i in range(0, 11)])),
+                 "Automatically printed pages", [str(i) for i in range(0, 11)] + ['max'])),
             ("max_pages",
                 (-1,
                  "Maximum number of printed pages before warning on paper/ink levels (-1 = infinite)",
