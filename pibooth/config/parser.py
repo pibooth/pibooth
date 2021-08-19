@@ -202,7 +202,7 @@ DEFAULT = odict((
                  "Time to show print screen", [str(i) for i in range(0, 21)])),
             ("auto_print",
                 (0,
-                 "Number of pages automatically sent to the printer",
+                 "Number of pages automatically sent to the printer (or use 'max' to reach max duplicate)",
                  "Automatically printed pages", [str(i) for i in range(0, 11)])),
             ("max_pages",
                 (-1,
