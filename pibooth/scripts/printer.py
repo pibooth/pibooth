@@ -3,6 +3,8 @@
 """Script to display the configuration of the printer.
 """
 
+import sys
+import json
 import cups
 from pibooth.utils import LOGGER, configure_logging
 from pibooth.config import PiConfigParser
@@ -39,19 +41,35 @@ def main():
     f = conn.getPPD(name)
     ppd = cups.PPD(f)
     groups = ppd.optionGroups
+    options = []
     for group in groups:
+        group_name = "{} - {}".format(group.name, group.text)
         for opt in group.options:
+            option = {'group': group_name}
             values = list(map(lambda x: x["choice"], opt.choices))
             texts = list(map(lambda x: x["text"], opt.choices))
-            print("{} = {}".format(opt.keyword, opt.defchoice))
-            print("     Description: {}".format(opt.text))
+            option['keyword'] = opt.keyword
+            option['value'] = opt.defchoice
+            option['description'] = opt.text
             if values != texts:
-                choices = ["{} = {}".format(v, texts[values.index(v)]) for v in values]
+                option['choices'] = dict([(v, texts[values.index(v)]) for v in values])
+            else:
+                option['choices'] = values
+            options.append(option)
+
+    if '--json' in sys.argv:
+        print(json.dumps(dict([(option['keyword'], option['value']) for option in options])))
+    else:
+        for option in options:
+            print("{} = {}".format(option['keyword'], option['value']))
+            print("     Description: {}".format(option['description']))
+            if isinstance(option['choices'], dict):
+                choices = ["{} = {}".format(value, descr) for value, descr in option['choices'].items()]
                 print("     Choices:     {}".format(choices[0]))
                 for choice in choices[1:]:
                     print("                  {}".format(choice))
             else:
-                print("     Choices:     {}".format(", ".join(values)))
+                print("     Choices:     {}".format(", ".join(option['choices'])))
 
             print()
 
