@@ -51,7 +51,7 @@ class PrinterPlugin(object):
 
     @pibooth.hookimpl
     def state_processing_do(self, cfg, app):
-        if app.previous_picture_file and app.printer.is_available():
+        if app.previous_picture_file and app.printer.is_ready():
             number = cfg.gettyped('PRINTER', 'auto_print')
             if number == 'max':
                 number = cfg.getint('PRINTER', 'max_duplicates')
