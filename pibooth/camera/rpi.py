@@ -101,6 +101,7 @@ class RpiCamera(BaseCamera):
             else:
                 # Flip again because flipped once at init
                 flip = True
+        print("preview params ->", (rect.width, rect.height), flip, tuple(rect))
         self._cam.start_preview(resolution=(rect.width, rect.height), hflip=flip,
                                 fullscreen=False, window=tuple(rect))
 
