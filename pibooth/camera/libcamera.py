@@ -55,8 +55,9 @@ class LibCamera(BaseCamera):
     def _specific_initialization(self):
         """Camera initialization.
         """
-        self._cam.initCamera(self.resolution[0], self.resolution[1],
-                             libcamera.PixelFormat.RGB888, buffercount=4,
+        # It seems that cameras are always in landscape
+        self._cam.initCamera(max(self.resolution), min(self.resolution),
+                             libcamera.PixelFormat.BGR888, buffercount=4,
                              rotation=self.preview_rotation)
         self._cam.startCamera()
         framerate = 30
