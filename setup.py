@@ -40,6 +40,7 @@ def main():
             'Natural Language :: French',
             'Natural Language :: German',
             'Natural Language :: Hungarian',
+            'Natural Language :: Italian',
             'Natural Language :: Norwegian',
             'Natural Language :: Spanish',
             'Topic :: Multimedia :: Graphics :: Capture :: Digital Camera',
