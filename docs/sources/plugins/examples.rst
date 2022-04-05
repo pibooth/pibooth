@@ -41,3 +41,11 @@ Setup a custom camera
 
 .. literalinclude:: pibooth_custom_camera.py
     :language: python
+
+Setup a custom picture factory
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:download:`pibooth_custom_factory.py<pibooth_custom_factory.py>`
+
+.. literalinclude:: pibooth_custom_factory.py
+    :language: python
