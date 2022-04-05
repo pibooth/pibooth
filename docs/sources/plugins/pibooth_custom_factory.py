@@ -15,6 +15,4 @@ class IdlePictureFactory(PictureFactory):
 
 @pibooth.hookimpl
 def pibooth_setup_picture_factory(factory):
-    """Setup :py:class:`TemplatePictureFactory` if a template path is given."""
-
     return IdlePictureFactory(factory.width, factory.height, *factory._images)
