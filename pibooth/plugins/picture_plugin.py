@@ -5,7 +5,7 @@ import os.path as osp
 import itertools
 from datetime import datetime
 import pibooth
-from pibooth.utils import timeit, PoolingTimer
+from pibooth.utils import LOGGER, PoolingTimer
 from pibooth.pictures import get_picture_factory
 from pibooth.pictures.pool import PicturesFactoryPool
 
@@ -100,37 +100,38 @@ class PicturePlugin(object):
         self.texts_vars['date'] = datetime.strptime(app.capture_date, "%Y-%m-%d-%H-%M-%S")
         self.texts_vars['count'] = app.count
 
-        with timeit("Saving raw captures"):
-            captures = app.camera.get_captures()
+        LOGGER.info("Saving raw captures")
+        captures = app.camera.get_captures()
 
-            for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
-                rawdir = osp.join(savedir, "raw", app.capture_date)
-                os.makedirs(rawdir)
+        for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
+            rawdir = osp.join(savedir, "raw", app.capture_date)
+            os.makedirs(rawdir)
 
-                for capture in captures:
-                    count = captures.index(capture)
-                    capture.save(osp.join(rawdir, "pibooth{:03}.jpg".format(count)))
+            for capture in captures:
+                count = captures.index(capture)
+                capture.save(osp.join(rawdir, "pibooth{:03}.jpg".format(count)))
 
-        with timeit("Creating the final picture"):
-            default_factory = get_picture_factory(captures, cfg.get('PICTURE', 'orientation'))
-            factory = self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
-                                                                  opt_index=idx,
-                                                                  factory=default_factory)
-            app.previous_picture = factory.build()
+        LOGGER.info("Creating the final picture")
+        default_factory = get_picture_factory(captures, cfg.get('PICTURE', 'orientation'))
+        factory = self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
+                                                              opt_index=idx,
+                                                              factory=default_factory)
+        app.previous_picture = factory.build()
 
         for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
             app.previous_picture_file = osp.join(savedir, app.picture_filename)
             factory.save(app.previous_picture_file)
 
         if cfg.getboolean('WINDOW', 'animate') and app.capture_nbr > 1:
-            with timeit("Asyncronously generate pictures for animation"):
-                for capture in captures:
-                    default_factory = get_picture_factory((capture,), cfg.get('PICTURE', 'orientation'), force_pil=True, dpi=200)
-                    factory = self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
-                                                                          opt_index=idx,
-                                                                          factory=default_factory)
-                    factory.set_margin(factory._margin // 3)  # 1/3 since DPI is divided by 3
-                    self.factory_pool.add(factory)
+            LOGGER.info("Asyncronously generate pictures for animation")
+            for capture in captures:
+                default_factory = get_picture_factory((capture,), cfg.get(
+                    'PICTURE', 'orientation'), force_pil=True, dpi=200)
+                factory = self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
+                                                                      opt_index=idx,
+                                                                      factory=default_factory)
+                factory.set_margin(factory._margin // 3)  # 1/3 since DPI is divided by 3
+                self.factory_pool.add(factory)
 
     @pibooth.hookimpl
     def state_processing_exit(self, app):
@@ -140,13 +141,12 @@ class PicturePlugin(object):
     def state_print_do(self, cfg, app, events):
         if app.find_capture_event(events):
 
-            with timeit("Moving the picture in the forget folder"):
-
-                for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
-                    forgetdir = osp.join(savedir, "forget")
-                    if not osp.isdir(forgetdir):
-                        os.makedirs(forgetdir)
-                    os.rename(osp.join(savedir, app.picture_filename), osp.join(forgetdir, app.picture_filename))
+            LOGGER.info("Moving the picture in the forget folder")
+            for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
+                forgetdir = osp.join(savedir, "forget")
+                if not osp.isdir(forgetdir):
+                    os.makedirs(forgetdir)
+                os.rename(osp.join(savedir, app.picture_filename), osp.join(forgetdir, app.picture_filename))
 
             self._reset_vars(app)
             app.count.forgotten += 1

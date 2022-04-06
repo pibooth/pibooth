@@ -4,7 +4,7 @@ import time
 import pygame
 import pibooth
 from pibooth import camera
-from pibooth.utils import LOGGER, timeit
+from pibooth.utils import LOGGER
 
 
 class CameraPlugin(object):
@@ -95,12 +95,12 @@ class CameraPlugin(object):
             raise ValueError("Not enough effects defined for {} captures {}".format(
                 app.capture_nbr, effects))
 
-        with timeit("Take a capture"):
-            if cfg.getboolean('WINDOW', 'flash'):
-                with win.flash(2):  # Manage the window here, have no choice
-                    app.camera.capture(effect)
-            else:
+        LOGGER.info("Take a capture")
+        if cfg.getboolean('WINDOW', 'flash'):
+            with win.flash(2):  # Manage the window here, have no choice
                 app.camera.capture(effect)
+        else:
+            app.camera.capture(effect)
 
         self.count += 1
 

@@ -3,7 +3,7 @@
 import os
 import os.path as osp
 from pibooth import fonts
-from pibooth.utils import timeit
+from pibooth.utils import LOGGER
 from pibooth.pictures import sizing
 from PIL import Image, ImageDraw
 
@@ -352,21 +352,21 @@ class PictureFactory(object):
         """
         if not self._final or rebuild:
 
-            with timeit("Use {} to create background".format(self.name)):
-                image = self._build_background()
+            LOGGER.info("Use %s to create background", self.name)
+            image = self._build_background()
 
-            with timeit("Use {} to concatenate images".format(self.name)):
-                image = self._build_matrix(image)
+            LOGGER.info("Use %s to concatenate images", self.name)
+            image = self._build_matrix(image)
 
-            with timeit("Use {} to assemble final image".format(self.name)):
-                self._final = self._build_final_image(image)
+            LOGGER.info("Use %s to assemble final image", self.name)
+            self._final = self._build_final_image(image)
 
-            with timeit("Use {} to draw texts".format(self.name)):
-                self._build_texts(self._final)
+            LOGGER.info("Use %s to draw texts", self.name)
+            self._build_texts(self._final)
 
             if self._outlines:
-                with timeit("Use {} to outline boundary borders".format(self.name)):
-                    self._build_outlines(self._final)
+                LOGGER.info("Use %s to outline boundary borders", self.name)
+                self._build_outlines(self._final)
 
         return self._final
 
@@ -383,8 +383,8 @@ class PictureFactory(object):
         if not osp.isdir(dirname):
             os.mkdir(dirname)
         image = self.build()
-        with timeit("Save image '{}'".format(path)):
-            image.save(path)
+        LOGGER.info("Save image '%s'", path)
+        image.save(path)
         return image
 
 

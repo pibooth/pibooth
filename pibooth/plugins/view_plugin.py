@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pibooth
-from pibooth.utils import LOGGER, get_crash_message, timeit, PoolingTimer
+from pibooth.utils import LOGGER, get_crash_message, PoolingTimer
 
 
 class ViewPlugin(object):
@@ -87,9 +87,9 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_choose_enter(self, app, win):
-        with timeit("Show picture choice (nothing selected)"):
-            win.set_print_number(0, False)  # Hide printer status
-            win.show_choice(app.capture_choices)
+        LOGGER.info("Show picture choice (nothing selected)")
+        win.set_print_number(0, False)  # Hide printer status
+        win.show_choice(app.capture_choices)
         self.choose_timer.start()
 
     @pibooth.hookimpl
@@ -104,8 +104,8 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_chosen_enter(self, cfg, app, win):
-        with timeit("Show picture choice ({} captures selected)".format(app.capture_nbr)):
-            win.show_choice(app.capture_choices, selected=app.capture_nbr)
+        LOGGER.info("Show picture choice (%s captures selected)", app.capture_nbr)
+        win.show_choice(app.capture_choices, selected=app.capture_nbr)
 
         # Reset timeout in case of settings changed
         self.layout_timer.timeout = cfg.getfloat('WINDOW', 'chosen_delay')
@@ -148,9 +148,9 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_print_enter(self, cfg, app, win):
-        with timeit("Display the final picture"):
-            win.show_print(app.previous_picture)
-            win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
+        LOGGER.info("Display the final picture")
+        win.show_print(app.previous_picture)
+        win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
 
         # Reset timeout in case of settings changed
         self.print_view_timer.timeout = cfg.getfloat('PRINTER', 'printer_delay')

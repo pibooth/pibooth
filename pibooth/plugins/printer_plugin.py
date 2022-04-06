@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pibooth
-from pibooth.utils import LOGGER, timeit
+from pibooth.utils import LOGGER
 
 
 class PrinterPlugin(object):
@@ -13,11 +13,11 @@ class PrinterPlugin(object):
         self._pm = plugin_manager
 
     def print_picture(self, cfg, app):
-        with timeit("Send final picture to printer"):
-            app.printer.print_file(app.previous_picture_file,
-                                   cfg.getint('PRINTER', 'pictures_per_page'))
-            app.count.printed += 1
-            app.count.remaining_duplicates -= 1
+        LOGGER.info("Send final picture to printer")
+        app.printer.print_file(app.previous_picture_file,
+                               cfg.getint('PRINTER', 'pictures_per_page'))
+        app.count.printed += 1
+        app.count.remaining_duplicates -= 1
 
     @pibooth.hookimpl
     def pibooth_cleanup(self, app):
