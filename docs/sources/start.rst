@@ -36,7 +36,7 @@ below:
 The states of the **LED 1** and **LED 2** are modified depending on the actions
 available for the user.
 
-Detailed state diagram can be found on this page section :ref:`on this page section<state_sequence_details>`.
+Detailed state diagram can be found :ref:`on this page section<state_sequence_details>`.
 
 Controls
 ^^^^^^^^
