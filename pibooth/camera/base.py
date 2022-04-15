@@ -28,17 +28,13 @@ class CameraWorker(threading.Thread):
         pygame.event.post(event)
 
     def run(self):
-        if not self._loop:
-            try:
+        try:
+            while not self._stop_request.is_set():
                 self.emit(self.get_capture())
-            except:
-                self.emit(None, sys.exc_info())
-        else:
-            try:
-                while not self._stop_request.is_set():
-                    self.emit(self.get_capture())
-            except:
-                self.emit(None, sys.exc_info())
+                if not self._loop:
+                    break
+        except:
+            self.emit(None, sys.exc_info())
 
     def kill(self):
         """Stop working.

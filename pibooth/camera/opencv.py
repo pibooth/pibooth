@@ -167,7 +167,6 @@ class CvCamera(BaseCamera):
             self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.preview_iso)
 
         self._captures.append((image, effect))
-        time.sleep(0.5)  # To let time to see "Smile"
 
         self._hide_overlay()  # If stop_preview() has not been called
         return image
