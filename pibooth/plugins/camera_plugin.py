@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import time
+import math
 import pygame
 import pibooth
 from pibooth import camera
-from pibooth.utils import LOGGER
+from pibooth.language import get_translated_text
+from pibooth.utils import LOGGER, PoolingTimer
 
 
 class CameraPlugin(object):
@@ -15,6 +17,8 @@ class CameraPlugin(object):
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.count = 0
+        # Seconds to display the preview
+        self.preview_timer = PoolingTimer(3)
 
     @pibooth.hookimpl(hookwrapper=True)
     def pibooth_setup_camera(self, cfg):
@@ -66,15 +70,30 @@ class CameraPlugin(object):
         LOGGER.info("Show preview before next capture")
         if not app.capture_date:
             app.capture_date = time.strftime("%Y-%m-%d-%H-%M-%S")
-        app.camera.preview(win)
+
+        border = 100
+        app.camera.preview(win.get_rect(absolute=True).inflate(-border, -border))
+        self.preview_timer.timeout = cfg.getint('WINDOW', 'preview_delay')
+        self.preview_timer.start()
 
     @pibooth.hookimpl
-    def state_preview_do(self, cfg, app):
-        pygame.event.pump()  # Before blocking actions
+    def state_preview_do(self, cfg, app, win, events):
         if cfg.getboolean('WINDOW', 'preview_countdown'):
-            app.camera.preview_countdown(cfg.getint('WINDOW', 'preview_delay'))
-        else:
-            app.camera.preview_wait(cfg.getint('WINDOW', 'preview_delay'))
+            if self.preview_timer.remaining() > 0.5:
+                app.camera.set_overlay(math.ceil(self.preview_timer.remaining()))
+            else:
+                app.camera.set_overlay(get_translated_text('smile'))
+        for event in events:
+            if event.type == camera.EVT_CAMERA_CAPTURE:
+                if event.error:
+                    LOGGER.error("Camera preview failure", exc_info=event.error)
+                    raise IOError("Can not get preview capture!")
+                win.show_image(event.image)
+
+    @pibooth.hookimpl
+    def state_preview_validate(self):
+        if self.preview_timer.is_timeout():
+            return 'capture'
 
     @pibooth.hookimpl
     def state_preview_exit(self, cfg, app):

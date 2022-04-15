@@ -143,7 +143,7 @@ class GpCamera(BaseCamera):
             image.paste(self._overlay, (0, 0), self._overlay)
         return image
 
-    def _post_process_capture(self, capture_data):
+    def _process_capture(self, capture_data):
         """Rework capture data.
 
         :param capture_data: couple (GPhotoPath, effect)
@@ -219,7 +219,7 @@ class GpCamera(BaseCamera):
                 self.set_config_value('actions', 'viewfinder', 1)
             self._window.show_image(self._get_preview_image())
 
-    def preview_countdown(self, timeout, alpha=80):
+    def set_countdown(self, timeout, alpha=80):
         """Show a countdown of `timeout` seconds on the preview.
         Returns when the countdown is finished.
         """
@@ -252,26 +252,6 @@ class GpCamera(BaseCamera):
             pygame.event.pump()
             if updated_rect:
                 pygame.display.update(updated_rect)
-
-        self._show_overlay(get_translated_text('smile'), alpha)
-        self._window.show_image(self._get_preview_image())
-
-    def preview_wait(self, timeout, alpha=80):
-        """Wait the given time.
-        """
-        timeout = int(timeout)
-        if timeout < 1:
-            raise ValueError("Start time shall be greater than 0")
-
-        timer = PoolingTimer(timeout)
-        if self._preview_compatible:
-            while not timer.is_timeout():
-                updated_rect = self._window.show_image(self._get_preview_image())
-                pygame.event.pump()
-                if updated_rect:
-                    pygame.display.update(updated_rect)
-        else:
-            time.sleep(timer.remaining())
 
         self._show_overlay(get_translated_text('smile'), alpha)
         self._window.show_image(self._get_preview_image())

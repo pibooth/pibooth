@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import sys
+import threading
 import pygame
 from PIL import Image, ImageDraw
 
@@ -7,14 +9,54 @@ from pibooth import fonts
 from pibooth.pictures import sizing
 
 
+EVT_CAMERA_CAPTURE = pygame.USEREVENT + 3
+
+
+class CameraWorker(threading.Thread):
+
+    def __init__(self, getter, loop=True):
+        super(CameraWorker, self).__init__(name='CameraWorker')
+        self.daemon = True
+        self.get_capture = getter
+        self._loop = loop
+        self._stop_request = threading.Event()
+
+    def emit(self, capture, exc_info=None):
+        """Post event with the new capture.
+        """
+        event = pygame.event.Event(EVT_CAMERA_CAPTURE, image=capture, error=exc_info)
+        pygame.event.post(event)
+
+    def run(self):
+        if not self._loop:
+            try:
+                self.emit(self.get_capture())
+            except:
+                self.emit(None, sys.exc_info())
+        else:
+            try:
+                while not self._stop_request.is_set():
+                    self.emit(self.get_capture())
+            except:
+                self.emit(None, sys.exc_info())
+
+    def kill(self):
+        """Stop working.
+        """
+        self._stop_request.set()
+        self.join(5)
+
+
 class BaseCamera(object):
 
     def __init__(self, camera_proxy):
         self._cam = camera_proxy
-        self._border = 50
-        self._window = None
+        self._rect = None
         self._overlay = None
+        self._overlay_text = None
+        self._overlay_alpha = 60
         self._captures = []
+        self._worker = None
 
         self.resolution = None
         self.delete_internal_memory = False
@@ -46,30 +88,17 @@ class BaseCamera(object):
         """
         pass
 
-    def _show_overlay(self, text, alpha):
-        """Add an image as an overlay.
+    def set_overlay(self, text, alpha=60):
+        """Show a text over on the preview.
         """
-        self._overlay = text
-
-    def _hide_overlay(self):
-        """Remove any existing overlay.
-        """
-        if self._overlay is not None:
-            self._overlay = None
-
-    def _post_process_capture(self, capture_data):
-        """Rework and return a PIL Image object from capture data.
-        """
-        raise NotImplementedError
-
-    def get_rect(self):
-        """Return a Rect object (as defined in pygame) for resizing preview and images
-        in order to fit to the defined window.
-        """
-        rect = self._window.get_rect(absolute=True)
-        res = sizing.new_size_keep_aspect_ratio(self.resolution,
-                                                (rect.width - 2 * self._border, rect.height - 2 * self._border))
-        return pygame.Rect(rect.centerx - res[0] // 2, rect.centery - res[1] // 2, res[0], res[1])
+        if self._rect is None:
+            raise IOError("Preview is not started")
+        if text is None:
+            self._hide_overlay()
+        elif str(text) != self._overlay_text:
+            self._overlay_text = str(text)
+            self._overlay_alpha = alpha
+            self._show_overlay()
 
     def build_overlay(self, size, text, alpha):
         """Return a PIL image with the given text that can be used
@@ -85,30 +114,53 @@ class BaseCamera(object):
         draw.text(position, text, (255, 255, 255, alpha), font=font)
         return image
 
-    def preview(self, window, flip=True):
-        """Setup the preview.
+    def _show_overlay(self):
+        """Add an image as an overlay.
+        """
+        self._overlay = self.build_overlay(self._rect.size,
+                                           self._overlay_text,
+                                           self._overlay_alpha)
+
+    def _hide_overlay(self):
+        """Remove any existing overlay.
+        """
+        if self._overlay is not None:
+            self._overlay = None
+            self._overlay_text = None
+
+    def get_preview_capture(self):
+        """Return a new capture fit to the preview rect.
         """
         raise NotImplementedError
 
-    def preview_countdown(self, timeout, alpha=60):
-        """Show a countdown of `timeout` seconds on the preview.
-        Returns when the countdown is finished.
+    def preview(self, rect, flip=True):
+        """Start the preview fitting the given Rect object.
         """
-        raise NotImplementedError
+        # Define Rect() object for resizing preview captures to fit to the defined
+        # preview rect keeping same aspect ratio than camera resolution.
+        size = sizing.new_size_keep_aspect_ratio(self.resolution, (rect.width, rect.height))
+        self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
 
-    def preview_wait(self, timeout, alpha=60):
-        """Wait the given time and let doing the job.
-        Returns when the timeout is reached.
-        """
-        raise NotImplementedError
+        self.preview_flip = flip
+        self._worker = CameraWorker(self.get_preview_capture)
+        self._worker.start()
 
     def stop_preview(self):
         """Stop the preview.
         """
+        self._rect = None
+        if self._worker:
+            self._worker.kill()
+            self._worker = None
+        self._hide_overlay()
+
+    def _process_capture(self, capture_data):
+        """Rework and return a PIL Image object from capture data.
+        """
         raise NotImplementedError
 
     def capture(self, effect=None):
-        """Capture a new picture.
+        """Take a new capture and add it to internal buffer.
         """
         raise NotImplementedError
 
@@ -117,7 +169,7 @@ class BaseCamera(object):
         """
         images = []
         for data in self._captures:
-            images.append(self._post_process_capture(data))
+            images.append(self._process_capture(data))
         self.drop_captures()
         return images
 
@@ -129,4 +181,11 @@ class BaseCamera(object):
     def quit(self):
         """Close the camera driver, it's definitive.
         """
-        raise NotImplementedError
+        if self._worker:
+            self._worker.kill()
+        self._specific_cleanup()
+
+    def _specific_cleanup(self):
+        """Specific camera cleanup.
+        """
+        pass

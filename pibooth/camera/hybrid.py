@@ -25,13 +25,13 @@ class HybridRpiCamera(RpiCamera):
         super(HybridRpiCamera, self).initialize(*args, **kwargs)
         self._gp_cam.initialize(*args, **kwargs)
 
-    def _post_process_capture(self, capture_data):
+    def _process_capture(self, capture_data):
         """Rework capture data.
 
         :param capture_data: couple (GPhotoPath, effect)
         :type capture_data: tuple
         """
-        return self._gp_cam._post_process_capture(capture_data)
+        return self._gp_cam._process_capture(capture_data)
 
     def capture(self, effect=None):
         """Capture a picture in a file.
@@ -67,13 +67,13 @@ class HybridCvCamera(CvCamera):
         super(HybridCvCamera, self).initialize(*args, **kwargs)
         self._gp_cam.initialize(*args, **kwargs)
 
-    def _post_process_capture(self, capture_data):
+    def _process_capture(self, capture_data):
         """Rework capture data.
 
         :param capture_data: couple (GPhotoPath, effect)
         :type capture_data: tuple
         """
-        return self._gp_cam._post_process_capture(capture_data)
+        return self._gp_cam._process_capture(capture_data)
 
     def capture(self, effect=None):
         """Capture a picture in a file.

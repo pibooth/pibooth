@@ -8,7 +8,6 @@ try:
     import picamera
 except ImportError:
     picamera = None  # picamera is optional
-from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
 
@@ -75,7 +74,7 @@ class RpiCamera(BaseCamera):
             self._cam.remove_overlay(self._overlay)
             self._overlay = None
 
-    def _post_process_capture(self, capture_data):
+    def _process_capture(self, capture_data):
         """Rework capture data.
 
         :param capture_data: binary data as stream
@@ -96,7 +95,7 @@ class RpiCamera(BaseCamera):
         rect = self.get_rect()
         if self._cam.hflip:
             if flip:
-                 # Don't flip again, already done at init
+                # Don't flip again, already done at init
                 flip = False
             else:
                 # Flip again because flipped once at init
@@ -104,29 +103,14 @@ class RpiCamera(BaseCamera):
         self._cam.start_preview(resolution=(rect.width, rect.height), hflip=flip,
                                 fullscreen=False, window=tuple(rect))
 
-    def preview_countdown(self, timeout, alpha=60):
+    def set_countdown(self, timeout, alpha=60):
         """Show a countdown of `timeout` seconds on the preview.
         Returns when the countdown is finished.
         """
         timeout = int(timeout)
-        if timeout < 1:
-            raise ValueError("Start time shall be greater than 0")
         if not self._cam.preview:
             raise EnvironmentError("Preview shall be started first")
-
-        while timeout > 0:
-            self._show_overlay(timeout, alpha)
-            time.sleep(1)
-            timeout -= 1
-            self._hide_overlay()
-
-        self._show_overlay(get_translated_text('smile'), alpha)
-
-    def preview_wait(self, timeout, alpha=60):
-        """Wait the given time.
-        """
-        time.sleep(timeout)
-        self._show_overlay(get_translated_text('smile'), alpha)
+        self._show_overlay(timeout, alpha)
 
     def stop_preview(self):
         """Stop the preview.
