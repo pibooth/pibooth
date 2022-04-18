@@ -9,28 +9,31 @@ from pibooth import fonts
 from pibooth.pictures import sizing
 
 
-EVT_CAMERA_CAPTURE = pygame.USEREVENT + 3
+EVT_CAMERA_PREVIEW = pygame.USEREVENT + 3
+EVT_CAMERA_CAPTURE = pygame.USEREVENT + 4
 
 
 class CameraWorker(threading.Thread):
 
-    def __init__(self, getter, loop=True):
+    def __init__(self, event_type, getter, args=(), loop=True):
         super(CameraWorker, self).__init__(name='CameraWorker')
         self.daemon = True
         self.get_capture = getter
+        self.event_type = event_type
+        self._args = args
         self._loop = loop
         self._stop_request = threading.Event()
 
     def emit(self, capture, exc_info=None):
         """Post event with the new capture.
         """
-        event = pygame.event.Event(EVT_CAMERA_CAPTURE, image=capture, error=exc_info)
+        event = pygame.event.Event(self.event_type, image=capture, error=exc_info)
         pygame.event.post(event)
 
     def run(self):
         try:
             while not self._stop_request.is_set():
-                self.emit(self.get_capture())
+                self.emit(self.get_capture(*self._args))
                 if not self._loop:
                     break
         except:
@@ -44,6 +47,8 @@ class CameraWorker(threading.Thread):
 
 
 class BaseCamera(object):
+
+    IMAGE_EFFECTS = ['none']
 
     def __init__(self, camera_proxy):
         self._cam = camera_proxy
@@ -124,21 +129,25 @@ class BaseCamera(object):
             self._overlay = None
             self._overlay_text = None
 
-    def get_preview_capture(self):
-        """Return a new capture fit to the preview rect.
+    def get_preview_image(self):
+        """Return a new image fit to the preview rect.
         """
         raise NotImplementedError
 
     def preview(self, rect, flip=True):
         """Start the preview fitting the given Rect object.
         """
+        if self._worker and self._worker.is_alive():
+            # Already running
+            return
+
         # Define Rect() object for resizing preview captures to fit to the defined
         # preview rect keeping same aspect ratio than camera resolution.
         size = sizing.new_size_keep_aspect_ratio(self.resolution, (rect.width, rect.height))
         self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
 
         self.preview_flip = flip
-        self._worker = CameraWorker(self.get_preview_capture)
+        self._worker = CameraWorker(EVT_CAMERA_PREVIEW, self.get_preview_image)
         self._worker.start()
 
     def stop_preview(self):
@@ -155,12 +164,27 @@ class BaseCamera(object):
         """
         raise NotImplementedError
 
-    def capture(self, effect=None):
-        """Take a new capture and add it to internal buffer.
+    def get_capture_image(self, effect=None):
+        """Return a new full resolution image.
         """
         raise NotImplementedError
 
-    def get_captures(self):
+    def capture(self, effect=None, wait=False):
+        """Take a new capture and add it to internal buffer.
+        """
+        effect = str(effect).lower()
+        if effect not in self.IMAGE_EFFECTS:
+            raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
+
+        if self._worker:
+            self.stop_preview()
+
+        self._worker = CameraWorker(EVT_CAMERA_CAPTURE, self.get_capture_image, (effect,), False)
+        self._worker.start()
+        if wait:
+            self._worker.join()
+
+    def grab_captures(self):
         """Return all buffered captures as PIL images (buffer dropped after call).
         """
         images = []

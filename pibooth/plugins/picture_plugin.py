@@ -101,7 +101,7 @@ class PicturePlugin(object):
         self.texts_vars['count'] = app.count
 
         LOGGER.info("Saving raw captures")
-        captures = app.camera.get_captures()
+        captures = app.camera.grab_captures()
 
         for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
             rawdir = osp.join(savedir, "raw", app.capture_date)

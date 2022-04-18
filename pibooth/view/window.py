@@ -4,8 +4,6 @@
 """
 
 import os
-import time
-import contextlib
 import pygame
 from pygame import gfxdraw
 from PIL import Image
@@ -65,6 +63,7 @@ class PiWindow(object):
         self._print_number = 0
         self._print_failure = False
         self._capture_number = (0, 4)  # (current, max)
+        self._is_flash_on = False
 
         self._pos_map = {self.CENTER: self._center_pos,
                          self.RIGHT: self._right_pos,
@@ -295,43 +294,17 @@ class PiWindow(object):
         else:
             self._update_background(background.FinishedBackground())
 
-    @contextlib.contextmanager
-    def flash(self, count):
-        """Flash the window content.
-        """
-        if count < 1:
-            raise ValueError("The flash counter shall be greater than 0")
-
-        for i in range(count):
-            self.surface.fill((255, 255, 255))
-            if self._current_foreground:
-                # Flash only the background, keep foreground at the top
-                self._update_foreground(*self._current_foreground)
-            pygame.event.pump()
-            pygame.display.update()
-            time.sleep(0.02)
-            if i == count - 1:
-                yield  # Let's do actions before end of flash
-                self.update()
-                pygame.event.pump()
-                pygame.display.update()
-            else:
-                self.update()
-                pygame.event.pump()
-                pygame.display.update()
-                time.sleep(0.02)
-
     def set_capture_number(self, current_nbr, total_nbr):
         """Set the current number of captures taken.
         """
         if total_nbr < 1:
             raise ValueError("Total number of captures shall be greater than 0")
 
-        self._capture_number = (current_nbr, total_nbr)
-        self._update_background(background.CaptureBackground())
-        if self._current_foreground:
-            self._update_foreground(*self._current_foreground)
-        pygame.display.update()
+        if self._capture_number != (current_nbr, total_nbr):
+            self._capture_number = (current_nbr, total_nbr)
+            self._update_background(background.CaptureBackground())
+            if self._current_foreground:
+                self._update_foreground(*self._current_foreground)
 
     def set_print_number(self, current_nbr=None, failure=None):
         """Set the current number of tasks in the printer queue.
@@ -351,6 +324,18 @@ class PiWindow(object):
             if self._current_foreground:
                 self._update_foreground(*self._current_foreground)
             pygame.display.update()
+
+    def toggle_flash(self):
+        """Update background in white.
+        """
+        if not self._is_flash_on:
+            self.surface.fill((255, 255, 255))
+            if self._current_foreground:
+                # Flash only the background, keep foreground at the top
+                self._update_foreground(*self._current_foreground)
+        else:
+            self.update()
+        self._is_flash_on = not self._is_flash_on
 
     def toggle_fullscreen(self):
         """Set window to full screen or initial size.

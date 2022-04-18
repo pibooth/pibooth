@@ -86,7 +86,7 @@ class CvCamera(BaseCamera):
             return cv2.flip(image, 0)
         return image
 
-    def get_preview_capture(self):
+    def get_preview_image(self):
         """Capture a new preview image.
         """
         ret, image = self._cam.read()
@@ -140,13 +140,9 @@ class CvCamera(BaseCamera):
 
         return Image.fromarray(image)
 
-    def capture(self, effect=None):
+    def get_capture_image(self, effect=None):
         """Capture a new picture.
         """
-        effect = str(effect).lower()
-        if effect not in self.IMAGE_EFFECTS:
-            raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
-
         self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
         self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
 
@@ -167,12 +163,10 @@ class CvCamera(BaseCamera):
             self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.preview_iso)
 
         self._captures.append((image, effect))
-
-        self._hide_overlay()  # If stop_preview() has not been called
         return image
 
     def _specific_cleanup(self):
-        """Camera cleanup.
+        """Close the camera driver, it's definitive.
         """
         if self._cam:
             self._cam.release()

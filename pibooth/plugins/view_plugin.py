@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pibooth
+from pibooth import camera
 from pibooth.utils import LOGGER, get_crash_message, PoolingTimer
 
 
@@ -12,6 +13,8 @@ class ViewPlugin(object):
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.count = 0
+        self.count_flash = 0
+        self.capture_finished = False
         self.forgotten = False
         # Seconds to display the failed message
         self.failed_view_timer = PoolingTimer(2)
@@ -21,6 +24,8 @@ class ViewPlugin(object):
         self.choose_timer = PoolingTimer(30)
         # Seconds to display the selected layout
         self.layout_timer = PoolingTimer(4)
+        # Seconds between each flash
+        self.flash_timer = PoolingTimer(0.05)
         # Seconds to display the selected layout
         self.print_view_timer = PoolingTimer(0)
         # Seconds to display the selected layout
@@ -119,17 +124,35 @@ class ViewPlugin(object):
     @pibooth.hookimpl
     def state_preview_enter(self, app, win):
         self.count += 1
+        self.capture_finished = False
         win.set_capture_number(self.count, app.capture_nbr)
 
     @pibooth.hookimpl
-    def state_capture_do(self, app, win):
-        win.set_capture_number(self.count, app.capture_nbr)
+    def state_capture_enter(self):
+        self.count_flash = 0
+        self.flash_timer.start()
 
     @pibooth.hookimpl
-    def state_capture_validate(self, app):
-        if self.count >= app.capture_nbr:
-            return 'processing'
-        return 'preview'
+    def state_capture_do(self, cfg, app, win, events):
+        if cfg.getboolean('WINDOW', 'flash'):
+            if self.count_flash < 4:
+                if self.flash_timer.is_timeout():
+                    self.count_flash += 1
+                    win.toggle_flash()
+                    self.flash_timer.start()
+
+        win.set_capture_number(self.count, app.capture_nbr)
+
+        for event in events:
+            if event.type == camera.EVT_CAMERA_CAPTURE:
+                self.capture_finished = True
+
+    @pibooth.hookimpl
+    def state_capture_validate(self, cfg, app):
+        if self.capture_finished and (not cfg.getboolean('WINDOW', 'flash') or self.count_flash >= 4):
+            if self.count >= app.capture_nbr:
+                return 'processing'
+            return 'preview'
 
     @pibooth.hookimpl
     def state_processing_enter(self, win):

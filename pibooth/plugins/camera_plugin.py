@@ -57,6 +57,10 @@ class CameraPlugin(object):
             app.capture_nbr = app.capture_choices[0]
 
     @pibooth.hookimpl
+    def state_wait_exit(self, win):
+        self.count = 0
+
+    @pibooth.hookimpl
     def state_choose_do(self, app, events):
         event = app.find_choice_event(events)
         if event:
@@ -81,10 +85,10 @@ class CameraPlugin(object):
         if cfg.getboolean('WINDOW', 'preview_countdown'):
             if self.preview_timer.remaining() > 0.5:
                 app.camera.set_overlay(math.ceil(self.preview_timer.remaining()))
-            else:
-                app.camera.set_overlay(get_translated_text('smile'))
+        if self.preview_timer.remaining() <= 0.5:
+            app.camera.set_overlay(get_translated_text('smile'))
         for event in events:
-            if event.type == camera.EVT_CAMERA_CAPTURE:
+            if event.type == camera.EVT_CAMERA_PREVIEW:
                 if event.error:
                     LOGGER.error("Camera preview failure", exc_info=event.error)
                     raise IOError("Can not get preview capture!")
@@ -96,11 +100,7 @@ class CameraPlugin(object):
             return 'capture'
 
     @pibooth.hookimpl
-    def state_preview_exit(self, cfg, app):
-        app.camera.stop_preview()
-
-    @pibooth.hookimpl
-    def state_capture_do(self, cfg, app, win):
+    def state_capture_enter(self, cfg, app):
         effects = cfg.gettyped('PICTURE', 'captures_effects')
         if not isinstance(effects, (list, tuple)):
             # Same effect for all captures
@@ -114,10 +114,9 @@ class CameraPlugin(object):
                 app.capture_nbr, effects))
 
         LOGGER.info("Take a capture")
-        if cfg.getboolean('WINDOW', 'flash'):
-            with win.flash(2):  # Manage the window here, have no choice
-                app.camera.capture(effect)
-        else:
-            app.camera.capture(effect)
-
+        app.camera.capture(effect)
         self.count += 1
+
+    @pibooth.hookimpl
+    def state_capture_exit(self, app):
+        app.camera.stop_preview()

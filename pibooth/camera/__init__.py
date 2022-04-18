@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pibooth.utils import LOGGER
-from pibooth.camera.base import EVT_CAMERA_CAPTURE
+from pibooth.camera.base import EVT_CAMERA_PREVIEW, EVT_CAMERA_CAPTURE
 from pibooth.camera.rpi import RpiCamera, get_rpi_camera_proxy
 from pibooth.camera.gphoto import GpCamera, get_gp_camera_proxy
 from pibooth.camera.opencv import CvCamera, get_cv_camera_proxy
