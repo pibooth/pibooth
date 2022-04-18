@@ -128,6 +128,15 @@ class ViewPlugin(object):
         win.set_capture_number(self.count, app.capture_nbr)
 
     @pibooth.hookimpl
+    def state_preview_do(self, win, events):
+        for event in events:
+            if event.type == camera.EVT_CAMERA_PREVIEW:
+                if event.error:
+                    LOGGER.error("Camera preview failure", exc_info=event.error)
+                    raise IOError("Can not get preview capture!")
+                win.show_image(event.result)
+
+    @pibooth.hookimpl
     def state_capture_enter(self):
         self.count_flash = 0
         self.flash_timer.start()
@@ -145,6 +154,9 @@ class ViewPlugin(object):
 
         for event in events:
             if event.type == camera.EVT_CAMERA_CAPTURE:
+                if event.error:
+                    LOGGER.error("Camera capture failure", exc_info=event.error)
+                    raise IOError("Can not get capture!")
                 self.capture_finished = True
 
     @pibooth.hookimpl

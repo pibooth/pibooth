@@ -57,7 +57,7 @@ class CameraPlugin(object):
             app.capture_nbr = app.capture_choices[0]
 
     @pibooth.hookimpl
-    def state_wait_exit(self, win):
+    def state_wait_exit(self):
         self.count = 0
 
     @pibooth.hookimpl
@@ -81,18 +81,12 @@ class CameraPlugin(object):
         self.preview_timer.start()
 
     @pibooth.hookimpl
-    def state_preview_do(self, cfg, app, win, events):
+    def state_preview_do(self, cfg, app):
         if cfg.getboolean('WINDOW', 'preview_countdown'):
             if self.preview_timer.remaining() > 0.5:
                 app.camera.set_overlay(math.ceil(self.preview_timer.remaining()))
         if self.preview_timer.remaining() <= 0.5:
             app.camera.set_overlay(get_translated_text('smile'))
-        for event in events:
-            if event.type == camera.EVT_CAMERA_PREVIEW:
-                if event.error:
-                    LOGGER.error("Camera preview failure", exc_info=event.error)
-                    raise IOError("Can not get preview capture!")
-                win.show_image(event.image)
 
     @pibooth.hookimpl
     def state_preview_validate(self):

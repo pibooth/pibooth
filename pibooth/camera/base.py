@@ -1,49 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import threading
 import pygame
 from PIL import Image, ImageDraw
 
 from pibooth import fonts
+from pibooth.utils import AsyncTask
 from pibooth.pictures import sizing
 
 
 EVT_CAMERA_PREVIEW = pygame.USEREVENT + 3
 EVT_CAMERA_CAPTURE = pygame.USEREVENT + 4
-
-
-class CameraWorker(threading.Thread):
-
-    def __init__(self, event_type, getter, args=(), loop=True):
-        super(CameraWorker, self).__init__(name='CameraWorker')
-        self.daemon = True
-        self.get_capture = getter
-        self.event_type = event_type
-        self._args = args
-        self._loop = loop
-        self._stop_request = threading.Event()
-
-    def emit(self, capture, exc_info=None):
-        """Post event with the new capture.
-        """
-        event = pygame.event.Event(self.event_type, image=capture, error=exc_info)
-        pygame.event.post(event)
-
-    def run(self):
-        try:
-            while not self._stop_request.is_set():
-                self.emit(self.get_capture(*self._args))
-                if not self._loop:
-                    break
-        except:
-            self.emit(None, sys.exc_info())
-
-    def kill(self):
-        """Stop working.
-        """
-        self._stop_request.set()
-        self.join(5)
 
 
 class BaseCamera(object):
@@ -147,7 +113,7 @@ class BaseCamera(object):
         self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
 
         self.preview_flip = flip
-        self._worker = CameraWorker(EVT_CAMERA_PREVIEW, self.get_preview_image)
+        self._worker = AsyncTask(self.get_preview_image, event=EVT_CAMERA_PREVIEW)
         self._worker.start()
 
     def stop_preview(self):
@@ -179,7 +145,7 @@ class BaseCamera(object):
         if self._worker:
             self.stop_preview()
 
-        self._worker = CameraWorker(EVT_CAMERA_CAPTURE, self.get_capture_image, (effect,), False)
+        self._worker = AsyncTask(self.get_capture_image, (effect,), event=EVT_CAMERA_CAPTURE, loop=False)
         self._worker.start()
         if wait:
             self._worker.join()
@@ -187,9 +153,7 @@ class BaseCamera(object):
     def grab_captures(self):
         """Return all buffered captures as PIL images (buffer dropped after call).
         """
-        images = []
-        for data in self._captures:
-            images.append(self._process_capture(data))
+        images = [self._process_capture(data) for data in self._captures]
         self.drop_captures()
         return images
 

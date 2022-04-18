@@ -8,6 +8,7 @@ import sys
 import time
 import os.path as osp
 import logging
+import threading
 import psutil
 import platform
 from fnmatch import fnmatchcase
@@ -18,6 +19,42 @@ import pygame
 
 
 LOGGER = logging.getLogger("pibooth")
+
+
+class AsyncTask(threading.Thread):
+
+    def __init__(self, runnable, args=(), event=None, loop=True):
+        super(AsyncTask, self).__init__(name='AsyncTask')
+        self.daemon = True
+        self.runnable = runnable
+        self.event_type = event
+        self.args = args
+        self.loop = loop
+        self._stop_request = threading.Event()
+
+    def emit(self, data, exc_info=None):
+        """Post event with the result of the task.
+        """
+        if self.event_type is not None:
+            event = pygame.event.Event(self.event_type, result=data, error=exc_info)
+            pygame.event.post(event)
+
+    def run(self):
+        """Execute the runnable.
+        """
+        try:
+            while not self._stop_request.is_set():
+                self.emit(self.runnable(*self.args))
+                if not self.loop:
+                    break
+        except:
+            self.emit(None, sys.exc_info())
+
+    def kill(self):
+        """Stop working.
+        """
+        self._stop_request.set()
+        self.join(5)  # Safety timeout
 
 
 class BlockConsoleHandler(logging.StreamHandler):
