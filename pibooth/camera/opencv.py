@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import time
 try:
     import cv2
     import numpy as np
