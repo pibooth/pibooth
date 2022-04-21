@@ -6,7 +6,7 @@ import pygame
 import pibooth
 from pibooth import camera
 from pibooth.language import get_translated_text
-from pibooth.utils import LOGGER, PoolingTimer
+from pibooth.utils import LOGGER, PollingTimer
 
 
 class CameraPlugin(object):
@@ -16,9 +16,8 @@ class CameraPlugin(object):
 
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
+        self.timer = PollingTimer()
         self.count = 0
-        # Seconds to display the preview
-        self.preview_timer = PoolingTimer(3)
 
     @pibooth.hookimpl(hookwrapper=True)
     def pibooth_setup_camera(self, cfg):
@@ -77,20 +76,19 @@ class CameraPlugin(object):
 
         border = 100
         app.camera.preview(win.get_rect(absolute=True).inflate(-border, -border))
-        self.preview_timer.timeout = cfg.getint('WINDOW', 'preview_delay')
-        self.preview_timer.start()
+        self.timer.start(cfg.getint('WINDOW', 'preview_delay'))
 
     @pibooth.hookimpl
     def state_preview_do(self, cfg, app):
         if cfg.getboolean('WINDOW', 'preview_countdown'):
-            if self.preview_timer.remaining() > 0.5:
-                app.camera.set_overlay(math.ceil(self.preview_timer.remaining()))
-        if self.preview_timer.remaining() <= 0.5:
+            if self.timer.remaining() > 0.5:
+                app.camera.set_overlay(math.ceil(self.timer.remaining()))
+        if self.timer.remaining() <= 0.5:
             app.camera.set_overlay(get_translated_text('smile'))
 
     @pibooth.hookimpl
     def state_preview_validate(self):
-        if self.preview_timer.is_timeout():
+        if self.timer.is_timeout():
             return 'capture'
 
     @pibooth.hookimpl

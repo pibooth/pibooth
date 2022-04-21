@@ -100,13 +100,13 @@ class BlockConsoleHandler(logging.StreamHandler):
             cls.current_indent = (cls.current_indent[:-len(cls.pattern_blocks)] + cls.pattern_dedent)
 
 
-class PoolingTimer(object):
+class PollingTimer(object):
 
     """
     Timer to be used in a pooling loop to check if timeout has been exceed.
     """
 
-    def __init__(self, timeout, start=True):
+    def __init__(self, timeout=0, start=True):
         self.timeout = timeout
         self.time = None
         self._paused_total = 0
@@ -132,11 +132,14 @@ class PoolingTimer(object):
         self._paused_total = 0
         self._paused_time = None
 
-    def start(self):
+    def start(self, timeout=None):
         """Start the timer.
         """
+        if timeout is not None:
+            self.timeout = timeout
+            self._paused_time = None
         if self.timeout < 0:
-            raise ValueError("PoolingTimer cannot be started if timeout is lower than zero")
+            raise ValueError("PollingTimer cannot be started if timeout is lower than zero")
         if self._paused_time:
             self._paused_total += time.time() - self._paused_time
             self._paused_time = None
@@ -179,7 +182,7 @@ class PoolingTimer(object):
         """Return True if the timer is in timeout.
         """
         if self.time is None:
-            raise RuntimeError("PoolingTimer has never been started")
+            raise RuntimeError("PollingTimer has never been started")
         return (time.time() - self.time - self.paused()) > self.timeout
 
 

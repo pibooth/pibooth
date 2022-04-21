@@ -21,7 +21,7 @@ import pibooth
 from pibooth import fonts
 from pibooth import language
 from pibooth.counters import Counters
-from pibooth.utils import (LOGGER, PoolingTimer, configure_logging, get_crash_message,
+from pibooth.utils import (LOGGER, PollingTimer, configure_logging, get_crash_message,
                            set_logging_level, get_event_pos)
 from pibooth.states import StateMachine
 from pibooth.plugins import create_plugin_manager
@@ -100,7 +100,7 @@ class PiApplication(object):
                                     text_color=init_text_color, debug=init_debug)
 
         self._menu = None
-        self._multipress_timer = PoolingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
+        self._multipress_timer = PollingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
         self._fingerdown_events = []
 
         # Define states of the application

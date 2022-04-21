@@ -6,8 +6,24 @@ import itertools
 from concurrent import futures
 from datetime import datetime
 import pibooth
-from pibooth.utils import LOGGER, PoolingTimer, AsyncTask
+from pibooth.utils import LOGGER, PollingTimer, AsyncTask
 from pibooth.pictures import get_picture_factory
+
+
+def build_and_save(cfg, app, factory):
+    for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
+        rawdir = osp.join(savedir, "raw", app.capture_date)
+        os.makedirs(rawdir)
+
+        for count, capture in enumerate(factory._images):
+            capture.save(osp.join(rawdir, "pibooth{:03}.jpg".format(count)))
+
+    LOGGER.info("Creating the final picture")
+    app.previous_picture = factory.build()
+
+    for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
+        app.previous_picture_file = osp.join(savedir, app.picture_filename)
+        factory.save(app.previous_picture_file)
 
 
 class PicturePlugin(object):
@@ -17,10 +33,10 @@ class PicturePlugin(object):
 
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
+        self.timer = PollingTimer()
         self.picture_worker = None
         self.factory_pool = futures.ProcessPoolExecutor()
         self.factory_pool_results = []
-        self.picture_destroy_timer = PoolingTimer(0)
         self.second_previous_picture = None
         self.texts_vars = {}
 
@@ -82,12 +98,11 @@ class PicturePlugin(object):
             app.previous_animated = itertools.cycle(animated)
 
         # Reset timeout in case of settings changed
-        self.picture_destroy_timer.timeout = max(0, cfg.getfloat('WINDOW', 'wait_picture_delay'))
-        self.picture_destroy_timer.start()
+        self.timer.start(max(0, cfg.getfloat('WINDOW', 'wait_picture_delay')))
 
     @pibooth.hookimpl
     def state_wait_do(self, cfg, app):
-        if cfg.getfloat('WINDOW', 'wait_picture_delay') > 0 and self.picture_destroy_timer.is_timeout()\
+        if cfg.getfloat('WINDOW', 'wait_picture_delay') > 0 and self.timer.is_timeout()\
                 and app.previous_picture_file:
             self._reset_vars(app)
 
@@ -106,23 +121,8 @@ class PicturePlugin(object):
         factory = self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
                                                               opt_index=idx,
                                                               factory=default_factory)
-        self.picture_worker = AsyncTask(self._build, args=(cfg, app, factory))
+        self.picture_worker = AsyncTask(build_and_save, args=(cfg, app, factory))
         self.picture_worker.start()
-
-    def _build(self, cfg, app, factory):
-        for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
-            rawdir = osp.join(savedir, "raw", app.capture_date)
-            os.makedirs(rawdir)
-
-            for count, capture in enumerate(factory._images):
-                capture.save(osp.join(rawdir, "pibooth{:03}.jpg".format(count)))
-
-        LOGGER.info("Creating the final picture")
-        app.previous_picture = factory.build()
-
-        for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
-            app.previous_picture_file = osp.join(savedir, app.picture_filename)
-            factory.save(app.previous_picture_file)
 
     @pibooth.hookimpl
     def state_processing_exit(self, cfg, app):
