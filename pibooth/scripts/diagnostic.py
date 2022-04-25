@@ -194,7 +194,10 @@ def main():
             camera_file = camera.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
 
             write_log("Save capture locally from memory buffer")
-            image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
+            data = camera_file.get_data_and_size()
+            with open(APPNAME + '.raw', 'wb') as fd:
+                fd.write(data)
+            image = Image.open(io.BytesIO(data))
             image.save(APPNAME + '.jpg')
 
         except Exception as ex:
