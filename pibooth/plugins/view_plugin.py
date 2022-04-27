@@ -127,7 +127,7 @@ class ViewPlugin(object):
         for event in events:
             if event.type == camera.EVT_CAMERA_PREVIEW:
                 if event.error:
-                    LOGGER.error("Camera preview failure", exc_info=event.error)
+                    LOGGER.debug("Camera preview failure", exc_info=event.error)
                     raise IOError("Can not get preview capture!")
                 win.show_image(event.result)
 
@@ -149,7 +149,7 @@ class ViewPlugin(object):
         for event in events:
             if event.type == camera.EVT_CAMERA_CAPTURE:
                 if event.error:
-                    LOGGER.error("Camera capture failure", exc_info=event.error)
+                    LOGGER.debug("Camera capture failure", exc_info=event.error)
                     raise IOError("Can not get capture!")
                 self.capture_finished = True
 
