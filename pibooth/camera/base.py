@@ -118,10 +118,10 @@ class BaseCamera(object):
     def stop_preview(self):
         """Stop the preview.
         """
-        self._rect = None
         if self._worker:
             self._worker.kill()
             self._worker = None
+        self._rect = None
         self._hide_overlay()
 
     def _process_capture(self, capture_data):

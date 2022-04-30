@@ -10,20 +10,21 @@ from pibooth.utils import LOGGER, PollingTimer, AsyncTask
 from pibooth.pictures import get_picture_factory
 
 
-def build_and_save(cfg, app, factory):
-    for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
-        rawdir = osp.join(savedir, "raw", app.capture_date)
+def build_and_save(factory, savedirs, date, filename):
+    for savedir in savedirs:
+        rawdir = osp.join(savedir, "raw", date)
         os.makedirs(rawdir)
 
         for count, capture in enumerate(factory._images):
             capture.save(osp.join(rawdir, "pibooth{:03}.jpg".format(count)))
 
     LOGGER.info("Creating the final picture")
-    app.previous_picture = factory.build()
+    factory.build()
 
-    for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
-        app.previous_picture_file = osp.join(savedir, app.picture_filename)
-        factory.save(app.previous_picture_file)
+    for savedir in savedirs:
+        picture_path = osp.join(savedir, filename)
+        factory.save(picture_path)
+    return factory, picture_path
 
 
 class PicturePlugin(object):
@@ -121,7 +122,17 @@ class PicturePlugin(object):
         factory = self._pm.hook.pibooth_setup_picture_factory(cfg=cfg,
                                                               opt_index=idx,
                                                               factory=default_factory)
-        self.picture_worker = AsyncTask(build_and_save, args=(cfg, app, factory))
+        self.picture_worker = AsyncTask(build_and_save,
+                                        args=(factory,
+                                              cfg.gettuple('GENERAL', 'directory', 'path'),
+                                              app.capture_date,
+                                              app.picture_filename))
+
+    @pibooth.hookimpl
+    def state_processing_do(self, app):
+        if not self.picture_worker.is_alive():
+            factory, app.previous_picture_file = self.picture_worker.result()
+            app.previous_picture = factory.build()  # Get last generated picture
 
     @pibooth.hookimpl
     def state_processing_exit(self, cfg, app):
@@ -130,7 +141,7 @@ class PicturePlugin(object):
 
         if cfg.getboolean('WINDOW', 'animate') and app.capture_nbr > 1:
             LOGGER.info("Asyncronously generate pictures for animation")
-            factory = self.picture_worker.args[-1]
+            factory, _ = self.picture_worker.result()
             for capture in factory._images:
                 default_factory = get_picture_factory((capture,), cfg.get(
                     'PICTURE', 'orientation'), force_pil=True, dpi=200)
