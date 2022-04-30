@@ -126,9 +126,6 @@ class ViewPlugin(object):
     def state_preview_do(self, win, events):
         for event in events:
             if event.type == camera.EVT_CAMERA_PREVIEW:
-                if event.error:
-                    LOGGER.debug("Camera preview failure", exc_info=event.error)
-                    raise IOError("Can not get preview capture!")
                 win.show_image(event.result)
 
     @pibooth.hookimpl
@@ -148,9 +145,6 @@ class ViewPlugin(object):
 
         for event in events:
             if event.type == camera.EVT_CAMERA_CAPTURE:
-                if event.error:
-                    LOGGER.debug("Camera capture failure", exc_info=event.error)
-                    raise IOError("Can not get capture!")
                 self.capture_finished = True
 
     @pibooth.hookimpl

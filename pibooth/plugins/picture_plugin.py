@@ -122,7 +122,6 @@ class PicturePlugin(object):
                                                               opt_index=idx,
                                                               factory=default_factory)
         self.picture_worker = AsyncTask(build_and_save, args=(cfg, app, factory))
-        self.picture_worker.start()
 
     @pibooth.hookimpl
     def state_processing_exit(self, cfg, app):

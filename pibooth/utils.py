@@ -15,46 +15,86 @@ from fnmatch import fnmatchcase
 import contextlib
 import errno
 import subprocess
+from concurrent import futures
 import pygame
 
 
 LOGGER = logging.getLogger("pibooth")
 
 
-class AsyncTask(threading.Thread):
+class AsyncTask(object):
 
-    def __init__(self, runnable, args=(), event=None, loop=True):
-        super(AsyncTask, self).__init__(name='AsyncTask')
-        self.daemon = True
+    POOL = futures.ThreadPoolExecutor()
+    FUTURES = {}
+
+    def __init__(self, runnable, args=(), event=None, loop=False):
+        self._stop_event = threading.Event()
         self.runnable = runnable
         self.event_type = event
-        self.args = args
         self.loop = loop
-        self._stop_request = threading.Event()
+        self.future = self.POOL.submit(self._run, *args)
+        self.FUTURES[self.future] = self
+        self.future.add_done_callback(self._finish)
 
-    def emit(self, data, exc_info=None):
+    def _finish(self, future):
+        """Remove future from tracking list.
+        """
+        self.FUTURES.pop(future)
+        self.future.result()  # Raise exception is occures during run
+
+    def _run(self, *args, **kwargs):
+        """Execute the runnable.
+        """
+        result = None
+        while not self._stop_event.is_set():
+            result = self.runnable(*args, **kwargs)
+            self.emit(result)
+            if not self.loop:
+                break
+        return result
+
+    def emit(self, data):
         """Post event with the result of the task.
         """
         if self.event_type is not None:
-            event = pygame.event.Event(self.event_type, result=data, error=exc_info)
+            event = pygame.event.Event(self.event_type, result=data)
             pygame.event.post(event)
 
-    def run(self):
-        """Execute the runnable.
+    def result(self):
+        """Return task result.
+        """
+        return self.future.result()
+
+    def is_alive(self):
+        """Return true if the task is not yet started or running.
+        """
+        return not self.future.done()
+
+    def wait(self, timeout=None):
+        """Wait for task ends or cancelled.
         """
         try:
-            while not self._stop_request.is_set():
-                self.emit(self.runnable(*self.args))
-                if not self.loop:
-                    break
-        except:
-            self.emit(None, sys.exc_info())
+            return self.future.result(timeout)
+        except futures.TimeoutError:
+            raise
+        except Exception:
+            return None
 
     def kill(self):
-        """Stop working.
+        """Stop running.
         """
-        self._stop_request.set()
-        self.join(5)  # Safety timeout
+        self._stop_event.set()
+        self.future.cancel()
+        self.wait()
+
+    @classmethod
+    def kill_all(cls):
+        """Stop all tasks and don't accept new one.
+        """
+        for task in cls.FUTURES.values():
+            task.kill()
+        cls.FUTURES.clear()
+        cls.POOL.shutdown(wait=True)
 
 
 class BlockConsoleHandler(logging.StreamHandler):

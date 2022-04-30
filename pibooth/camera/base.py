@@ -113,8 +113,7 @@ class BaseCamera(object):
         self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
 
         self.preview_flip = flip
-        self._worker = AsyncTask(self.get_preview_image, event=EVT_CAMERA_PREVIEW)
-        self._worker.start()
+        self._worker = AsyncTask(self.get_preview_image, event=EVT_CAMERA_PREVIEW, loop=True)
 
     def stop_preview(self):
         """Stop the preview.
@@ -145,10 +144,9 @@ class BaseCamera(object):
         if self._worker:
             self.stop_preview()
 
-        self._worker = AsyncTask(self.get_capture_image, (effect,), event=EVT_CAMERA_CAPTURE, loop=False)
-        self._worker.start()
+        self._worker = AsyncTask(self.get_capture_image, (effect,), event=EVT_CAMERA_CAPTURE)
         if wait:
-            self._worker.join()
+            self._worker.wait()
 
     def grab_captures(self):
         """Return all buffered captures as PIL images (buffer dropped after call).

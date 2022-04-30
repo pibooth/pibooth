@@ -22,7 +22,7 @@ from pibooth import fonts
 from pibooth import language
 from pibooth.counters import Counters
 from pibooth.utils import (LOGGER, PollingTimer, configure_logging, get_crash_message,
-                           set_logging_level, get_event_pos)
+                           set_logging_level, get_event_pos, AsyncTask)
 from pibooth.states import StateMachine
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import PiWindow
@@ -409,6 +409,7 @@ class PiApplication(object):
             LOGGER.error(get_crash_message())
         finally:
             self._pm.hook.pibooth_cleanup(app=self)
+            AsyncTask.kill_all()
             pygame.quit()
 
 
