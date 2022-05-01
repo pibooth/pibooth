@@ -25,8 +25,8 @@ from pibooth.utils import (LOGGER, PollingTimer, configure_logging, get_crash_me
                            set_logging_level, get_event_pos, AsyncTask)
 from pibooth.states import StateMachine
 from pibooth.plugins import create_plugin_manager
-from pibooth.view import PiWindow
-from pibooth.config import PiConfigParser, PiConfigMenu
+from pibooth.view import PiWindow, PiConfigMenu
+from pibooth.config import PiConfigParser
 from pibooth.printer import EVT_PRINTER_TASKS_UPDATED, Printer
 
 
