@@ -9,7 +9,7 @@ import pygame_vkeyboard as vkb
 import pibooth
 from pibooth import fonts
 from pibooth.utils import LOGGER, get_event_pos
-from pibooth.config.parser import DEFAULT
+from pibooth.config.default import DEFAULT
 
 
 pgm.controls.KEY_BACK = pygame.K_ESCAPE
