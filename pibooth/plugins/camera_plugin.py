@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import time
+import math
 import pygame
 import pibooth
 from pibooth import camera
-from pibooth.utils import LOGGER
+from pibooth.language import get_translated_text
+from pibooth.utils import LOGGER, PollingTimer
 
 
 class CameraPlugin(object):
@@ -14,6 +16,7 @@ class CameraPlugin(object):
 
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
+        self.timer = PollingTimer()
         self.count = 0
 
     @pibooth.hookimpl(hookwrapper=True)
@@ -53,6 +56,10 @@ class CameraPlugin(object):
             app.capture_nbr = app.capture_choices[0]
 
     @pibooth.hookimpl
+    def state_wait_exit(self):
+        self.count = 0
+
+    @pibooth.hookimpl
     def state_choose_do(self, app, events):
         event = app.find_choice_event(events)
         if event:
@@ -66,23 +73,26 @@ class CameraPlugin(object):
         LOGGER.info("Show preview before next capture")
         if not app.capture_date:
             app.capture_date = time.strftime("%Y-%m-%d-%H-%M-%S")
-        app.camera.preview(win)
+
+        border = 100
+        app.camera.preview(win.get_rect(absolute=True).inflate(-border, -border))
+        self.timer.start(cfg.getint('WINDOW', 'preview_delay'))
 
     @pibooth.hookimpl
     def state_preview_do(self, cfg, app):
-        pygame.event.pump()  # Before blocking actions
         if cfg.getboolean('WINDOW', 'preview_countdown'):
-            app.camera.preview_countdown(cfg.getint('WINDOW', 'preview_delay'))
-        else:
-            app.camera.preview_wait(cfg.getint('WINDOW', 'preview_delay'))
+            if self.timer.remaining() > 0.5:
+                app.camera.set_overlay(math.ceil(self.timer.remaining()))
+        if self.timer.remaining() <= 0.5:
+            app.camera.set_overlay(get_translated_text('smile'))
 
     @pibooth.hookimpl
-    def state_preview_exit(self, cfg, app):
-        if cfg.getboolean('WINDOW', 'preview_stop_on_capture'):
-            app.camera.stop_preview()
+    def state_preview_validate(self):
+        if self.timer.is_timeout():
+            return 'capture'
 
     @pibooth.hookimpl
-    def state_capture_do(self, cfg, app, win):
+    def state_capture_enter(self, cfg, app):
         effects = cfg.gettyped('PICTURE', 'captures_effects')
         if not isinstance(effects, (list, tuple)):
             # Same effect for all captures
@@ -96,15 +106,9 @@ class CameraPlugin(object):
                 app.capture_nbr, effects))
 
         LOGGER.info("Take a capture")
-        if cfg.getboolean('WINDOW', 'flash'):
-            with win.flash(2):  # Manage the window here, have no choice
-                app.camera.capture(effect)
-        else:
-            app.camera.capture(effect)
-
+        app.camera.capture(effect)
         self.count += 1
 
     @pibooth.hookimpl
-    def state_capture_exit(self, cfg, app):
-        if not cfg.getboolean('WINDOW', 'preview_stop_on_capture'):
-            app.camera.stop_preview()
+    def state_capture_exit(self, app):
+        app.camera.stop_preview()

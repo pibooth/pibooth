@@ -112,10 +112,6 @@ DEFAULT = odict((
                 (True,
                  "Show a countdown timer during the preview",
                  "Preview countdown", ['True', 'False'])),
-            ("preview_stop_on_capture",
-                (False,
-                 "Stop the preview before taking the capture",
-                 None, None)),
         ))
      ),
     ("PICTURE",

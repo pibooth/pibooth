@@ -82,8 +82,7 @@ installed. Instead of doing step 8. of the below procedure, follow
 
         sudo apt-get install cups libcups2-dev
 
-7. Optionally install ``OpenCV`` to improve images generation efficiency or if a
-   Webcam is used:
+7. Optionally install ``OpenCV`` (required only for Webcam):
 
    .. code-block:: bash
 

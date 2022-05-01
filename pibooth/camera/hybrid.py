@@ -25,26 +25,24 @@ class HybridRpiCamera(RpiCamera):
         super(HybridRpiCamera, self).initialize(*args, **kwargs)
         self._gp_cam.initialize(*args, **kwargs)
 
-    def _post_process_capture(self, capture_data):
+    def _process_capture(self, capture_data):
         """Rework capture data.
 
         :param capture_data: couple (GPhotoPath, effect)
         :type capture_data: tuple
         """
-        return self._gp_cam._post_process_capture(capture_data)
+        return self._gp_cam._process_capture(capture_data)
 
-    def capture(self, effect=None):
+    def get_capture_image(self, effect=None):
         """Capture a picture in a file.
         """
-        self._gp_cam.capture(effect)
+        return self._gp_cam.get_capture_image(effect)
 
-        self._hide_overlay()  # If stop_preview() has not been called
-
-    def quit(self):
-        """Close the camera driver, it's definitive.
+    def _specific_cleanup(self):
+        """Ensure that both cameras are cleaned.
         """
-        super(HybridRpiCamera, self).quit()
-        self._gp_cam.quit()
+        super(HybridRpiCamera, self)._specific_cleanup()
+        self._gp_cam._specific_cleanup()
 
 
 class HybridCvCamera(CvCamera):
@@ -67,23 +65,21 @@ class HybridCvCamera(CvCamera):
         super(HybridCvCamera, self).initialize(*args, **kwargs)
         self._gp_cam.initialize(*args, **kwargs)
 
-    def _post_process_capture(self, capture_data):
+    def _process_capture(self, capture_data):
         """Rework capture data.
 
         :param capture_data: couple (GPhotoPath, effect)
         :type capture_data: tuple
         """
-        return self._gp_cam._post_process_capture(capture_data)
+        return self._gp_cam._process_capture(capture_data)
 
-    def capture(self, effect=None):
+    def get_capture_image(self, effect=None):
         """Capture a picture in a file.
         """
-        self._gp_cam.capture(effect)
+        return self._gp_cam.get_capture_image(effect)
 
-        self._hide_overlay()  # If stop_preview() has not been called
-
-    def quit(self):
-        """Close the camera driver, it's definitive.
+    def _specific_cleanup(self):
+        """Ensure that both cameras are cleaned.
         """
-        super(HybridCvCamera, self).quit()
-        self._gp_cam.quit()
+        super(HybridCvCamera, self)._specific_cleanup()
+        self._gp_cam._specific_cleanup()

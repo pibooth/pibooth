@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import pibooth
-from pibooth.utils import LOGGER, get_crash_message, PoolingTimer
+from pibooth import camera
+from pibooth.utils import LOGGER, get_crash_message, PollingTimer
 
 
 class ViewPlugin(object):
@@ -12,19 +13,23 @@ class ViewPlugin(object):
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.count = 0
+        self.count_flash = 0
+        self.capture_finished = False
         self.forgotten = False
         # Seconds to display the failed message
-        self.failed_view_timer = PoolingTimer(2)
+        self.failed_view_timer = PollingTimer(2)
         # Seconds between each animated frame
-        self.animated_frame_timer = PoolingTimer(0)
+        self.animated_frame_timer = PollingTimer(0)
         # Seconds before going back to the start
-        self.choose_timer = PoolingTimer(30)
+        self.choose_timer = PollingTimer(30)
         # Seconds to display the selected layout
-        self.layout_timer = PoolingTimer(4)
+        self.layout_timer = PollingTimer(4)
+        # Seconds between each flash
+        self.flash_timer = PollingTimer(0.05)
         # Seconds to display the selected layout
-        self.print_view_timer = PoolingTimer(0)
+        self.print_view_timer = PollingTimer(0)
         # Seconds to display the selected layout
-        self.finish_timer = PoolingTimer(1)
+        self.finish_timer = PollingTimer(1)
 
     @pibooth.hookimpl
     def state_failsafe_enter(self, win):
@@ -42,9 +47,7 @@ class ViewPlugin(object):
         self.forgotten = False
         if app.previous_animated:
             previous_picture = next(app.previous_animated)
-            # Reset timeout in case of settings changed
-            self.animated_frame_timer.timeout = cfg.getfloat('WINDOW', 'animate_delay')
-            self.animated_frame_timer.start()
+            self.animated_frame_timer.start(cfg.getfloat('WINDOW', 'animate_delay'))
         else:
             previous_picture = app.previous_picture
 
@@ -106,10 +109,7 @@ class ViewPlugin(object):
     def state_chosen_enter(self, cfg, app, win):
         LOGGER.info("Show picture choice (%s captures selected)", app.capture_nbr)
         win.show_choice(app.capture_choices, selected=app.capture_nbr)
-
-        # Reset timeout in case of settings changed
-        self.layout_timer.timeout = cfg.getfloat('WINDOW', 'chosen_delay')
-        self.layout_timer.start()
+        self.layout_timer.start(cfg.getfloat('WINDOW', 'chosen_delay'))
 
     @pibooth.hookimpl
     def state_chosen_validate(self):
@@ -119,21 +119,40 @@ class ViewPlugin(object):
     @pibooth.hookimpl
     def state_preview_enter(self, app, win):
         self.count += 1
+        self.capture_finished = False
         win.set_capture_number(self.count, app.capture_nbr)
 
     @pibooth.hookimpl
-    def state_preview_validate(self):
-        return 'capture'
+    def state_preview_do(self, win, events):
+        for event in events:
+            if event.type == camera.EVT_CAMERA_PREVIEW:
+                win.show_image(event.result)
 
     @pibooth.hookimpl
-    def state_capture_do(self, app, win):
+    def state_capture_enter(self):
+        self.count_flash = 0
+        self.flash_timer.start()
+
+    @pibooth.hookimpl
+    def state_capture_do(self, cfg, app, win, events):
+        if cfg.getboolean('WINDOW', 'flash'):
+            if self.flash_timer.is_timeout():
+                self.count_flash += 1
+                win.toggle_flash()
+                self.flash_timer.start()
+
         win.set_capture_number(self.count, app.capture_nbr)
 
+        for event in events:
+            if event.type == camera.EVT_CAMERA_CAPTURE:
+                self.capture_finished = True
+
     @pibooth.hookimpl
-    def state_capture_validate(self, app):
-        if self.count >= app.capture_nbr:
-            return 'processing'
-        return 'preview'
+    def state_capture_validate(self, cfg, app):
+        if self.capture_finished and (not cfg.getboolean('WINDOW', 'flash') or self.count_flash >= 4):
+            if self.count >= app.capture_nbr:
+                return 'processing'
+            return 'preview'
 
     @pibooth.hookimpl
     def state_processing_enter(self, win):
@@ -141,20 +160,18 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_processing_validate(self, cfg, app):
-        if app.printer.is_ready() and cfg.getfloat('PRINTER', 'printer_delay') > 0\
-                and app.count.remaining_duplicates > 0:
-            return 'print'
-        return 'finish'  # Can not print
+        if app.previous_picture:  # Processing is finished
+            if app.printer.is_ready() and cfg.getfloat('PRINTER', 'printer_delay') > 0\
+                    and app.count.remaining_duplicates > 0:
+                return 'print'
+            return 'finish'  # Can not print
 
     @pibooth.hookimpl
     def state_print_enter(self, cfg, app, win):
         LOGGER.info("Display the final picture")
         win.show_print(app.previous_picture)
         win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
-
-        # Reset timeout in case of settings changed
-        self.print_view_timer.timeout = cfg.getfloat('PRINTER', 'printer_delay')
-        self.print_view_timer.start()
+        self.print_view_timer.start(cfg.getfloat('PRINTER', 'printer_delay'))
 
     @pibooth.hookimpl
     def state_print_validate(self, app, win, events):
@@ -174,9 +191,7 @@ class ViewPlugin(object):
             win.show_finished()
             timeout = 1
 
-        # Reset timeout in case of settings changed
-        self.finish_timer.timeout = timeout
-        self.finish_timer.start()
+        self.finish_timer.start(timeout)
 
     @pibooth.hookimpl
     def state_finish_validate(self):
