@@ -2,6 +2,7 @@
 
 import time
 import pibooth
+from pibooth import pgevents
 
 
 class LightsPlugin(object):
@@ -22,8 +23,8 @@ class LightsPlugin(object):
             app.leds.printer.off()
 
     @pibooth.hookimpl
-    def state_wait_do(self, app, events):
-        if app.find_print_event(events) and app.previous_picture_file and app.printer.is_ready():
+    def state_wait_do(self, app, win, events):
+        if pgevents.find_print_event(events, win) and app.previous_picture_file and app.printer.is_ready():
             if app.count.remaining_duplicates <= 0:
                 app.leds.printer.off()
             else:
@@ -60,8 +61,8 @@ class LightsPlugin(object):
         app.leds.blink(on_time=self.blink_time, off_time=self.blink_time)
 
     @pibooth.hookimpl
-    def state_print_do(self, app, events):
-        if app.find_print_event(events):
+    def state_print_do(self, app, win, events):
+        if pgevents.find_print_event(events, win):
             app.leds.printer.on()
             app.leds.capture.off()
 

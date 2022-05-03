@@ -19,15 +19,15 @@ from gpiozero.exc import BadPinFactory, PinFactoryFallback
 
 import pibooth
 from pibooth import fonts
-from pibooth import language
+from pibooth import language, pgevents
 from pibooth.counters import Counters
 from pibooth.utils import (LOGGER, PollingTimer, configure_logging, get_crash_message,
-                           set_logging_level, get_event_pos, AsyncTask)
+                           set_logging_level, AsyncTask)
 from pibooth.states import StateMachine
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import PiWindow, PiConfigMenu
 from pibooth.config import PiConfigParser
-from pibooth.printer import EVT_PRINTER_TASKS_UPDATED, Printer
+from pibooth.printer import Printer
 
 
 # Set the default pin factory to a mock factory if pibooth is not started a Raspberry Pi
@@ -38,9 +38,6 @@ except BadPinFactory:
     from gpiozero.pins.mock import MockFactory
     Device.pin_factory = MockFactory()
     GPIO_INFO = "without physical GPIO, fallback to GPIO mock"
-
-
-EVT_BUTTONDOWN = pygame.USEREVENT + 1
 
 
 class PiApplication(object):
@@ -101,7 +98,6 @@ class PiApplication(object):
 
         self._menu = None
         self._multipress_timer = PollingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
-        self._fingerdown_events = []
 
         # Define states of the application
         self._machine = StateMachine(self._pm, self._config, self, self._window)
@@ -208,7 +204,7 @@ class PiApplication(object):
                     event = self._menu.create_back_event()
                     LOGGER.debug("EVT_BUTTONDOWN: generate MENU-ESC event")
                 else:
-                    event = pygame.event.Event(EVT_BUTTONDOWN, capture=1, printer=1,
+                    event = pygame.event.Event(pgevents.EVT_BUTTONDOWN, capture=1, printer=1,
                                                button=self.buttons)
                     LOGGER.debug("EVT_BUTTONDOWN: generate DOUBLE buttons event")
                 self.buttons.capture.hold_repeat = False
@@ -221,7 +217,7 @@ class PiApplication(object):
                 event = self._menu.create_next_event()
                 LOGGER.debug("EVT_BUTTONDOWN: generate MENU-NEXT event")
             else:
-                event = pygame.event.Event(EVT_BUTTONDOWN, capture=1, printer=0,
+                event = pygame.event.Event(pgevents.EVT_BUTTONDOWN, capture=1, printer=0,
                                            button=self.buttons.capture)
                 LOGGER.debug("EVT_BUTTONDOWN: generate CAPTURE button event")
             self.buttons.capture.hold_repeat = False
@@ -242,7 +238,7 @@ class PiApplication(object):
                 event = self._menu.create_click_event()
                 LOGGER.debug("EVT_BUTTONDOWN: generate MENU-APPLY event")
             else:
-                event = pygame.event.Event(EVT_BUTTONDOWN, capture=0, printer=1,
+                event = pygame.event.Event(pgevents.EVT_BUTTONDOWN, capture=0, printer=1,
                                            button=self.buttons.printer)
                 LOGGER.debug("EVT_BUTTONDOWN: generate PRINTER event")
             pygame.event.post(event)
@@ -255,115 +251,6 @@ class PiApplication(object):
             raise EnvironmentError("The 'capture_date' attribute is not set yet")
         return "{}_pibooth.jpg".format(self.capture_date)
 
-    def find_quit_event(self, events):
-        """Return the first found event if found in the list.
-        """
-        for event in events:
-            if event.type == pygame.QUIT:
-                return event
-        return None
-
-    def find_settings_event(self, events):
-        """Return the first found event if found in the list.
-        """
-        for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                return event
-            if event.type == EVT_BUTTONDOWN and event.capture and event.printer:
-                return event
-            if event.type == pygame.FINGERDOWN:
-                # Press but not release
-                self._fingerdown_events.append(event)
-            if event.type == pygame.FINGERUP:
-                # Resetting touch_events
-                self._fingerdown_events = []
-            if len(self._fingerdown_events) > 3:
-                # 4 fingers on the screen trigger the menu
-                self._fingerdown_events = []
-                return pygame.event.Event(EVT_BUTTONDOWN, capture=1, printer=1,
-                                          button=self.buttons)
-        return None
-
-    def find_fullscreen_event(self, events):
-        """Return the first found event if found in the list.
-        """
-        for event in events:
-            if event.type == pygame.KEYDOWN and \
-                    event.key == pygame.K_f and pygame.key.get_mods() & pygame.KMOD_CTRL:
-                return event
-        return None
-
-    def find_resize_event(self, events):
-        """Return the first found event if found in the list.
-        """
-        for event in events:
-            if event.type == pygame.VIDEORESIZE:
-                return event
-        return None
-
-    def find_capture_event(self, events):
-        """Return the first found event if found in the list.
-        """
-        for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                return event
-            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
-                pos = get_event_pos(self._window.display_size, event)
-                rect = self._window.get_rect()
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(pos):
-                    return event
-            if event.type == EVT_BUTTONDOWN and event.capture:
-                return event
-        return None
-
-    def find_print_event(self, events):
-        """Return the first found event if found in the list.
-        """
-        for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_e\
-                    and pygame.key.get_mods() & pygame.KMOD_CTRL:
-                return event
-            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
-                pos = get_event_pos(self._window.display_size, event)
-                rect = self._window.get_rect()
-                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(pos):
-                    return event
-            if event.type == EVT_BUTTONDOWN and event.printer:
-                return event
-        return None
-
-    def find_print_status_event(self, events):
-        """Return the first found event if found in the list.
-        """
-        for event in events:
-            if event.type == EVT_PRINTER_TASKS_UPDATED:
-                return event
-        return None
-
-    def find_choice_event(self, events):
-        """Return the first found event if found in the list.
-        """
-        for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                return event
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                return event
-            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
-                pos = get_event_pos(self._window.display_size, event)
-                rect = self._window.get_rect()
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(pos):
-                    event.key = pygame.K_LEFT
-                else:
-                    event.key = pygame.K_RIGHT
-                return event
-            if event.type == EVT_BUTTONDOWN:
-                if event.capture:
-                    event.key = pygame.K_LEFT
-                else:
-                    event.key = pygame.K_RIGHT
-                return event
-        return None
-
     def main_loop(self):
         try:
             fps = 40
@@ -373,33 +260,26 @@ class PiApplication(object):
             self._machine.set_state('wait')
 
             while True:
-                events = list(pygame.event.get())
+                evts = list(pygame.event.get())
 
-                if self.find_quit_event(events):
+                if pgevents.find_quit_event(evts):
                     break
 
-                if self.find_fullscreen_event(events):
-                    self._window.toggle_fullscreen()
-
-                event = self.find_resize_event(events)
-                if event:
-                    self._window.resize(event.size)
-
-                if not self._menu and self.find_settings_event(events):
+                if not self._menu and pgevents.find_settings_event(evts):
                     self.camera.stop_preview()
                     self.leds.off()
                     self._menu = PiConfigMenu(self._pm, self._config, self, self._window)
                     self._menu.show()
                     self.leds.blink(on_time=0.1, off_time=1)
                 elif self._menu and self._menu.is_shown():
-                    self._menu.process(events)
+                    self._menu.process(evts)
                 elif self._menu and not self._menu.is_shown():
                     self.leds.off()
                     self._initialize()
                     self._machine.set_state('wait')
                     self._menu = None
                 else:
-                    self._machine.process(events)
+                    self._machine.process(evts)
 
                 pygame.display.update()
                 clock.tick(fps)  # Ensure the program will never run at more than <fps> frames per second

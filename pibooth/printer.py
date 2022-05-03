@@ -14,11 +14,10 @@ import os.path as osp
 
 import pygame
 from PIL import Image
+from pibooth import pgevents
 from pibooth.utils import LOGGER
 from pibooth.pictures import get_picture_factory
 
-
-EVT_PRINTER_TASKS_UPDATED = pygame.USEREVENT + 2
 
 PAPER_FORMATS = {
     '2x6': (2, 6),      # 2x6 pouces - 5x15 cm - 51x152 mm
@@ -69,7 +68,7 @@ class Printer(object):
         Call for each new printer event.
         """
         LOGGER.info(evt.title)
-        pygame.event.post(pygame.event.Event(EVT_PRINTER_TASKS_UPDATED,
+        pygame.event.post(pygame.event.Event(pgevents.EVT_PRINTER_TASKS_UPDATED,
                                              tasks=self.get_all_tasks()))
 
     def is_installed(self):

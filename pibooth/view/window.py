@@ -7,7 +7,7 @@ import os
 import pygame
 from pygame import gfxdraw
 from PIL import Image
-from pibooth import pictures, fonts
+from pibooth import pictures, fonts, pgevents
 from pibooth.view import background
 from pibooth.utils import LOGGER
 from pibooth.pictures import sizing
@@ -57,6 +57,7 @@ class PiWindow(object):
         self.display_size = (info.current_w, info.current_h)
         self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
 
+        self._menu = None
         self._buffered_images = {}
         self._current_background = None
         self._current_foreground = None
@@ -76,6 +77,18 @@ class PiWindow(object):
                          127, 128, 124, 0, 108, 0, 70, 0, 6, 0, 3, 0, 3, 0, 0, 0),
                         (192, 0, 224, 0, 240, 0, 248, 0, 252, 0, 254, 0, 255, 0, 255,
                          128, 255, 192, 255, 224, 254, 0, 239, 0, 207, 0, 135, 128, 7, 128, 3, 0))
+
+    def update(self, evts):
+        """Pygame events processing.
+
+        :param evts: list of events to process.
+        :type evts: list
+        """
+        for evt in evts:
+            if pgevents.is_resize_event(evt):
+                self.resize(evt.size)
+            elif pgevents.is_fullscreen_event(evt):
+                self.toggle_fullscreen()
 
     def _update_foreground(self, pil_image, pos=CENTER, resize=True):
         """Show a PIL image on the foreground.

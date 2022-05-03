@@ -3,13 +3,9 @@
 import pygame
 from PIL import Image, ImageDraw
 
-from pibooth import fonts
+from pibooth import fonts, pgevents
 from pibooth.utils import AsyncTask
 from pibooth.pictures import sizing
-
-
-EVT_CAMERA_PREVIEW = pygame.USEREVENT + 3
-EVT_CAMERA_CAPTURE = pygame.USEREVENT + 4
 
 
 class BaseCamera(object):
@@ -113,7 +109,7 @@ class BaseCamera(object):
         self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
 
         self.preview_flip = flip
-        self._worker = AsyncTask(self.get_preview_image, event=EVT_CAMERA_PREVIEW, loop=True)
+        self._worker = AsyncTask(self.get_preview_image, event=pgevents.EVT_CAMERA_PREVIEW, loop=True)
 
     def stop_preview(self):
         """Stop the preview.
@@ -144,7 +140,7 @@ class BaseCamera(object):
         if self._worker:
             self.stop_preview()
 
-        self._worker = AsyncTask(self.get_capture_image, (effect,), event=EVT_CAMERA_CAPTURE)
+        self._worker = AsyncTask(self.get_capture_image, (effect,), event=pgevents.EVT_CAMERA_CAPTURE)
         if wait:
             self._worker.wait()
 

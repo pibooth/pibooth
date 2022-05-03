@@ -26,7 +26,9 @@ Features
 * Custom texts can be added on the final picture (customizable fonts, colors, alignments)
 * Custom background(s) and overlay(s) can be added on the final picture
 * All settings available in a configuration file (most common options in a graphical interface)
-* Highly customizable thanks to its plugin system, you can develop your own plugin
+* Highly customizable thanks to its plugin system, you can install
+  `plugins developed by the community from PyPI  <https://pypi.org/search/?q=pibooth>`_
+  or develop your own plugin.
 
 Documentation
 -------------

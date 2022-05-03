@@ -10,7 +10,7 @@ that gives users the ability to extend or modify its behavior thanks to plugins.
 Several plugins maintained by the community are available. They add extra features to
 ``pibooth``. Have a look to the `plugins on PyPI  <https://pypi.org/search/?q=pibooth>`_.
 
-You can also easily develop your own plugin, and declare it in the ``[GENERAL][plugins]``
+You can also easily develop your own plugin, and **declare it** in the ``[GENERAL][plugins]``
 key of the configuration.
 
 What is a plugin?

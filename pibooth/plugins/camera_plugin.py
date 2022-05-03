@@ -4,7 +4,7 @@ import time
 import math
 import pygame
 import pibooth
-from pibooth import camera
+from pibooth import camera, pgevents
 from pibooth.language import get_translated_text
 from pibooth.utils import LOGGER, PollingTimer
 
@@ -60,8 +60,8 @@ class CameraPlugin(object):
         self.count = 0
 
     @pibooth.hookimpl
-    def state_choose_do(self, app, events):
-        event = app.find_choice_event(events)
+    def state_choose_do(self, app, win, events):
+        event = pgevents.find_choice_event(events, win)
         if event:
             if event.key == pygame.K_LEFT:
                 app.capture_nbr = app.capture_choices[0]
