@@ -70,8 +70,9 @@ installed. Instead of doing step 8. of the below procedure, follow
 
    .. code-block:: bash
 
-        sudo wget raw.github.com/gonzalo/gphoto2-updater/master/gphoto2-updater.sh
-        sudo chmod 755 gphoto2-updater.sh
+        wget https://raw.githubusercontent.com/gonzalo/gphoto2-updater/master/gphoto2-updater.sh
+        wget https://raw.githubusercontent.com/gonzalo/gphoto2-updater/master/.env
+        chmod +x gphoto2-updater.sh
         sudo ./gphoto2-updater.sh
 
 6. Optionally install ``CUPS`` to handle printers (more instructions to add a
