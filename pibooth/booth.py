@@ -96,7 +96,6 @@ class PiApplication(object):
             self._window = PiWindow(title, color=init_color,
                                     text_color=init_text_color, debug=init_debug)
 
-        self._menu = None
         self._multipress_timer = PollingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
 
         # Define states of the application
@@ -167,7 +166,6 @@ class PiApplication(object):
         self._window.arrow_location = self._config.get('WINDOW', 'arrows')
         self._window.arrow_offset = self._config.getint('WINDOW', 'arrows_x_offset')
         self._window.text_color = self._config.gettyped('WINDOW', 'text_color')
-        self._window.drop_cache()
 
         # Handle window size
         size = self._config.gettyped('WINDOW', 'size')
@@ -233,14 +231,9 @@ class PiApplication(object):
             pass
         else:
             # Printer was held but capture not pressed
-            if self._menu and self._menu.is_shown():
-                # Convert HW button events to keyboard events for menu
-                event = self._menu.create_click_event()
-                LOGGER.debug("EVT_BUTTONDOWN: generate MENU-APPLY event")
-            else:
-                event = pygame.event.Event(pgevents.EVT_BUTTONDOWN, capture=0, printer=1,
-                                           button=self.buttons.printer)
-                LOGGER.debug("EVT_BUTTONDOWN: generate PRINTER event")
+            event = pygame.event.Event(pgevents.EVT_BUTTONDOWN, capture=0, printer=1,
+                                       button=self.buttons.printer)
+            LOGGER.debug("EVT_BUTTONDOWN: generate PRINTER event")
             pygame.event.post(event)
 
     @property
@@ -265,24 +258,31 @@ class PiApplication(object):
                 if pgevents.find_quit_event(evts):
                     break
 
-                if not self._menu and pgevents.find_settings_event(evts):
-                    self.camera.stop_preview()
-                    self.leds.off()
-                    self._menu = PiConfigMenu(self._pm, self._config, self, self._window)
-                    self._menu.show()
-                    self.leds.blink(on_time=0.1, off_time=1)
-                elif self._menu and self._menu.is_shown():
-                    self._menu.process(evts)
-                elif self._menu and not self._menu.is_shown():
-                    self.leds.off()
-                    self._initialize()
-                    self._machine.set_state('wait')
-                    self._menu = None
+                if pgevents.find_settings_event(evts):
+                    if not self._window.is_menu_shown():
+                        # Settings menu is opened
+                        self.camera.stop_preview()
+                        self.leds.off()
+                        self.leds.blink(on_time=0.1, off_time=1)
+                    elif self._window.is_menu_shown():
+                        # Settings menu is closed
+                        self.leds.off()
+                        self._initialize()
+                        self._machine.set_state('wait')
                 else:
                     self._machine.process(evts)
 
-                pygame.display.update()
-                clock.tick(fps)  # Ensure the program will never run at more than <fps> frames per second
+                # Update view elements according to user events
+                self._window.update(evts)
+
+                # Draw view elements
+                rects = self._window.draw()
+
+                # Update dirty rects on screen
+                pygame.display.update(rects)
+
+                # Ensure the program will never run at more than <fps> frames per second
+                clock.tick(fps)
 
         except Exception as ex:
             LOGGER.error(str(ex), exc_info=True)

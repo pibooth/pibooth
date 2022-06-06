@@ -313,35 +313,6 @@ class PiConfigMenu(object):
         """
         return self._main_menu.is_enabled()
 
-    def create_click_event(self):
-        """Create a pygame event to click on the currently selected
-        widget on the menu. If the widget is a button, ENTER event
-        is created, else LEFT event is created.
-        """
-        if isinstance(self._main_menu.get_current().get_selected_widget(), pgm.widgets.Button):
-            event = pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_APPLY,
-                                       unicode='\r', mod=0, scancode=36,
-                                       window=None, test=True)
-        else:
-            event = pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_RIGHT,
-                                       unicode=u'\uf703', mod=0, scancode=124,
-                                       window=None, test=True)
-        return event
-
-    def create_next_event(self):
-        """Create a pygame event to select the next widget.
-        """
-        return pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_MOVE_UP,
-                                  unicode=u'\uf701', mod=0, scancode=125,
-                                  window=None, test=True)
-
-    def create_back_event(self):
-        """Create a pygame event to back to the previous menu.
-        """
-        return pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_BACK,
-                                  unicode=u'\x1b', mod=0, scancode=53,
-                                  window=None, test=True)
-
     def process(self, events):
         """Process the events related to the menu.
         """

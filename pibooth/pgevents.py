@@ -2,6 +2,7 @@
 
 import pygame
 from pygame._sdl2 import touch
+import pygame_menu as pgm
 
 EVT_BUTTONDOWN = pygame.USEREVENT + 1
 EVT_PRINTER_TASKS_UPDATED = pygame.USEREVENT + 2
@@ -155,3 +156,35 @@ def find_print_status_event(events):
         if is_printer_status_event(event):
             return event
     return None
+
+
+def create_click_event(button=True):
+    """Create a pygame event to click on the currently selected
+    widget on the menu. If the widget is a button, ENTER event
+    is created, else LEFT event is created.
+    """
+    if button:
+        event = pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_APPLY,
+                                   unicode='\r', mod=0, scancode=36,
+                                   window=None, test=True)
+    else:
+        event = pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_RIGHT,
+                                   unicode=u'\uf703', mod=0, scancode=124,
+                                   window=None, test=True)
+    return event
+
+
+def create_next_event():
+    """Create a pygame event to select the next widget.
+    """
+    return pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_MOVE_UP,
+                              unicode=u'\uf701', mod=0, scancode=125,
+                              window=None, test=True)
+
+
+def create_back_event():
+    """Create a pygame event to back to the previous menu.
+    """
+    return pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_BACK,
+                              unicode=u'\x1b', mod=0, scancode=53,
+                              window=None, test=True)

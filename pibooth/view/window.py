@@ -7,8 +7,11 @@ import os
 import pygame
 from pygame import gfxdraw
 from PIL import Image
+import pygame_menu as pgm
+import pygame_vkeyboard as vkb
 from pibooth import pictures, fonts, pgevents
 from pibooth.view import background
+from pibooth.view.menu import PiConfigMenu
 from pibooth.utils import LOGGER
 from pibooth.pictures import sizing
 
@@ -57,19 +60,18 @@ class PiWindow(object):
         self.display_size = (info.current_w, info.current_h)
         self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
 
-        self._menu = None
-        self._buffered_images = {}
-        self._current_background = None
-        self._current_foreground = None
-        self._print_number = 0
+        self._menu = PiConfigMenu(plugins_manager, configuration, application, self)
+
+        self._keyboard = vkb.VKeyboard(self.surface,
+                                       self._on_keyboard_event,
+                                       vkb.VKeyboardLayout(vkb.VKeyboardLayout.QWERTY),
+                                       renderer=vkb.VKeyboardRenderer.DARK,
+                                       show_text=True,
+                                       joystick_navigation=True)
+        self._keyboard.disable()
         self._print_failure = False
         self._capture_number = (0, 4)  # (current, max)
         self._is_flash_on = False
-
-        self._pos_map = {self.CENTER: self._center_pos,
-                         self.RIGHT: self._right_pos,
-                         self.LEFT: self._left_pos,
-                         self.FULLSCREEN: self._center_pos}
 
         # Don't use pygame.mouse.get_cursor() because will be removed in pygame2
         self._cursor = ((16, 16), (0, 0),
@@ -89,115 +91,22 @@ class PiWindow(object):
                 self.resize(evt.size)
             elif pgevents.is_fullscreen_event(evt):
                 self.toggle_fullscreen()
+            elif pgevents.is_settings_event(evt):
+                self.toggle_menu()
+            elif pgevents.is_print_button_event(evt, self):
+                # Convert HW button events to keyboard events for menu
+                event = pgevents.create_click_event()
+                LOGGER.debug("EVT_BUTTONDOWN: generate MENU-APPLY event")
+                evts += (event,)
 
-    def _update_foreground(self, pil_image, pos=CENTER, resize=True):
-        """Show a PIL image on the foreground.
-        Only one is bufferized to avoid memory leak.
+        if self._menu.is_shown():
+
+            self._menu.update(evts)
+
+    def draw(self):
+        """Draw all Sprites.
         """
-        image_name = id(pil_image)
-
-        if pos == self.FULLSCREEN:
-            image_size_max = (self.surface.get_size()[0] * 0.9, self.surface.get_size()[1] * 0.9)
-        else:
-            image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1])
-
-        buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
-        if buff_image and image_size_max == buff_size:
-            image = buff_image
-        else:
-            if resize:
-                image = pil_image.resize(sizing.new_size_keep_aspect_ratio(
-                    pil_image.size, image_size_max), Image.ANTIALIAS)
-            else:
-                image = pil_image
-            image = pygame.image.frombuffer(image.tobytes(), image.size, image.mode)
-            if self._current_foreground:
-                self._buffered_images.pop(id(self._current_foreground[0]), None)
-            LOGGER.debug("Add to buffer the image '%s'", image_name)
-            self._buffered_images[image_name] = (image_size_max, image)
-
-        self._current_foreground = (pil_image, pos, resize)
-
-        if self.debug and resize:
-            # Build rectangle around picture area for debuging purpose
-            outlines = pygame.Surface(image_size_max, pygame.SRCALPHA, 32)
-            pygame.draw.rect(outlines, pygame.Color(255, 0, 0), outlines.get_rect(), 2)
-            self.surface.blit(outlines, self._pos_map[pos](outlines))
-
-        return self.surface.blit(image, self._pos_map[pos](image))
-
-    def _update_background(self, bkgd):
-        """Show image on the background.
-        """
-        self._current_background = self._buffered_images.setdefault(str(bkgd), bkgd)
-        self._current_background.set_color(self.bg_color)
-        self._current_background.set_outlines(self.debug)
-        self._current_background.set_text_color(self.text_color)
-        self._current_background.resize(self.surface)
-        self._current_background.paint(self.surface)
-        self._update_capture_number()
-        self._update_print_number()
-
-    def _update_capture_number(self):
-        """Update the captures counter displayed.
-        """
-        if not self._capture_number[0]:
-            return  # Dont show counter: no picture taken
-
-        center = self.surface.get_rect().center
-        radius = 10
-        border = 20
-        x = center[0] - (2 * radius * self._capture_number[1] + border * (self._capture_number[1] - 1)) // 2
-        y = self.surface.get_size()[1] - radius - border
-        for nbr in range(self._capture_number[1]):
-            gfxdraw.aacircle(self.surface, x, y, radius, self.text_color)
-            if self._capture_number[0] > nbr:
-                # Because anti-aliased filled circle doesn't exist
-                gfxdraw.aacircle(self.surface, x, y, radius - 3, self.text_color)
-                gfxdraw.filled_circle(self.surface, x, y, radius - 3, self.text_color)
-            x += (2 * radius + border)
-
-    def _update_print_number(self):
-        """Update the number of files in the printer queue.
-        """
-        if not self._print_number and not self._print_failure:
-            return  # Dont show counter: no file in queue, no failure
-
-        smaller = self.surface.get_size()[1] if self.surface.get_size(
-        )[1] < self.surface.get_size()[0] else self.surface.get_size()[0]
-        side = int(smaller * 0.05)  # 5% of the window
-
-        if side > 0:
-            if self._print_failure:
-                image = pictures.get_pygame_image('printer_failure.png', (side, side), color=self.text_color)
-            else:
-                image = pictures.get_pygame_image('printer.png', (side, side), color=self.text_color)
-            y = self.surface.get_rect().height - image.get_rect().height - 10
-            self.surface.blit(image, (10, y))
-            font = pygame.font.Font(fonts.CURRENT, side)
-            label = font.render(str(self._print_number), True, self.text_color)
-            self.surface.blit(label, (side + 20, y))
-
-    def _center_pos(self, image):
-        """
-        Return the position of the given image to be centered on window.
-        """
-        pos = self.surface.get_rect().center
-        return image.get_rect(center=pos) if image else pos
-
-    def _left_pos(self, image):
-        """
-        Return the position of the given image to be put on the left of the screen
-        """
-        pos = (self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
-        return image.get_rect(center=pos) if image else pos
-
-    def _right_pos(self, image):
-        """
-        Return the position of the given image to be put on the right of the screen
-        """
-        pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
-        return image.get_rect(center=pos) if image else pos
+        return []
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.
@@ -209,37 +118,21 @@ class PiWindow(object):
             return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
         return self.surface.get_rect()
 
-    def get_image(self):
-        """Return the currently displayed foreground image.
-        """
-        if self._current_foreground:
-            return self._current_foreground[0]
-        return None
-
     def resize(self, size):
         """Resize the window keeping aspect ratio.
         """
         if not self.is_fullscreen:
             self.__size = size  # Manual resizing
             self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
-        self.update()
 
-    def update(self):
-        """Repaint the window with currently displayed images.
-        """
-        if self._current_background:
-            self._update_background(self._current_background)
-        else:
-            self._update_capture_number()
-            self._update_print_number()
-        if self._current_foreground:
-            self._update_foreground(*self._current_foreground)
+    def is_menu_shown(self):
+        return self._menu.is_shown()
 
     def show_oops(self):
         """Show failure view in case of exception.
         """
         self._capture_number = (0, self._capture_number[1])
-        self._update_background(background.OopsBackground())
+        print("Oops")
 
     def show_intro(self, pil_image=None, with_print=True):
         """Show introduction view.
@@ -347,7 +240,7 @@ class PiWindow(object):
                 # Flash only the background, keep foreground at the top
                 self._update_foreground(*self._current_foreground)
         else:
-            self.update()
+            self._update()
         self._is_flash_on = not self._is_flash_on
 
     def toggle_fullscreen(self):
@@ -364,12 +257,10 @@ class PiWindow(object):
             pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
             self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
 
-        self.update()
-
-    def drop_cache(self):
-        """Drop all cached background and foreground to force
-        refreshing the view.
+    def toggle_menu(self):
+        """Show/hide settings menu.
         """
-        self._current_background = None
-        self._current_foreground = None
-        self._buffered_images = {}
+        if self._menu.is_shown():
+            self._menu.show()
+        else:
+            self._menu.hide()
