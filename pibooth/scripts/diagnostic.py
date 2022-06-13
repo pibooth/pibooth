@@ -143,6 +143,14 @@ def main():
     if not gp:
         write_log("gPhoto2 not installed, cannot diagnose connected DSLR")
         sys.exit(1)
+    else:
+        try:
+            info = gp.version.gp_library_version(gp.version.GP_VERSION_VERBOSE)
+            write_log("GPhoto2 version installed: {}".format(info[0]))
+            for opt in info[1:]:
+                write_log("  - {}".format(opt))
+        except:
+            pass
 
     gp_log_callback = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_logging))
     write_log("Listing all connected DSLR camera")
