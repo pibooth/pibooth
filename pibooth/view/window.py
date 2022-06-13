@@ -49,7 +49,8 @@ class PiWindow(object):
         self.arrow_offset = arrow_offset
 
         # Prepare the pygame module for use
-        os.environ['SDL_VIDEO_CENTERED'] = '1'
+        if 'SDL_VIDEO_WINDOW_POS' not in os.environ:
+            os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
 
         # Save the desktop mode, shall be done before `setmode` (SDL 1.2.10, and pygame 1.8.0)
