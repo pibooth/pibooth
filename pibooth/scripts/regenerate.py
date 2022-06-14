@@ -5,12 +5,14 @@
 
 import os
 from os import path as osp
+from datetime import datetime
 
 from PIL import Image
 
 from pibooth.utils import LOGGER, configure_logging
 from pibooth.plugins import create_plugin_manager
 from pibooth.config import PiConfigParser
+from pibooth.counters import Counters
 from pibooth.pictures import get_picture_factory
 
 
@@ -76,6 +78,13 @@ def main():
 
     # Update configuration with plugins ones
     plugin_manager.hook.pibooth_configure(cfg=config)
+
+    # Initialize text variables (normally done by the app)
+    picture_plugin = plugin_manager.get_plugin('pibooth-core:picture')
+    picture_plugin.texts_vars['date'] = datetime.now()
+    picture_plugin.texts_vars['count'] = Counters(config.join_path("counters.pickle"),
+                                                  taken=0, printed=0, forgotten=0,
+                                                  remaining_duplicates=config.getint('PRINTER', 'max_duplicates'))
 
     for path in config.gettuple('GENERAL', 'directory', 'path'):
         regenerate_all_images(plugin_manager, config, path)

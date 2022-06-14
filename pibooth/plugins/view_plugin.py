@@ -10,6 +10,8 @@ class ViewPlugin(object):
     """Plugin to manage the pibooth window dans transitions.
     """
 
+    __name__ = 'pibooth-core:view'
+
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.count = 0

@@ -10,6 +10,8 @@ class PrinterPlugin(object):
     """Plugin to manage the printer.
     """
 
+    __name__ = 'pibooth-core:printer'
+
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
 

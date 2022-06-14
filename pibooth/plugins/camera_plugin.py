@@ -14,6 +14,8 @@ class CameraPlugin(object):
     """Plugin to manage the camera captures.
     """
 
+    __name__ = 'pibooth-core:camera'
+
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.timer = PollingTimer()

@@ -33,6 +33,8 @@ class PicturePlugin(object):
     """Plugin to build the final picture.
     """
 
+    __name__ = 'pibooth-core:picture'
+
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.timer = PollingTimer()
