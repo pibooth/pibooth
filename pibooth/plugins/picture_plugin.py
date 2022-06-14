@@ -15,6 +15,8 @@ class PicturePlugin(object):
     """Plugin to build the final picture.
     """
 
+    name = 'pibooth-core:picture'
+
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.factory_pool = PicturesFactoryPool()

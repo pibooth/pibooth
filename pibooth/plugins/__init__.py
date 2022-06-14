@@ -75,7 +75,7 @@ class PiPluginManager(pluggy.PluginManager):
                     CameraPlugin(self)]  # First called
 
         for plugin in plugins:
-            self.register(plugin)
+            self.register(plugin, name=getattr(plugin, 'name', None))
 
         # Check that each hookimpl is defined in the hookspec
         # except for hookimpl with kwarg 'optionalhook=True'.

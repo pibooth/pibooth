@@ -8,6 +8,8 @@ class LightsPlugin(object):
     """Plugin to manage the lights via GPIO.
     """
 
+    name = 'pibooth-core:lights'
+
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.blink_time = 0.3
