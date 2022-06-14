@@ -81,7 +81,7 @@ def main():
             'doc': docs_require
         },
         zip_safe=False,  # Don't install the lib as an .egg zipfile
-        entry_points={'console_scripts': ["pibooth = pibooth.booth:main",
+        entry_points={'console_scripts': ["pibooth = pibooth.__main__:main",
                                           "pibooth-count = pibooth.scripts.count:main",
                                           "pibooth-diag = pibooth.scripts.diagnostic:main",
                                           "pibooth-fonts = pibooth.scripts.fonts:main",
