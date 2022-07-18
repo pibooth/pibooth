@@ -214,6 +214,9 @@ class GpCamera(BaseCamera):
         self._window = window
         self.preview_flip = flip
 
+        if self.capture_iso != self.preview_iso:
+            self.set_config_value('imgsettings', 'iso', self.preview_iso)
+
         if self._preview_compatible:
             if self._preview_viewfinder:
                 self.set_config_value('actions', 'viewfinder', 1)
@@ -297,9 +300,6 @@ class GpCamera(BaseCamera):
 
         self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
         time.sleep(0.3)  # Necessary to let the time for the camera to save the image
-
-        if self.capture_iso != self.preview_iso:
-            self.set_config_value('imgsettings', 'iso', self.preview_iso)
 
         self._hide_overlay()  # If stop_preview() has not been called
 
