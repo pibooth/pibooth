@@ -119,7 +119,13 @@ class Background(object):
             assert osp.isfile(color_or_path), "Invalid image for window background: '{}'".format(color_or_path)
             if color_or_path != self._background_image:
                 self._background_image = color_or_path
+                self._background_color = (0, 0, 0)
                 self._need_update = True
+
+    def get_color(self):
+        """Return the background color (RGB tuple).
+        """
+        return self._background_color
 
     def set_text_color(self, color):
         """Set text color (RGB tuple) used to write the texts.
@@ -646,7 +652,7 @@ class FinishedWithImageBackground(FinishedBackground):
                 margin = min(xmargin, self._rect.height // 3)
             elif ymargin > 50:
                 margin = min(ymargin, self._rect.width // 3)
-            else: # Too small
+            else:  # Too small
                 self.left_people = None
                 self.right_people = None
                 return

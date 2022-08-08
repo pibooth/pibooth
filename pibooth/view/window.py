@@ -161,11 +161,17 @@ class PiWindow(object):
                 image = pictures.get_pygame_image('printer_failure.png', (side, side), color=self.text_color)
             else:
                 image = pictures.get_pygame_image('printer.png', (side, side), color=self.text_color)
-            y = self.surface.get_rect().height - image.get_rect().height - 10
-            self.surface.blit(image, (10, y))
             font = pygame.font.Font(fonts.CURRENT, side)
             label = font.render(str(self._print_number), True, self.text_color)
-            self.surface.blit(label, (side + 20, y))
+
+            height = max((image.get_rect().height, label.get_rect().height)) + 20
+            bg = pygame.Surface((image.get_rect().width + label.get_rect().width + side + 10, height))
+            bg.fill(self._current_background.get_color())
+            rect = bg.get_rect()
+            rect.bottomleft = self.get_rect().bottomleft
+            self.surface.blit(bg, rect.topleft)
+            self.surface.blit(image, (10, rect.centery - image.get_rect().height // 2))
+            self.surface.blit(label, (side + 20, rect.centery - label.get_rect().height // 2))
 
     def _center_pos(self, image):
         """
