@@ -169,9 +169,12 @@ class PiWindow(object):
             bg.fill(self._current_background.get_color())
             rect = bg.get_rect()
             rect.bottomleft = self.get_rect().bottomleft
+            rect_image = image.get_rect(left=10, centery=rect.centery)
+            rect_label = label.get_rect(centerx=rect_image.right + (rect.width -
+                                        rect_image.right) // 2, centery=rect.centery)
             self.surface.blit(bg, rect.topleft)
-            self.surface.blit(image, (10, rect.centery - image.get_rect().height // 2))
-            self.surface.blit(label, (side + 20, rect.centery - label.get_rect().height // 2))
+            self.surface.blit(image, rect_image.topleft)
+            self.surface.blit(label, rect_label.topleft)
 
     def _center_pos(self, image):
         """
