@@ -36,6 +36,10 @@ DEFAULT = odict((
                 (False,
                  "Start pibooth at Raspberry Pi startup",
                  "Auto-start", ['True', 'False'])),
+            ("autostart_delay",
+                (0,
+                 "How long to wait in seconds before start pibooth at Raspberry Pi startup",
+                 "Auto-start delay", [str(i) for i in range(0, 121, 5)])),
             ("debug",
                 (False,
                  "In debug mode, exceptions are not caught, logs are more verbose, pictures are cleared at startup",
@@ -325,6 +329,7 @@ class PiConfigParser(RawConfigParser):
         filename = osp.expanduser('~/.config/autostart/pibooth.desktop')
         dirname = osp.dirname(filename)
         enable = self.getboolean('GENERAL', 'autostart')
+        delay = self.getint('GENERAL', 'autostart_delay')
         if enable and not osp.isfile(filename):
 
             if not osp.isdir(dirname):
@@ -334,7 +339,10 @@ class PiConfigParser(RawConfigParser):
             with open(filename, 'w') as fp:
                 fp.write("[Desktop Entry]\n")
                 fp.write("Name=pibooth\n")
-                fp.write("Exec=pibooth\n")
+                if delay > 0:
+                    fp.write(f"Exec=bash -c \"sleep {delay} && pibooth\"\n")
+                else:
+                    fp.write("Exec=pibooth\n")
                 fp.write("Type=application\n")
 
         elif not enable and osp.isfile(filename):
