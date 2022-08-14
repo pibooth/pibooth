@@ -82,17 +82,28 @@ class PiConfigParser(RawConfigParser):
         filename = osp.expanduser('~/.config/autostart/pibooth.desktop')
         dirname = osp.dirname(filename)
         enable = self.getboolean('GENERAL', 'autostart')
-        if enable and not osp.isfile(filename):
+        delay = self.getint('GENERAL', 'autostart_delay')
+        if enable:
+            regenerate = True
+            if osp.isfile(filename):
+                with open(filename, 'r') as fp:
+                    txt = fp.read()
+                    if delay > 0 and f"sleep {delay}" in txt or delay <= 0 and "sleep" not in txt:
+                        regenerate = False
 
-            if not osp.isdir(dirname):
-                os.makedirs(dirname)
+            if regenerate:
+                if not osp.isdir(dirname):
+                    os.makedirs(dirname)
 
-            LOGGER.info("Generate the auto-startup file in '%s'", dirname)
-            with open(filename, 'w') as fp:
-                fp.write("[Desktop Entry]\n")
-                fp.write("Name=pibooth\n")
-                fp.write("Exec=pibooth\n")
-                fp.write("Type=application\n")
+                LOGGER.info("Generate the auto-startup file in '%s'", dirname)
+                with open(filename, 'w') as fp:
+                    fp.write("[Desktop Entry]\n")
+                    fp.write("Name=pibooth\n")
+                    if delay > 0:
+                        fp.write(f"Exec=bash -c \"sleep {delay} && pibooth\"\n")
+                    else:
+                        fp.write("Exec=pibooth\n")
+                    fp.write("Type=application\n")
 
         elif not enable and osp.isfile(filename):
             LOGGER.info("Remove the auto-startup file in '%s'", dirname)
