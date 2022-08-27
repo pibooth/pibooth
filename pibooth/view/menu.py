@@ -7,7 +7,7 @@ import pygame
 import pygame_menu as pgm
 import pygame_vkeyboard as vkb
 import pibooth
-from pibooth import fonts, pgevents
+from pibooth import fonts, evtfilters
 from pibooth.utils import LOGGER
 from pibooth.config.default import DEFAULT
 
@@ -335,7 +335,7 @@ class PiConfigMenu(object):
             for event in events:
                 if (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3)
                         or event.type == pygame.FINGERDOWN)\
-                        and not self._keyboard.get_rect().collidepoint(pgevents.get_event_pos(self.win.display_size, event)):
+                        and not self._keyboard.get_rect().collidepoint(evtfilters.get_event_pos(self.win.display_size, event)):
                     self._keyboard.disable()
                     self._keyboard.draw()
                     return

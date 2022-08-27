@@ -6,7 +6,7 @@ import itertools
 from concurrent import futures
 from datetime import datetime
 import pibooth
-from pibooth import pgevents
+from pibooth import evtfilters
 from pibooth.utils import LOGGER, PollingTimer, AsyncTask
 from pibooth.pictures import get_picture_factory
 
@@ -156,7 +156,7 @@ class PicturePlugin(object):
 
     @pibooth.hookimpl
     def state_print_do(self, cfg, app, win, events):
-        if pgevents.find_capture_event(events, win):
+        if evtfilters.find_capture_event(events, win):
 
             LOGGER.info("Moving the picture in the forget folder")
             for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):

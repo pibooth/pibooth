@@ -14,7 +14,7 @@ import os.path as osp
 
 import pygame
 from PIL import Image
-from pibooth import pgevents
+from pibooth import evtfilters
 from pibooth.utils import LOGGER
 from pibooth.pictures import get_picture_factory
 
@@ -68,7 +68,7 @@ class Printer(object):
         Call for each new printer event.
         """
         LOGGER.info(evt.title)
-        pygame.event.post(pygame.event.Event(pgevents.EVT_PRINTER_TASKS_UPDATED,
+        pygame.event.post(pygame.event.Event(evtfilters.EVT_PRINTER_TASKS_UPDATED,
                                              tasks=self.get_all_tasks()))
 
     def is_installed(self):

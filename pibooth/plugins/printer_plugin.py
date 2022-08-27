@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pibooth
-from pibooth import pgevents
+from pibooth import evtfilters
 from pibooth.utils import LOGGER
 
 
@@ -34,7 +34,7 @@ class PrinterPlugin(object):
 
     @pibooth.hookimpl
     def state_wait_do(self, cfg, app, win, events):
-        if pgevents.find_print_event(events, win) and app.previous_picture_file and app.printer.is_installed():
+        if evtfilters.find_print_event(events, win) and app.previous_picture_file and app.printer.is_installed():
 
             if app.count.remaining_duplicates <= 0:
                 LOGGER.warning("Too many duplicates sent to the printer (%s max)",
@@ -64,5 +64,5 @@ class PrinterPlugin(object):
 
     @pibooth.hookimpl
     def state_print_do(self, cfg, app, win, events):
-        if pgevents.find_print_event(events, event) and app.previous_picture_file:
+        if evtfilters.find_print_event(events, event) and app.previous_picture_file:
             self.print_picture(cfg, app)

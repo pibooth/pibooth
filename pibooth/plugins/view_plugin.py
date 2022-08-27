@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pibooth
-from pibooth import camera, pgevents
+from pibooth import camera, evtfilters
 from pibooth.utils import LOGGER, get_crash_message, PollingTimer
 
 
@@ -68,17 +68,17 @@ class ViewPlugin(object):
         else:
             previous_picture = app.previous_picture
 
-        event = pgevents.find_print_status_event(events)
+        event = evtfilters.find_print_status_event(events)
         if event and app.printer.is_installed():
             win.set_print_number(len(event.tasks), not app.printer.is_ready())
 
-        if pgevents.find_print_event(events, win) or (win.get_image() and not previous_picture):
+        if evtfilters.find_print_event(events, win) or (win.get_image() and not previous_picture):
             win.show_intro(previous_picture, app.printer.is_ready()
                            and app.count.remaining_duplicates > 0)
 
     @pibooth.hookimpl
     def state_wait_validate(self, cfg, app, win, events):
-        if pgevents.find_capture_event(events, win):
+        if evtfilters.find_capture_event(events, win):
             if len(app.capture_choices) > 1:
                 return 'choose'
             if cfg.getfloat('WINDOW', 'chosen_delay') > 0:
@@ -127,7 +127,7 @@ class ViewPlugin(object):
     @pibooth.hookimpl
     def state_preview_do(self, win, events):
         for event in events:
-            if event.type == pgevents.EVT_CAMERA_PREVIEW:
+            if event.type == evtfilters.EVT_CAMERA_PREVIEW:
                 win.show_image(event.result)
 
     @pibooth.hookimpl
@@ -146,7 +146,7 @@ class ViewPlugin(object):
         win.set_capture_number(self.count, app.capture_nbr)
 
         for event in events:
-            if event.type == pgevents.EVT_CAMERA_CAPTURE:
+            if event.type == evtfilters.EVT_CAMERA_CAPTURE:
                 self.capture_finished = True
 
     @pibooth.hookimpl
@@ -177,8 +177,8 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_print_validate(self, app, win, events):
-        printed = pgevents.find_print_event(events, win)
-        self.forgotten = pgevents.find_capture_event(events, win)
+        printed = evtfilters.find_print_event(events, win)
+        self.forgotten = evtfilters.find_capture_event(events, win)
         if self.print_view_timer.is_timeout() or printed or self.forgotten:
             if printed:
                 win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())

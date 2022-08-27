@@ -9,7 +9,7 @@ from pygame import gfxdraw
 from PIL import Image
 import pygame_menu as pgm
 import pygame_vkeyboard as vkb
-from pibooth import pictures, fonts, pgevents
+from pibooth import pictures, fonts, evtfilters
 from pibooth.view import background
 from pibooth.view.menu import PiConfigMenu
 from pibooth.utils import LOGGER
@@ -88,15 +88,15 @@ class PiWindow(object):
         :type evts: list
         """
         for evt in evts:
-            if pgevents.is_resize_event(evt):
+            if evtfilters.is_resize_event(evt):
                 self.resize(evt.size)
-            elif pgevents.is_fullscreen_event(evt):
+            elif evtfilters.is_fullscreen_event(evt):
                 self.toggle_fullscreen()
-            elif pgevents.is_settings_event(evt):
+            elif evtfilters.is_settings_event(evt):
                 self.toggle_menu()
-            elif pgevents.is_print_button_event(evt, self):
+            elif evtfilters.is_print_button_event(evt, self):
                 # Convert HW button events to keyboard events for menu
-                event = pgevents.create_click_event()
+                event = evtfilters.create_click_event()
                 LOGGER.debug("EVT_BUTTONDOWN: generate MENU-APPLY event")
                 evts += (event,)
 

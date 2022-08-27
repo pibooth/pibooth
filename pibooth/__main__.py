@@ -19,7 +19,7 @@ from gpiozero.exc import BadPinFactory, PinFactoryFallback
 
 import pibooth
 from pibooth import fonts
-from pibooth import language, pgevents
+from pibooth import language, evtfilters
 from pibooth.counters import Counters
 from pibooth.utils import (LOGGER, PollingTimer, configure_logging, get_crash_message,
                            set_logging_level, AsyncTask)
@@ -202,7 +202,7 @@ class PiApplication(object):
                     event = self._menu.create_back_event()
                     LOGGER.debug("EVT_BUTTONDOWN: generate MENU-ESC event")
                 else:
-                    event = pygame.event.Event(pgevents.EVT_BUTTONDOWN, capture=1, printer=1,
+                    event = pygame.event.Event(evtfilters.EVT_BUTTONDOWN, capture=1, printer=1,
                                                button=self.buttons)
                     LOGGER.debug("EVT_BUTTONDOWN: generate DOUBLE buttons event")
                 self.buttons.capture.hold_repeat = False
@@ -215,7 +215,7 @@ class PiApplication(object):
                 event = self._menu.create_next_event()
                 LOGGER.debug("EVT_BUTTONDOWN: generate MENU-NEXT event")
             else:
-                event = pygame.event.Event(pgevents.EVT_BUTTONDOWN, capture=1, printer=0,
+                event = pygame.event.Event(evtfilters.EVT_BUTTONDOWN, capture=1, printer=0,
                                            button=self.buttons.capture)
                 LOGGER.debug("EVT_BUTTONDOWN: generate CAPTURE button event")
             self.buttons.capture.hold_repeat = False
@@ -231,7 +231,7 @@ class PiApplication(object):
             pass
         else:
             # Printer was held but capture not pressed
-            event = pygame.event.Event(pgevents.EVT_BUTTONDOWN, capture=0, printer=1,
+            event = pygame.event.Event(evtfilters.EVT_BUTTONDOWN, capture=0, printer=1,
                                        button=self.buttons.printer)
             LOGGER.debug("EVT_BUTTONDOWN: generate PRINTER event")
             pygame.event.post(event)
@@ -255,10 +255,10 @@ class PiApplication(object):
             while True:
                 evts = list(pygame.event.get())
 
-                if pgevents.find_quit_event(evts):
+                if evtfilters.find_quit_event(evts):
                     break
 
-                if pgevents.find_settings_event(evts):
+                if evtfilters.find_settings_event(evts):
                     if not self._window.is_menu_shown():
                         # Settings menu is opened
                         self.camera.stop_preview()
