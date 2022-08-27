@@ -43,10 +43,10 @@ Third-party plugins
 Third-party plugins can be found an GitHub or on `plugins on PyPI  <https://pypi.org/search/?q=pibooth>`_.
 Here is a short list:
 
-- `pibooth-lcd-display <https://pypi.org/project/pibooth-lcd-display>`
-- `pibooth-neopixel_spi <https://github.com/peteoheat/pibooth-neopixel_spi>`
-- `pibooth-telegram-upload <https://pypi.org/project/pibooth-telegram-upload>`
-- `pibooth-s3-upload <https://pypi.org/project/pibooth-s3-upload>`
+- `pibooth-lcd-display <https://pypi.org/project/pibooth-lcd-display>`_
+- `pibooth-neopixel_spi <https://github.com/peteoheat/pibooth-neopixel_spi>`_
+- `pibooth-telegram-upload <https://pypi.org/project/pibooth-telegram-upload>`_
+- `pibooth-s3-upload <https://pypi.org/project/pibooth-s3-upload>`_
 
 
 .. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/pibooth.png
