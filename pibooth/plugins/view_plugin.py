@@ -67,7 +67,8 @@ class ViewPlugin(object):
 
         event = app.find_print_status_event(events)
         if event and app.printer.is_installed():
-            win.set_print_number(len(event.tasks), not app.printer.is_ready())
+            tasks = app.printer.get_all_tasks()
+            win.set_print_number(len(tasks), not app.printer.is_ready())
 
         if app.find_print_event(events) or (win.get_image() and not previous_picture):
             win.show_intro(previous_picture, app.printer.is_ready()
