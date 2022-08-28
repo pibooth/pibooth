@@ -55,18 +55,20 @@ class PiPluginManager(pluggy.PluginManager):
 
         :param paths: list of Python module/package paths to load
         :type paths: list
-        :param disabled: list of plugins name to be disabled after loaded
+        :param disabled: list of plugins name to be disabled after loaded or 'all'
         :type disabled: list
         """
-        # Load plugins declared by setuptools entry points
-        self.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
-
         plugins = []
-        for path in paths:
-            plugin = load_module(path)
-            if plugin:
-                LOGGER.debug("Plugin found at '%s'", path)
-                plugins.append(plugin)
+
+        if disabled != 'all':
+            # Load plugins declared by setuptools entry points
+            self.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
+
+            for path in paths:
+                plugin = load_module(path)
+                if plugin:
+                    LOGGER.debug("Plugin found at '%s'", path)
+                    plugins.append(plugin)
 
         plugins += [LightsPlugin(self),  # Last called
                     ViewPlugin(self),
@@ -82,7 +84,7 @@ class PiPluginManager(pluggy.PluginManager):
         self.check_pending()
 
         # Disable unwanted plugins
-        if disabled:
+        if disabled and disabled != 'all':
             for name in disabled:
                 self.unregister(name=name)
 

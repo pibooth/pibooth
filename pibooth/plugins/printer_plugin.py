@@ -64,5 +64,5 @@ class PrinterPlugin(object):
 
     @pibooth.hookimpl
     def state_print_do(self, cfg, app, win, events):
-        if evtfilters.find_print_event(events, event) and app.previous_picture_file:
+        if evtfilters.find_print_event(events, win) and app.previous_picture_file:
             self.print_picture(cfg, app)

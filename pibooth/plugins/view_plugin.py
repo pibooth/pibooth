@@ -34,8 +34,7 @@ class ViewPlugin(object):
         self.finish_timer = PollingTimer(1)
 
     @pibooth.hookimpl
-    def state_failsafe_enter(self, win):
-        win.show_oops()
+    def state_failsafe_enter(self):
         self.failed_view_timer.start()
         LOGGER.error(get_crash_message())
 
@@ -53,8 +52,8 @@ class ViewPlugin(object):
         else:
             previous_picture = app.previous_picture
 
-        win.show_intro(previous_picture, app.printer.is_ready()
-                       and app.count.remaining_duplicates > 0)
+        win.scene.update_picture(previous_picture)
+        win.scene.update_print_action(app.printer.is_ready() and app.count.remaining_duplicates > 0)
         if app.printer.is_installed():
             win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
 
@@ -62,8 +61,8 @@ class ViewPlugin(object):
     def state_wait_do(self, app, win, events):
         if app.previous_animated and self.animated_frame_timer.is_timeout():
             previous_picture = next(app.previous_animated)
-            win.show_intro(previous_picture, app.printer.is_ready()
-                           and app.count.remaining_duplicates > 0)
+            win.scene.update_picture(previous_picture)
+            win.scene.update_print_action(app.printer.is_ready() and app.count.remaining_duplicates > 0)
             self.animated_frame_timer.start()
         else:
             previous_picture = app.previous_picture
@@ -73,8 +72,7 @@ class ViewPlugin(object):
             win.set_print_number(len(event.tasks), not app.printer.is_ready())
 
         if evtfilters.find_print_event(events, win) or (win.get_image() and not previous_picture):
-            win.show_intro(previous_picture, app.printer.is_ready()
-                           and app.count.remaining_duplicates > 0)
+            win.scene.update_print_action(app.printer.is_ready() and app.count.remaining_duplicates > 0)
 
     @pibooth.hookimpl
     def state_wait_validate(self, cfg, app, win, events):

@@ -26,17 +26,20 @@ class StateMachine(object):
         """Add a state to the internal dictionary.
         """
         self.states.add(name)
+        self.win.add_scene(name)
 
     def add_failsafe_state(self, name):
         """Add a state that will be call in case of exception.
         """
         self.failsafe_state = name
         self.states.add(name)
+        self.win.add_scene(name)
 
     def remove_state(self, name):
         """Remove a state to the internal dictionary.
         """
         self.states.discard(name)
+        self.win.remove_scene(name)
         if name == self.failsafe_state:
             self.failsafe_state = None
 
@@ -94,6 +97,7 @@ class StateMachine(object):
         self.active_state = state_name
 
         try:
+            self.win.set_scene(self.active_state)
             hook = getattr(self.pm.hook, 'state_{}_enter'.format(self.active_state))
             hook(cfg=self.cfg, app=self.app, win=self.win)
         except Exception as ex:

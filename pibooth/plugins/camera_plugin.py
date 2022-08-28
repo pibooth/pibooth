@@ -27,7 +27,7 @@ class CameraPlugin(object):
         cam = outcome.get_result()
 
         if not cam:
-            LOGGER.debug("Fallback to pibooth default camera management system")
+            LOGGER.debug("Use pibooth camera management system")
             cam = camera.find_camera()
 
         cam.initialize(cfg.gettuple('CAMERA', 'iso', (int, str), 2),
