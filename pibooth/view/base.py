@@ -58,7 +58,7 @@ class BaseWindow(object):
                  arrow_location=ARROW_BOTTOM,
                  arrow_offset=0,
                  debug=False):
-        self.__size = size
+        self._size = size
 
         self.debug = debug
         self.text_color = text_color
@@ -111,13 +111,13 @@ class BaseWindow(object):
         :param absolute: absolute position considering the window centered on screen
         :type absolute: bool
         """
-        return pygame.Rect(0, 0, self.__size[0], self.__size[1])
+        return pygame.Rect(0, 0, self._size[0], self._size[1])
 
     def resize(self, size):
         """Resize the window only if not fullscreen.
         """
         if not self.is_fullscreen:
-            self.__size = size  # Manual resizing
+            self._size = size  # Manual resizing
 
     def gui_eventloop(self, app_update):
         """Main GUI events loop (blocking).

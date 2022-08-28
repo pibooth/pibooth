@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 
+"""PygameWindow class to build a Pygame UI.
+"""
+
 import os
 import pygame
+import pygame_vkeyboard as vkb
 
 from pibooth import evtfilters
+from pibooth.utils import LOGGER
 from pibooth.view.base import BaseWindow
+from pibooth.view.pygame import scenes
 
 
 class PygameWindow(BaseWindow):
@@ -31,7 +37,53 @@ class PygameWindow(BaseWindow):
 
         pygame.display.set_caption(title)
         self.display_size = (info.current_w, info.current_h)
-        self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
+        self.surface = pygame.display.set_mode(self._size, pygame.RESIZABLE)
+
+        self._keyboard = vkb.VKeyboard(self.surface,
+                                       self._on_keyboard_event,
+                                       vkb.VKeyboardLayout(vkb.VKeyboardLayout.QWERTY),
+                                       renderer=vkb.VKeyboardRenderer.DARK,
+                                       show_text=True,
+                                       joystick_navigation=True)
+        self._keyboard.disable()
+
+    def _create_scene(self, name):
+        """Create scene instance."""
+        return scenes.get_scene(name)
+
+    def _on_keyboard_event(self, text):
+        print(text)
+
+    def get_rect(self, absolute=False):
+        """Return a Rect object (as defined in pygame) for this window.
+
+        :param absolute: absolute position considering the window centered on screen
+        :type absolute: bool
+        """
+        if absolute:
+            return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
+        return self.surface.get_rect()
+
+    def resize(self, size):
+        """Resize the window keeping aspect ratio.
+        """
+        if not self.is_fullscreen:
+            self._size = size  # Manual resizing
+            self.surface = pygame.display.set_mode(self._size, pygame.RESIZABLE)
+
+    def toggle_fullscreen(self):
+        """Set window to full screen or initial size.
+        """
+        if self.is_fullscreen:
+            self.is_fullscreen = False  # Set before resize
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+            self.surface = pygame.display.set_mode(self._size, pygame.RESIZABLE)
+        else:
+            self.is_fullscreen = True  # Set before resize
+            # Make an invisible cursor (don't use pygame.mouse.set_visible(False) because
+            # the mouse event will always return the window bottom-right coordinate)
+            pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
+            self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
 
     def update(self, events):
         """Update sprites according to Pygame events.
@@ -39,7 +91,18 @@ class PygameWindow(BaseWindow):
         :param events: list of events to process.
         :type events: list
         """
-        pass
+        for event in events:
+            if evtfilters.is_resize_event(event):
+                self.resize(event.size)
+            elif evtfilters.is_fullscreen_event(event):
+                self.toggle_fullscreen()
+            elif evtfilters.is_settings_event(event):
+                self.toggle_menu()
+            elif evtfilters.is_print_button_event(event, self):
+                # Convert HW button events to keyboard events for menu
+                event = evtfilters.create_click_event()
+                LOGGER.debug("EVT_BUTTONDOWN: generate MENU-APPLY event")
+                events += (event,)
 
     def draw(self):
         """Draw all Sprites on surface and return updated Pygame rects.

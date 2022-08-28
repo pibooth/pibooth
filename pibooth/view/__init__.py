@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from pibooth.view.pygame.window import PygameWindow
-from pibooth.view.terminal.window import TerminalWindow
+from pibooth.view.nogui.window import NoGuiWindow
 
 WINDOWS = {
-    'terminal': TerminalWindow,
+    'nogui': NoGuiWindow,
     'pygame': PygameWindow
 }
 

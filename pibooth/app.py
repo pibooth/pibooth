@@ -172,7 +172,7 @@ class PiboothApplication(object):
                 self._multipress_timer.start()
             if self._multipress_timer.is_timeout():
                 # Capture was held while printer was pressed
-                if self._menu and self._menu.is_shown():
+                if self._window.is_menu_shown:
                     # Convert HW button events to keyboard events for menu
                     event = evtfilters.create_back_event()
                     LOGGER.debug("EVT_BUTTONDOWN: generate MENU-ESC event")
@@ -185,7 +185,7 @@ class PiboothApplication(object):
                 pygame.event.post(event)
         else:
             # Capture was held but printer not pressed
-            if self._menu and self._menu.is_shown():
+            if self._window.is_menu_shown:
                 # Convert HW button events to keyboard events for menu
                 event = evtfilters.create_next_event()
                 LOGGER.debug("EVT_BUTTONDOWN: generate MENU-NEXT event")

@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import pygame
+"""NoGuiWindow class to emulate a dummy window.
+"""
+
 from functools import partial
+import pygame
 
 from pibooth import evtfilters
 from pibooth.utils import LOGGER
 from pibooth.view.base import BaseWindow, BaseScene
 
 
-class TerminalScene(BaseScene):
+class NoGuiScene(BaseScene):
 
     def set_debug(self, enable=True): pass
 
@@ -33,7 +36,7 @@ class TerminalScene(BaseScene):
         return partial(self.nop, attr)
 
 
-class TerminalWindow(BaseWindow):
+class NoGuiWindow(BaseWindow):
 
     """Class to print view changes in terminal (useful for tests).
     """
@@ -45,13 +48,13 @@ class TerminalWindow(BaseWindow):
                  arrow_location=BaseWindow.ARROW_BOTTOM,
                  arrow_offset=0,
                  debug=False):
-        super(TerminalWindow, self).__init__(size, background, text_color, arrow_location, arrow_offset, debug)
-        LOGGER.info(" @@@@@ TerminalWindow @@@@@ : %s", title)
+        super(NoGuiWindow, self).__init__(size, background, text_color, arrow_location, arrow_offset, debug)
+        LOGGER.info(" @@@@@ NoGuiWindow @@@@@ : %s", title)
 
         pygame.init()  # Necessary to enable pygame event loop
 
     def _create_scene(self, name):
-        return TerminalScene(name)
+        return NoGuiScene(name)
 
     def gui_eventloop(self, app_update):
         """Main GUI events loop (blocking).

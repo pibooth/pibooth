@@ -59,7 +59,7 @@ def main():
     parser.add_argument("--nolog", action='store_true', default=False,
                         help=u"don't save console output in a file (avoid filling the /tmp directory)")
 
-    parser.add_argument("--nogui", dest='gui', action='store_const', const='terminal',
+    parser.add_argument("--nogui", dest='gui', action='store_const', const='nogui',
                         help=u"don't show Graphical User Interface", default='pygame')
 
     parser.add_argument("--noplugin", action='store_true', default=False,
