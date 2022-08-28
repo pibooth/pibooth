@@ -27,7 +27,7 @@ Hardware
 Software
 ^^^^^^^^
 
-* Raspberry Pi OS with desktop
+* Raspberry Pi OS **Bullseye** with desktop
 * Python ``3.7.3``
 * libsdl2 ``2.0``
 * libgphoto2 ``2.5.27``

@@ -254,11 +254,14 @@ class PiboothApplication(object):
                 rects = self._window.draw()
 
                 # Update dirty rects on screen
-                pygame.display.update(rects)
+                if pygame.display.get_surface():
+                    pygame.display.update(rects)
 
                 # Ensure the program will never run at more than <fps> frames per second
                 clock.tick(fps)
 
+        except KeyboardInterrupt:
+            print()
         except Exception as ex:
             LOGGER.error(str(ex), exc_info=True)
             LOGGER.error(get_crash_message())
