@@ -219,47 +219,32 @@ class PiboothApplication(object):
             raise EnvironmentError("The 'capture_date' attribute is not set yet")
         return "{}_pibooth.jpg".format(self.capture_date)
 
-    def main_loop(self):
+    def update(self, events):
+        """Update application and call plugins according to Pygame events.
+
+        :param events: list of events to process.
+        :type events: list
+        """
+        if evtfilters.find_settings_event(events):
+            if not self._window.is_menu_shown:  # Settings menu is opened
+                self.camera.stop_preview()
+                self.leds.off()
+                self.leds.blink(on_time=0.1, off_time=1)
+            elif self._window.is_menu_shown:  # Settings menu is closed
+                self.leds.off()
+                self._initialize()
+                self._machine.set_state('wait')
+        else:
+            self._machine.process(events)
+
+    def mainloop(self):
+        """Start application mainloop.
+        """
         try:
-            fps = 40
-            clock = pygame.time.Clock()
             self._initialize()
             self._pm.hook.pibooth_startup(cfg=self._config, app=self)
             self._machine.set_state('wait')
-
-            while True:
-                evts = list(pygame.event.get())
-
-                if evtfilters.find_quit_event(evts):
-                    break
-
-                if evtfilters.find_settings_event(evts):
-                    if not self._window.is_menu_shown:
-                        # Settings menu is opened
-                        self.camera.stop_preview()
-                        self.leds.off()
-                        self.leds.blink(on_time=0.1, off_time=1)
-                    elif self._window.is_menu_shown:
-                        # Settings menu is closed
-                        self.leds.off()
-                        self._initialize()
-                        self._machine.set_state('wait')
-                else:
-                    self._machine.process(evts)
-
-                # Update view elements according to user events
-                self._window.update(evts)
-
-                # Draw view elements
-                rects = self._window.draw()
-
-                # Update dirty rects on screen
-                if pygame.display.get_surface():
-                    pygame.display.update(rects)
-
-                # Ensure the program will never run at more than <fps> frames per second
-                clock.tick(fps)
-
+            self._window.gui_eventloop(self.update)
         except KeyboardInterrupt:
             print()
         except Exception as ex:

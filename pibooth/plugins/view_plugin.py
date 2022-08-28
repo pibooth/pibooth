@@ -52,7 +52,7 @@ class ViewPlugin(object):
         else:
             previous_picture = app.previous_picture
 
-        win.scene.update_image(previous_picture)
+        win.set_image(previous_picture)
         win.scene.update_print_action(app.printer.is_ready() and app.count.remaining_duplicates > 0)
         if app.printer.is_installed():
             win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
@@ -73,7 +73,7 @@ class ViewPlugin(object):
         if evtfilters.find_print_event(events, win):
             win.scene.update_print_action(app.printer.is_ready() and app.count.remaining_duplicates > 0)
 
-        win.scene.update_image(previous_picture)
+        win.set_image(previous_picture)
 
     @pibooth.hookimpl
     def state_wait_validate(self, cfg, app, win, events):
@@ -120,13 +120,13 @@ class ViewPlugin(object):
     def state_preview_enter(self, app, win):
         self.count += 1
         self.capture_finished = False
-        win.set_capture_number(self.count, app.capture_nbr)
+        win.scene.set_capture_number(self.count, app.capture_nbr)
 
     @pibooth.hookimpl
     def state_preview_do(self, win, events):
         for event in events:
             if event.type == evtfilters.EVT_CAMERA_PREVIEW:
-                win.scene.update_image(event.result)
+                win.set_image(event.result)
 
     @pibooth.hookimpl
     def state_capture_enter(self):
@@ -138,10 +138,10 @@ class ViewPlugin(object):
         if cfg.getboolean('WINDOW', 'flash'):
             if self.flash_timer.is_timeout():
                 self.count_flash += 1
-                win.toggle_flash()
+                win.scene.toggle_flash()
                 self.flash_timer.start()
 
-        win.set_capture_number(self.count, app.capture_nbr)
+        win.scene.set_capture_number(self.count, app.capture_nbr)
 
         for event in events:
             if event.type == evtfilters.EVT_CAMERA_CAPTURE:
@@ -165,7 +165,7 @@ class ViewPlugin(object):
     @pibooth.hookimpl
     def state_print_enter(self, cfg, app, win):
         LOGGER.info("Display the final picture")
-        win.scene.update_image(app.previous_picture)
+        win.set_image(app.previous_picture)
         win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
         self.print_view_timer.start(cfg.getfloat('PRINTER', 'printer_delay'))
 
@@ -181,10 +181,10 @@ class ViewPlugin(object):
     @pibooth.hookimpl
     def state_finish_enter(self, cfg, app, win):
         if cfg.getfloat('WINDOW', 'finish_picture_delay') > 0 and not self.forgotten:
-            win.scene.update_image(app.previous_picture)
+            win.set_image(app.previous_picture)
             timeout = cfg.getfloat('WINDOW', 'finish_picture_delay')
         else:
-            win.scene.update_image()
+            win.set_image()
             timeout = 1
 
         self.finish_timer.start(timeout)

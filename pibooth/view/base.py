@@ -13,6 +13,27 @@ class BaseScene(object):
     def __init__(self, name):
         self.name = name
 
+    def set_debug(self, enable=True):
+        raise NotImplementedError
+
+    def set_image(self, image=None):
+        raise NotImplementedError
+
+    def set_background(self, color_or_path):
+        raise NotImplementedError
+
+    def set_text_color(self, color):
+        raise NotImplementedError
+
+    def set_arrow_offset(self, offset):
+        raise NotImplementedError
+
+    def set_arrow_location(self, location):
+        raise NotImplementedError
+
+    def set_print_number(self, current_nbr=None, failure=False):
+        raise NotImplementedError
+
 
 class BaseWindow(object):
 
@@ -22,8 +43,6 @@ class BaseWindow(object):
 
     :attr is_fullscreen: True if the window is display in full screen
     :type is_fullscreen: bool
-    :attr is_flash_on: True if the flash is ON
-    :type is_flash_on: bool
     """
 
     FULLSCREEN = 'fullscreen'
@@ -34,7 +53,7 @@ class BaseWindow(object):
 
     def __init__(self,
                  size=(800, 480),
-                 bg_color=(0, 0, 0),
+                 background=(0, 0, 0),
                  text_color=(255, 255, 255),
                  arrow_location=ARROW_BOTTOM,
                  arrow_offset=0,
@@ -42,17 +61,15 @@ class BaseWindow(object):
         self.__size = size
 
         self.debug = debug
-        self.bg_color = bg_color
         self.text_color = text_color
+        self.background = background
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
         self.print_number = 0
         self.print_failure = False
-        self.capture_number = 0
-        self.capture_max = 4
+        self.image = None
 
         self.is_fullscreen = False
-        self.is_flash_on = False
         self.is_menu_shown = False
 
         self.scenes = {}
@@ -80,6 +97,13 @@ class BaseWindow(object):
 
         LOGGER.debug("Set scene '%s'", name)
         self.scene = self.scenes[name]
+        self.scene.set_debug(self.debug)
+        self.scene.set_image(self.image)
+        self.scene.set_background(self.background)
+        self.scene.set_text_color(self.text_color)
+        self.scene.set_arrow_offset(self.arrow_offset)
+        self.scene.set_arrow_location(self.arrow_location)
+        self.scene.set_print_number(self.print_number, self.print_failure)
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.
@@ -95,38 +119,29 @@ class BaseWindow(object):
         if not self.is_fullscreen:
             self.__size = size  # Manual resizing
 
-    def update(self, events):
-        """Update sprites according to Pygame events.
+    def gui_eventloop(self, app_update):
+        """Main GUI events loop (blocking).
 
-        :param events: list of events to process.
-        :type events: list
+        :param app_update: function update application state
+        :type app_update: callable
         """
-        pass
+        raise NotImplementedError
 
-    def draw(self):
-        """Draw all Sprites on surface and return updated Pygame rects.
+    # ---------------------------------------------------------------------
+    # Functions applicable to more than one scene
+
+    def set_image(self, pil_image=None):
+        """Set the current displayed image.
         """
-        pass
+        self.image = pil_image
+        self.scene.set_image(self.image)
 
-    def set_capture_number(self, current_nbr, total_nbr):
-        """Set the current number of captures taken.
-        """
-        assert total_nbr > 0, "Total number of captures shall be greater than 0"
-        assert current_nbr <= total_nbr, "Current number of captures shall be lower or equal to total number"
-        self.capture_number = current_nbr
-        self.capture_max = total_nbr
-
-    def set_print_number(self, current_nbr=None, failure=None):
+    def set_print_number(self, current_nbr=None, failure=False):
         """Set the current number of tasks in the printer queue.
         """
         assert current_nbr >= 0, "Current number of printed files shall be greater or equal to 0"
         self.print_number = current_nbr
         self.print_failure = failure
-
-    def toggle_flash(self):
-        """Set flash to ON or OFF.
-        """
-        self.is_flash_on = not self.is_flash_on
 
     def toggle_fullscreen(self):
         """Set window to full screen or initial size.
