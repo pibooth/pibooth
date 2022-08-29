@@ -40,7 +40,7 @@ Documentation
 Third-party plugins
 -------------------
 
-Third-party plugins can be found an GitHub or on `plugins on PyPI  <https://pypi.org/search/?q=pibooth>`_.
+Third-party plugins can be found on GitHub or on `plugins on PyPI  <https://pypi.org/search/?q=pibooth>`_.
 Here is a short list:
 
 - `pibooth-lcd-display <https://pypi.org/project/pibooth-lcd-display>`_
