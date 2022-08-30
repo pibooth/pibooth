@@ -19,7 +19,7 @@ class BaseScene(object):
     def set_image(self, image=None):
         raise NotImplementedError
 
-    def set_background(self, color_or_path):
+    def set_background(self, color_or_path, size):
         raise NotImplementedError
 
     def set_text_color(self, color):
@@ -99,7 +99,7 @@ class BaseWindow(object):
         self.scene = self.scenes[name]
         self.scene.set_debug(self.debug)
         self.scene.set_image(self.image)
-        self.scene.set_background(self.background)
+        self.scene.set_background(self.background, self._size)
         self.scene.set_text_color(self.text_color)
         self.scene.set_arrow_offset(self.arrow_offset)
         self.scene.set_arrow_location(self.arrow_location)

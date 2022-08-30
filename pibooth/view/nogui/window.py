@@ -17,7 +17,7 @@ class NoGuiScene(BaseScene):
 
     def set_image(self, image=None): pass
 
-    def set_background(self, color_or_path): pass
+    def set_background(self, color_or_path, size): pass
 
     def set_text_color(self, color): pass
 

@@ -61,15 +61,12 @@ class PygameWindow(BaseWindow):
         :type absolute: bool
         """
         if absolute:
-            return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
+            if 'SDL_VIDEO_WINDOW_POS' in os.environ:
+                posx, posy = [int(v) for v in os.environ['SDL_VIDEO_WINDOW_POS'].split(',')]
+                return self.surface.get_rect(x=posx, y=posy)
+            else:
+                return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
         return self.surface.get_rect()
-
-    def resize(self, size):
-        """Resize the window keeping aspect ratio.
-        """
-        if not self.is_fullscreen:
-            self._size = size  # Manual resizing
-            self.surface = pygame.display.set_mode(self._size, pygame.RESIZABLE)
 
     def toggle_fullscreen(self):
         """Set window to full screen or initial size.
@@ -92,10 +89,13 @@ class PygameWindow(BaseWindow):
         :type events: list
         """
         for event in events:
-            if evtfilters.is_resize_event(event):
-                self.resize(event.size)
+            if evtfilters.is_resize_event(event) and not self.is_fullscreen:
+                self._size = event.size  # Manual resizing
+                self.surface = pygame.display.set_mode(self._size, pygame.RESIZABLE)
+                self.scene.set_background(self.background, self.get_rect().size)
             elif evtfilters.is_fullscreen_event(event):
                 self.toggle_fullscreen()
+                self.scene.set_background(self.background, self.get_rect().size)
             elif evtfilters.is_settings_event(event):
                 self.toggle_menu()
             elif evtfilters.is_print_button_event(event, self):
@@ -104,10 +104,20 @@ class PygameWindow(BaseWindow):
                 LOGGER.debug("EVT_BUTTONDOWN: generate MENU-APPLY event")
                 events += (event,)
 
+        self.scene.update(events)
+
+        if self._keyboard.is_enabled():
+            self._keyboard.update(events)
+
     def draw(self):
         """Draw all Sprites on surface and return updated Pygame rects.
         """
-        return []
+        rects = self.scene.draw(self.surface)
+
+        if self._keyboard.is_enabled():
+            rects += self._keyboard.draw(self.surface)
+
+        return rects
 
     def gui_eventloop(self, app_update):
         """Main GUI events loop (blocking).

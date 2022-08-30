@@ -221,6 +221,7 @@ class PiboothApplication(object):
 
     def update(self, events):
         """Update application and call plugins according to Pygame events.
+        Better to call it in the main thread to avoid plugin thread-safe issues.
 
         :param events: list of events to process.
         :type events: list
