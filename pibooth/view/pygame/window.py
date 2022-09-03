@@ -119,10 +119,10 @@ class PygameWindow(BaseWindow):
 
         return rects
 
-    def gui_eventloop(self, app_update):
+    def eventloop(self, app_update):
         """Main GUI events loop (blocking).
         """
-        fps = 40
+        fps = 30
         clock = pygame.time.Clock()
 
         while True:

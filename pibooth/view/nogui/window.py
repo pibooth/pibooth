@@ -13,7 +13,7 @@ from pibooth.view.base import BaseWindow, BaseScene
 
 class NoGuiScene(BaseScene):
 
-    def set_debug(self, enable=True): pass
+    def set_outlines(self, enable=True): pass
 
     def set_image(self, image=None): pass
 
@@ -21,9 +21,7 @@ class NoGuiScene(BaseScene):
 
     def set_text_color(self, color): pass
 
-    def set_arrow_offset(self, offset): pass
-
-    def set_arrow_location(self, location): pass
+    def set_arrows(self, location, offset): pass
 
     def set_print_number(self, current_nbr=None, failure=False):
         self.nop('set_print_number', current_nbr, failure)
@@ -56,10 +54,10 @@ class NoGuiWindow(BaseWindow):
     def _create_scene(self, name):
         return NoGuiScene(name)
 
-    def gui_eventloop(self, app_update):
+    def eventloop(self, app_update):
         """Main GUI events loop (blocking).
         """
-        fps = 40
+        fps = 30
         clock = pygame.time.Clock()
 
         while True:

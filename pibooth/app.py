@@ -10,6 +10,7 @@ import shutil
 import logging
 
 import pygame
+from PIL import Image
 from gpiozero import ButtonBoard, LEDBoard
 
 import pibooth
@@ -20,33 +21,46 @@ from pibooth.printer import Printer
 from pibooth.utils import LOGGER, PollingTimer, get_crash_message, set_logging_level, AsyncTask
 
 
+def load_last_saved_picture(path):
+    """Load the saved picture last time pibooth was started.
+
+    :return: PIL.Image and path
+    :rtype: tuple
+    """
+    for name in sorted(os.listdir(path), reverse=True):
+        filename = osp.join(path, name)
+        if osp.isfile(filename) and osp.splitext(name)[-1] == '.jpg':
+            return (Image.open(filename), filename)
+    return (None, None)
+
+
 class PiboothApplication(object):
 
     """Main class representing the ``pibooth`` software.
     The following attributes are available for use in plugins:
 
-    :attr capture_nbr: number of capture to be done in the current sequence
-    :type capture_nbr: int
-    :attr capture_date: date (%Y-%m-%d-%H-%M-%S) of the first capture of the current sequence
-    :type capture_date: str
-    :attr capture_choices: possible choices of captures numbers.
-    :type capture_choices: tuple
-    :attr previous_picture: picture generated during last sequence
-    :type previous_picture: :py:class:`PIL.Image`
-    :attr previous_animated: infinite list of picture to display during animation
-    :type previous_animated: :py:func:`itertools.cycle`
-    :attr previous_picture_file: file name of the picture generated during last sequence
-    :type previous_picture_file: str
-    :attr count: holder for counter values
-    :type count: :py:class:`pibooth.counters.Counters`
-    :attr camera: camera used
-    :type camera: :py:class:`pibooth.camera.base.BaseCamera`
-    :attr buttons: access to hardware buttons ``capture`` and ``printer``
-    :type buttons: :py:class:`gpiozero.ButtonBoard`
-    :attr leds: access to hardware LED ``capture`` and ``printer``
-    :attr leds: :py:class:`gpiozero.LEDBoard`
-    :attr printer: printer used
-    :type printer: :py:class:`pibooth.printer.Printer`
+    : attr capture_nbr: number of capture to be done in the current sequence
+    : type capture_nbr: int
+    : attr capture_date: date (% Y-%m-%d-%H-%M-%S) of the first capture of the current sequence
+    : type capture_date: str
+    : attr capture_choices: possible choices of captures numbers.
+    : type capture_choices: tuple
+    : attr previous_picture: picture generated during last sequence
+    : type previous_picture: : py: class: `PIL.Image`
+    : attr previous_animated: infinite list of picture to display during animation
+    : type previous_animated: : py: func: `itertools.cycle`
+    : attr previous_picture_file: file name of the picture generated during last sequence
+    : type previous_picture_file: str
+    : attr count: holder for counter values
+    : type count: : py: class: `pibooth.counters.Counters`
+    : attr camera: camera used
+    : type camera: : py: class: `pibooth.camera.base.BaseCamera`
+    : attr buttons: access to hardware buttons ``capture`` and ``printer``
+    : type buttons: : py: class: `gpiozero.ButtonBoard`
+    : attr leds: access to hardware LED ``capture`` and ``printer``
+    : attr leds: : py: class: `gpiozero.LEDBoard`
+    : attr printer: printer used
+    : type printer: : py: class: `pibooth.printer.Printer`
     """
 
     def __init__(self, config, plugin_manager, window_type='pygame'):
@@ -90,9 +104,10 @@ class PiboothApplication(object):
         self.capture_nbr = None
         self.capture_date = None
         self.capture_choices = (4, 1)
-        self.previous_picture = None
+
         self.previous_animated = None
-        self.previous_picture_file = None
+        self.previous_picture, self.previous_picture_file = load_last_saved_picture(
+            config.gettuple('GENERAL', 'directory', 'path')[0])
 
         self.count = Counters(self._config.join_path("counters.pickle"),
                               taken=0, printed=0, forgotten=0,
@@ -150,7 +165,7 @@ class PiboothApplication(object):
         else:
             if self._window.is_fullscreen:
                 self._window.toggle_fullscreen()
-        self._window.debug = self._config.getboolean('GENERAL', 'debug')
+        self._window.debug = True  # self._config.getboolean('GENERAL', 'debug')
 
         # Handle debug mode
         if not self._config.getboolean('GENERAL', 'debug'):
@@ -182,7 +197,7 @@ class PiboothApplication(object):
                     LOGGER.debug("EVT_BUTTONDOWN: generate DOUBLE buttons event")
                 self.buttons.capture.hold_repeat = False
                 self._multipress_timer.reset()
-                pygame.event.post(event)
+                evtfilters.post(event)
         else:
             # Capture was held but printer not pressed
             if self._window.is_menu_shown:
@@ -195,7 +210,7 @@ class PiboothApplication(object):
                 LOGGER.debug("EVT_BUTTONDOWN: generate CAPTURE button event")
             self.buttons.capture.hold_repeat = False
             self._multipress_timer.reset()
-            pygame.event.post(event)
+            evtfilters.post(event)
 
     def _on_button_printer_held(self):
         """Called when the printer button is pressed.
@@ -209,7 +224,7 @@ class PiboothApplication(object):
             event = pygame.event.Event(evtfilters.EVT_BUTTONDOWN, capture=0, printer=1,
                                        button=self.buttons.printer)
             LOGGER.debug("EVT_BUTTONDOWN: generate PRINTER event")
-            pygame.event.post(event)
+            evtfilters.post(event)
 
     @property
     def picture_filename(self):
@@ -223,8 +238,8 @@ class PiboothApplication(object):
         """Update application and call plugins according to Pygame events.
         Better to call it in the main thread to avoid plugin thread-safe issues.
 
-        :param events: list of events to process.
-        :type events: list
+        : param events: list of events to process.
+        : type events: list
         """
         if evtfilters.find_settings_event(events):
             if not self._window.is_menu_shown:  # Settings menu is opened
@@ -245,7 +260,7 @@ class PiboothApplication(object):
             self._initialize()
             self._pm.hook.pibooth_startup(cfg=self._config, app=self)
             self._machine.set_state('wait')
-            self._window.gui_eventloop(self.update)
+            self._window.eventloop(self.update)
         except KeyboardInterrupt:
             print()
         except Exception as ex:

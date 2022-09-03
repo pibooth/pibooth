@@ -14,8 +14,8 @@ import os.path as osp
 
 import pygame
 from PIL import Image
-from pibooth import evtfilters
 from pibooth.utils import LOGGER
+from pibooth import evtfilters
 from pibooth.pictures import get_picture_factory
 
 
@@ -68,8 +68,8 @@ class Printer(object):
         Call for each new printer event.
         """
         LOGGER.info(evt.title)
-        pygame.event.post(pygame.event.Event(evtfilters.EVT_PRINTER_TASKS_UPDATED,
-                                             tasks=self.get_all_tasks()))
+        evtfilters.post(pygame.event.Event(evtfilters.EVT_PRINTER_TASKS_UPDATED,
+                                           tasks=self.get_all_tasks()))
 
     def is_installed(self):
         """Return True if the CUPS server is available for printing.

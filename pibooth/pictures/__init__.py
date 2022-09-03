@@ -52,6 +52,54 @@ def get_pygame_main_color(surface):
     return tuple(monopixel_surface.get_at((0, 0)))
 
 
+def resize_pygame_image(surface, size, antialiasing=True, hflip=False, vflip=False,
+                        angle=0, crop=False):
+    """Resize a Pygame surface, the image is resized keeping the original
+    surface's aspect ratio.
+
+    :param surface: Pygame surface to resize
+    :type surface: object
+    :param size: resize image to this size
+    :type size: tuple
+    :param antialiasing: use antialiasing algorithm when resize
+    :type antialiasing: bool
+    :param hflip: apply an horizontal flip
+    :type hflip: bool
+    :param vflip: apply a vertical flip
+    :type vflip: bool
+    :param crop: crop image to fit aspect ratio of the size
+    :type crop: bool
+    :param angle: angle of rotation of the image
+    :type angle: int
+
+    :return: pygame.Surface with image
+    :rtype: object
+    """
+    if crop:
+        resize_type = 'outer'
+    else:
+        resize_type = 'inner'
+
+    if size != surface.get_size():
+        if antialiasing:
+            image = pygame.transform.smoothscale(
+                surface, sizing.new_size_keep_aspect_ratio(surface.get_size(), size, resize_type))
+        else:
+            image = pygame.transform.scale(surface, sizing.new_size_keep_aspect_ratio(
+                surface.get_size(), size, resize_type))
+
+    if crop and size != image.get_size():
+        new_surface = pygame.Surface(size, pygame.SRCALPHA, 32)
+        new_surface.blit(image, (0, 0), sizing.new_size_by_croping_ratio(image.get_rect().size, size))
+        image = new_surface
+
+    if hflip or vflip:
+        image = pygame.transform.flip(image, hflip, vflip)
+    if angle != 0:
+        image = pygame.transform.rotate(image, angle)
+    return image
+
+
 def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False,
                      crop=False, angle=0, color=(255, 255, 255), bg_color=None):
     """Return a Pygame image. If a size is given, the image is

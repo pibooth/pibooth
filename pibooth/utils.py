@@ -17,7 +17,7 @@ import errno
 import subprocess
 from concurrent import futures
 import pygame
-
+from pibooth import evtfilters
 
 LOGGER = logging.getLogger("pibooth")
 
@@ -58,7 +58,7 @@ class AsyncTask(object):
         """
         if self.event_type is not None:
             event = pygame.event.Event(self.event_type, result=data)
-            pygame.event.post(event)
+            evtfilters.post(event)
 
     def result(self):
         """Return task result.

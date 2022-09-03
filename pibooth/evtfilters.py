@@ -10,6 +10,18 @@ EVT_CAMERA_PREVIEW = pygame.USEREVENT + 3
 EVT_CAMERA_CAPTURE = pygame.USEREVENT + 4
 
 
+_EVT_EMITTER = pygame.event.post
+
+
+def post(*args, **kwargs):
+    """Post an envent to be processed later by tha main loop. Usefull
+    for thread safe action on view.
+
+    The default implementation use the Pygame event mechanism.
+    """
+    _EVT_EMITTER(*args, **kwargs)
+
+
 def get_event_pos(display_size, event):
     """
     Return the position from finger or mouse event on x-axis and y-axis (x, y).

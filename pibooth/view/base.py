@@ -13,7 +13,7 @@ class BaseScene(object):
     def __init__(self, name):
         self.name = name
 
-    def set_debug(self, enable=True):
+    def set_outlines(self, enable=True):
         raise NotImplementedError
 
     def set_image(self, image=None):
@@ -25,10 +25,7 @@ class BaseScene(object):
     def set_text_color(self, color):
         raise NotImplementedError
 
-    def set_arrow_offset(self, offset):
-        raise NotImplementedError
-
-    def set_arrow_location(self, location):
+    def set_arrows(self, location, offset):
         raise NotImplementedError
 
     def set_print_number(self, current_nbr=None, failure=False):
@@ -97,12 +94,11 @@ class BaseWindow(object):
 
         LOGGER.debug("Set scene '%s'", name)
         self.scene = self.scenes[name]
-        self.scene.set_debug(self.debug)
+        self.scene.set_outlines(self.debug)
         self.scene.set_image(self.image)
         self.scene.set_background(self.background, self._size)
         self.scene.set_text_color(self.text_color)
-        self.scene.set_arrow_offset(self.arrow_offset)
-        self.scene.set_arrow_location(self.arrow_location)
+        self.scene.set_arrows(self.arrow_location, self.arrow_offset)
         self.scene.set_print_number(self.print_number, self.print_failure)
 
     def get_rect(self, absolute=False):
@@ -119,7 +115,7 @@ class BaseWindow(object):
         if not self.is_fullscreen:
             self._size = size  # Manual resizing
 
-    def gui_eventloop(self, app_update):
+    def eventloop(self, app_update):
         """Main GUI events loop (blocking).
 
         :param app_update: function update application state
