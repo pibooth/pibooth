@@ -19,7 +19,7 @@ def post(*args, **kwargs):
 
     The default implementation use the Pygame event mechanism.
     """
-    _EVT_EMITTER(*args, **kwargs)
+    return _EVT_EMITTER(*args, **kwargs)
 
 
 def get_event_pos(display_size, event):
@@ -28,7 +28,9 @@ def get_event_pos(display_size, event):
 
     :param display_size: size of display for relative positioning in finger events
     :param event: pygame event object
+
     :return: position (x, y) in px
+    :rtype: tuple
     """
     if event.type in (pygame.FINGERDOWN, pygame.FINGERMOTION, pygame.FINGERUP):
         finger_pos = (event.x * display_size[0], event.y * display_size[1])

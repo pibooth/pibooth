@@ -38,7 +38,7 @@ add_default_option("GENERAL", "autostart_delay", 0,
                    "Auto-start delay", [str(i) for i in range(0, 121, 5)])
 
 add_default_option("GENERAL", "debug", False,
-                   "In debug mode, exceptions are not caught, logs are more verbose, pictures are cleared at startup",
+                   "In debug mode, exceptions will stop pibooth, logs are more verbose, image placeholders at screen",
                    "Debug mode", ['True', 'False'])
 
 add_default_option("GENERAL", "plugins", '',

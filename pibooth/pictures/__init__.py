@@ -27,7 +27,7 @@ def get_filename(name):
 
 
 def colorize_pil_image(pil_image, color, bg_color=None):
-    """Convert a picto in white to the corresponding color.
+    """Create a "colorized" copy of a PIL image in white to the corresponding color.
 
     :param pil_image: PIL image to be colorized
     :type pil_image: :py:class:`PIL.Image`
@@ -35,6 +35,9 @@ def colorize_pil_image(pil_image, color, bg_color=None):
     :type color: tuple
     :param bg_color: RGB color to use for the picto's background
     :type bg_color: tuple
+
+    :return: new colorized Image instance
+    :rtype: object
     """
     if not bg_color:
         bg_color = (abs(color[0] - 255), abs(color[1] - 255), abs(color[2] - 255))
@@ -45,15 +48,50 @@ def colorize_pil_image(pil_image, color, bg_color=None):
     return new_pil_image
 
 
-def get_pygame_main_color(surface):
-    """Return the main color of the given pygame surface.
+def colorize_pygame_image(surface, color):
+    """Create a "colorized" copy of a surface (replaces RGB values with the given color, preserving
+    the per-pixel alphas of original).
+
+    :param surface: surface to create a colorized copy of
+    :type surface: object
+    :param color: RGB color to use (original alpha values are preserved)
+    :type color: tuple
+
+    :return: new colorized Surface instance
+    :rtype: object
     """
-    monopixel_surface = pygame.transform.scale(surface, (1, 1))
-    return tuple(monopixel_surface.get_at((0, 0)))
+    surface = surface.copy()
+
+    # zero out RGB values
+    surface.fill((0, 0, 0, 255), None, pygame.BLEND_RGBA_MULT)
+    # add in new RGB values
+    surface.fill(color[0:3] + (0,), None, pygame.BLEND_RGBA_ADD)
+
+    return surface
 
 
-def resize_pygame_image(surface, size, antialiasing=True, hflip=False, vflip=False,
-                        angle=0, crop=False):
+def load_pygame_image(filename):
+    """Load Pygame image from located in `pibooth.pictures.assets` folder
+    or from path.
+
+    :param filename: name of asset (with extension) or path to an image file
+    :type filename: str
+
+    :return: Pygame surface
+    :rtype: object
+    """
+    if osp.isfile(filename):
+        path = filename
+    else:
+        path = get_filename(filename)
+
+    if osp.isfile(path):
+        return pygame.image.load(path).convert_alpha()
+    raise ValueError(f"No such image file '{filename}'")
+
+
+def transform_pygame_image(surface, size, antialiasing=True, hflip=False, vflip=False,
+                           angle=0, crop=False, color=None):
     """Resize a Pygame surface, the image is resized keeping the original
     surface's aspect ratio.
 
@@ -67,10 +105,12 @@ def resize_pygame_image(surface, size, antialiasing=True, hflip=False, vflip=Fal
     :type hflip: bool
     :param vflip: apply a vertical flip
     :type vflip: bool
-    :param crop: crop image to fit aspect ratio of the size
+    :param crop: crop image to fit the size keeping aspect ratio
     :type crop: bool
     :param angle: angle of rotation of the image
     :type angle: int
+    :param color: recolorize image
+    :type color: tuple
 
     :return: pygame.Surface with image
     :rtype: object
@@ -87,16 +127,26 @@ def resize_pygame_image(surface, size, antialiasing=True, hflip=False, vflip=Fal
         else:
             image = pygame.transform.scale(surface, sizing.new_size_keep_aspect_ratio(
                 surface.get_size(), size, resize_type))
+    else:
+        image = surface.copy()
 
     if crop and size != image.get_size():
+        # Crop image to fill surface
         new_surface = pygame.Surface(size, pygame.SRCALPHA, 32)
         new_surface.blit(image, (0, 0), sizing.new_size_by_croping_ratio(image.get_rect().size, size))
+        image = new_surface
+    elif size != image.get_size():
+        # Center image on surface
+        new_surface = pygame.Surface(size, pygame.SRCALPHA, 32)
+        new_surface.blit(image, image.get_rect(center=new_surface.get_rect().center))
         image = new_surface
 
     if hflip or vflip:
         image = pygame.transform.flip(image, hflip, vflip)
     if angle != 0:
         image = pygame.transform.rotate(image, angle)
+    if color:
+        image = colorize_pygame_image(image, color)
     return image
 
 
@@ -128,23 +178,20 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
     :rtype: object
     """
     path = get_filename(name)
-    if not size and not color:
-        image = pygame.image.load(path).convert()
+    if osp.isfile(path):
+        pil_image = Image.open(path)
     else:
-        if osp.isfile(path):
-            pil_image = Image.open(path)
-        else:
-            pil_image = Image.new('RGBA', size, (0, 0, 0, 0))
+        pil_image = Image.new('RGBA', size, (0, 0, 0, 0))
 
-        if color:
-            pil_image = colorize_pil_image(pil_image, color, bg_color)
+    if color:
+        pil_image = colorize_pil_image(pil_image, color, bg_color)
 
-        if crop:
-            pil_image = pil_image.crop(sizing.new_size_by_croping_ratio(pil_image.size, size))
-        pil_image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, size),
-                                     Image.ANTIALIAS if antialiasing else Image.NEAREST)
+    if crop:
+        pil_image = pil_image.crop(sizing.new_size_by_croping_ratio(pil_image.size, size))
+    pil_image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, size),
+                                 Image.ANTIALIAS if antialiasing else Image.NEAREST)
 
-        image = pygame.image.frombuffer(pil_image.tobytes(), pil_image.size, pil_image.mode).convert()
+    image = pygame.image.frombuffer(pil_image.tobytes(), pil_image.size, pil_image.mode).convert()
 
     if hflip or vflip:
         image = pygame.transform.flip(image, hflip, vflip)
@@ -221,6 +268,9 @@ def get_picture_factory(captures, orientation=AUTO, paper_format=(4, 6), force_p
     :type force_pil: bool
     :param dpi: dot-per-inche resolution
     :type dpi: int
+
+    :return: PictureFactory instance
+    :rtype: object
     """
     assert orientation in (AUTO, PORTRAIT, LANDSCAPE), "Unknown orientation '{}'".format(orientation)
     if orientation == AUTO:

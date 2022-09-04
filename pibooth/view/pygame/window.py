@@ -139,6 +139,7 @@ class PygameWindow(BaseWindow):
 
             # Draw view elements
             rects = self.draw()
+            print(rects)
 
             # Update dirty rects on screen
             pygame.display.update(rects)

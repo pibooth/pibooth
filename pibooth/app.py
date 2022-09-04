@@ -6,7 +6,6 @@
 
 import os
 import os.path as osp
-import shutil
 import logging
 
 import pygame
@@ -24,7 +23,7 @@ from pibooth.utils import LOGGER, PollingTimer, get_crash_message, set_logging_l
 def load_last_saved_picture(path):
     """Load the saved picture last time pibooth was started.
 
-    :return: PIL.Image and path
+    :return: PIL.Image instance and path
     :rtype: tuple
     """
     for name in sorted(os.listdir(path), reverse=True):
@@ -69,8 +68,6 @@ class PiboothApplication(object):
 
         # Create directories where pictures are saved
         for savedir in config.gettuple('GENERAL', 'directory', 'path'):
-            if osp.isdir(savedir) and config.getboolean('GENERAL', 'debug'):
-                shutil.rmtree(savedir)
             if not osp.isdir(savedir):
                 os.makedirs(savedir)
 
@@ -165,7 +162,7 @@ class PiboothApplication(object):
         else:
             if self._window.is_fullscreen:
                 self._window.toggle_fullscreen()
-        self._window.debug = True  # self._config.getboolean('GENERAL', 'debug')
+        self._window.debug = self._config.getboolean('GENERAL', 'debug')
 
         # Handle debug mode
         if not self._config.getboolean('GENERAL', 'debug'):
