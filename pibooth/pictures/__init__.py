@@ -120,6 +120,9 @@ def transform_pygame_image(surface, size, antialiasing=True, hflip=False, vflip=
     else:
         resize_type = 'inner'
 
+    if angle != 0:
+        surface = pygame.transform.rotate(surface, angle)
+
     if size != surface.get_size():
         if antialiasing:
             image = pygame.transform.smoothscale(
@@ -143,8 +146,6 @@ def transform_pygame_image(surface, size, antialiasing=True, hflip=False, vflip=
 
     if hflip or vflip:
         image = pygame.transform.flip(image, hflip, vflip)
-    if angle != 0:
-        image = pygame.transform.rotate(image, angle)
     if color:
         image = colorize_pygame_image(image, color)
     return image

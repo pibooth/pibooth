@@ -103,6 +103,12 @@ class ImageSprite(pygame.sprite.DirtySprite):
         """Draw image if has changed and visible.
         """
         if self.image is None and self.visible:
+            if self.image_orig is None:
+                if self.path:
+                    self.image_orig = pictures.load_pygame_image(self.path)
+                else:
+                    raise ValueError("Path to image is missing")
+
             if isinstance(self.image_orig, (tuple, list)):
                 self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
                 self.image.fill(self.image_orig)
@@ -134,7 +140,7 @@ class ImageSprite(pygame.sprite.DirtySprite):
         if isinstance(skin, str):
             if skin != self.path:
                 self.path, self.image = skin, None  # Force rendering
-                self.image_orig = pictures.load_pygame_image(self.path)
+                self.image_orig = None
                 self.dirty = 1
         elif isinstance(skin, (tuple, list)):
             assert len(skin) == 3, "Length of 3 is required for RGB tuple"
@@ -207,10 +213,10 @@ class ImageSprite(pygame.sprite.DirtySprite):
         :param width: background width
         :param height: background height
         """
-        if self.rect.topleft != (x, y):
+        if self.rect.topleft != (int(x), int(y)):
             self.rect.topleft = (x, y)
             self.dirty = 1
-        if self.rect.size != (width, height):
+        if self.rect.size != (int(width), int(height)):
             self.rect.size = (width, height)
             self.image = None  # Force rendering
             self.dirty = 1
@@ -231,7 +237,7 @@ class TextSprite(pygame.sprite.DirtySprite):
         :param path: image file path
         :type path: str
         """
-        super(ImageSprite, self).__init__()
+        super(TextSprite, self).__init__()
         self.image = None
         self.rect = pygame.Rect((0, 0), size)
         self.text = text
@@ -308,6 +314,7 @@ class BasePygameScene(BaseScene):
         self.image = ImageSprite()
         self.image.visible = 0
         self.add_sprite(self.image, layer=3)
+        self.arrow_location = BaseWindow.ARROW_BOTTOM
 
     def add_sprite(self, sprite, outlines=True, layer=0):
         """Declare a new sprite to draw.
@@ -341,6 +348,10 @@ class BasePygameScene(BaseScene):
     @ property
     def background(self):
         return BasePygameScene.BACKGROUND
+
+    @ property
+    def rect(self):
+        return BasePygameScene.BACKGROUND.rect
 
     def set_background(self, color_or_path, size):
         """Set background sprite.
@@ -385,6 +396,7 @@ class BasePygameScene(BaseScene):
     def set_arrows(self, location, offset):
         """Set arrows attributes.
         """
+        self.arrow_location = location
         for sprite in self.sprites.get_sprites_from_layer(4):
             sprite.set_location(location)
             sprite.set_offset(offset)
@@ -401,6 +413,11 @@ class BasePygameScene(BaseScene):
         pass
 
     def _compute_position_and_size(self, events):
+        """Function call at each update responsible to recalculate positions ans sizes.
+
+        :param events: list of events to process.
+        :type events: list
+        """
         pass
 
     def update(self, events):
