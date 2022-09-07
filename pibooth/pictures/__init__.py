@@ -61,12 +61,10 @@ def colorize_pygame_image(surface, color):
     :rtype: object
     """
     surface = surface.copy()
-
     # zero out RGB values
     surface.fill((0, 0, 0, 255), None, pygame.BLEND_RGBA_MULT)
     # add in new RGB values
     surface.fill(color[0:3] + (0,), None, pygame.BLEND_RGBA_ADD)
-
     return surface
 
 
@@ -149,6 +147,57 @@ def transform_pygame_image(surface, size, antialiasing=True, hflip=False, vflip=
     if color:
         image = colorize_pygame_image(image, color)
     return image
+
+
+def text_to_pygame_image(text, size, color, align='center', bg_color=None):
+    """Return a surface the text fit inside.
+
+    The ``align`` parameter can be one of:
+       * top-left
+       * top-center
+       * top-right
+       * center-left
+       * center
+       * center-right
+       * bottom-left
+       * bottom-center
+       * bottom-right
+    """
+    lines = text.splitlines()
+    surface = pygame.Surface(size, pygame.SRCALPHA, 32)
+
+    font = fonts.get_pygame_font(max(lines, key=len), fonts.CURRENT, size[0], size[1] // len(lines))
+    for i, line in enumerate(lines):
+        text_surface = font.render(line, True, color)
+
+        loc = {}
+
+        if align.endswith('left'):
+            loc['left'] = 0
+        elif align.endswith('center'):
+            loc['centerx'] = surface.get_rect().centerx
+        elif align.endswith('right'):
+            loc['right'] = surface.get_rect().right
+        else:
+            raise ValueError("Invalid horizontal alignment '{}'".format(align))
+
+        line_height = text_surface.get_rect().height
+        if align.startswith('top'):
+            loc['top'] = i * line_height
+        elif align.startswith('center'):
+            loc['top'] = surface.get_rect().centery - len(lines) * line_height // 2 + i * line_height
+        elif align.startswith('bottom'):
+            loc['bottom'] = surface.get_rect().bottom - (len(lines) - 1 - i) * line_height
+        else:
+            raise ValueError("Invalid vertical alignment '{}'".format(align))
+
+        if bg_color:
+            bg_surface = pygame.Surface(text_surface.get_size(), pygame.SRCALPHA, 32)
+            bg_surface.fill(bg_color)
+            surface.blit(bg_surface, text_surface.get_rect(**loc))
+
+        surface.blit(text_surface, text_surface.get_rect(**loc))
+    return surface
 
 
 def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=False,
