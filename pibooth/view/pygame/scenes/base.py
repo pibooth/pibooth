@@ -79,9 +79,13 @@ class BaseSprite(pygame.sprite.DirtySprite):
         """Set the sprite absolute position and size.
 
         :param x: position x
+        :type x: int
         :param y: position y
+        :type y: int
         :param width: background width
+        :type width: int
         :param height: background height
+        :type height: int
         """
         if self.rect.topleft != (int(x), int(y)):
             self.rect.topleft = (x, y)
@@ -329,8 +333,16 @@ class LeftArrowSprite(ArrowSprite):
         elif location == BaseWindow.ARROW_TOP:
             self.set_flip(vflip=True)
             self.show()
+        elif location == BaseWindow.ARROW_TOUCH:
+            self.show()
         else:
             self.hide()
+
+    def set_rect(self, x, y, width, height):
+        """Set the sprite absolute position and size.
+        """
+        x -= self.offset
+        super(LeftArrowSprite, self).set_rect(x, y, width, height)
 
 
 class RightArrowSprite(LeftArrowSprite):
@@ -338,6 +350,12 @@ class RightArrowSprite(LeftArrowSprite):
     def __init__(self, *args, **kwargs):
         super(RightArrowSprite, self).__init__(*args, **kwargs)
         self.set_flip(hflip=True)
+
+    def set_rect(self, x, y, width, height):
+        """Set the sprite absolute position and size.
+        """
+        x += self.offset
+        ArrowSprite.set_rect(self, x, y, width, height)
 
 
 class BasePygameScene(BaseScene):
@@ -425,6 +443,7 @@ class BasePygameScene(BaseScene):
     def set_image(self, image=None):
         """Set an image to the main place or hide it.
         """
+        print("image", image)
         if image:
             self.image.set_skin(image)
             self.image.show()
@@ -453,6 +472,11 @@ class BasePygameScene(BaseScene):
             sprite.set_offset(offset)
 
     def set_text_color(self, color):
+        """Set text font color.
+
+        :param color: RGB color tuple for the texts
+        :type color: tuple
+        """
         # Texts
         for sprite in self.sprites.get_sprites_from_layer(1):
             sprite.set_color(color)

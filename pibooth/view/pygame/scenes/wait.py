@@ -47,15 +47,15 @@ class WaitScene(BasePygameScene):
         self.intro_print.set_text(get_translated_text("intro_print"))
         rect = pygame.Rect(self.rect.width * 0.3, 0, self.rect.width * 0.2, self.rect.height * 0.2)
         if self.arrow_location == BaseWindow.ARROW_TOP:
-            rect.top = self.rect.height * 0.08
+            rect.top = self.rect.height * 0.11
         else:
-            rect.bottom = self.rect.height - self.rect.height * 0.08
+            rect.bottom = self.rect.height - self.rect.height * 0.11
         self.intro_print.set_rect(*tuple(rect))
 
         # Left arrow
         if self.arrow_location == BaseWindow.ARROW_TOUCH:
             self.left_arrow.set_skin('touch.png')
-            size = (self.rect.width * 0.2, self.rect.height * 0.2)
+            size = (self.rect.width * 0.15, self.rect.height * 0.15)
             x = self.rect.width * 0.2
             y = self.rect.height // 2
         elif self.arrow_location in [BaseWindow.ARROW_BOTTOM, BaseWindow.ARROW_TOP]:
@@ -66,8 +66,7 @@ class WaitScene(BasePygameScene):
                 y = self.rect.top + 10
             else:
                 y = self.rect.bottom - size[1] - 10
-        if self.arrow_location != BaseWindow.ARROW_HIDDEN:
-            self.left_arrow.set_rect(x - self.left_arrow.offset, y, size[0], size[1])
+        self.left_arrow.set_rect(x, y, size[0], size[1])
 
         # Right arrow
         size = (self.rect.width * 0.1, self.rect.height * 0.1)
@@ -82,11 +81,12 @@ class WaitScene(BasePygameScene):
         elif self.arrow_location in [BaseWindow.ARROW_BOTTOM, BaseWindow.ARROW_TOP]:
             self.right_arrow.set_skin('arrow.png')
             self.right_arrow.set_angle(-60)
-        if self.arrow_location != BaseWindow.ARROW_HIDDEN:
-            self.right_arrow.set_rect(x + self.right_arrow.offset, y, size[0], size[1])
+        self.right_arrow.set_rect(x, y, size[0], size[1])
 
     def update_print_action(self, enabled=True):
         if enabled and self.right_arrow.location != BaseWindow.ARROW_HIDDEN:
             self.right_arrow.show()
+            self.intro_print.show()
         else:
             self.right_arrow.hide()
+            self.intro_print.hide()
