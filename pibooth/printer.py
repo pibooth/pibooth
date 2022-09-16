@@ -68,8 +68,7 @@ class Printer(object):
         Call for each new printer event.
         """
         LOGGER.info(evt.title)
-        evtfilters.post(pygame.event.Event(evtfilters.EVT_PRINTER_TASKS_UPDATED,
-                                           tasks=self.get_all_tasks()))
+        evtfilters.post(evtfilters.EVT_PRINTER_TASKS_UPDATED, notification=evt)
 
     def is_installed(self):
         """Return True if the CUPS server is available for printing.

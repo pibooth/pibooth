@@ -25,8 +25,8 @@ class LightsPlugin(object):
             app.leds.printer.off()
 
     @pibooth.hookimpl
-    def state_wait_do(self, app, win, events):
-        if evtfilters.find_print_event(events, win) and app.previous_picture_file and app.printer.is_ready():
+    def state_wait_do(self, app, events):
+        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_PRINT) and app.previous_picture_file and app.printer.is_ready():
             if app.count.remaining_duplicates <= 0:
                 app.leds.printer.off()
             else:
@@ -63,8 +63,8 @@ class LightsPlugin(object):
         app.leds.blink(on_time=self.blink_time, off_time=self.blink_time)
 
     @pibooth.hookimpl
-    def state_print_do(self, app, win, events):
-        if evtfilters.find_print_event(events, win):
+    def state_print_do(self, app, events):
+        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_PRINT):
             app.leds.printer.on()
             app.leds.capture.off()
 

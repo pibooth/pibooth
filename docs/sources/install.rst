@@ -85,6 +85,7 @@ Manual procedure
    .. code-block:: bash
 
         sudo apt-get install cups libcups2-dev
+        sudo apt-get install printer-driver-gutenprint
 
 7. Optionally install ``OpenCV`` to improve images generation efficiency or if a
    Webcam is used:

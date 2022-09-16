@@ -19,6 +19,10 @@ from pibooth.states import StateMachine
 from pibooth.printer import Printer
 from pibooth.utils import LOGGER, PollingTimer, get_crash_message, set_logging_level, AsyncTask
 
+import pstats
+import cProfile
+PROFILER = cProfile.Profile()
+
 
 def load_last_saved_picture(path):
     """Load the saved picture last time pibooth was started.
@@ -184,30 +188,16 @@ class PiboothApplication(object):
                 self._multipress_timer.start()
             if self._multipress_timer.is_timeout():
                 # Capture was held while printer was pressed
-                if self._window.is_menu_shown:
-                    # Convert HW button events to keyboard events for menu
-                    event = evtfilters.create_back_event()
-                    LOGGER.debug("EVT_BUTTONDOWN: generate MENU-ESC event")
-                else:
-                    event = pygame.event.Event(evtfilters.EVT_BUTTONDOWN, capture=1, printer=1,
-                                               button=self.buttons)
-                    LOGGER.debug("EVT_BUTTONDOWN: generate DOUBLE buttons event")
+                LOGGER.debug("EVT_PIBOOTH_BTN_SETTINGS")
                 self.buttons.capture.hold_repeat = False
                 self._multipress_timer.reset()
-                evtfilters.post(event)
+                evtfilters.post(evtfilters.EVT_PIBOOTH_BTN_SETTINGS, button=self.buttons)
         else:
             # Capture was held but printer not pressed
-            if self._window.is_menu_shown:
-                # Convert HW button events to keyboard events for menu
-                event = evtfilters.create_next_event()
-                LOGGER.debug("EVT_BUTTONDOWN: generate MENU-NEXT event")
-            else:
-                event = pygame.event.Event(evtfilters.EVT_BUTTONDOWN, capture=1, printer=0,
-                                           button=self.buttons.capture)
-                LOGGER.debug("EVT_BUTTONDOWN: generate CAPTURE button event")
+            LOGGER.debug("EVT_PIBOOTH_BTN_CAPTURE")
             self.buttons.capture.hold_repeat = False
             self._multipress_timer.reset()
-            evtfilters.post(event)
+            evtfilters.post(evtfilters.EVT_PIBOOTH_BTN_CAPTURE, button=self.buttons.capture)
 
     def _on_button_printer_held(self):
         """Called when the printer button is pressed.
@@ -218,10 +208,8 @@ class PiboothApplication(object):
             pass
         else:
             # Printer was held but capture not pressed
-            event = pygame.event.Event(evtfilters.EVT_BUTTONDOWN, capture=0, printer=1,
-                                       button=self.buttons.printer)
-            LOGGER.debug("EVT_BUTTONDOWN: generate PRINTER event")
-            evtfilters.post(event)
+            LOGGER.debug("EVT_PIBOOTH_BTN_PRINT")
+            evtfilters.post(evtfilters.EVT_PIBOOTH_BTN_PRINT, button=self.buttons.printer)
 
     @property
     def picture_filename(self):
@@ -238,7 +226,7 @@ class PiboothApplication(object):
         : param events: list of events to process.
         : type events: list
         """
-        if evtfilters.find_settings_event(events):
+        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_SETTINGS):
             if not self._window.is_menu_shown:  # Settings menu is opened
                 self.camera.stop_preview()
                 self.leds.off()
@@ -257,6 +245,7 @@ class PiboothApplication(object):
             self._initialize()
             self._pm.hook.pibooth_startup(cfg=self._config, app=self)
             self._machine.set_state('wait')
+            PROFILER.enable()
             self._window.eventloop(self.update)
         except KeyboardInterrupt:
             print()
@@ -264,6 +253,10 @@ class PiboothApplication(object):
             LOGGER.error(str(ex), exc_info=True)
             LOGGER.error(get_crash_message())
         finally:
+            # stats = pstats.Stats(PROFILER).sort_stats('cumtime')
+            # stats.print_stats()
+            PROFILER.disable()
+
             self._pm.hook.pibooth_cleanup(app=self)
             AsyncTask.kill_all()
             pygame.quit()

@@ -33,8 +33,8 @@ class PrinterPlugin(object):
         app.count.remaining_duplicates = cfg.getint('PRINTER', 'max_duplicates')
 
     @pibooth.hookimpl
-    def state_wait_do(self, cfg, app, win, events):
-        if evtfilters.find_print_event(events, win) and app.previous_picture_file and app.printer.is_installed():
+    def state_wait_do(self, cfg, app, events):
+        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_PRINT) and app.previous_picture_file and app.printer.is_installed():
 
             if app.count.remaining_duplicates <= 0:
                 LOGGER.warning("Too many duplicates sent to the printer (%s max)",
@@ -63,6 +63,6 @@ class PrinterPlugin(object):
                     self.print_picture(cfg, app)
 
     @pibooth.hookimpl
-    def state_print_do(self, cfg, app, win, events):
-        if evtfilters.find_print_event(events, win) and app.previous_picture_file:
+    def state_print_do(self, cfg, app, events):
+        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_PRINT) and app.previous_picture_file:
             self.print_picture(cfg, app)

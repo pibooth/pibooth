@@ -10,6 +10,11 @@ from pibooth.utils import LOGGER
 class BaseScene(object):
     """Base class for scene."""
 
+    ARROW_TOP = 'top'
+    ARROW_BOTTOM = 'bottom'
+    ARROW_HIDDEN = 'hidden'
+    ARROW_TOUCH = 'touchscreen'
+
     def __init__(self, name):
         self.name = name
 
@@ -43,28 +48,23 @@ class BaseWindow(object):
     """
 
     FULLSCREEN = 'fullscreen'
-    ARROW_TOP = 'top'
-    ARROW_BOTTOM = 'bottom'
-    ARROW_HIDDEN = 'hidden'
-    ARROW_TOUCH = 'touchscreen'
 
     def __init__(self,
                  size=(800, 480),
                  background=(0, 0, 0),
                  text_color=(255, 255, 255),
-                 arrow_location=ARROW_BOTTOM,
+                 arrow_location=BaseScene.ARROW_BOTTOM,
                  arrow_offset=0,
                  debug=False):
         self._size = size
 
         self.debug = debug
         self.text_color = text_color
-        self.background = background
+        self.bg_color_or_path = background
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
         self.print_number = 0
         self.print_failure = False
-        self.image = None
 
         self.is_fullscreen = False
         self.is_menu_shown = False
@@ -95,8 +95,7 @@ class BaseWindow(object):
         LOGGER.debug("Set scene '%s'", name)
         self.scene = self.scenes[name]
         self.scene.set_outlines(self.debug)
-        self.scene.set_image(self.image)
-        self.scene.set_background(self.background, self._size)
+        self.scene.set_background(self.bg_color_or_path, self._size)
         self.scene.set_text_color(self.text_color)
         self.scene.set_arrows(self.arrow_location, self.arrow_offset)
         self.scene.set_print_number(self.print_number, self.print_failure)
@@ -129,8 +128,7 @@ class BaseWindow(object):
     def set_image(self, pil_image=None):
         """Set the current displayed image.
         """
-        self.image = pil_image
-        self.scene.set_image(self.image)
+        self.scene.set_image(pil_image)
 
     def set_print_number(self, current_nbr=None, failure=False):
         """Set the current number of tasks in the printer queue.

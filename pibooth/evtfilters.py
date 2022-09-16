@@ -4,10 +4,12 @@ import pygame
 from pygame._sdl2 import touch
 import pygame_menu as pgm
 
-EVT_BUTTONDOWN = pygame.USEREVENT + 1
-EVT_PRINTER_TASKS_UPDATED = pygame.USEREVENT + 2
-EVT_CAMERA_PREVIEW = pygame.USEREVENT + 3
-EVT_CAMERA_CAPTURE = pygame.USEREVENT + 4
+EVT_PIBOOTH_BTN_CAPTURE = pygame.USEREVENT + 201
+EVT_PIBOOTH_BTN_PRINT = pygame.USEREVENT + 202
+EVT_PIBOOTH_BTN_SETTINGS = pygame.USEREVENT + 203
+EVT_PRINTER_TASKS_UPDATED = pygame.USEREVENT + 204
+EVT_PIBOOTH_CAM_PREVIEW = pygame.USEREVENT + 205
+EVT_PIBOOTH_CAM_CAPTURE = pygame.USEREVENT + 206
 
 
 _EVT_EMITTER = pygame.event.post
@@ -19,7 +21,19 @@ def post(*args, **kwargs):
 
     The default implementation use the Pygame event mechanism.
     """
-    return _EVT_EMITTER(*args, **kwargs)
+    return _EVT_EMITTER(pygame.event.Event(*args, **kwargs))
+
+
+def post_capture_button_event():
+    """Post EVT_PIBOOTH_BTN_CAPTURE.
+    """
+    return post(EVT_PIBOOTH_BTN_CAPTURE)
+
+
+def post_print_button_event():
+    """Post EVT_PIBOOTH_BTN_PRINT.
+    """
+    return post(EVT_PIBOOTH_BTN_PRINT)
 
 
 def get_event_pos(display_size, event):
@@ -38,136 +52,74 @@ def get_event_pos(display_size, event):
     return event.pos
 
 
-def is_quit_event(event):
-    """Return True if quit event."""
-    return event.type == pygame.QUIT
+def get_top_visible(sprites, from_layers=(1, 2, 3, 4)):
+    """Return the top sprite (last of the list) which is visible.
 
-
-def is_resize_event(event):
-    """Return True if resize event."""
-    return event.type == pygame.VIDEORESIZE
+    :param sprites: sprites list
+    :type sprites: list
+    :param from_layers: layers to belong to
+    :type from_layers: list
+    """
+    for sp in reversed(sprites):
+        if sp.visible and sp.layer in from_layers:
+            return sp
+    return None
 
 
 def is_fullscreen_event(event):
-    """Return True if fullscreen event:
-        - CTRL + F key
+    """Return True if fullscreen event.
     """
     return event.type == pygame.KEYDOWN and \
         event.key == pygame.K_f and pygame.key.get_mods() & pygame.KMOD_CTRL
 
 
+def is_fingers_event(event, nbr_fingers):
+    """Return True if screen is touched with the number of fingers (or more).
+    """
+    return event.type == pygame.FINGERDOWN and touch.get_num_fingers(event.touch_id) >= nbr_fingers
+
+
 def is_settings_event(event):
-    """Return True if settings event:
-        - ESCAPE key
-        - CAPTURE button
-        - 4 FINGERS touch
+    """Return True if settings event.
     """
-    if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-        return True
-    if event.type == EVT_BUTTONDOWN and event.capture and event.printer:
-        return True
-    if event.type == pygame.FINGERDOWN:
-        return touch.get_num_fingers(event.touch_id) > 3
-    return False
+    return event.type == EVT_PIBOOTH_BTN_SETTINGS
 
 
-def is_capture_button_event(event, window):
-    """Return True if capture button event:
-        - LEFT key
-        - CAPTURE button
-        - MOUSE click on half-left screen
-        - FINGER touch on half-left screen
+def is_capture_button_event(event):
+    """Return True if capture button event.
     """
-    if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-        return True
-    if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
-        pos = get_event_pos(window.display_size, event)
-        rect = window.get_rect()
-        if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(pos):
-            return True
-    if event.type == EVT_BUTTONDOWN and event.capture:
-        return True
-    return False
+    return event.type == EVT_PIBOOTH_BTN_CAPTURE
 
 
-def is_print_button_event(event, window):
-    """Return True if capture button event:
-        - RIGHT key
-        - PRINTER button
-        - MOUSE click on half-right screen
-        - FINGER touch on half-right screen
+def is_print_button_event(event):
+    """Return True if capture button event.
     """
-    if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-        return True
-    if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
-        pos = get_event_pos(window.display_size, event)
-        rect = window.get_rect()
-        if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(pos):
-            return True
-    if event.type == EVT_BUTTONDOWN and event.printer:
-        return True
-    return False
+    return event.type == EVT_PIBOOTH_BTN_PRINT
 
 
 def is_printer_status_event(event):
-    """Return True if printer status event."""
+    """Return True if printer status event.
+    """
     return event.type == EVT_PRINTER_TASKS_UPDATED
 
 
-def find_quit_event(events):
+def is_camera_capture_event(event):
+    """Return True if camera capture event.
+    """
+    return event.type == EVT_PIBOOTH_CAM_CAPTURE
+
+
+def is_camera_preview_event(event):
+    """Return True if camera preview event.
+    """
+    return event.type == EVT_PIBOOTH_CAM_PREVIEW
+
+
+def find_event(events, event_type):
     """Return the first found event if found in the list.
     """
     for event in events:
-        if is_quit_event(event):
-            return event
-    return None
-
-
-def find_settings_event(events):
-    """Return the first found event if found in the list.
-    """
-    for event in events:
-        if is_settings_event(event):
-            return event
-    return None
-
-
-def find_capture_event(events, window):
-    """Return the first found event if found in the list.
-    """
-    for event in events:
-        if is_capture_button_event(event, window):
-            return event
-    return None
-
-
-def find_print_event(events, window):
-    """Return the first found event if found in the list.
-    """
-    for event in events:
-        if is_print_button_event(event, window):
-            return event
-    return None
-
-
-def find_choice_event(events, window):
-    """Return the first found event if found in the list.
-    """
-    for event in events:
-        if is_capture_button_event(event, window):
-            event.key = pygame.K_LEFT
-            return event
-        if is_print_button_event(event, window):
-            event.key = pygame.K_RIGHT
-            return event
-    return None
-
-
-def find_print_status_event(events):
-    """Return the first found event if found in the list.
-    """
-    for event in events:
-        if is_printer_status_event(event):
+        if event.type == event_type:
             return event
     return None
 

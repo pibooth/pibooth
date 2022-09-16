@@ -66,18 +66,17 @@ class ViewPlugin(object):
         else:
             previous_picture = app.previous_picture
 
-        event = evtfilters.find_print_status_event(events)
-        if event and app.printer.is_installed():
-            win.set_print_number(len(event.tasks), not app.printer.is_ready())
+        if evtfilters.find_event(events, evtfilters.EVT_PRINTER_TASKS_UPDATED) and app.printer.is_installed():
+            win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
 
-        if evtfilters.find_print_event(events, win):
+        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_PRINT):
             win.scene.update_print_action(app.printer.is_ready() and app.count.remaining_duplicates > 0)
 
         win.set_image(previous_picture)
 
     @pibooth.hookimpl
-    def state_wait_validate(self, cfg, app, win, events):
-        if evtfilters.find_capture_event(events, win):
+    def state_wait_validate(self, cfg, app, events):
+        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_CAPTURE):
             if len(app.capture_choices) > 1:
                 return 'choose'
             if cfg.getfloat('WINDOW', 'chosen_delay') > 0:
@@ -94,6 +93,11 @@ class ViewPlugin(object):
         win.set_print_number(0, False)  # Hide printer status
         win.scene.set_choices(app.capture_choices)
         self.choose_timer.start()
+
+    @pibooth.hookimpl
+    def state_choose_do(self, app, win, events):
+        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_CAPTURE):
+            app.capture_nbr = win.scene.get_selection()
 
     @pibooth.hookimpl
     def state_choose_validate(self, cfg, app):
@@ -125,7 +129,7 @@ class ViewPlugin(object):
     @pibooth.hookimpl
     def state_preview_do(self, win, events):
         for event in events:
-            if event.type == evtfilters.EVT_CAMERA_PREVIEW:
+            if event.type == evtfilters.EVT_PIBOOTH_CAM_PREVIEW:
                 win.set_image(event.result)
 
     @pibooth.hookimpl
@@ -143,9 +147,8 @@ class ViewPlugin(object):
 
         win.scene.set_capture_number(self.count, app.capture_nbr)
 
-        for event in events:
-            if event.type == evtfilters.EVT_CAMERA_CAPTURE:
-                self.capture_finished = True
+        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_CAM_CAPTURE):
+            self.capture_finished = True
 
     @pibooth.hookimpl
     def state_capture_validate(self, cfg, app):
@@ -171,8 +174,8 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_print_validate(self, app, win, events):
-        printed = evtfilters.find_print_event(events, win)
-        self.forgotten = evtfilters.find_capture_event(events, win)
+        printed = evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_PRINT)
+        self.forgotten = evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_CAPTURE)
         if self.print_view_timer.is_timeout() or printed or self.forgotten:
             if printed:
                 win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())

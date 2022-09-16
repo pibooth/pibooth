@@ -5,7 +5,8 @@ import PIL
 import pygame
 
 from pibooth import pictures
-from pibooth.view.base import BaseWindow, BaseScene
+from pibooth import evtfilters
+from pibooth.view.base import BaseScene
 
 
 class OutlinesSprite(pygame.sprite.DirtySprite):
@@ -58,6 +59,9 @@ class BaseSprite(pygame.sprite.DirtySprite):
         self.image = None
         self.rect = pygame.Rect((0, 0), size)
         self.outlines = None  # Set by OutlinesSprite class
+        self.pressed = 0
+        self.on_pressed = None
+        self.color_pressed = (100, 100, 100)
 
     def show(self):
         """Show image.
@@ -95,10 +99,33 @@ class BaseSprite(pygame.sprite.DirtySprite):
             self.image = None  # Force rendering
             self.dirty = 1
 
-    def update(self, events):
-        """Draw image.
+    def set_pressed(self, state):
+        """Set the arrow pressed state (1 for pressed 0 for released)
+        and redraws it.
+
+        :param state: new sprite state.
+        :type state: bool.
         """
-        pass
+        if self.pressed != int(state):
+            self.pressed = int(state)
+            if self.color_pressed:
+                self.image = None  # Force rendering
+                self.dirty = 1
+
+                # Trigger callback when press is released
+                if not self.pressed and self.on_pressed:
+                    self.on_pressed()
+
+    def set_pressable(self, state):
+        """Define if the sprite can be pressed (color changed) .
+
+        :param state: new sprite state.
+        :type state: bool.
+        """
+        if state:
+            self.color_pressed = (100, 100, 100)
+        else:
+            self.color_pressed = None
 
 
 class ImageSprite(BaseSprite):
@@ -209,11 +236,14 @@ class ImageSprite(BaseSprite):
             self.image = None  # Force rendering
             self.dirty = 1
 
-    def get_color(self):
+    def get_color(self, factor=1):
         """Return image main color.
+
+        :param factor: more or less dark, should be > 0 and < 1
+        :type factor: int
         """
         if self.color:
-            return self.color
+            return tuple(min(int(c * abs(factor)), 255) for c in self.color)
         else:
             return pygame.transform.average_color(self.image)
 
@@ -227,6 +257,8 @@ class ImageSprite(BaseSprite):
                 else:
                     raise ValueError("Path to image is missing")
 
+            color = self.color_pressed if self.pressed else self.color
+
             if isinstance(self.image_orig, (tuple, list)):
                 self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
                 self.image.fill(self.image_orig)
@@ -235,11 +267,11 @@ class ImageSprite(BaseSprite):
                                                   self.image_orig.size, self.image_orig.mode)
                 self.image = pictures.transform_pygame_image(surface, self.rect.size, hflip=self.hflip,
                                                              vflip=self.vflip, angle=self.angle, crop=self.crop,
-                                                             color=self.color)
+                                                             color=color)
             else:
                 self.image = pictures.transform_pygame_image(self.image_orig, self.rect.size, hflip=self.hflip,
                                                              vflip=self.vflip, angle=self.angle, crop=self.crop,
-                                                             color=self.color)
+                                                             color=color)
 
 
 class TextSprite(BaseSprite):
@@ -298,14 +330,15 @@ class TextSprite(BaseSprite):
         """Draw image if has changed and visible.
         """
         if self.image is None and self.visible:
-            self.image = pictures.text_to_pygame_image(self.text, self.rect.size, self.color, self.align)
+            color = self.color_pressed if self.pressed else self.color
+            self.image = pictures.text_to_pygame_image(self.text, self.rect.size, color, self.align)
 
 
 class ArrowSprite(ImageSprite):
 
     def __init__(self, *args, **kwargs):
         super(ArrowSprite, self).__init__(*args, **kwargs)
-        self.location = BaseWindow.ARROW_BOTTOM
+        self.location = BaseScene.ARROW_BOTTOM
         self.offset = 0
 
     def set_location(self, location):
@@ -327,13 +360,13 @@ class LeftArrowSprite(ArrowSprite):
 
     def set_location(self, location):
         super(LeftArrowSprite, self).set_location(location)
-        if location == BaseWindow.ARROW_BOTTOM:
+        if location == BaseScene.ARROW_BOTTOM:
             self.set_flip(vflip=False)
             self.show()
-        elif location == BaseWindow.ARROW_TOP:
+        elif location == BaseScene.ARROW_TOP:
             self.set_flip(vflip=True)
             self.show()
-        elif location == BaseWindow.ARROW_TOUCH:
+        elif location == BaseScene.ARROW_TOUCH:
             self.show()
         else:
             self.hide()
@@ -372,7 +405,13 @@ class BasePygameScene(BaseScene):
         self.image = ImageSprite()
         self.image.visible = 0
         self.add_sprite(self.image, layer=3)
-        self.arrow_location = BaseWindow.ARROW_BOTTOM
+        self.text_color = (255, 255, 255)
+        self.arrow_location = BaseScene.ARROW_BOTTOM
+
+        # On Raspberry Pi, the time to update dirty sprites is long (120-180ms
+        # tested), increasing the treshold permits to avoid blitting full screen
+        # at each draw() call.
+        self.sprites.set_timing_treshold(200)
 
     def add_sprite(self, sprite, outlines=True, layer=0):
         """Declare a new sprite to draw.
@@ -382,7 +421,7 @@ class BasePygameScene(BaseScene):
             - 0: one background sprite
             - 1: texts sprites
             - 2: assets sprites
-            - 3: one speciale image
+            - 3: one speciale image sprite
             - 4: arrows sprites
             - 5: outlines sprites
 
@@ -403,11 +442,11 @@ class BasePygameScene(BaseScene):
         if outlines:
             self.sprites.add(OutlinesSprite(sprite), layer=5)
 
-    @ property
+    @property
     def background(self):
         return BasePygameScene.BACKGROUND
 
-    @ property
+    @property
     def rect(self):
         return BasePygameScene.BACKGROUND.rect
 
@@ -421,11 +460,12 @@ class BasePygameScene(BaseScene):
         """
         if not BasePygameScene.BACKGROUND:
             BasePygameScene.BACKGROUND = ImageSprite(size=size)
-            self.sprites.add(BasePygameScene.BACKGROUND, layer=0)
+            BasePygameScene.BACKGROUND.set_pressable(False)
+        if not self.sprites.has(self.background):
+            self.sprites.add(self.background, layer=0)
         self.background.set_rect(0, 0, size[0], size[1])
         self.background.set_skin(color_or_path)
         self.background.set_crop()
-        self.sprites.clear(None, self.background.image)
 
     def set_outlines(self, enable=True):
         """Draw outlines for each rectangle available for drawing
@@ -443,7 +483,6 @@ class BasePygameScene(BaseScene):
     def set_image(self, image=None):
         """Set an image to the main place or hide it.
         """
-        print("image", image)
         if image:
             self.image.set_skin(image)
             self.image.show()
@@ -457,11 +496,11 @@ class BasePygameScene(BaseScene):
 
         # Texts
         for sprite in self.sprites.get_sprites_from_layer(1):
-            if location == BaseWindow.ARROW_HIDDEN:
+            if location == BaseScene.ARROW_HIDDEN:
                 sprite.set_align('center')
-            elif location == BaseWindow.ARROW_BOTTOM:
+            elif location == BaseScene.ARROW_BOTTOM:
                 sprite.set_align('bottom-center')
-            elif location == BaseWindow.ARROW_TOUCH:
+            elif location == BaseScene.ARROW_TOUCH:
                 sprite.set_align('bottom-center')
             else:
                 sprite.set_align('top-center')
@@ -477,6 +516,7 @@ class BasePygameScene(BaseScene):
         :param color: RGB color tuple for the texts
         :type color: tuple
         """
+        self.text_color = color
         # Texts
         for sprite in self.sprites.get_sprites_from_layer(1):
             sprite.set_color(color)
@@ -492,13 +532,13 @@ class BasePygameScene(BaseScene):
     def set_print_number(self, current_nbr=None, failure=False):
         pass
 
-    def _compute_position_and_size(self, events):
-        """Function call at each update responsible to recalculate positions ans sizes.
+    def resize(self, size):
+        """Recalculate sizes of sprites according to the new given size.
 
-        :param events: list of events to process.
-        :type events: list
+        :param size: new size of the scene
+        :type size: tuple
         """
-        pass
+        self.set_background(self.background.path or self.background.image_orig, size)
 
     def update(self, events):
         """Pygame events processing callback method.
@@ -506,10 +546,30 @@ class BasePygameScene(BaseScene):
         :param events: list of events to process.
         :type events: list
         """
-        self._compute_position_and_size(events)
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN\
+                    and event.button in (1, 2, 3):
+                # Don't consider the mouse wheel (button 4 & 5):
+                sprite = evtfilters.get_top_visible(self.sprites.get_sprites_at(event.pos))
+                if sprite:
+                    sprite.set_pressed(1)
+            elif event.type == pygame.FINGERDOWN:
+                display_size = pygame.display.get_surface().get_size()
+                finger_pos = (event.x * display_size[0], event.y * display_size[1])
+                sprite = evtfilters.get_top_visible(self.sprites.get_sprites_at(finger_pos))
+                if sprite:
+                    sprite.set_pressed(1)
+            elif (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3))\
+                    or event.type == pygame.FINGERUP:
+                # Don't consider the mouse wheel (button 4 & 5):
+                for sprite in self.sprites.sprites():
+                    if hasattr(sprite, 'set_pressed'):
+                        # Outlines can not be pressed
+                        sprite.set_pressed(0)
+
         self.sprites.update(events)
 
-    def draw(self, surface):
+    def draw(self, surface, force=False):
         """Draw the elements on scene.
 
         This method is optimized to be called at each loop of the
@@ -519,7 +579,17 @@ class BasePygameScene(BaseScene):
         The first call to this method will setup the "eraser" surface that
         will be used to redraw dirty parts of the screen.
 
-        :param surface: surface this scene will be displayed at
+        The `force` parameter shall be used if the surface has been redrawn:
+        it reset the eraser and redraw all view elements.
+
+        :param surface: surface the slider will be displayed at
+        :type surface: object
+        :param force: force the drawing of the entire surface (time consuming)
+        :type force: bool
+
         :return: list of updated area
+        :rtype: list
         """
+        if force:
+            self.sprites.repaint_rect(self.background.rect)
         return self.sprites.draw(surface)

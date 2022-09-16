@@ -109,7 +109,7 @@ class BaseCamera(object):
         self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
 
         self.preview_flip = flip
-        self._worker = AsyncTask(self.get_preview_image, event=evtfilters.EVT_CAMERA_PREVIEW, loop=True)
+        self._worker = AsyncTask(self.get_preview_image, event=evtfilters.EVT_PIBOOTH_CAM_PREVIEW, loop=True)
 
     def stop_preview(self):
         """Stop the preview.
@@ -140,7 +140,7 @@ class BaseCamera(object):
         if self._worker:
             self.stop_preview()
 
-        self._worker = AsyncTask(self.get_capture_image, (effect,), event=evtfilters.EVT_CAMERA_CAPTURE)
+        self._worker = AsyncTask(self.get_capture_image, (effect,), event=evtfilters.EVT_PIBOOTH_CAM_CAPTURE)
         if wait:
             self._worker.wait()
 

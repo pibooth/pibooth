@@ -2,7 +2,6 @@
 
 import time
 import math
-import pygame
 import pibooth
 from pibooth import camera
 from pibooth import evtfilters
@@ -61,15 +60,6 @@ class CameraPlugin(object):
     @pibooth.hookimpl
     def state_wait_exit(self):
         self.count = 0
-
-    @pibooth.hookimpl
-    def state_choose_do(self, app, win, events):
-        event = evtfilters.find_choice_event(events, win)
-        if event:
-            if event.key == pygame.K_LEFT:
-                app.capture_nbr = app.capture_choices[0]
-            elif event.key == pygame.K_RIGHT:
-                app.capture_nbr = app.capture_choices[1]
 
     @pibooth.hookimpl
     def state_preview_enter(self, cfg, app, win):

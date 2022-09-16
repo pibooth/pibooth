@@ -43,7 +43,7 @@ class NoGuiWindow(BaseWindow):
                  size=(800, 480),
                  background=(0, 0, 0),
                  text_color=(255, 255, 255),
-                 arrow_location=BaseWindow.ARROW_BOTTOM,
+                 arrow_location=BaseScene.ARROW_BOTTOM,
                  arrow_offset=0,
                  debug=False):
         super(NoGuiWindow, self).__init__(size, background, text_color, arrow_location, arrow_offset, debug)
@@ -57,17 +57,25 @@ class NoGuiWindow(BaseWindow):
     def eventloop(self, app_update):
         """Main GUI events loop (blocking).
         """
-        fps = 30
+        fps = 25
         clock = pygame.time.Clock()
 
         while True:
-            evts = list(pygame.event.get())
+            events = list(pygame.event.get())
 
-            if evtfilters.find_quit_event(evts):
-                break
+            # Convert Pygame events to pibooth events (plugins are based on them)
+            for event in events:
+                if event.type == pygame.QUIT:
+                    return
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+                    evtfilters.post_capture_button_event()
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                    evtfilters.post_print_button_event()
 
             # Update application and plugins according to user events
-            app_update(evts)
+            app_update(events)
 
             # Ensure the program will never run at more than <fps> frames per second
             clock.tick(fps)

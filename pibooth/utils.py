@@ -16,7 +16,6 @@ import contextlib
 import errno
 import subprocess
 from concurrent import futures
-import pygame
 from pibooth import evtfilters
 
 LOGGER = logging.getLogger("pibooth")
@@ -40,7 +39,7 @@ class AsyncTask(object):
         """Remove future from tracking list.
         """
         self.FUTURES.pop(future)
-        self.future.result()  # Raise exception is occures during run
+        self.future.result()  # Raise exception if occures during run
 
     def _run(self, *args, **kwargs):
         """Execute the runnable.
@@ -57,8 +56,7 @@ class AsyncTask(object):
         """Post event with the result of the task.
         """
         if self.event_type is not None:
-            event = pygame.event.Event(self.event_type, result=data)
-            evtfilters.post(event)
+            evtfilters.post(self.event_type, result=data)
 
     def result(self):
         """Return task result.
@@ -85,7 +83,7 @@ class AsyncTask(object):
         """
         self._stop_event.set()
         self.future.cancel()
-        self.wait()
+        self.wait(30)  # Max 30 seconds
 
     @classmethod
     def kill_all(cls):

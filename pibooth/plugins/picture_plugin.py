@@ -155,8 +155,8 @@ class PicturePlugin(object):
                 self.factory_pool_results.append(self.factory_pool.submit(factory.build))
 
     @pibooth.hookimpl
-    def state_print_do(self, cfg, app, win, events):
-        if evtfilters.find_capture_event(events, win):
+    def state_print_do(self, cfg, app, events):
+        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_CAPTURE):
 
             LOGGER.info("Moving the picture in the forget folder")
             for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
