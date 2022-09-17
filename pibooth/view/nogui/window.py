@@ -68,10 +68,10 @@ class NoGuiWindow(BaseWindow):
                 if event.type == pygame.QUIT:
                     return
 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
                     evtfilters.post_capture_button_event()
 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                     evtfilters.post_print_button_event()
 
             # Update application and plugins according to user events

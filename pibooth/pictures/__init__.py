@@ -200,6 +200,33 @@ def text_to_pygame_image(text, size, color, align='center', bg_color=None):
     return surface
 
 
+def get_layout_asset(index, text_color, bg_color):
+    """Return the layout image with the corresponding text.
+
+    :param index: number of captures on the layout
+    :type index: int
+    :param text_color: RGB color for text
+    :type text_color: tuple
+    :param bg_color: RGB color for asset image
+    :type bg_color: tuple
+
+    :return: surface
+    :rtype: :py:class:`pygame.Surface`
+    """
+    layout_image = colorize_pygame_image(
+        load_pygame_image(f"layout{index}.png"), bg_color)
+    text = language.get_translated_text(str(index))
+    if text:
+        rect = layout_image.get_rect()
+        rect = pygame.Rect(rect.x + rect.width * 0.3 / 2,
+                           rect.y + rect.height * 0.76,
+                           rect.width * 0.7, rect.height * 0.20)
+        text_font = fonts.get_pygame_font(text, fonts.CURRENT, rect.width, rect.height)
+        surface = text_font.render(text, True, text_color)
+        layout_image.blit(surface, surface.get_rect(center=rect.center))
+    return layout_image
+
+
 def get_best_orientation(captures):
     """Return the most adapted orientation (PORTRAIT or LANDSCAPE),
     depending on the resolution of the given captures.

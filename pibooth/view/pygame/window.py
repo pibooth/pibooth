@@ -124,10 +124,10 @@ class PygameWindow(BaseWindow):
             elif evtfilters.is_fingers_event(event, 4):
                 evtfilters.post(evtfilters.EVT_PIBOOTH_BTN_SETTINGS, is_shown=self._menu.is_shown())
 
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
                 evtfilters.post_capture_button_event()
 
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 evtfilters.post_print_button_event()
 
         self.scene.update(events)

@@ -108,24 +108,13 @@ class BaseSprite(pygame.sprite.DirtySprite):
         """
         if self.pressed != int(state):
             self.pressed = int(state)
-            if self.color_pressed:
+            if self.on_pressed is not None:
                 self.image = None  # Force rendering
                 self.dirty = 1
 
                 # Trigger callback when press is released
                 if not self.pressed and self.on_pressed:
                     self.on_pressed()
-
-    def set_pressable(self, state):
-        """Define if the sprite can be pressed (color changed) .
-
-        :param state: new sprite state.
-        :type state: bool.
-        """
-        if state:
-            self.color_pressed = (100, 100, 100)
-        else:
-            self.color_pressed = None
 
 
 class ImageSprite(BaseSprite):
@@ -460,7 +449,6 @@ class BasePygameScene(BaseScene):
         """
         if not BasePygameScene.BACKGROUND:
             BasePygameScene.BACKGROUND = ImageSprite(size=size)
-            BasePygameScene.BACKGROUND.set_pressable(False)
         if not self.sprites.has(self.background):
             self.sprites.add(self.background, layer=0)
         self.background.set_rect(0, 0, size[0], size[1])

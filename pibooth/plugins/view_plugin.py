@@ -98,6 +98,8 @@ class ViewPlugin(object):
     def state_choose_do(self, app, win, events):
         if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_CAPTURE):
             app.capture_nbr = win.scene.get_selection()
+        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_PRINT):
+            win.scene.next()
 
     @pibooth.hookimpl
     def state_choose_validate(self, cfg, app):

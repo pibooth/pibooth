@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import pygame
 from pygame_imslider import ImSlider, ImSliderRenderer, STYPE_LOOP
 
 from pibooth import evtfilters
@@ -55,7 +54,6 @@ class ChooseScene(BasePygameScene):
         self.choices = ()
         self.slider = ImSlider((200, 100), focus=False, renderer=Renderer(self), stype=STYPE_LOOP)
         self.left_arrow = LeftArrowSprite()
-        self.left_arrow.set_skin('touch_thumb.png')
         self.add_sprite(self.left_arrow)
         self.right_arrow = RightArrowSprite()
         self.right_arrow.set_skin('arrow_double.png')
@@ -67,21 +65,26 @@ class ChooseScene(BasePygameScene):
     def resize(self, size):
         super(ChooseScene, self).resize(size)
         slider_width, slider_height = self.rect.width * 3 // 4, self.rect.height * 7 // 8
-        if self.arrow_location in (self.ARROW_TOUCH, self.ARROW_BOTTOM):
+        if self.arrow_location == self.ARROW_BOTTOM:
             self.slider.set_position(self.rect.centerx - slider_width // 2, 0)
+            self.slider.set_arrows_visible(False)
         elif self.arrow_location == self.ARROW_TOP:
             self.slider.set_position(self.rect.centerx - slider_width // 2,
                                      self.rect.bottom - slider_height)
+            self.slider.set_arrows_visible(False)
         else:
             self.slider.set_position(self.rect.centerx - slider_width // 2,
                                      self.rect.centery - slider_height // 2)
+            self.slider.set_arrows_visible(True)
         self.slider.set_size(slider_width, slider_height)
 
         # Left arrow
-        size = (self.rect.width * 0.1, self.rect.height * 0.1)
+        size = (self.rect.height * 0.15, self.rect.height * 0.15)
         if self.arrow_location == self.ARROW_TOUCH:
-            x = self.rect.left + size[0]
+            self.left_arrow.set_skin('touch_thumb.png')
+            x = self.rect.right - size[0] - 10
         else:
+            self.left_arrow.set_skin('arrow.png')
             x = self.rect.left + self.rect.width // 4 - size[0] // 2
         if self.arrow_location == self.ARROW_TOP:
             y = self.rect.top + 10
@@ -90,6 +93,7 @@ class ChooseScene(BasePygameScene):
         self.left_arrow.set_rect(x, y, size[0], size[1])
 
         # Right arrow
+        size = (self.rect.width * 0.1, self.rect.height * 0.1)
         if self.arrow_location == self.ARROW_TOUCH:
             self.right_arrow.hide()
         elif self.arrow_location in (self.ARROW_BOTTOM, self.ARROW_TOP):
@@ -102,11 +106,6 @@ class ChooseScene(BasePygameScene):
 
     def update(self, events):
         super(ChooseScene, self).update(events)
-        for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                return  # Capture button is triggered, don't go left in slider
-            if event.type == evtfilters.EVT_PIBOOTH_BTN_PRINT:
-                self.slider.on_next()
         self.slider.update(events)
 
     def draw(self, surface, force):
@@ -114,12 +113,15 @@ class ChooseScene(BasePygameScene):
         rects += self.slider.draw(surface, force)
         return rects
 
+    def next(self):
+        self.slider.on_next()
+
     def set_choices(self, choices):
         if choices != self.choices:
             # Reload pictures
             self.choices = choices
-            self.slider.load_images([pictures.colorize_pygame_image(
-                pictures.load_pygame_image(f"layout{c}.png"), self.text_color) for c in choices])
+            self.slider.load_images([pictures.get_layout_asset(
+                c, self.background.get_color(), self.text_color) for c in choices])
 
     def get_selection(self):
         return self.choices[self.slider.get_index()]

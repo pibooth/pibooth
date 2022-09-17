@@ -74,7 +74,8 @@ class WaitScene(BasePygameScene):
                 y = self.rect.top + 10
             else:
                 y = self.rect.bottom - size[1] - 10
-        self.left_arrow.set_rect(x, y, size[0], size[1])
+        if self.arrow_location != self.ARROW_HIDDEN:
+            self.left_arrow.set_rect(x, y, size[0], size[1])
 
         # Right arrow
         size = (self.rect.width * 0.1, self.rect.height * 0.1)
@@ -89,16 +90,17 @@ class WaitScene(BasePygameScene):
         elif self.arrow_location in (self.ARROW_BOTTOM, self.ARROW_TOP):
             self.right_arrow.set_skin('arrow.png')
             self.right_arrow.set_angle(-60)
-        self.right_arrow.set_rect(x, y, size[0], size[1])
+        if self.arrow_location != self.ARROW_HIDDEN:
+            self.right_arrow.set_rect(x, y, size[0], size[1])
 
     def update_print_action(self, enabled=True):
         if enabled:
             if self.arrow_location != self.ARROW_HIDDEN:
                 self.right_arrow.show()
                 self.intro_print.show()
-            self.image.set_pressable(True)
+            self.image.on_pressed = evtfilters.post_print_button_event
         else:
             if self.arrow_location != self.ARROW_HIDDEN:
                 self.right_arrow.hide()
                 self.intro_print.hide()
-            self.image.set_pressable(False)
+            self.image.on_pressed = None
