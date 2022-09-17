@@ -27,7 +27,7 @@ class ViewPlugin(object):
         # Seconds to display the selected layout
         self.layout_timer = PollingTimer(4)
         # Seconds between each flash
-        self.flash_timer = PollingTimer(0.05)
+        self.flash_timer = PollingTimer(0.3)
         # Seconds to display the print view
         self.print_view_timer = PollingTimer(0)
         # Seconds to display the finished view

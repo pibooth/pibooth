@@ -7,20 +7,18 @@ class PreviewScene(BasePygameScene):
 
     def __init__(self, name):
         super(PreviewScene, self).__init__(name)
-        self.left_image = ImageSprite('capture_left.png')
-        self.add_sprite(self.left_image)
-        self.right_image = ImageSprite('capture_right.png')
-        self.add_sprite(self.right_image)
+        self.left_image = self.add_sprite(ImageSprite('capture_left.png'))
+        self.right_image = self.add_sprite(ImageSprite('capture_right.png'))
 
     def resize(self, size):
         super(PreviewScene, self).resize(size)
 
-        # Preview picture
-        self.image.set_rect(self.rect.centerx - self.rect.width//4, 10,
-                            self.rect.width//2, self.rect.height * 7 // 8)
+        # Preview capture
+        self.image.set_rect(self.rect.width // 6, 10,
+                            self.rect.width * 2 // 3, self.rect.height * 7 // 8)
 
         # Left image
-        height = self.rect.height / 4
+        height = self.rect.height // 4
         size = (height, height)
         self.left_image.set_rect(10, self.rect.bottom - size[1], size[0] * 1.5, size[1])
 

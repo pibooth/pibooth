@@ -169,6 +169,11 @@ class ImageSprite(BaseSprite):
                 self.image_orig = skin
                 self.dirty = 1
 
+    def get_skin(self):
+        """Return the current skin.
+        """
+        return self.path or self.image_orig
+
     def set_crop(self, crop=True):
         """Crop the skin to fit sprite size.
 
@@ -394,7 +399,7 @@ class BasePygameScene(BaseScene):
         # On Raspberry Pi, the time to update dirty sprites is long (120-180ms
         # tested), increasing the treshold permits to avoid blitting full screen
         # at each draw() call.
-        self.sprites.set_timing_treshold(200)
+        self.sprites.set_timing_threshold(200)
 
     def add_sprite(self, sprite, outlines=True, layer=0):
         """Declare a new sprite to draw.
@@ -424,6 +429,7 @@ class BasePygameScene(BaseScene):
         self.sprites.add(sprite, layer=layer)
         if outlines:
             self.sprites.add(OutlinesSprite(sprite), layer=5)
+        return sprite
 
     @property
     def background(self):
@@ -515,7 +521,7 @@ class BasePygameScene(BaseScene):
         :param size: new size of the scene
         :type size: tuple
         """
-        self.set_background(self.background.path or self.background.image_orig, size)
+        self.set_background(self.background.get_skin(), size)
 
     def update(self, events):
         """Pygame events processing callback method.

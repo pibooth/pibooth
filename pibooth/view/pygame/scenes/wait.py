@@ -10,14 +10,10 @@ class WaitScene(BasePygameScene):
 
     def __init__(self, name):
         super(WaitScene, self).__init__(name)
-        self.left_arrow = LeftArrowSprite()
-        self.add_sprite(self.left_arrow)
-        self.right_arrow = RightArrowSprite()
-        self.add_sprite(self.right_arrow)
-        self.intro = TextSprite(get_translated_text('intro'))
-        self.add_sprite(self.intro)
-        self.intro_print = TextSprite(get_translated_text('intro_print'))
-        self.add_sprite(self.intro_print)
+        self.left_arrow = self.add_sprite(LeftArrowSprite())
+        self.right_arrow = self.add_sprite(RightArrowSprite())
+        self.intro = self.add_sprite(TextSprite(get_translated_text('intro')))
+        self.intro_print = self.add_sprite(TextSprite(get_translated_text('intro_print')))
 
         self.intro.on_pressed = evtfilters.post_capture_button_event
         self.left_arrow.on_pressed = evtfilters.post_capture_button_event

@@ -8,10 +8,8 @@ class ProcessingScene(BasePygameScene):
 
     def __init__(self, name):
         super(ProcessingScene, self).__init__(name)
-        self.image.set_skin('processing.png')
-        self.image.show()
-        self.text = TextSprite(get_translated_text('processing'))
-        self.add_sprite(self.text)
+        self.set_image('processing.png')
+        self.text = self.add_sprite(TextSprite(get_translated_text('processing')))
 
     def resize(self, size):
         super(ProcessingScene, self).resize(size)

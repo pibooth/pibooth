@@ -8,8 +8,7 @@ class FailsafeScene(BasePygameScene):
 
     def __init__(self, name):
         super(FailsafeScene, self).__init__(name)
-        self.text = TextSprite(get_translated_text('oops'))
-        self.add_sprite(self.text)
+        self.text = self.add_sprite(TextSprite(get_translated_text('oops')))
 
     def resize(self, size):
         super(FailsafeScene, self).resize(size)

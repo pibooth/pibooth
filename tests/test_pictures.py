@@ -26,43 +26,37 @@ MULTILINES = ["This is a\ntop-left\ncool position",
               "This is a\nbottom-right\ncool position"]
 
 
-if __name__ == '__main__':
-    pygame.init()
-    clock = pygame.time.Clock()
-    screen = pygame.display.set_mode((400, 400))
-    screen.fill((0, 0, 0))
+def test_text_position(pygame_loop):
 
-    run = True
-    index_right = itertools.cycle(POSITIONS)
-    index_left = itertools.cycle(MULTILINES)
+    index = itertools.cycle(POSITIONS)
 
-    while run:
+    def handler(screen, events):
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                text = next(index)
+                screen.fill((0, 0, 0))
+                surface = text_to_pygame_image(text, screen.get_size(),
+                                               color=(255, 255, 255),
+                                               align=text,
+                                               bg_color=(234, 23, 89))
+                screen.blit(surface, (0, 0))
 
-        for event in pygame.event.get():
+    pygame_loop(handler)
 
-            if event.type == pygame.QUIT:
-                run = False
 
-            if event.type == pygame.KEYDOWN:
+def test_text_multilines(pygame_loop):
 
-                if event.key == pygame.K_RIGHT:
-                    text = next(index_right)
-                    screen.fill((0, 0, 0))
-                    surface = text_to_pygame_image(text, screen.get_size(),
-                                                   color=(255, 255, 255),
-                                                   align=text,
-                                                   bg_color=(234, 23, 89))
-                    screen.blit(surface, (0, 0))
+    index = itertools.cycle(MULTILINES)
 
-                if event.key == pygame.K_LEFT:
-                    text = next(index_left)
-                    screen.fill((0, 0, 0))
-                    surface = text_to_pygame_image(text, screen.get_size(),
-                                                   color=(255, 255, 255),
-                                                   align=POSITIONS[MULTILINES.index(text)],
-                                                   bg_color=(234, 23, 89))
-                    screen.blit(surface, (0, 0))
+    def handler(screen, events):
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                text = next(index)
+                screen.fill((0, 0, 0))
+                surface = text_to_pygame_image(text, screen.get_size(),
+                                               color=(255, 255, 255),
+                                               align=POSITIONS[MULTILINES.index(text)],
+                                               bg_color=(234, 23, 89))
+                screen.blit(surface, (0, 0))
 
-        pygame.display.flip()
-
-        clock.tick(5)
+    pygame_loop(handler)

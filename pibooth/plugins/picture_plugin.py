@@ -58,12 +58,13 @@ class PicturePlugin(object):
         outcome = yield  # all corresponding hookimpls are invoked here
         factory = outcome.get_result() or factory
 
+        nbr_capture_choices = len(cfg.gettuple('PICTURE', 'captures', int))
         factory.set_margin(cfg.getint('PICTURE', 'margin_thick'))
 
-        backgrounds = cfg.gettuple('PICTURE', 'backgrounds', ('color', 'path'), 2)
+        backgrounds = cfg.gettuple('PICTURE', 'backgrounds', ('color', 'path'), nbr_capture_choices)
         factory.set_background(backgrounds[opt_index])
 
-        overlays = cfg.gettuple('PICTURE', 'overlays', 'path', 2)
+        overlays = cfg.gettuple('PICTURE', 'overlays', 'path', nbr_capture_choices)
         if overlays[opt_index]:
             factory.set_overlay(overlays[opt_index])
 

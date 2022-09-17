@@ -111,9 +111,9 @@ add_default_option("PICTURE", "orientation", 'auto',
                    "Orientation of the final picture: 'auto', 'portrait' or 'landscape'",
                    "Orientation", ['auto', 'portrait', 'landscape'])
 
-add_default_option("PICTURE", "captures", (4, 1),
+add_default_option("PICTURE", "captures", (1, 2, 3, 4),
                    "Possible choice(s) of captures numbers (numbers between 1 to 4)",
-                   "Number of captures", ['1', '2', '3', '4'] + [str(val) for val in itertools.permutations(range(1, 5), 2)])
+                   "Number of captures", ['(1, 2, 3, 4)', '1', '2', '3', '4'] + [str(val) for val in itertools.permutations(range(1, 5), 2)])
 
 add_default_option("PICTURE", "captures_effects", 'none',
                    "Effect applied to the captures (list of quoted names accepted)")

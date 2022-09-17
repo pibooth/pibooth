@@ -3,10 +3,12 @@
 
 import os
 import pytest
+import pygame
 from PIL import Image
 from pibooth import language
 from pibooth.counters import Counters
 from pibooth.config.parser import PiConfigParser
+from pibooth.view.pygame.scenes import get_scene
 from pibooth.camera import get_rpi_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
 from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
 
@@ -123,3 +125,47 @@ def camera_gp(proxy_gp):
     cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
     yield cam
     cam.quit()
+
+
+@pytest.fixture(scope='session')
+def pygame_loop():
+
+    pygame.init()
+    pygame.display.set_caption("Hit [ESC] to end the test")
+    screen = pygame.display.set_mode((400, 400), pygame.RESIZABLE)
+    screen.fill((0, 0, 0))
+    clock = pygame.time.Clock()
+
+    def loop(event_handler):
+        while True:
+            events = pygame.event.get()
+
+            for event in events:
+                if event.type == pygame.QUIT or\
+                        (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                    screen.fill((0, 0, 0))
+                    pygame.display.update()
+                    return
+
+            event_handler(screen, events)
+            pygame.display.update()
+            clock.tick(5)
+
+    return loop
+
+
+@pytest.fixture(scope='session')
+def scene_builder():
+
+    def create(name):
+        scene = get_scene(name)
+        scene.set_outlines(True)
+        scene.set_background((0, 0, 0), (400, 400))
+        scene.set_text_color((255, 255, 255))
+        scene.set_arrows(scene.ARROW_BOTTOM, 0)
+        scene.set_print_number(2, False)
+        scene.need_resize = True
+        scene.resize((400, 400))
+        return scene
+
+    return create
