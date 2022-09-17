@@ -8,7 +8,12 @@ from pibooth.utils import LOGGER
 
 
 class BaseScene(object):
-    """Base class for scene."""
+    """Base class for scene.
+
+    Methodes defined here are abstarct and shall be implemented in child classes.
+    Plugins will use them to set severals parameters depending on the pibooth
+    configuration / user choices / new behaviors.
+    """
 
     ARROW_TOP = 'top'
     ARROW_BOTTOM = 'bottom'
@@ -19,18 +24,48 @@ class BaseScene(object):
         self.name = name
 
     def set_outlines(self, enable=True):
+        """Draw outlines for each rectangle available for drawing
+        images and texts.
+
+        :param enable: enable / disable outlines
+        :type enable: bool
+        """
         raise NotImplementedError
 
     def set_image(self, image=None):
+        """Set an image to the main place or hide it.
+
+        :param image: image to set (path, PIL object or pygame object)
+        :type image: str or object
+        """
         raise NotImplementedError
 
     def set_background(self, color_or_path, size):
+        """Set background sprite.
+
+        :param color_or_path: color of path to an imgae
+        :type color_or_path: tuple or str
+        :param size: size tuple (width, height) of the image.
+        :type size: tuple
+        """
         raise NotImplementedError
 
     def set_text_color(self, color):
+        """Set text font color.
+
+        :param color: RGB color tuple for the texts
+        :type color: tuple
+        """
         raise NotImplementedError
 
     def set_arrows(self, location, offset):
+        """Set arrows attributes.
+
+        :param location: arrow location: ARROW_HIDDEN, ARROW_BOTTOM, ARROW_TOP, ARROW_TOUCH
+        :type location: str
+        :param offset: x offset from current position to screen outer
+        :type offset: int
+        """
         raise NotImplementedError
 
     def set_print_number(self, current_nbr=None, failure=False):
@@ -136,6 +171,7 @@ class BaseWindow(object):
         assert current_nbr >= 0, "Current number of printed files shall be greater or equal to 0"
         self.print_number = current_nbr
         self.print_failure = failure
+        self.scene.set_print_number(self.print_number, self.print_failure)
 
     def toggle_fullscreen(self):
         """Set window to full screen or initial size.

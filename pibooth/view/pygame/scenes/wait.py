@@ -33,7 +33,7 @@ class WaitScene(BasePygameScene):
 
         # Take picture text
         text_border = 20
-        self.intro.set_text(get_translated_text("intro"))
+        self.intro.set_text(get_translated_text("intro"))  # In case of text has changed
         if self.arrow_location == self.ARROW_HIDDEN:
             self.intro.set_rect(text_border, text_border,
                                 self.rect.width // 2 - 2 * text_border,
@@ -52,7 +52,7 @@ class WaitScene(BasePygameScene):
                                 self.rect.height * 0.6 - text_border)
 
         # Print text
-        self.intro_print.set_text(get_translated_text("intro_print"))
+        self.intro_print.set_text(get_translated_text("intro_print"))  # In case of text has changed
         rect = pygame.Rect(self.rect.width * 0.3, 0, self.rect.width * 0.2, self.rect.height * 0.2)
         if self.arrow_location == self.ARROW_TOP:
             rect.top = self.rect.height * 0.11

@@ -5,7 +5,7 @@ from pygame_imslider import ImSlider, ImSliderRenderer, STYPE_LOOP
 from pibooth import evtfilters
 from pibooth import pictures
 from pibooth.language import get_translated_text
-from pibooth.view.pygame.scenes.base import BasePygameScene, LeftArrowSprite, RightArrowSprite
+from pibooth.view.pygame.scenes.base import BasePygameScene, LeftArrowSprite, RightArrowSprite, TextSprite
 
 
 class Renderer(ImSliderRenderer):
@@ -58,25 +58,31 @@ class ChooseScene(BasePygameScene):
         self.right_arrow = RightArrowSprite()
         self.right_arrow.set_skin('arrow_double.png')
         self.add_sprite(self.right_arrow)
+        self.text = TextSprite(get_translated_text("choose"))
+        self.add_sprite(self.text)
 
         self.left_arrow.on_pressed = evtfilters.post_capture_button_event
         self.right_arrow.on_pressed = evtfilters.post_print_button_event
 
     def resize(self, size):
         super(ChooseScene, self).resize(size)
-        slider_width, slider_height = self.rect.width * 3 // 4, self.rect.height * 7 // 8
-        if self.arrow_location == self.ARROW_BOTTOM:
-            self.slider.set_position(self.rect.centerx - slider_width // 2, 0)
-            self.slider.set_arrows_visible(False)
-        elif self.arrow_location == self.ARROW_TOP:
-            self.slider.set_position(self.rect.centerx - slider_width // 2,
-                                     self.rect.bottom - slider_height)
+
+        # Slider
+        slider_width, slider_height = self.rect.width * 3 // 4, self.rect.height * 6 // 8
+        x, y = (self.rect.width - slider_width) // 2, (self.rect.height - slider_height) // 2
+        if self.arrow_location in (self.ARROW_BOTTOM, self.ARROW_TOP):
             self.slider.set_arrows_visible(False)
         else:
-            self.slider.set_position(self.rect.centerx - slider_width // 2,
-                                     self.rect.centery - slider_height // 2)
             self.slider.set_arrows_visible(True)
+        self.slider.set_position(x, y)
         self.slider.set_size(slider_width, slider_height)
+
+        # Text
+        self.text.set_text(get_translated_text("choose"))  # In case of text has changed
+        if self.arrow_location == self.ARROW_TOP:
+            self.text.set_rect(10, self.rect.bottom - y, self.rect.width - 20, y - 10)
+        else:
+            self.text.set_rect(10, 10, self.rect.width - 20, y - 10)
 
         # Left arrow
         size = (self.rect.height * 0.15, self.rect.height * 0.15)
@@ -114,9 +120,13 @@ class ChooseScene(BasePygameScene):
         return rects
 
     def next(self):
+        """Display next possible layout.
+        """
         self.slider.on_next()
 
     def set_choices(self, choices):
+        """Set the list of possible number of captures.
+        """
         if choices != self.choices:
             # Reload pictures
             self.choices = choices
@@ -124,4 +134,6 @@ class ChooseScene(BasePygameScene):
                 c, self.background.get_color(), self.text_color) for c in choices])
 
     def get_selection(self):
+        """Return curretly selected number of captures.
+        """
         return self.choices[self.slider.get_index()]

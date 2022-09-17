@@ -1,12 +1,32 @@
 # -*- coding: utf-8 -*-
 
-from pibooth.view.pygame.scenes.base import BasePygameScene
+from pibooth.language import get_translated_text
+from pibooth.view.pygame.scenes.base import BasePygameScene, TextSprite
 
 
 class ChosenScene(BasePygameScene):
 
     def __init__(self, name):
         super(ChosenScene, self).__init__(name)
+        self.choice = 0
+        self.text = TextSprite(get_translated_text("chosen"))
+        self.add_sprite(self.text)
+
+    def get_text(self):
+        texts = []
+        if get_translated_text("chosen"):
+            texts.append(get_translated_text("chosen"))
+        if get_translated_text(str(self.choice)):
+            texts.append(get_translated_text(str(self.choice)))
+        return "\n".join(texts)
+
+    def resize(self, size):
+        super(ChosenScene, self).resize(size)
+        self.text.set_text(self.get_text())  # In case of text has changed
+        self.text.set_rect(*self.rect.inflate(-100, -100))
 
     def set_selected_choice(self, choice):
-        pass
+        if self.choice != choice:
+            self.choice = choice
+            print(choice)
+            self.text.set_text(self.get_text())

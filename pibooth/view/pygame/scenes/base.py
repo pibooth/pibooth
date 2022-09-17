@@ -470,6 +470,9 @@ class BasePygameScene(BaseScene):
 
     def set_image(self, image=None):
         """Set an image to the main place or hide it.
+
+        :param image: image to set (path, PIL object or pygame object)
+        :type image: str or object
         """
         if image:
             self.image.set_skin(image)
@@ -479,6 +482,11 @@ class BasePygameScene(BaseScene):
 
     def set_arrows(self, location, offset):
         """Set arrows attributes.
+
+        :param location: arrow location: ARROW_HIDDEN, ARROW_BOTTOM, ARROW_TOP, ARROW_TOUCH
+        :type location: str
+        :param offset: x offset from current position to screen outer
+        :type offset: int
         """
         self.arrow_location = location
 
