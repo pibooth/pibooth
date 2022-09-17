@@ -53,7 +53,8 @@ class ViewPlugin(object):
             previous_picture = app.previous_picture
 
         win.set_image(previous_picture)
-        win.scene.update_print_action(app.printer.is_ready() and app.count.remaining_duplicates > 0)
+        win.scene.update_print_action(app.previous_picture and app.printer.is_ready()
+                                      and app.count.remaining_duplicates > 0)
         if app.printer.is_installed():
             win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
 

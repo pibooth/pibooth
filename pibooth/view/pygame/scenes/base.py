@@ -26,7 +26,6 @@ class OutlinesSprite(pygame.sprite.DirtySprite):
         self.color = color
         self.visible = 0
         self._sp = sprite
-        self._sp.outlines = self
 
     def __repr__(self):
         return f"{self.__class__.__name__}(rect={tuple(self.rect)}"
@@ -58,7 +57,6 @@ class BaseSprite(pygame.sprite.DirtySprite):
         super(BaseSprite, self).__init__()
         self.image = None
         self.rect = pygame.Rect((0, 0), size)
-        self.outlines = None  # Set by OutlinesSprite class
         self.pressed = 0
         self.on_pressed = None
         self.color_pressed = (100, 100, 100)
@@ -68,16 +66,12 @@ class BaseSprite(pygame.sprite.DirtySprite):
         """
         if not self.visible:
             self.visible = 1
-        if self.outlines:
-            self.outlines.show()
 
     def hide(self):
         """Hide image.
         """
         if self.visible:
             self.visible = 0
-        if self.outlines:
-            self.outlines.hide()
 
     def set_rect(self, x, y, width, height):
         """Set the sprite absolute position and size.
@@ -274,7 +268,7 @@ class TextSprite(BaseSprite):
         """
         super(TextSprite, self).__init__(size)
         self.text = text
-        self.align = 'center'
+        self.align = pictures.ALIGN_CENTER
         self.color = (255, 255, 255)
         if text is not None:
             self.set_text(text)
@@ -489,19 +483,6 @@ class BasePygameScene(BaseScene):
         :type offset: int
         """
         self.arrow_location = location
-
-        # Texts
-        for sprite in self.sprites.get_sprites_from_layer(1):
-            if location == BaseScene.ARROW_HIDDEN:
-                sprite.set_align('center')
-            elif location == BaseScene.ARROW_BOTTOM:
-                sprite.set_align('bottom-center')
-            elif location == BaseScene.ARROW_TOUCH:
-                sprite.set_align('bottom-center')
-            else:
-                sprite.set_align('top-center')
-
-        # Arrows
         for sprite in self.sprites.get_sprites_from_layer(4):
             sprite.set_location(location)
             sprite.set_offset(offset)

@@ -58,7 +58,7 @@ class ChooseScene(BasePygameScene):
         self.right_arrow = RightArrowSprite()
         self.right_arrow.set_skin('arrow_double.png')
         self.add_sprite(self.right_arrow)
-        self.text = TextSprite(get_translated_text("choose"))
+        self.text = TextSprite(get_translated_text('choose'))
         self.add_sprite(self.text)
 
         self.left_arrow.on_pressed = evtfilters.post_capture_button_event
@@ -78,7 +78,7 @@ class ChooseScene(BasePygameScene):
         self.slider.set_size(slider_width, slider_height)
 
         # Text
-        self.text.set_text(get_translated_text("choose"))  # In case of text has changed
+        self.text.set_text(get_translated_text('choose'))  # In case of text has changed
         if self.arrow_location == self.ARROW_TOP:
             self.text.set_rect(10, self.rect.bottom - y, self.rect.width - 20, y - 10)
         else:
