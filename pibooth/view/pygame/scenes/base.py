@@ -26,26 +26,30 @@ class OutlinesSprite(pygame.sprite.DirtySprite):
         self.color = color
         self.visible = 0
         self._sp = sprite
+        self._sp.outlines = self
+        self.enabled = True
 
     def __repr__(self):
         return f"{self.__class__.__name__}(rect={tuple(self.rect)}"
 
-    def show(self):
+    def enable(self):
         """Show outlines (only if reference sprite is visible).
         """
+        self.enabled = True
         if self._sp.visible and not self.visible:
             self.visible = 1
 
-    def hide(self):
+    def disable(self):
         """Hide outlines.
         """
+        self.enabled = False
         if self.visible:
             self.visible = 0
 
     def update(self, events):
         """Draw outlines only if visible.
         """
-        if self._sp.dirty:
+        if self._sp.dirty and self.visible:
             self.dirty = 1
             self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
             pygame.draw.rect(self.image, self.color, (0, 0, self.rect.width, self.rect.height), 2)
@@ -57,21 +61,25 @@ class BaseSprite(pygame.sprite.DirtySprite):
         super(BaseSprite, self).__init__()
         self.image = None
         self.rect = pygame.Rect((0, 0), size)
+        self.outlines = None  # Dynamically set by outlines sprite class
         self.pressed = 0
         self.on_pressed = None
-        self.color_pressed = (100, 100, 100)
 
     def show(self):
         """Show image.
         """
         if not self.visible:
             self.visible = 1
+            if self.outlines and self.outlines.enabled and not self.outlines.visible:
+                self.outlines.visible = 1
 
     def hide(self):
         """Hide image.
         """
         if self.visible:
             self.visible = 0
+            if self.outlines and self.outlines.visible:
+                self.outlines.visible = 0
 
     def set_rect(self, x, y, width, height):
         """Set the sprite absolute position and size.
@@ -103,11 +111,11 @@ class BaseSprite(pygame.sprite.DirtySprite):
         if self.pressed != int(state):
             self.pressed = int(state)
             if self.on_pressed is not None:
-                self.image = None  # Force rendering
-                self.dirty = 1
-
-                # Trigger callback when press is released
-                if not self.pressed and self.on_pressed:
+                if self.pressed and self.visible:
+                    self.visible = 0
+                else:
+                    self.visible = 1
+                    # Trigger callback when press is released
                     self.on_pressed()
 
 
@@ -115,12 +123,14 @@ class ImageSprite(BaseSprite):
     """Image Sprite.
     """
 
-    def __init__(self, skin=None, size=(10, 10)):
+    def __init__(self, skin=None, size=(10, 10), colorize=True):
         """
         :param skin: image file path, RGB color tuple,  PIL image or Pygame surface
         :type skin: str or tuple or object
         :param size: size tuple (width, height) of the image.
         :type size: tuple
+        :param colorize: recolorize picture if a color is set.
+        :type colorize: tuple
         """
         super(ImageSprite, self).__init__(size)
         self.image_orig = None
@@ -130,6 +140,7 @@ class ImageSprite(BaseSprite):
         self.hflip = False
         self.vflip = False
         self.angle = 0
+        self.colorize = colorize
         if skin:
             self.set_skin(skin)
 
@@ -245,8 +256,6 @@ class ImageSprite(BaseSprite):
                 else:
                     raise ValueError("Path to image is missing")
 
-            color = self.color_pressed if self.pressed else self.color
-
             if isinstance(self.image_orig, (tuple, list)):
                 self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
                 self.image.fill(self.image_orig)
@@ -255,11 +264,11 @@ class ImageSprite(BaseSprite):
                                                   self.image_orig.size, self.image_orig.mode)
                 self.image = pictures.transform_pygame_image(surface, self.rect.size, hflip=self.hflip,
                                                              vflip=self.vflip, angle=self.angle, crop=self.crop,
-                                                             color=color)
+                                                             color=self.color if self.colorize else None)
             else:
                 self.image = pictures.transform_pygame_image(self.image_orig, self.rect.size, hflip=self.hflip,
                                                              vflip=self.vflip, angle=self.angle, crop=self.crop,
-                                                             color=color)
+                                                             color=self.color if self.colorize else None)
 
 
 class TextSprite(BaseSprite):
@@ -318,8 +327,7 @@ class TextSprite(BaseSprite):
         """Draw image if has changed and visible.
         """
         if self.image is None and self.visible:
-            color = self.color_pressed if self.pressed else self.color
-            self.image = pictures.text_to_pygame_image(self.text, self.rect.size, color, self.align)
+            self.image = pictures.text_to_pygame_image(self.text, self.rect.size, self.color, self.align)
 
 
 class ArrowSprite(ImageSprite):
@@ -464,9 +472,9 @@ class BasePygameScene(BaseScene):
         """
         for sprite in self.sprites.get_sprites_from_layer(5):
             if enable:
-                sprite.show()
+                sprite.enable()
             else:
-                sprite.hide()
+                sprite.disable()
 
     def set_image(self, image=None):
         """Set an image to the main place or hide it.
@@ -475,8 +483,8 @@ class BasePygameScene(BaseScene):
         :type image: str or object
         """
         if image:
-            self.image.set_skin(image)
             self.image.show()
+            self.image.set_skin(image)
         else:
             self.image.hide()
 

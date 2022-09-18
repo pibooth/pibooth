@@ -5,7 +5,7 @@ import pygame
 
 def test_scene(init, pygame_loop, scene_builder):
 
-    scene = scene_builder('finish')
+    scene = scene_builder('print')
 
     def handler(screen, events):
         for event in events:

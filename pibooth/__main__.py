@@ -65,6 +65,9 @@ def main():
     parser.add_argument("--noplugin", action='store_true', default=False,
                         help=u"don't load external plugins")
 
+    parser.add_argument("--profile", action='store_true',
+                        help=u"run the profiler to do CPU times analysis")
+
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-v", "--verbose", dest='logging', action='store_const', const=logging.DEBUG,
                        help=u"report more information about operations", default=logging.INFO)
@@ -114,7 +117,7 @@ def main():
     else:
         LOGGER.info("Starting the photo booth application %s", GPIO_INFO)
         app = PiboothApplication(config, plugin_manager, options.gui)
-        app.mainloop()
+        app.mainloop(options.profile)
 
 
 if __name__ == '__main__':

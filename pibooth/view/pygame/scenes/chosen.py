@@ -27,5 +27,4 @@ class ChosenScene(BasePygameScene):
     def set_selected_choice(self, choice):
         if self.choice != choice:
             self.choice = choice
-            print(choice)
             self.text.set_text(self.get_text())

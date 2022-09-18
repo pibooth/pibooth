@@ -115,7 +115,6 @@ class PygameWindow(BaseWindow):
                 # Convert HW button events to keyboard events for menu
                 event = evtfilters.create_click_event()
                 LOGGER.debug("Generate MENU-APPLY event for menu")
-                events += (event,)
 
             # Convert GUI events to pibooth events (plugins are based on them)
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -170,8 +169,6 @@ class PygameWindow(BaseWindow):
 
             # 3. Draw on buffer view elements which have changed
             rects = self.draw()
-            if rects:
-                print(rects)
 
             # 4. Update dirty rects on screen (the most time-consuming action)
             pygame.display.update(rects)

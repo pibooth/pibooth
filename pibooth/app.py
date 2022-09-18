@@ -7,6 +7,8 @@
 import os
 import os.path as osp
 import logging
+import pstats
+import cProfile
 
 import pygame
 from PIL import Image
@@ -18,10 +20,6 @@ from pibooth.counters import Counters
 from pibooth.states import StateMachine
 from pibooth.printer import Printer
 from pibooth.utils import LOGGER, PollingTimer, get_crash_message, set_logging_level, AsyncTask
-
-import pstats
-import cProfile
-PROFILER = cProfile.Profile()
 
 
 def load_last_saved_picture(path):
@@ -238,14 +236,18 @@ class PiboothApplication(object):
         else:
             self._machine.process(events)
 
-    def mainloop(self):
+    def mainloop(self, enable_profiler=False):
         """Start application mainloop.
         """
+        if enable_profiler:
+            profiler = cProfile.Profile()
+
         try:
             self._initialize()
             self._pm.hook.pibooth_startup(cfg=self._config, app=self)
             self._machine.set_state('wait')
-            PROFILER.enable()
+            if enable_profiler:
+                profiler.enable()
             self._window.eventloop(self.update)
         except KeyboardInterrupt:
             print()
@@ -253,9 +255,11 @@ class PiboothApplication(object):
             LOGGER.error(str(ex), exc_info=True)
             LOGGER.error(get_crash_message())
         finally:
-            # stats = pstats.Stats(PROFILER).sort_stats('cumtime')
-            # stats.print_stats()
-            PROFILER.disable()
+
+            if enable_profiler:
+                stats = pstats.Stats(profiler).sort_stats('cumtime')
+                stats.print_stats()
+                profiler.disable()
 
             self._pm.hook.pibooth_cleanup(app=self)
             AsyncTask.kill_all()

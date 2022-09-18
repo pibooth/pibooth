@@ -68,7 +68,7 @@ The output can be formatted in **json** using the ``--json`` option:
 
     {"taken": 126, "printed": 17, "forgotten": 2, "remaining_duplicates": 3}
 
-The counters can be updated/rest using the ``--update`` option:
+The counters can be interactively updated/rest using the ``--update`` option:
 
 .. code-block:: bash
 
