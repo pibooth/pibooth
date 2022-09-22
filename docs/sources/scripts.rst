@@ -93,7 +93,7 @@ in the configuration:
 
 .. code-block:: bash
 
-    pibooth-printcfg
+    pibooth-printer
 
 *Output example*::
 
@@ -119,7 +119,7 @@ generated output can be pasted (after update of the wanted values) in the
 
 .. code-block:: bash
 
-    pibooth-printcfg --json
+    pibooth-printer --json
 
 *Output example*::
 

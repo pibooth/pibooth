@@ -20,7 +20,6 @@ class ChosenScene(BasePygameScene):
         return "\n".join(texts)
 
     def resize(self, size):
-        super(ChosenScene, self).resize(size)
         self.text.set_text(self.get_text())  # In case of text has changed
         self.text.set_rect(*self.rect.inflate(-100, -100))
 

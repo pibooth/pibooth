@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pibooth.view.pygame.scenes.base import BasePygameScene, ImageSprite
+from pibooth.view.pygame.scenes.base import BasePygameScene, ImageSprite, DotsSprite
 
 
 class PreviewScene(BasePygameScene):
@@ -9,10 +9,9 @@ class PreviewScene(BasePygameScene):
         super(PreviewScene, self).__init__(name)
         self.left_image = self.add_sprite(ImageSprite('capture_left.png'))
         self.right_image = self.add_sprite(ImageSprite('capture_right.png'))
+        self.dots = self.add_sprite(DotsSprite(4))
 
     def resize(self, size):
-        super(PreviewScene, self).resize(size)
-
         # Preview capture
         self.image.set_rect(self.rect.width // 6, 10,
                             self.rect.width * 2 // 3, self.rect.height * 7 // 8)
@@ -25,5 +24,9 @@ class PreviewScene(BasePygameScene):
         # Right image
         self.right_image.set_rect(self.rect.right - size[0] - 10, self.rect.bottom - size[1], size[0], size[1])
 
+        # Dots
+        self.dots.set_rect(self.rect.width // 6, self.rect.bottom - self.rect.height // 8 + 10,
+                           self.rect.width * 2 // 3, self.rect.height // 8 - 10)
+
     def set_capture_number(self, current, total):
-        pass
+        self.dots.set_status(current, total)

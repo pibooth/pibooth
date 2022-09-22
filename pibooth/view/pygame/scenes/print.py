@@ -22,15 +22,12 @@ class PrintScene(BasePygameScene):
         self.right_arrow.on_pressed = evtfilters.post_print_button_event
 
     def resize(self, size):
-        super(PrintScene, self).resize(size)
-
         # Previous picture
         self.image.set_rect(0, 0, self.rect.width // 2, self.rect.height)
 
         # Take picture text
         text_border = 20
         self.text.set_text(get_translated_text('print'))  # In case of text has changed
-        rect = pygame.Rect(0, 0, self.rect.width // 2 - 2 * text_border, self.rect.height * 0.6 - text_border)
         if self.arrow_location == self.ARROW_HIDDEN:
             self.text.set_align(pictures.ALIGN_CENTER)
             self.text.set_rect(self.rect.width // 2 + text_border, text_border,
@@ -69,6 +66,7 @@ class PrintScene(BasePygameScene):
             y = self.rect.bottom - size[1] - 10
         if self.arrow_location == self.ARROW_TOUCH:
             self.left_arrow.set_skin('touch.png')
+            self.left_arrow.set_angle(60)
             self.left_arrow.set_flip(hflip=False)
         elif self.arrow_location in (self.ARROW_BOTTOM, self.ARROW_TOP):
             self.left_arrow.set_skin('arrow.png')
@@ -78,7 +76,7 @@ class PrintScene(BasePygameScene):
 
         # Right arrow
         if self.arrow_location == self.ARROW_TOUCH:
-            self.right_arrow.set_skin('touch.png')
+            self.right_arrow.set_skin('touch_print.png')
             size = (self.rect.width * 0.15, self.rect.height * 0.15)
             x = self.rect.centerx + self.rect.width * 0.2
             y = self.rect.height // 2

@@ -5,7 +5,6 @@
 
 import pygame
 import pygame_menu as pgm
-import pygame_vkeyboard as vkb
 import pibooth
 from pibooth import fonts, evtfilters
 from pibooth.utils import LOGGER

@@ -67,9 +67,9 @@ def main():
             'picamera2>=0.3.2 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
             'Pillow>=9.2.0',
             'pygame>=2.1.2',
-            'pygame-menu==4.0.7',
+            'pygame-menu==4.2.8',
             'pygame-vkeyboard>=2.0.8',
-            'pygame-imslider>=1.0.0',
+            'pygame-imslider>=1.0.1',
             'psutil>=5.9.1',
             'pluggy>=1.0.0',
             'gpiozero>=1.6.2',
@@ -87,7 +87,7 @@ def main():
                                           "pibooth-diag = pibooth.scripts.diagnostic:main",
                                           "pibooth-fonts = pibooth.scripts.fonts:main",
                                           "pibooth-regen = pibooth.scripts.regenerate:main",
-                                          "pibooth-printcfg = pibooth.scripts.printer:main"]},
+                                          "pibooth-printer = pibooth.scripts.printer:main"]},
     )
 
 

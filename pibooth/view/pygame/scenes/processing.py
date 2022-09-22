@@ -12,8 +12,6 @@ class ProcessingScene(BasePygameScene):
         self.text = self.add_sprite(TextSprite(get_translated_text('processing')))
 
     def resize(self, size):
-        super(ProcessingScene, self).resize(size)
-
         # Preview picture
         self.image.set_rect(*self.rect)
 

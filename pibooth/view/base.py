@@ -130,10 +130,20 @@ class BaseWindow(object):
         LOGGER.debug("Set scene '%s'", name)
         self.scene = self.scenes[name]
         self.scene.set_outlines(self.debug)
-        self.scene.set_background(self.bg_color_or_path, self._size)
         self.scene.set_text_color(self.text_color)
         self.scene.set_arrows(self.arrow_location, self.arrow_offset)
         self.scene.set_print_number(self.print_number, self.print_failure)
+        self.resize(self._size)  # Force graphical element to be recalculated
+
+    def resize(self, size):
+        """Resize the window only if not fullscreen.
+
+        :param size: new size of the scene
+        :type size: tuple
+        """
+        self._size = size  # Manual resizing
+        self.scene.set_background(self.bg_color_or_path, self._size)
+        self.scene.resize(self.get_rect().size)
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.
@@ -142,12 +152,6 @@ class BaseWindow(object):
         :type absolute: bool
         """
         return pygame.Rect(0, 0, self._size[0], self._size[1])
-
-    def resize(self, size):
-        """Resize the window only if not fullscreen.
-        """
-        if not self.is_fullscreen:
-            self._size = size  # Manual resizing
 
     def eventloop(self, app_update):
         """Main GUI events loop (blocking).

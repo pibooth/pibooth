@@ -16,7 +16,7 @@ class WaitScene(BasePygameScene):
         self.right_arrow = self.add_sprite(RightArrowSprite())
         self.text = self.add_sprite(TextSprite(get_translated_text('intro')))
         self.text_print = self.add_sprite(TextSprite(get_translated_text('intro_print')))
-        self.image_check = self.add_sprite(ImageSprite('check.png', colorize=False))
+        self.image_check = self.add_sprite(ImageSprite('check.png'))
         self.image_check.hide()
 
         self.printer_ongoing_timer = PollingTimer(1)
@@ -28,12 +28,10 @@ class WaitScene(BasePygameScene):
         self.right_arrow.on_pressed = evtfilters.post_print_button_event
 
     def on_event(self):
-        self.image.hide()  # Do not show image after click, there is a timer
+        self.image.hide()  # Do not show image after click, there is a timer before
         evtfilters.post_print_button_event()
 
     def resize(self, size):
-        super(WaitScene, self).resize(size)
-
         # Previous picture
         self.image.set_rect(self.rect.centerx, 0, self.rect.width // 2, self.rect.height)
         self.image_check.set_rect(*self.image.rect.inflate(-self.image.rect.width // 2,

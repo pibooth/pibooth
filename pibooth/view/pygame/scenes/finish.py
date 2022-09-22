@@ -13,8 +13,6 @@ class FinishScene(BasePygameScene):
         self.text = self.add_sprite(TextSprite(get_translated_text('finished')))
 
     def resize(self, size):
-        super(FinishScene, self).resize(size)
-
         # Text
         self.text.set_text(get_translated_text('finished'))  # In case of text has changed
         self.text.set_rect(*self.rect.inflate(-self.rect.width // 2, -self.rect.height//2))

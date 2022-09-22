@@ -3,6 +3,7 @@
 import os.path as osp
 import PIL
 import pygame
+from pygame import gfxdraw
 
 from pibooth import pictures
 from pibooth import evtfilters
@@ -61,6 +62,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
         super(BaseSprite, self).__init__()
         self.image = None
         self.rect = pygame.Rect((0, 0), size)
+        self.color = None
         self.outlines = None  # Dynamically set by outlines sprite class
         self.pressed = 0
         self.on_pressed = None
@@ -101,6 +103,28 @@ class BaseSprite(pygame.sprite.DirtySprite):
             self.image = None  # Force rendering
             self.dirty = 1
 
+    def set_color(self, color):
+        """Re-colorize the skin.
+
+        :param color: RGB color tuple
+        :type color: tuple
+        """
+        if color != self.color:
+            self.color = color
+            self.image = None  # Force rendering
+            self.dirty = 1
+
+    def get_color(self, factor=1):
+        """Return image main color.
+
+        :param factor: more or less dark, should be > 0 and < 1
+        :type factor: int
+        """
+        if self.color:
+            return tuple(min(int(c * abs(factor)), 255) for c in self.color)
+        else:
+            return pygame.transform.average_color(self.image)
+
     def set_pressed(self, state):
         """Set the arrow pressed state (1 for pressed 0 for released)
         and redraws it.
@@ -134,7 +158,6 @@ class ImageSprite(BaseSprite):
         """
         super(ImageSprite, self).__init__(size)
         self.image_orig = None
-        self.color = None
         self.path = None
         self.crop = False
         self.hflip = False
@@ -224,28 +247,6 @@ class ImageSprite(BaseSprite):
             self.image = None  # Force rendering
             self.dirty = 1
 
-    def set_color(self, color):
-        """Re-colorize the skin.
-
-        :param color: RGB color tuple
-        :type color: tuple
-        """
-        if color != self.color:
-            self.color = color
-            self.image = None  # Force rendering
-            self.dirty = 1
-
-    def get_color(self, factor=1):
-        """Return image main color.
-
-        :param factor: more or less dark, should be > 0 and < 1
-        :type factor: int
-        """
-        if self.color:
-            return tuple(min(int(c * abs(factor)), 255) for c in self.color)
-        else:
-            return pygame.transform.average_color(self.image)
-
     def update(self, events):
         """Draw image if has changed and visible.
         """
@@ -282,24 +283,13 @@ class TextSprite(BaseSprite):
         """
         super(TextSprite, self).__init__(size)
         self.text = text
-        self.align = pictures.ALIGN_CENTER
         self.color = (255, 255, 255)
+        self.align = pictures.ALIGN_CENTER
         if text is not None:
             self.set_text(text)
 
     def __repr__(self):
         return f"{self.__class__.__name__}(text='{self.text}', rect={tuple(self.rect)})"
-
-    def set_color(self, color):
-        """Set text color.
-
-        :param color: RGB color tuple
-        :type color: tuple
-        """
-        if color != self.color:
-            self.color = color
-            self.image = None  # Force rendering
-            self.dirty = 1
 
     def set_text(self, text):
         """Set text.
@@ -387,6 +377,43 @@ class RightArrowSprite(LeftArrowSprite):
         ArrowSprite.set_rect(self, x, y, width, height)
 
 
+class DotsSprite(BaseSprite):
+
+    def __init__(self, nbr_dots=4):
+        super(DotsSprite, self).__init__((100, 50))
+        self.dots = []
+        self.filled_orig = pictures.load_pygame_image('dot_filled.png')
+        self.empty_orig = pictures.load_pygame_image('dot.png')
+        self.current = 0
+        self.total = nbr_dots
+
+    def set_status(self, current, total):
+        if self.total != total:
+            self.total = total
+            self.image = None  # Force rendering
+            self.dirty = 1
+        if self.current != current:
+            self.current = current
+            self.image = None  # Force rendering
+            self.dirty = 1
+
+    def update(self, events):
+        if self.image is None and self.visible:
+            self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+            border = 20
+            side = min(self.rect.size) - 10
+            empty_dot = pictures.transform_pygame_image(self.empty_orig, (side, side), color=self.color)
+            filled_dot = pictures.transform_pygame_image(self.filled_orig, (side, side), color=self.color)
+            x = (self.rect.width - (side * self.total + border * (self.total - 1))) // 2
+            y = (self.rect.height - side) // 2
+            for i in range(self.total):
+                if i < self.current:
+                    self.image.blit(filled_dot, (x, y))
+                else:
+                    self.image.blit(empty_dot, (x, y))
+                x += (side + border)
+
+
 class BasePygameScene(BaseScene):
 
     """Base class for Pygame scene. It use dirty sprite mechanism to
@@ -430,7 +457,7 @@ class BasePygameScene(BaseScene):
         """
         if layer == 0 and isinstance(sprite, ArrowSprite):
             layer = 4
-        elif layer == 0 and isinstance(sprite, ImageSprite):
+        elif layer == 0 and isinstance(sprite, (ImageSprite, DotsSprite)):
             layer = 2
         elif layer == 0 and isinstance(sprite, TextSprite):
             layer = 1
@@ -529,7 +556,7 @@ class BasePygameScene(BaseScene):
         :param size: new size of the scene
         :type size: tuple
         """
-        self.set_background(self.background.get_skin(), size)
+        pass
 
     def update(self, events):
         """Pygame events processing callback method.

@@ -46,9 +46,7 @@ class PygameWindow(BaseWindow):
                                        show_text=True,
                                        joystick_navigation=True)
         self._keyboard.disable()
-
         self._menu = None
-
         self._force_redraw = False
 
     def _create_scene(self, name):
@@ -57,7 +55,6 @@ class PygameWindow(BaseWindow):
 
     def set_scene(self, name):
         super(PygameWindow, self).set_scene(name)
-        self.scene.resize(self.get_rect().size)
         self._keyboard.disable()
         self._force_redraw = True
 
@@ -100,13 +97,12 @@ class PygameWindow(BaseWindow):
         """
         for event in events:
             if event.type == pygame.VIDEORESIZE and not self.is_fullscreen:
-                self._size = event.size  # Manual resizing
-                self.surface = pygame.display.set_mode(self._size, pygame.RESIZABLE)
-                self.scene.resize(self.get_rect().size)
+                self.surface = pygame.display.set_mode(event.size, pygame.RESIZABLE)
+                self.resize(event.size)
 
             elif evtfilters.is_fullscreen_event(event):
                 self.toggle_fullscreen()
-                self.scene.resize(self.get_rect().size)
+                self.resize(self.get_rect().size)
 
             elif evtfilters.is_settings_event(event):
                 self.toggle_menu()

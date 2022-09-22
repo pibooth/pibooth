@@ -15,7 +15,6 @@ class ViewPlugin(object):
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.count = 0
-        self.count_flash = 0
         self.capture_finished = False
         self.forgotten = False
         # Seconds to display the failed message
@@ -26,8 +25,6 @@ class ViewPlugin(object):
         self.choose_timer = PollingTimer(30)
         # Seconds to display the selected layout
         self.layout_timer = PollingTimer(4)
-        # Seconds between each flash
-        self.flash_timer = PollingTimer(0.3)
         # Seconds to display the print view
         self.print_view_timer = PollingTimer(0)
         # Seconds to display the finished view
@@ -132,26 +129,19 @@ class ViewPlugin(object):
                 win.set_image(event.result)
 
     @pibooth.hookimpl
-    def state_capture_enter(self):
-        self.count_flash = 0
-        self.flash_timer.start()
-
-    @pibooth.hookimpl
-    def state_capture_do(self, cfg, app, win, events):
+    def state_capture_enter(self, cfg, app, win):
         if cfg.getboolean('WINDOW', 'flash'):
-            if self.flash_timer.is_timeout():
-                self.count_flash += 1
-                win.scene.toggle_flash()
-                self.flash_timer.start()
-
+            win.scene.trigger_flash()
         win.scene.set_capture_number(self.count, app.capture_nbr)
 
+    @pibooth.hookimpl
+    def state_capture_do(self, events):
         if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_CAM_CAPTURE):
             self.capture_finished = True
 
     @pibooth.hookimpl
-    def state_capture_validate(self, cfg, app):
-        if self.capture_finished and (not cfg.getboolean('WINDOW', 'flash') or self.count_flash >= 4):
+    def state_capture_validate(self, cfg, app, win):
+        if self.capture_finished and (not cfg.getboolean('WINDOW', 'flash') or win.scene.count_flash >= 3):
             if self.count >= app.capture_nbr:
                 return 'processing'
             return 'preview'

@@ -11,6 +11,5 @@ class FailsafeScene(BasePygameScene):
         self.text = self.add_sprite(TextSprite(get_translated_text('oops')))
 
     def resize(self, size):
-        super(FailsafeScene, self).resize(size)
         self.text.set_text(get_translated_text('oops'))  # In case of text has changed
         self.text.set_rect(*self.rect.inflate(-100, -100))

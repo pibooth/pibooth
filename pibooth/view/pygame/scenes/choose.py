@@ -62,8 +62,6 @@ class ChooseScene(BasePygameScene):
         self.right_arrow.on_pressed = evtfilters.post_print_button_event
 
     def resize(self, size):
-        super(ChooseScene, self).resize(size)
-
         # Slider
         slider_width, slider_height = self.rect.width * 3 // 4, self.rect.height * 6 // 8
         x, y = (self.rect.width - slider_width) // 2, (self.rect.height - slider_height) // 2
