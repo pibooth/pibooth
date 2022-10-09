@@ -6,7 +6,7 @@
 import pygame
 import pygame_menu as pgm
 import pibooth
-from pibooth import fonts, evtfilters
+from pibooth import fonts
 from pibooth.utils import LOGGER
 from pibooth.config.default import DEFAULT
 
@@ -80,25 +80,20 @@ def _counters(counters):
     return [pattern.format(name.replace("_", " ").capitalize(), counters[name]) for name in counters]
 
 
-class PiConfigMenu(object):
+class PygameMenu(object):
 
-    def __init__(self, plugins_manager, configuration, application, window, onclose=None):
+    def __init__(self, application, configuration, callback=None):
         self.app = application
-        self.win = window
         self.cfg = configuration
-        self.pm = plugins_manager
+        self.callback = callback
+        self.size = (600, 400)
         self._changed = False
-        self._close_callback = onclose
-
-        size = self.win.get_rect().size
-        self.size = (min(600, size[0]), min(400, size[1]))
         self._main_menu = pgm.Menu(title="Settings v{}".format(pibooth.__version__),
                                    width=self.size[0],
                                    height=self.size[1],
                                    theme=THEME_DARK,
                                    touchscreen=True,
                                    onclose=self.on_close)
-        self._main_menu.disable()
         self._main_menu.add.vertical_margin(20)
 
         for name in DEFAULT:
@@ -285,8 +280,6 @@ class PiConfigMenu(object):
         if self._changed:
             self.cfg.save()
             self._changed = False
-        if self._close_callback:
-            self._close_callback()
 
     def on_exit(self):
         """Called when the application is exited by menu.
@@ -294,46 +287,40 @@ class PiConfigMenu(object):
         self.on_close()
         exit(0)
 
-    def show(self):
+    def enable(self):
         """Show the menu.
         """
         self._main_menu.enable()
 
-    def is_shown(self):
+    def disable(self):
+        """Show the menu.
+        """
+        self._main_menu.disable()
+
+    def is_enabled(self):
         """Return True if the menu is shown.
         """
         return self._main_menu.is_enabled()
 
-    def process(self, events):
+    def resize(self, size):
+        self._main_menu.resize(size[0], size[1])
+
+    def update(self, events):
         """Process the events related to the menu.
         """
-        if not self._keyboard.is_enabled():
-            self._main_menu.update(events)
-            if self._main_menu.is_enabled():  # Menu may have been closed
-                self._main_menu.draw(self.win.surface)
-                selected = self._main_menu.get_current().get_selected_widget()
-                if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
-                    for event in events:
-                        if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN)\
-                                and selected.get_scrollarea().collide(selected, event):
-                            self._keyboard.enable()
-                            if isinstance(selected, pgm.widgets.ColorInput):
-                                self._keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
-                            else:
-                                self._keyboard.set_text(selected.get_value())
-                            return
-        else:
-            for event in events:
-                if (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3)
-                        or event.type == pygame.FINGERDOWN)\
-                        and not self._keyboard.get_rect().collidepoint(evtfilters.get_event_pos(self.win.display_size, event)):
-                    self._keyboard.disable()
-                    self._keyboard.draw()
-                    return
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    self._keyboard.disable()
-                    self._keyboard.draw()
-                    return
+        self._main_menu.update(events)
+        if self._main_menu.is_enabled():  # Menu may have been closed
+            selected = self._main_menu.get_current().get_selected_widget()
+            if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
+                for event in events:
+                    if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN)\
+                            and selected.get_scrollarea().collide(selected, event):
+                        self._keyboard.enable()
+                        if isinstance(selected, pgm.widgets.ColorInput):
+                            self._keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
+                        else:
+                            self._keyboard.set_text(selected.get_value())
+                        return
 
-            self._keyboard.update(events)
-            self._keyboard.draw(self.win.surface)
+    def draw(self, surface):
+        return self._main_menu.draw(surface)

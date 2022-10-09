@@ -72,7 +72,7 @@ class WaitScene(BasePygameScene):
 
         # Left arrow
         if self.arrow_location == self.ARROW_TOUCH:
-            self.left_arrow.set_skin('touch.png')
+            self.left_arrow.set_skin('touch_camera.png')
             size = (self.rect.width * 0.15, self.rect.height * 0.15)
             x = self.rect.width * 0.2
             y = self.rect.height // 2

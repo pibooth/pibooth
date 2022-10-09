@@ -83,6 +83,7 @@ class PiboothApplication(object):
 
         title = 'Pibooth v{}'.format(pibooth.__version__)
         self._window = view.get_window(window_type, title, init_size, init_color, init_text_color, init_debug)
+        self._window.set_menu(self, self._config)
 
         self._multipress_timer = PollingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
 

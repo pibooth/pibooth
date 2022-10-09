@@ -135,6 +135,11 @@ class BaseWindow(object):
         self.scene.set_print_number(self.print_number, self.print_failure)
         self.resize(self._size)  # Force graphical element to be recalculated
 
+    def set_menu(self, app, cfg):
+        """Set the menu.
+        """
+        pass
+
     def resize(self, size):
         """Resize the window only if not fullscreen.
 

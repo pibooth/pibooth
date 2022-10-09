@@ -68,6 +68,10 @@ class NoGuiWindow(BaseWindow):
                 if event.type == pygame.QUIT:
                     return
 
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    LOGGER.debug("[ESC] pressed. No menu configured -> exit")
+                    return
+
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
                     evtfilters.post_capture_button_event()
 
