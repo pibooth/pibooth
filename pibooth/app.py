@@ -138,7 +138,10 @@ class PiboothApplication(object):
         """
         # Handle the language configuration
         language.CURRENT = self._config.get('GENERAL', 'language')
-        fonts.CURRENT = fonts.get_filename(self._config.get('WINDOW', 'font'))
+        if self._config.get('WINDOW', 'font').endswith('.ttf') or self._config.get('WINDOW', 'font').endswith('.otf'):
+            fonts.CURRENT = fonts.get_filename(self._config.getpath('WINDOW', 'font'))
+        else:
+            fonts.CURRENT = fonts.get_filename(self._config.get('WINDOW', 'font'))
 
         # Set the captures choices
         choices = self._config.gettuple('PICTURE', 'captures', int)

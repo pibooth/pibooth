@@ -57,6 +57,7 @@ class PygameWindow(BaseWindow):
     def set_menu(self, app, cfg):
         """Set the menu.
         """
+        return
         self._menu = menu.PygameMenu(app, cfg, self._on_menu_event)
         self._menu.disable()
 
