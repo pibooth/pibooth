@@ -59,7 +59,7 @@ class RpiCamera(BaseCamera):
         """Add an image as an overlay.
         """
         if self._window:  # No window means no preview displayed
-            rect = self.get_rect()
+            rect = self.get_rect(self._cam.MAX_RESOLUTION)
 
             # Create an image padded to the required size (required by picamera)
             size = (((rect.width + 31) // 32) * 32, ((rect.height + 15) // 16) * 16)
@@ -93,10 +93,10 @@ class RpiCamera(BaseCamera):
             return
 
         self._window = window
-        rect = self.get_rect()
+        rect = self.get_rect(self._cam.MAX_RESOLUTION)
         if self._cam.hflip:
             if flip:
-                 # Don't flip again, already done at init
+                # Don't flip again, already done at init
                 flip = False
             else:
                 # Flip again because flipped once at init
