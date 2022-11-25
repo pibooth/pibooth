@@ -37,8 +37,22 @@ Documentation
    :target: https://pibooth.readthedocs.io/en/latest
    :height: 200px
 
-Third-party plugins
+Plugins
 -------------------
+
+Here is a list of known plugins compatible with Pibooth
+
+Pibooth organisation's plugin
+=============================
+
+- `pibooth-picture-template <https://github.com/pibooth/pibooth-picture-template>`_
+- `pibooth-google-photo <https://github.com/pibooth/pibooth-google-photo>`_
+- `pibooth-sound-effects <https://github.com/pibooth/pibooth-sound-effects>`_
+- `pibooth_dropbox <https://github.com/pibooth/pibooth-dropbox>`_
+- `pibooth-qrcode <https://github.com/pibooth/pibooth-qrcode>`_
+
+Third-party plugins
+===================
 
 Third-party plugins can be found on GitHub or on `plugins on PyPI  <https://pypi.org/search/?q=pibooth>`_.
 Here is a short list:
@@ -48,6 +62,10 @@ Here is a short list:
 - `pibooth-telegram-upload <https://pypi.org/project/pibooth-telegram-upload>`_
 - `pibooth-s3-upload <https://pypi.org/project/pibooth-s3-upload>`_
 
+Sponsors
+--------
+
+An enormous thanks to to `@andhey <https://github.com/andhey>`_, `@philipbarwi <https://github.com/philipbarwi>`_ and `@laurasees <https://github.com/laurasees>`_ who sponsored us, it means a lot to us!
 
 .. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/pibooth.png
    :align: middle
