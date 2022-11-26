@@ -105,7 +105,7 @@ Manual procedure
 Automated procedure
 ^^^^^^^^^^^^^^^^^^^
 
-Alternatively, you can use Asible to install pibooth automatically.
+Alternatively, you can use Ansible to install pibooth automatically.
 `A playbook can be found here <https://github.com/TiJof/pibooth_ansible>`_
 (thank you **TiJof**).
 
