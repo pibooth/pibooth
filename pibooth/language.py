@@ -159,7 +159,6 @@ DEFAULT = {
         'finished': "Takk",
         'oops': "Ops, noe gikk galt",
     },
-        },
     'pt': {
         'intro': "Tira uma foto",
         'intro_print': 'Ainda podes\nimprimir esta\nfoto',
