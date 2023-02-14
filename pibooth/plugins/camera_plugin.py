@@ -110,3 +110,4 @@ class CameraPlugin(object):
     def state_capture_exit(self, cfg, app):
         if not cfg.getboolean('WINDOW', 'preview_stop_on_capture'):
             app.camera.stop_preview()
+        self.count = 0
