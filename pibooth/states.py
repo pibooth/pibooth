@@ -13,12 +13,12 @@ class StateMachine(object):
         self.states = set()
         self.failsafe_state = None
         self.active_state = None
+        self.pm = plugins_manager
 
-        # Share the application to manage between states
+        # Shared variables between states
         self.app = application
         self.win = window
         self.cfg = configuration
-        self.pm = plugins_manager
 
         self._start_time = time.time()
 

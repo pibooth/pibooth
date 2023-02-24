@@ -6,6 +6,7 @@ import pytest
 import pygame
 from PIL import Image
 from pibooth import language
+from pibooth.tasks import AsyncTasksPool
 from pibooth.counters import Counters
 from pibooth.config.parser import PiConfigParser
 from pibooth.view.pygame.scenes import get_scene
@@ -70,6 +71,11 @@ def cfg(cfg_path):
 @pytest.fixture
 def counters(tmpdir):
     return Counters(str(tmpdir.join('data.pickle')), nbr_printed=0)
+
+
+@pytest.fixture(scope='session')
+def init_tasks():
+    return AsyncTasksPool()
 
 
 @pytest.fixture(scope='session')

@@ -21,9 +21,9 @@ LOGGER = logging.getLogger("pibooth")
 class BlockConsoleHandler(logging.StreamHandler):
 
     default_level = logging.INFO
-    pattern_indent = '+< '
-    pattern_blocks = '|  '
-    pattern_dedent = '+> '
+    pattern_start = '+<- '
+    pattern_block = '|   '
+    pattern_end = '+-> '
     current_indent = ''
 
     def emit(self, record):
@@ -32,10 +32,10 @@ class BlockConsoleHandler(logging.StreamHandler):
             record.msg = '{}{}'.format(cls.current_indent, record.msg)
         logging.StreamHandler.emit(self, record)
 
-        if cls.current_indent.endswith(cls.pattern_indent):
-            cls.current_indent = (cls.current_indent[:-len(cls.pattern_indent)] + cls.pattern_blocks)
-        elif cls.current_indent.endswith(cls.pattern_dedent):
-            cls.current_indent = cls.current_indent[:-len(cls.pattern_dedent)]
+        if cls.current_indent.endswith(cls.pattern_start):
+            cls.current_indent = (cls.current_indent[:-len(cls.pattern_start)] + cls.pattern_block)
+        elif cls.current_indent.endswith(cls.pattern_end):
+            cls.current_indent = cls.current_indent[:-len(cls.pattern_end)]
 
     @classmethod
     def is_debug(cls):
@@ -51,14 +51,14 @@ class BlockConsoleHandler(logging.StreamHandler):
         """Begin a new log block.
         """
         if cls.is_debug():
-            cls.current_indent += cls.pattern_indent
+            cls.current_indent += cls.pattern_start
 
     @classmethod
     def dedent(cls):
         """End the current log block.
         """
         if cls.is_debug():
-            cls.current_indent = (cls.current_indent[:-len(cls.pattern_blocks)] + cls.pattern_dedent)
+            cls.current_indent = (cls.current_indent[:-len(cls.pattern_block)] + cls.pattern_end)
 
 
 class PollingTimer(object):

@@ -227,8 +227,8 @@ class PiboothApplication(object):
         """Update application and call plugins according to Pygame events.
         Better to call it in the main thread to avoid plugin thread-safe issues.
 
-        : param events: list of events to process.
-        : type events: list
+        :param events: list of events to process.
+        :type events: list
         """
         if evts.find_event(events, evts.EVT_PIBOOTH_BTN_SETTINGS):
             if not self._window.is_menu_shown:  # Settings menu is opened
