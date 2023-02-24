@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Pibooth main module.
+"""Pibooth entry point.
 """
 
 import tempfile
@@ -20,7 +20,7 @@ from pibooth.app import PiboothApplication
 from pibooth import language
 from pibooth.utils import LOGGER, configure_logging
 from pibooth.plugins import create_plugin_manager
-from pibooth.config import PiConfigParser
+from pibooth.config import PiboothConfigParser
 
 
 # Set the default pin factory to a mock factory if pibooth is not started a Raspberry Pi
@@ -85,7 +85,7 @@ def main():
     plugin_manager = create_plugin_manager()
 
     # Load the configuration
-    config = PiConfigParser(osp.join(options.config_directory, "pibooth.cfg"), plugin_manager, not options.reset)
+    config = PiboothConfigParser(osp.join(options.config_directory, "pibooth.cfg"), plugin_manager, not options.reset)
 
     # Register plugins
     plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),

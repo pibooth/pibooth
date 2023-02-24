@@ -14,7 +14,7 @@ from pibooth.config.default import DEFAULT, add_default_option
 from pibooth.utils import LOGGER, open_text_editor
 
 
-class PiConfigParser(RawConfigParser):
+class PiboothConfigParser(RawConfigParser):
 
     """Class to parse and store the configuration values.
     The following attributes are available for use in plugins:
@@ -24,7 +24,7 @@ class PiConfigParser(RawConfigParser):
     """
 
     def __init__(self, filename, plugin_manager, load=True):
-        super(PiConfigParser, self).__init__()
+        super(PiboothConfigParser, self).__init__()
         self._pm = plugin_manager
         self.filename = osp.abspath(osp.expanduser(filename))
 
@@ -168,7 +168,7 @@ class PiConfigParser(RawConfigParser):
         :rtype: str
         """
         if self.has_section(section) and self.has_option(section, option):
-            return super(PiConfigParser, self).get(section, option, **kwargs)
+            return super(PiboothConfigParser, self).get(section, option, **kwargs)
         return str(DEFAULT[section][option][0])
 
     def set(self, section, option, value=None):
@@ -183,7 +183,7 @@ class PiConfigParser(RawConfigParser):
         """
         if not self.has_section(section):
             self.add_section(section)
-        super(PiConfigParser, self).set(section, option, value)
+        super(PiboothConfigParser, self).set(section, option, value)
 
     def gettyped(self, section, option):
         """Get a value from config and try to convert it in a native Python

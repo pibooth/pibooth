@@ -7,7 +7,7 @@ import sys
 import json
 import cups
 from pibooth.utils import LOGGER, configure_logging
-from pibooth.config import PiConfigParser
+from pibooth.config import PiboothConfigParser
 from pibooth.plugins import create_plugin_manager
 
 
@@ -16,7 +16,7 @@ def main():
     """
     configure_logging()
     plugin_manager = create_plugin_manager()
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
+    config = PiboothConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
 
     conn = cups.Connection()
     name = config.get('PRINTER', 'printer_name')

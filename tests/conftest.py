@@ -8,7 +8,7 @@ from PIL import Image
 from pibooth import language
 from pibooth.tasks import AsyncTasksPool
 from pibooth.counters import Counters
-from pibooth.config.parser import PiConfigParser
+from pibooth.config.parser import PiboothConfigParser
 from pibooth.view.pygame.scenes import get_scene
 from pibooth.camera import get_rpi_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
 from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
@@ -65,7 +65,7 @@ def cfg_path():
 
 @pytest.fixture(scope='session')
 def cfg(cfg_path):
-    return PiConfigParser(cfg_path, None)
+    return PiboothConfigParser(cfg_path, None)
 
 
 @pytest.fixture

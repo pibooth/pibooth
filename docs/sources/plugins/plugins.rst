@@ -107,7 +107,7 @@ Access to internal variables
 cfg
 ~~~
 
-.. autoclass:: pibooth.config.parser.PiConfigParser
+.. autoclass:: pibooth.config.parser.PiboothConfigParser
    :members: set, get, getint, getfloat, getboolean, gettyped, getpath, gettuple, add_option, join_path
    :undoc-members:
 

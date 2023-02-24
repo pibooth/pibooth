@@ -11,7 +11,7 @@ from PIL import Image
 
 from pibooth.utils import LOGGER, configure_logging
 from pibooth.plugins import create_plugin_manager
-from pibooth.config import PiConfigParser
+from pibooth.config import PiboothConfigParser
 from pibooth.counters import Counters
 from pibooth.pictures import get_picture_factory
 
@@ -67,7 +67,7 @@ def main():
     """
     configure_logging()
     plugin_manager = create_plugin_manager()
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
+    config = PiboothConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
 
     # Register plugins
     plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),

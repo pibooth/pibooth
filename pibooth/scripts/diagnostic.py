@@ -11,7 +11,7 @@ try:
 except ImportError:
     gp = None  # gphoto2 is optional
 import pibooth
-from pibooth.config import PiConfigParser
+from pibooth.config import PiboothConfigParser
 from pibooth.utils import configure_logging
 from pibooth.plugins import create_plugin_manager
 
@@ -131,7 +131,7 @@ def main():
     write_log("Pibooth version installed: {}".format(pibooth.__version__))
 
     plugin_manager = create_plugin_manager()
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
+    config = PiboothConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
 
     # Register plugins
     plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
