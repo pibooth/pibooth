@@ -2,7 +2,7 @@
 
 import pygame
 from pibooth.utils import PollingTimer
-from pibooth import pictures, evtfilters
+from pibooth import pictures, evts
 from pibooth.language import get_translated_text
 from pibooth.view.pygame.scenes.base import (BasePygameScene, LeftArrowSprite, RightArrowSprite,
                                              ImageSprite, TextSprite)
@@ -21,15 +21,15 @@ class WaitScene(BasePygameScene):
 
         self.printer_ongoing_timer = PollingTimer(1)
 
-        self.text.on_pressed = evtfilters.post_capture_button_event
-        self.left_arrow.on_pressed = evtfilters.post_capture_button_event
+        self.text.on_pressed = evts.post_capture_button_event
+        self.left_arrow.on_pressed = evts.post_capture_button_event
         self.image.on_pressed = self.on_event
-        self.text_print.on_pressed = evtfilters.post_print_button_event
-        self.right_arrow.on_pressed = evtfilters.post_print_button_event
+        self.text_print.on_pressed = evts.post_print_button_event
+        self.right_arrow.on_pressed = evts.post_print_button_event
 
     def on_event(self):
         self.image.hide()  # Do not show image after click, there is a timer before
-        evtfilters.post_print_button_event()
+        evts.post_print_button_event()
 
     def resize(self, size):
         # Previous picture
@@ -104,7 +104,7 @@ class WaitScene(BasePygameScene):
             self.right_arrow.set_rect(x, y, size[0], size[1])
 
     def update(self, events):
-        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_PRINT):
+        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_PRINT):
             self.image.hide()
             self.image_check.show()
             self.printer_ongoing_timer.start()

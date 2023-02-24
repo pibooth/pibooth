@@ -7,7 +7,7 @@ import pygame_menu as pgm
 EVT_PIBOOTH_BTN_CAPTURE = pygame.USEREVENT + 201
 EVT_PIBOOTH_BTN_PRINT = pygame.USEREVENT + 202
 EVT_PIBOOTH_BTN_SETTINGS = pygame.USEREVENT + 203
-EVT_PRINTER_TASKS_UPDATED = pygame.USEREVENT + 204
+EVT_PIBOOTH_PRINTER_UPDATE = pygame.USEREVENT + 204
 EVT_PIBOOTH_CAM_PREVIEW = pygame.USEREVENT + 205
 EVT_PIBOOTH_CAM_CAPTURE = pygame.USEREVENT + 206
 
@@ -34,6 +34,12 @@ def post_print_button_event():
     """Post EVT_PIBOOTH_BTN_PRINT.
     """
     return post(EVT_PIBOOTH_BTN_PRINT)
+
+
+def post_settings_button_event():
+    """Post EVT_PIBOOTH_BTN_SETTINGS.
+    """
+    return post(EVT_PIBOOTH_BTN_SETTINGS)
 
 
 def get_event_pos(display_size, event):
@@ -79,19 +85,19 @@ def is_fingers_event(event, nbr_fingers):
     return event.type == pygame.FINGERDOWN and touch.get_num_fingers(event.touch_id) >= nbr_fingers
 
 
-def is_settings_event(event):
+def is_button_settings_event(event):
     """Return True if settings event.
     """
     return event.type == EVT_PIBOOTH_BTN_SETTINGS
 
 
-def is_capture_button_event(event):
+def is_button_capture_event(event):
     """Return True if capture button event.
     """
     return event.type == EVT_PIBOOTH_BTN_CAPTURE
 
 
-def is_print_button_event(event):
+def is_button_print_event(event):
     """Return True if capture button event.
     """
     return event.type == EVT_PIBOOTH_BTN_PRINT
@@ -100,7 +106,7 @@ def is_print_button_event(event):
 def is_printer_status_event(event):
     """Return True if printer status event.
     """
-    return event.type == EVT_PRINTER_TASKS_UPDATED
+    return event.type == EVT_PIBOOTH_PRINTER_UPDATE
 
 
 def is_camera_capture_event(event):

@@ -159,6 +159,22 @@ DEFAULT = {
         'finished': "Takk",
         'oops': "Ops, noe gikk galt",
     },
+    'pt': {
+        'intro': "Tira uma foto",
+        'intro_print': 'Ainda podes\nimprimir esta\nfoto',
+        'choose': "Escolhe o teu formato",
+        '1': "1 foto",
+        '2': "2 fotos",
+        '3': "3 fotos",
+        '4': "4 fotos",
+        'chosen': "Vamos!",
+        'smile': "Sorri!",
+        'processing': "A processar...",
+        'print': "Imprimir foto?",
+        'print_forget': "Por favor\nesqueçe-te\ndesta foto",
+        'finished': "Obrigado!",
+        'oops': "Oops, ocorreu um erro.",
+    },
 }
 
 

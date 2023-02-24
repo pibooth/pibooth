@@ -4,7 +4,6 @@ import time
 import math
 import pibooth
 from pibooth import camera
-from pibooth import evtfilters
 from pibooth.language import get_translated_text
 from pibooth.utils import LOGGER, PollingTimer
 

@@ -117,7 +117,7 @@ def main():
     else:
         LOGGER.info("Starting the photo booth application %s", GPIO_INFO)
         app = PiboothApplication(config, plugin_manager, options.gui)
-        app.mainloop(options.profile)
+        app.exec(options.profile)
 
 
 if __name__ == '__main__':

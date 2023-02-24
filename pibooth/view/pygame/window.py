@@ -7,7 +7,7 @@ import os
 import pygame
 import pygame_vkeyboard as vkb
 
-from pibooth import evtfilters
+from pibooth import evts
 from pibooth.utils import LOGGER
 from pibooth.view.base import BaseWindow, BaseScene
 from pibooth.view.pygame import scenes, menu
@@ -125,20 +125,20 @@ class PygameWindow(BaseWindow):
                 if self._menu and self._menu.is_enabled():
                     self._menu.resize(event.size)
 
-            elif evtfilters.is_fullscreen_event(event):
+            elif evts.is_fullscreen_event(event):
                 self.toggle_fullscreen()
                 self.resize(self.get_rect().size)
                 if self._menu and self._menu.is_enabled():
                     self._menu.resize(self.get_rect().size)
 
-            elif evtfilters.is_print_button_event(event):
+            elif evts.is_button_print_event(event):
                 # Convert HW button events to keyboard events for menu
-                event = evtfilters.create_click_event()
+                event = evts.create_click_event()
                 LOGGER.debug("Generate MENU-APPLY event for menu")
 
             elif self._keyboard.is_enabled() and \
                     (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3) or event.type == pygame.FINGERDOWN)\
-                    and not self._keyboard.get_rect().collidepoint(evtfilters.get_event_pos(self.display_size, event)):
+                    and not self._keyboard.get_rect().collidepoint(evts.get_event_pos(self.display_size, event)):
                 self._keyboard.disable()
 
             elif self._keyboard.is_enabled() and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -147,17 +147,17 @@ class PygameWindow(BaseWindow):
             # Convert GUI events to pibooth events (plugins are based on them)
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.toggle_menu()
-                evtfilters.post(evtfilters.EVT_PIBOOTH_BTN_SETTINGS, is_shown=self.is_menu_shown)
+                evts.post(evts.EVT_PIBOOTH_BTN_SETTINGS, is_shown=self.is_menu_shown)
 
-            elif evtfilters.is_fingers_event(event, 4):
+            elif evts.is_fingers_event(event, 4):
                 self.toggle_menu()
-                evtfilters.post(evtfilters.EVT_PIBOOTH_BTN_SETTINGS, is_shown=self.is_menu_shown)
+                evts.post(evts.EVT_PIBOOTH_BTN_SETTINGS, is_shown=self.is_menu_shown)
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
-                evtfilters.post_capture_button_event()
+                evts.post_capture_button_event()
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                evtfilters.post_print_button_event()
+                evts.post_print_button_event()
 
         self.scene.update(events)
 

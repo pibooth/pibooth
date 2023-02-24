@@ -15,11 +15,12 @@ from PIL import Image
 from gpiozero import ButtonBoard, LEDBoard
 
 import pibooth
-from pibooth import view, fonts, language, evtfilters
+from pibooth import view, fonts, language, evts
 from pibooth.counters import Counters
 from pibooth.states import StateMachine
 from pibooth.printer import Printer
-from pibooth.utils import LOGGER, PollingTimer, get_crash_message, set_logging_level, AsyncTask
+from pibooth.tasks import AsyncTasksPool
+from pibooth.utils import LOGGER, PollingTimer, get_crash_message, set_logging_level
 
 
 def load_last_saved_picture(path):
@@ -67,6 +68,7 @@ class PiboothApplication(object):
     def __init__(self, config, plugin_manager, window_type='pygame'):
         self._pm = plugin_manager
         self._config = config
+        self._tasks = AsyncTasksPool()
 
         # Create directories where pictures are saved
         for savedir in config.gettuple('GENERAL', 'directory', 'path'):
@@ -193,13 +195,13 @@ class PiboothApplication(object):
                 LOGGER.debug("EVT_PIBOOTH_BTN_SETTINGS")
                 self.buttons.capture.hold_repeat = False
                 self._multipress_timer.reset()
-                evtfilters.post(evtfilters.EVT_PIBOOTH_BTN_SETTINGS, button=self.buttons)
+                evts.post_settings_button_event()
         else:
             # Capture was held but printer not pressed
             LOGGER.debug("EVT_PIBOOTH_BTN_CAPTURE")
             self.buttons.capture.hold_repeat = False
             self._multipress_timer.reset()
-            evtfilters.post(evtfilters.EVT_PIBOOTH_BTN_CAPTURE, button=self.buttons.capture)
+            evts.post_capture_button_event()
 
     def _on_button_printer_held(self):
         """Called when the printer button is pressed.
@@ -211,7 +213,7 @@ class PiboothApplication(object):
         else:
             # Printer was held but capture not pressed
             LOGGER.debug("EVT_PIBOOTH_BTN_PRINT")
-            evtfilters.post(evtfilters.EVT_PIBOOTH_BTN_PRINT, button=self.buttons.printer)
+            evts.post_print_button_event()
 
     @property
     def picture_filename(self):
@@ -228,7 +230,7 @@ class PiboothApplication(object):
         : param events: list of events to process.
         : type events: list
         """
-        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_SETTINGS):
+        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_SETTINGS):
             if not self._window.is_menu_shown:  # Settings menu is opened
                 self.camera.stop_preview()
                 self.leds.off()
@@ -240,8 +242,8 @@ class PiboothApplication(object):
         else:
             self._machine.process(events)
 
-    def mainloop(self, enable_profiler=False):
-        """Start application mainloop.
+    def exec(self, enable_profiler=False):
+        """Start application.
         """
         if enable_profiler:
             profiler = cProfile.Profile()
@@ -266,5 +268,5 @@ class PiboothApplication(object):
                 profiler.disable()
 
             self._pm.hook.pibooth_cleanup(app=self)
-            AsyncTask.kill_all()
+            self._tasks.quit()
             pygame.quit()

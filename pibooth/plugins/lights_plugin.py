@@ -2,7 +2,7 @@
 
 import time
 import pibooth
-from pibooth import evtfilters
+from pibooth import evts
 
 
 class LightsPlugin(object):
@@ -26,7 +26,7 @@ class LightsPlugin(object):
 
     @pibooth.hookimpl
     def state_wait_do(self, app, events):
-        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_PRINT) and app.previous_picture_file and app.printer.is_ready():
+        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_PRINT) and app.previous_picture_file and app.printer.is_ready():
             if app.count.remaining_duplicates <= 0:
                 app.leds.printer.off()
 
@@ -60,7 +60,7 @@ class LightsPlugin(object):
 
     @pibooth.hookimpl
     def state_print_do(self, app, events):
-        if evtfilters.find_event(events, evtfilters.EVT_PIBOOTH_BTN_PRINT):
+        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_PRINT):
             app.leds.printer.on()
             app.leds.capture.off()
 

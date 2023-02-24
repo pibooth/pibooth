@@ -6,7 +6,7 @@ import pygame
 from pygame import gfxdraw
 
 from pibooth import pictures
-from pibooth import evtfilters
+from pibooth import evts
 from pibooth.view.base import BaseScene
 
 
@@ -568,13 +568,13 @@ class BasePygameScene(BaseScene):
             if event.type == pygame.MOUSEBUTTONDOWN\
                     and event.button in (1, 2, 3):
                 # Don't consider the mouse wheel (button 4 & 5):
-                sprite = evtfilters.get_top_visible(self.sprites.get_sprites_at(event.pos))
+                sprite = evts.get_top_visible(self.sprites.get_sprites_at(event.pos))
                 if sprite:
                     sprite.set_pressed(1)
             elif event.type == pygame.FINGERDOWN:
                 display_size = pygame.display.get_surface().get_size()
                 finger_pos = (event.x * display_size[0], event.y * display_size[1])
-                sprite = evtfilters.get_top_visible(self.sprites.get_sprites_at(finger_pos))
+                sprite = evts.get_top_visible(self.sprites.get_sprites_at(finger_pos))
                 if sprite:
                     sprite.set_pressed(1)
             elif (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3))\

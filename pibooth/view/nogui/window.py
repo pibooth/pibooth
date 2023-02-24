@@ -6,7 +6,7 @@
 from functools import partial
 import pygame
 
-from pibooth import evtfilters
+from pibooth import evts
 from pibooth.utils import LOGGER
 from pibooth.view.base import BaseWindow, BaseScene
 
@@ -27,7 +27,7 @@ class NoGuiScene(BaseScene):
         self.nop('set_print_number', current_nbr, failure)
 
     def nop(self, attr, *args, **kwargs):
-        LOGGER.info(" @@@@@ Scene(%s) @@@@@ : %s(%s)", self.name, attr,
+        LOGGER.info("   @@@@@   Scene(%s)   @@@@@   : %s(%s)", self.name, attr,
                     ','.join([str(v) for v in args] + ["{k}={v}" for k, v in kwargs.items()]))
 
     def __getattr__(self, attr):
@@ -73,10 +73,10 @@ class NoGuiWindow(BaseWindow):
                     return
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
-                    evtfilters.post_capture_button_event()
+                    evts.post_capture_button_event()
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                    evtfilters.post_print_button_event()
+                    evts.post_print_button_event()
 
             # Update application and plugins according to user events
             app_update(events)

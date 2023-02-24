@@ -15,7 +15,7 @@ import os.path as osp
 import pygame
 from PIL import Image
 from pibooth.utils import LOGGER
-from pibooth import evtfilters
+from pibooth import evts
 from pibooth.pictures import get_picture_factory
 
 
@@ -63,12 +63,12 @@ class Printer(object):
         elif not self.options:
             self.options = {}
 
-    def _on_event(self, evt):
+    def _on_event(self, event):
         """
         Call for each new printer event.
         """
-        LOGGER.info(evt.title)
-        evtfilters.post(evtfilters.EVT_PRINTER_TASKS_UPDATED, notification=evt)
+        LOGGER.info(event.title)
+        evts.post(evts.EVT_PIBOOTH_PRINTER_UPDATE, notification=event)
 
     def is_installed(self):
         """Return True if the CUPS server is available for printing.
