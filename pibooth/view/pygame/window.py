@@ -154,10 +154,10 @@ class PygameWindow(BaseWindow):
                 evts.post(evts.EVT_PIBOOTH_BTN_SETTINGS, is_shown=self.is_menu_shown)
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
-                evts.post_capture_button_event()
+                evts.post_button_capture_event()
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                evts.post_print_button_event()
+                evts.post_button_print_event()
 
         self.scene.update(events)
 
@@ -192,7 +192,7 @@ class PygameWindow(BaseWindow):
                     return
 
             # 1. Update application and plugins according to user events,
-            #    they may have updated view elements
+            #    it may update view elements internal variables
             app_update(events)
 
             # 2. Update view elements according to user events and re-create

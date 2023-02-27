@@ -3,7 +3,6 @@
 import os.path as osp
 import PIL
 import pygame
-from pygame import gfxdraw
 
 from pibooth import pictures
 from pibooth import evts
@@ -11,7 +10,8 @@ from pibooth.view.base import BaseScene
 
 
 class OutlinesSprite(pygame.sprite.DirtySprite):
-    """Outlines Sprite.
+    """Outlines Sprite. Paint a colored rectange around the given
+    sprite.
     """
 
     def __init__(self, sprite, color=(255, 0, 0)):
@@ -57,6 +57,15 @@ class OutlinesSprite(pygame.sprite.DirtySprite):
 
 
 class BaseSprite(pygame.sprite.DirtySprite):
+
+    """Base sprite for any graphical element. It handles common attributes
+    and methods:
+      - display: manage when sprite is displayed
+      - color: manage color rendering
+      - resizing: manage pygame.Rect dimension
+      - outline: manage a colored rectangle around the sprite
+      - event: manage pressed action
+    """
 
     def __init__(self, size):
         super(BaseSprite, self).__init__()
@@ -126,7 +135,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
             return pygame.transform.average_color(self.image)
 
     def set_pressed(self, state):
-        """Set the arrow pressed state (1 for pressed 0 for released)
+        """Set the pressed state (1 for pressed 0 for released)
         and redraws it.
 
         :param state: new sprite state.
@@ -144,7 +153,11 @@ class BaseSprite(pygame.sprite.DirtySprite):
 
 
 class ImageSprite(BaseSprite):
-    """Image Sprite.
+    """Image Sprite. Handle transformation on a source image which can be:
+     - RGB color tuple
+     - path to an image
+     - PIL image object
+     - Pygame surface object
     """
 
     def __init__(self, skin=None, size=(10, 10), colorize=True):
@@ -274,6 +287,9 @@ class ImageSprite(BaseSprite):
 
 class TextSprite(BaseSprite):
 
+    """Text Sprite.
+    """
+
     def __init__(self, text='', size=(10, 10)):
         """
         :param size: size tuple (width, height) of the image.
@@ -322,6 +338,10 @@ class TextSprite(BaseSprite):
 
 class ArrowSprite(ImageSprite):
 
+    """Image Sprite dedicated to display an arrow on a specific
+    location and with an offset.
+    """
+
     def __init__(self, *args, **kwargs):
         super(ArrowSprite, self).__init__(*args, **kwargs)
         self.location = BaseScene.ARROW_BOTTOM
@@ -339,6 +359,9 @@ class ArrowSprite(ImageSprite):
 
 
 class LeftArrowSprite(ArrowSprite):
+
+    """Image Sprite dedicated to display the left arrow.
+    """
 
     def __init__(self, *args, **kwargs):
         super(LeftArrowSprite, self).__init__(*args, **kwargs)
@@ -366,6 +389,9 @@ class LeftArrowSprite(ArrowSprite):
 
 class RightArrowSprite(LeftArrowSprite):
 
+    """Image Sprite dedicated to display the right arrow.
+    """
+
     def __init__(self, *args, **kwargs):
         super(RightArrowSprite, self).__init__(*args, **kwargs)
         self.set_flip(hflip=True)
@@ -378,6 +404,9 @@ class RightArrowSprite(LeftArrowSprite):
 
 
 class DotsSprite(BaseSprite):
+
+    """Dot Sprite to count current capture.
+    """
 
     def __init__(self, nbr_dots=4):
         super(DotsSprite, self).__init__((100, 50))

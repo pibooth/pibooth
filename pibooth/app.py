@@ -192,16 +192,14 @@ class PiboothApplication(object):
                 self._multipress_timer.start()
             if self._multipress_timer.is_timeout():
                 # Capture was held while printer was pressed
-                LOGGER.debug("EVT_PIBOOTH_BTN_SETTINGS")
                 self.buttons.capture.hold_repeat = False
                 self._multipress_timer.reset()
-                evts.post_settings_button_event()
+                evts.post_button_settings_event()
         else:
             # Capture was held but printer not pressed
-            LOGGER.debug("EVT_PIBOOTH_BTN_CAPTURE")
             self.buttons.capture.hold_repeat = False
             self._multipress_timer.reset()
-            evts.post_capture_button_event()
+            evts.post_button_capture_event()
 
     def _on_button_printer_held(self):
         """Called when the printer button is pressed.
@@ -212,8 +210,7 @@ class PiboothApplication(object):
             pass
         else:
             # Printer was held but capture not pressed
-            LOGGER.debug("EVT_PIBOOTH_BTN_PRINT")
-            evts.post_print_button_event()
+            evts.post_button_print_event()
 
     @property
     def picture_filename(self):

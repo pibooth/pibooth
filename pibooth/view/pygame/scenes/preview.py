@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pibooth.view.pygame.scenes.base import BasePygameScene, ImageSprite, DotsSprite
+from pibooth.view.pygame.sprites import BasePygameScene, ImageSprite, DotsSprite
 
 
 class PreviewScene(BasePygameScene):

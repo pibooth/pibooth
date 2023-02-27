@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pibooth.language import get_translated_text
-from pibooth.view.pygame.scenes.base import BasePygameScene, TextSprite
+from pibooth.view.pygame.sprites import BasePygameScene, TextSprite
 
 
 class ChosenScene(BasePygameScene):

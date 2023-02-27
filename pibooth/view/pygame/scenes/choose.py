@@ -5,7 +5,7 @@ from pygame_imslider import ImSlider, ImSliderRenderer, STYPE_LOOP
 from pibooth import evts
 from pibooth import pictures
 from pibooth.language import get_translated_text
-from pibooth.view.pygame.scenes.base import BasePygameScene, LeftArrowSprite, RightArrowSprite, TextSprite
+from pibooth.view.pygame.sprites import BasePygameScene, LeftArrowSprite, RightArrowSprite, TextSprite
 
 
 class Renderer(ImSliderRenderer):
@@ -58,8 +58,8 @@ class ChooseScene(BasePygameScene):
         self.right_arrow = self.add_sprite(RightArrowSprite())
 
         self.right_arrow.set_skin('arrow_double.png')
-        self.left_arrow.on_pressed = evts.post_capture_button_event
-        self.right_arrow.on_pressed = evts.post_print_button_event
+        self.left_arrow.on_pressed = evts.post_button_capture_event
+        self.right_arrow.on_pressed = evts.post_button_print_event
 
     def resize(self, size):
         # Slider

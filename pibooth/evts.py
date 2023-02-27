@@ -3,6 +3,7 @@
 import pygame
 from pygame._sdl2 import touch
 import pygame_menu as pgm
+from pibooth.utils import LOGGER
 
 EVT_PIBOOTH_BTN_CAPTURE = pygame.USEREVENT + 201
 EVT_PIBOOTH_BTN_PRINT = pygame.USEREVENT + 202
@@ -12,33 +13,33 @@ EVT_PIBOOTH_CAM_PREVIEW = pygame.USEREVENT + 205
 EVT_PIBOOTH_CAM_CAPTURE = pygame.USEREVENT + 206
 
 
-_EVT_EMITTER = pygame.event.post
-
-
 def post(*args, **kwargs):
     """Post an envent to be processed later by tha main loop. Usefull
     for thread safe action on view.
 
     The default implementation use the Pygame event mechanism.
     """
-    return _EVT_EMITTER(pygame.event.Event(*args, **kwargs))
+    return pygame.event.post(pygame.event.Event(*args, **kwargs))
 
 
-def post_capture_button_event():
+def post_button_capture_event():
     """Post EVT_PIBOOTH_BTN_CAPTURE.
     """
+    LOGGER.debug("Event triggered: EVT_PIBOOTH_BTN_CAPTURE")
     return post(EVT_PIBOOTH_BTN_CAPTURE)
 
 
-def post_print_button_event():
+def post_button_print_event():
     """Post EVT_PIBOOTH_BTN_PRINT.
     """
+    LOGGER.debug("Event triggered: EVT_PIBOOTH_BTN_PRINT")
     return post(EVT_PIBOOTH_BTN_PRINT)
 
 
-def post_settings_button_event():
+def post_button_settings_event():
     """Post EVT_PIBOOTH_BTN_SETTINGS.
     """
+    LOGGER.debug("Event triggered: EVT_PIBOOTH_BTN_SETTINGS")
     return post(EVT_PIBOOTH_BTN_SETTINGS)
 
 

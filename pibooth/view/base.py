@@ -169,11 +169,6 @@ class BaseWindow(object):
     # ---------------------------------------------------------------------
     # Functions applicable to more than one scene
 
-    def set_image(self, pil_image=None):
-        """Set the current displayed image.
-        """
-        self.scene.set_image(pil_image)
-
     def set_print_number(self, current_nbr=None, failure=False):
         """Set the current number of tasks in the printer queue.
         """

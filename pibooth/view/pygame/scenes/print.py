@@ -3,7 +3,7 @@
 import pygame
 from pibooth import pictures, evts
 from pibooth.language import get_translated_text
-from pibooth.view.pygame.scenes.base import BasePygameScene, LeftArrowSprite, RightArrowSprite, TextSprite
+from pibooth.view.pygame.sprites import BasePygameScene, LeftArrowSprite, RightArrowSprite, TextSprite
 
 
 class PrintScene(BasePygameScene):
@@ -15,11 +15,11 @@ class PrintScene(BasePygameScene):
         self.text = self.add_sprite(TextSprite(get_translated_text('print')))
         self.text_print = self.add_sprite(TextSprite(get_translated_text('print_forget')))
 
-        self.text.on_pressed = evts.post_capture_button_event
-        self.left_arrow.on_pressed = evts.post_capture_button_event
-        self.image.on_pressed = evts.post_print_button_event
-        self.text_print.on_pressed = evts.post_print_button_event
-        self.right_arrow.on_pressed = evts.post_print_button_event
+        self.text.on_pressed = evts.post_button_capture_event
+        self.left_arrow.on_pressed = evts.post_button_capture_event
+        self.image.on_pressed = evts.post_button_print_event
+        self.text_print.on_pressed = evts.post_button_print_event
+        self.right_arrow.on_pressed = evts.post_button_print_event
 
     def resize(self, size):
         # Previous picture
