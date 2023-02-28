@@ -31,7 +31,8 @@ Influencing states
 ^^^^^^^^^^^^^^^^^^
 
 The ``pibooth`` application is built on the principle of states. Each state
-is defined by a specific screen and possible actions available to the user.
+is defined by a specific ``scene`` (with same name as state one) and possible actions available
+to the user.
 
 The following states are defined:
 
