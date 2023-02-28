@@ -114,11 +114,11 @@ cfg
 app
 ~~~
 
-.. autoclass:: pibooth.booth.PiApplication
+.. autoclass:: pibooth.booth.PiboothApplication
    :members:
 
 win
 ~~~
 
-.. autoclass:: pibooth.view.window.PiWindow
+.. autoclass:: pibooth.view.base.BaseWindow
    :members:
