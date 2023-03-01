@@ -112,7 +112,7 @@ DEFAULT = {
         'oops': "Sajnos valami hiba történt",
     },
     'it': {
-        'intro': "Scatta una foto", 
+        'intro': "Scatta una foto",
         'intro_print': 'Oppure puoi\nstampare\nquesta foto',
         'choose': "Scegli il formato",
         '1': "1 foto",
