@@ -36,7 +36,7 @@ def regenerate_all_images(plugin_manager, config, basepath):
     if not osp.isdir(osp.join(basepath, 'raw')):
         return
 
-    capture_choices = config.gettuple('PICTURE', 'captures', int, 2)
+    capture_choices = config.gettuple('PICTURE', 'captures', int)
 
     for captures_folder in os.listdir(osp.join(basepath, 'raw')):
         captures_folder_path = osp.join(basepath, 'raw', captures_folder)
@@ -45,14 +45,11 @@ def regenerate_all_images(plugin_manager, config, basepath):
         captures = get_captures(captures_folder_path)
         LOGGER.info("Generating image from raws in folder %s", captures_folder_path)
 
-        if len(captures) == capture_choices[0]:
-            idx = 0
-        elif len(captures) == capture_choices[1]:
-            idx = 1
-        else:
+        if len(captures) not in capture_choices:
             LOGGER.warning("Folder %s doesn't contain the correct number of pictures", captures_folder_path)
             continue
 
+        idx = capture_choices.index(len(captures))
         default_factory = get_picture_factory(captures, config.get('PICTURE', 'orientation'))
         factory = plugin_manager.hook.pibooth_setup_picture_factory(cfg=config,
                                                                     opt_index=idx,

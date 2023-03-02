@@ -579,14 +579,6 @@ class BasePygameScene(BaseScene):
     def set_print_number(self, current_nbr=None, failure=False):
         pass
 
-    def resize(self, size):
-        """Recalculate sizes of sprites according to the new given size.
-
-        :param size: new size of the scene
-        :type size: tuple
-        """
-        pass
-
     def update(self, events):
         """Pygame events processing callback method.
 

@@ -23,6 +23,14 @@ class BaseScene(object):
     def __init__(self, name):
         self.name = name
 
+    def resize(self, size):
+        """Recalculate sizes of elements according to the new given size.
+
+        :param size: new size of the scene
+        :type size: tuple
+        """
+        raise NotImplementedError
+
     def set_outlines(self, enable=True):
         """Draw outlines for each rectangle available for drawing
         images and texts.
@@ -91,7 +99,7 @@ class BaseWindow(object):
                  arrow_location=BaseScene.ARROW_BOTTOM,
                  arrow_offset=0,
                  debug=False):
-        self._size = size
+        self._size = size  # Size of the window when not fullscreen
 
         self.debug = debug
         self.text_color = text_color
@@ -146,8 +154,11 @@ class BaseWindow(object):
         :param size: new size of the scene
         :type size: tuple
         """
-        self._size = size  # Manual resizing
-        self.scene.set_background(self.bg_color_or_path, self._size)
+        if not self.is_fullscreen:
+            self._size = size  # Size of the window when not fullscreen
+
+        # Call get_rect() to take new computed size if != self._size
+        self.scene.set_background(self.bg_color_or_path, self.get_rect().size)
         self.scene.resize(self.get_rect().size)
 
     def get_rect(self, absolute=False):

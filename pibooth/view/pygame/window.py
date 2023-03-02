@@ -120,6 +120,7 @@ class PygameWindow(BaseWindow):
         """
         for event in events:
             if event.type == pygame.VIDEORESIZE and not self.is_fullscreen:
+                # Manual resizing
                 self.surface = pygame.display.set_mode(event.size, pygame.RESIZABLE)
                 self.resize(event.size)
                 if self._menu and self._menu.is_enabled():

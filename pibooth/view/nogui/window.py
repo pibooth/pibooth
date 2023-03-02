@@ -14,6 +14,10 @@ from pibooth.view.base import BaseWindow, BaseScene
 class NoGuiScene(BaseScene):
 
     count_flash = 3
+    selection = None
+    choices = []
+
+    def resize(self, size): pass  # Avoid "NotImplemented" error
 
     def set_outlines(self, enable=True): pass  # Avoid "NotImplemented" error
 
@@ -27,6 +31,20 @@ class NoGuiScene(BaseScene):
 
     def set_print_number(self, current_nbr=None, failure=False):  # Avoid "NotImplemented" error
         self.nop('set_print_number', current_nbr, failure)
+
+    def set_choices(self, choices):
+        self.choices = choices
+
+    def next(self):
+        if not self.selection:
+            self.selection = self.choices[1]
+        else:
+            self.selection = self.choices[self.choices.index(self.selection)+1]
+
+    def get_selection(self):
+        if not self.selection:
+            self.selection = self.choices[0]
+        return self.selection
 
     def nop(self, attr, *args, **kwargs):
         LOGGER.info("Scene(%s).%s(%s)", self.name, attr,
