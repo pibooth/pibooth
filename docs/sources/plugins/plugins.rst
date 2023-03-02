@@ -115,7 +115,7 @@ cfg
 app
 ~~~
 
-.. autoclass:: pibooth.booth.PiboothApplication
+.. autoclass:: pibooth.app.PiboothApplication
    :members:
 
 win
