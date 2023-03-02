@@ -214,7 +214,7 @@ def get_pkg_versions():
         if isinstance(val, types.ModuleType):
             found = [pkg for pkg in installed_pkgs if name in pkg]
             if found:
-                used_pkgs.append(found[0])
+                used_pkgs.extend(found)
     return used_pkgs
 
 
