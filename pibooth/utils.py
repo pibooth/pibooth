@@ -204,8 +204,22 @@ def get_logging_filename():
     return None
 
 
+def get_pkg_versions():
+    """Return the list of Python packages and versions used by pibooth.
+    """
+    used_pkgs = []
+    installed_pkgs = [pkg for pkg in freeze.freeze()]
+    for name, val in sys.modules.items():
+        if isinstance(val, types.ModuleType):
+            found = [pkg for pkg in installed_pkgs if name in pkg]
+            if found:
+                used_pkgs.append(found[0])
+    return used_pkgs
+
+
 def get_crash_message():
     msg = "system='{}', node='{}', release='{}', version='{}', machine='{}', processor='{}'\n".format(*platform.uname())
+    msg += "\n".join(get_pkg_versions())
     msg += " " + "*" * 83 + "\n"
     msg += " * " + "Oops! It seems that pibooth has crashed".center(80) + "*\n"
     msg += " * " + "You can report an issue on https://github.com/pibooth/pibooth/issues/new".center(80) + "*\n"
