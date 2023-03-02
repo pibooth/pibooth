@@ -68,7 +68,7 @@ The output can be formatted in **json** using the ``--json`` option:
 
     {"taken": 126, "printed": 17, "forgotten": 2, "remaining_duplicates": 3}
 
-The counters can be updated/rest using the ``--update`` option:
+The counters can be interactively updated/rest using the ``--update`` option:
 
 .. code-block:: bash
 
@@ -93,7 +93,7 @@ in the configuration:
 
 .. code-block:: bash
 
-    pibooth-printcfg
+    pibooth-printer
 
 *Output example*::
 
@@ -119,7 +119,7 @@ generated output can be pasted (after update of the wanted values) in the
 
 .. code-block:: bash
 
-    pibooth-printcfg --json
+    pibooth-printer --json
 
 *Output example*::
 

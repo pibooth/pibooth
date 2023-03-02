@@ -11,7 +11,7 @@ try:
 except ImportError:
     gp = None  # gphoto2 is optional
 import pibooth
-from pibooth.config import PiConfigParser
+from pibooth.config import PiboothConfigParser
 from pibooth.utils import configure_logging
 from pibooth.plugins import create_plugin_manager
 
@@ -131,7 +131,7 @@ def main():
     write_log("Pibooth version installed: {}".format(pibooth.__version__))
 
     plugin_manager = create_plugin_manager()
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
+    config = PiboothConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
 
     # Register plugins
     plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
@@ -143,6 +143,14 @@ def main():
     if not gp:
         write_log("gPhoto2 not installed, cannot diagnose connected DSLR")
         sys.exit(1)
+    else:
+        try:
+            info = gp.version.gp_library_version(gp.version.GP_VERSION_VERBOSE)
+            write_log("GPhoto2 version installed: {}".format(info[0]))
+            for opt in info[1:]:
+                write_log("  - {}".format(opt))
+        except:
+            pass
 
     gp_log_callback = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_logging))
     write_log("Listing all connected DSLR camera")

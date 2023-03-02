@@ -7,7 +7,7 @@ import sys
 import json
 from pibooth.counters import Counters
 from pibooth.utils import configure_logging
-from pibooth.config import PiConfigParser
+from pibooth.config import PiboothConfigParser
 from pibooth.plugins import create_plugin_manager
 
 
@@ -16,7 +16,7 @@ def main():
     """
     configure_logging()
     plugin_manager = create_plugin_manager()
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
+    config = PiboothConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
 
     counters = Counters(config.join_path("counters.pickle"),
                         taken=0, printed=0, forgotten=0,
@@ -28,7 +28,7 @@ def main():
         try:
             print("\nUpdating counters (current value in square bracket):\n")
             for name in counters:
-                value = input(" -> {:.<18} [{:>4}] : ".format(name.capitalize(), counters[name]))
+                value = input(" -> {:.<20} [{:>4}] : ".format(name.capitalize(), counters[name]))
                 if value.strip():
                     setattr(counters, name, int(value))
         except KeyboardInterrupt:
@@ -37,7 +37,7 @@ def main():
     else:
         print("\nListing current counters:\n")
         for name in counters:
-            print(" -> {:.<25} : {:>4}".format(name.capitalize(), counters[name]))
+            print(" -> {:.<27} : {:>4}".format(name.capitalize(), counters[name]))
         print()
 
 

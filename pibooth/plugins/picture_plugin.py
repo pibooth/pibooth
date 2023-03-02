@@ -6,7 +6,9 @@ import itertools
 from concurrent import futures
 from datetime import datetime
 import pibooth
-from pibooth.utils import LOGGER, PollingTimer, AsyncTask
+from pibooth import evts
+from pibooth.utils import LOGGER, PollingTimer
+from pibooth.tasks import AsyncTask
 from pibooth.pictures import get_picture_factory
 
 
@@ -32,6 +34,8 @@ class PicturePlugin(object):
     """Plugin to build the final picture.
     """
 
+    __name__ = 'pibooth-core:picture'
+
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.timer = PollingTimer()
@@ -55,12 +59,13 @@ class PicturePlugin(object):
         outcome = yield  # all corresponding hookimpls are invoked here
         factory = outcome.get_result() or factory
 
+        nbr_capture_choices = len(cfg.gettuple('PICTURE', 'captures', int))
         factory.set_margin(cfg.getint('PICTURE', 'margin_thick'))
 
-        backgrounds = cfg.gettuple('PICTURE', 'backgrounds', ('color', 'path'), 2)
+        backgrounds = cfg.gettuple('PICTURE', 'backgrounds', ('color', 'path'), nbr_capture_choices)
         factory.set_background(backgrounds[opt_index])
 
-        overlays = cfg.gettuple('PICTURE', 'overlays', 'path', 2)
+        overlays = cfg.gettuple('PICTURE', 'overlays', 'path', nbr_capture_choices)
         if overlays[opt_index]:
             factory.set_overlay(overlays[opt_index])
 
@@ -153,7 +158,7 @@ class PicturePlugin(object):
 
     @pibooth.hookimpl
     def state_print_do(self, cfg, app, events):
-        if app.find_capture_event(events):
+        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_CAPTURE):
 
             LOGGER.info("Moving the picture in the forget folder")
             for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):

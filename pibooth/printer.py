@@ -15,10 +15,9 @@ import os.path as osp
 import pygame
 from PIL import Image
 from pibooth.utils import LOGGER
+from pibooth import evts
 from pibooth.pictures import get_picture_factory
 
-
-EVT_PRINTER_TASKS_UPDATED = pygame.USEREVENT + 2
 
 PAPER_FORMATS = {
     '2x6': (2, 6),      # 2x6 pouces - 5x15 cm - 51x152 mm
@@ -64,13 +63,12 @@ class Printer(object):
         elif not self.options:
             self.options = {}
 
-    def _on_event(self, evt):
+    def _on_event(self, event):
         """
         Call for each new printer event.
         """
-        LOGGER.info(evt.title)
-        pygame.event.post(pygame.event.Event(EVT_PRINTER_TASKS_UPDATED,
-                                             tasks=self.get_all_tasks()))
+        LOGGER.info(event.title)
+        evts.post(evts.EVT_PIBOOTH_PRINTER_UPDATE, notification=event)
 
     def is_installed(self):
         """Return True if the CUPS server is available for printing.

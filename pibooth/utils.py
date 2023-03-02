@@ -8,101 +8,22 @@ import sys
 import time
 import os.path as osp
 import logging
-import threading
 import psutil
 import platform
 from fnmatch import fnmatchcase
 import contextlib
 import errno
 import subprocess
-from concurrent import futures
-import pygame
-
 
 LOGGER = logging.getLogger("pibooth")
-
-
-class AsyncTask(object):
-
-    POOL = futures.ThreadPoolExecutor()
-    FUTURES = {}
-
-    def __init__(self, runnable, args=(), event=None, loop=False):
-        self._stop_event = threading.Event()
-        self.runnable = runnable
-        self.event_type = event
-        self.loop = loop
-        self.future = self.POOL.submit(self._run, *args)
-        self.FUTURES[self.future] = self
-        self.future.add_done_callback(self._finish)
-
-    def _finish(self, future):
-        """Remove future from tracking list.
-        """
-        self.FUTURES.pop(future)
-        self.future.result()  # Raise exception is occures during run
-
-    def _run(self, *args, **kwargs):
-        """Execute the runnable.
-        """
-        result = None
-        while not self._stop_event.is_set():
-            result = self.runnable(*args, **kwargs)
-            self.emit(result)
-            if not self.loop:
-                break
-        return result
-
-    def emit(self, data):
-        """Post event with the result of the task.
-        """
-        if self.event_type is not None:
-            event = pygame.event.Event(self.event_type, result=data)
-            pygame.event.post(event)
-
-    def result(self):
-        """Return task result.
-        """
-        return self.future.result()
-
-    def is_alive(self):
-        """Return true if the task is not yet started or running.
-        """
-        return not self.future.done()
-
-    def wait(self, timeout=None):
-        """Wait for task ends or cancelled.
-        """
-        try:
-            return self.future.result(timeout)
-        except futures.TimeoutError:
-            raise
-        except Exception:
-            return None
-
-    def kill(self):
-        """Stop running.
-        """
-        self._stop_event.set()
-        self.future.cancel()
-        self.wait()
-
-    @classmethod
-    def kill_all(cls):
-        """Stop all tasks and don't accept new one.
-        """
-        for task in cls.FUTURES.values():
-            task.kill()
-        cls.FUTURES.clear()
-        cls.POOL.shutdown(wait=True)
 
 
 class BlockConsoleHandler(logging.StreamHandler):
 
     default_level = logging.INFO
-    pattern_indent = '+< '
-    pattern_blocks = '|  '
-    pattern_dedent = '+> '
+    pattern_start = '+<- '
+    pattern_block = '|   '
+    pattern_end = '+-> '
     current_indent = ''
 
     def emit(self, record):
@@ -111,10 +32,10 @@ class BlockConsoleHandler(logging.StreamHandler):
             record.msg = '{}{}'.format(cls.current_indent, record.msg)
         logging.StreamHandler.emit(self, record)
 
-        if cls.current_indent.endswith(cls.pattern_indent):
-            cls.current_indent = (cls.current_indent[:-len(cls.pattern_indent)] + cls.pattern_blocks)
-        elif cls.current_indent.endswith(cls.pattern_dedent):
-            cls.current_indent = cls.current_indent[:-len(cls.pattern_dedent)]
+        if cls.current_indent.endswith(cls.pattern_start):
+            cls.current_indent = (cls.current_indent[:-len(cls.pattern_start)] + cls.pattern_block)
+        elif cls.current_indent.endswith(cls.pattern_end):
+            cls.current_indent = cls.current_indent[:-len(cls.pattern_end)]
 
     @classmethod
     def is_debug(cls):
@@ -130,14 +51,14 @@ class BlockConsoleHandler(logging.StreamHandler):
         """Begin a new log block.
         """
         if cls.is_debug():
-            cls.current_indent += cls.pattern_indent
+            cls.current_indent += cls.pattern_start
 
     @classmethod
     def dedent(cls):
         """End the current log block.
         """
         if cls.is_debug():
-            cls.current_indent = (cls.current_indent[:-len(cls.pattern_blocks)] + cls.pattern_dedent)
+            cls.current_indent = (cls.current_indent[:-len(cls.pattern_block)] + cls.pattern_end)
 
 
 class PollingTimer(object):
@@ -186,6 +107,11 @@ class PollingTimer(object):
         else:
             self._paused_total = 0
             self.time = time.time()
+
+    def is_started(self):
+        """Return True if time is started.
+        """
+        return self.time is not None
 
     def freeze(self):
         """Pause the timer.
@@ -281,7 +207,7 @@ def get_logging_filename():
 def get_crash_message():
     msg = "system='{}', node='{}', release='{}', version='{}', machine='{}', processor='{}'\n".format(*platform.uname())
     msg += " " + "*" * 83 + "\n"
-    msg += " * " + "Oops! It seems that pibooth has crached".center(80) + "*\n"
+    msg += " * " + "Oops! It seems that pibooth has crashed".center(80) + "*\n"
     msg += " * " + "You can report an issue on https://github.com/pibooth/pibooth/issues/new".center(80) + "*\n"
     if get_logging_filename():
         msg += " * " + ("and post the file: {}".format(get_logging_filename())).center(80) + "*\n"
@@ -360,17 +286,3 @@ def load_module(path):
                 return spec.loader.load_module(modname)
 
     LOGGER.warning("Can not load Python module '%s' from '%s'", modname, path)
-
-
-def get_event_pos(display_size, event):
-    """
-    Return the position from finger or mouse event on x-axis and y-axis (x, y).
-
-    :param display_size: size of display for relative positioning in finger events
-    :param event: pygame event object
-    :return: position (x, y) in px
-    """
-    if event.type in (pygame.FINGERDOWN, pygame.FINGERMOTION, pygame.FINGERUP):
-        finger_pos = (event.x * display_size[0], event.y * display_size[1])
-        return finger_pos
-    return event.pos

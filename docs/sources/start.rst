@@ -47,12 +47,11 @@ After the graphical interface is started, the following actions are available:
 Action                  Keyboard key     Physical button       Touch event
 ======================= ================ ===================== =====================
 Toggle Full screen      Ctrl + F         \-                    \-
-Choose layout           LEFT or RIGHT    Button 1 or Button 2  Tap 1 finger
-Take pictures           P                Button 1              Tap 1 finger
-Export Printer/Cloud    Ctrl + E         Button 2              Tap 1 finger
+Capture / Validate      C                Button 1              Tap 1 finger
+Print / Select          P                Button 2              Tap 1 finger
 Open/close settings     ESC              Button 1 + Button 2   Tap 4 finger
-Select option           UP or DOWN       Button 1              Tap 1 finger
-Change option value     LEFT or RIGHT    Button 2              Tap 1 finger
+Select option           UP or DOWN       Button 2              Tap 1 finger
+Change option value     LEFT or RIGHT    Button 1              Tap 1 finger
 ======================= ================ ===================== =====================
 
 Configure

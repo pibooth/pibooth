@@ -100,7 +100,7 @@ def get_pygame_font(text, font_name, max_width, max_height):
         k = (start + end) // 2
         font = pygame.font.Font(get_filename(font_name), k)
         font_size = font.size(text)
-        if font_size[0] > max_width or font_size[1] > max_height:
+        if font_size[0] >= max_width or font_size[1] >= max_height:
             end = k
         else:
             start = k + 1

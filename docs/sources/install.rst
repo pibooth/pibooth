@@ -27,7 +27,7 @@ Hardware
 Software
 ^^^^^^^^
 
-* Raspberry Pi OS with desktop
+* Raspberry Pi OS **Bullseye** with desktop
 * Python ``3.7.3``
 * libsdl2 ``2.0``
 * libgphoto2 ``2.5.27``
@@ -42,6 +42,9 @@ Here is a brief description on how to set-up a Raspberry Pi to use this software
 If you intend to develop on ``pibooth``, an editable/customizable version can be
 installed. Instead of doing step 8. of the below procedure, follow
 :ref:`instructions here<install_developing_version>`.
+
+Manual procedure
+^^^^^^^^^^^^^^^^
 
 1. Download the Raspbian image and set-up an SD-card. You can follow
    `these instructions <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_.
@@ -70,8 +73,9 @@ installed. Instead of doing step 8. of the below procedure, follow
 
    .. code-block:: bash
 
-        sudo wget raw.github.com/gonzalo/gphoto2-updater/master/gphoto2-updater.sh
-        sudo chmod 755 gphoto2-updater.sh
+        wget https://raw.githubusercontent.com/gonzalo/gphoto2-updater/master/gphoto2-updater.sh
+        wget https://raw.githubusercontent.com/gonzalo/gphoto2-updater/master/.env
+        chmod +x gphoto2-updater.sh
         sudo ./gphoto2-updater.sh
 
 6. Optionally install ``CUPS`` to handle printers (more instructions to add a
@@ -81,8 +85,10 @@ installed. Instead of doing step 8. of the below procedure, follow
    .. code-block:: bash
 
         sudo apt-get install cups libcups2-dev
+        sudo apt-get install printer-driver-gutenprint
 
-7. Optionally install ``OpenCV`` (required only for Webcam):
+7. Optionally install ``OpenCV`` to improve images generation efficiency or if a
+   Webcam is used:
 
    .. code-block:: bash
 
@@ -96,6 +102,14 @@ installed. Instead of doing step 8. of the below procedure, follow
 
    .. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/
           or 6. skipped), remove **printer** and/or **dslr** under the ``[]``
+
+Automated procedure
+^^^^^^^^^^^^^^^^^^^
+
+Alternatively, you can use Ansible to install pibooth automatically.
+`A playbook can be found here <https://github.com/TiJof/pibooth_ansible>`_
+(thank you **TiJof**).
+
 
 Circuit diagram
 ---------------

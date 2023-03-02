@@ -2,7 +2,6 @@
 
 import time
 import math
-import pygame
 import pibooth
 from pibooth import camera
 from pibooth.language import get_translated_text
@@ -13,6 +12,8 @@ class CameraPlugin(object):
 
     """Plugin to manage the camera captures.
     """
+
+    __name__ = 'pibooth-core:camera'
 
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
@@ -25,7 +26,7 @@ class CameraPlugin(object):
         cam = outcome.get_result()
 
         if not cam:
-            LOGGER.debug("Fallback to pibooth default camera management system")
+            LOGGER.debug("Use pibooth camera management system")
             cam = camera.find_camera()
 
         cam.initialize(cfg.gettuple('CAMERA', 'iso', (int, str), 2),
@@ -58,15 +59,6 @@ class CameraPlugin(object):
     @pibooth.hookimpl
     def state_wait_exit(self):
         self.count = 0
-
-    @pibooth.hookimpl
-    def state_choose_do(self, app, events):
-        event = app.find_choice_event(events)
-        if event:
-            if event.key == pygame.K_LEFT:
-                app.capture_nbr = app.capture_choices[0]
-            elif event.key == pygame.K_RIGHT:
-                app.capture_nbr = app.capture_choices[1]
 
     @pibooth.hookimpl
     def state_preview_enter(self, cfg, app, win):
