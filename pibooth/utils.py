@@ -15,8 +15,13 @@ from fnmatch import fnmatchcase
 import contextlib
 import errno
 import subprocess
+try:
+    from pip._internal.operations import freeze
+except ImportError:  # pip < 10.0
+    from pip.operations import freeze
 
 LOGGER = logging.getLogger("pibooth")
+logging.getLogger("pip").setLevel(logging.WARNING)
 
 
 class BlockConsoleHandler(logging.StreamHandler):
@@ -220,7 +225,7 @@ def get_pkg_versions():
 
 def get_crash_message():
     msg = "system='{}', node='{}', release='{}', version='{}', machine='{}', processor='{}'\n".format(*platform.uname())
-    msg += "\n".join(get_pkg_versions())
+    msg += "\n".join(get_pkg_versions()) + "\n"
     msg += " " + "*" * 83 + "\n"
     msg += " * " + "Oops! It seems that pibooth has crashed".center(80) + "*\n"
     msg += " * " + "You can report an issue on https://github.com/pibooth/pibooth/issues/new".center(80) + "*\n"
