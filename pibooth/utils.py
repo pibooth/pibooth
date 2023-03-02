@@ -6,6 +6,7 @@
 import os
 import sys
 import time
+import types
 import os.path as osp
 import logging
 import psutil
