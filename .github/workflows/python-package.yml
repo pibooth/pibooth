@@ -40,5 +40,8 @@ jobs:
       run: |
         pylint $(git ls-files '*.py') || echo "pylint exited with $?"
     - name: Test with pytest
+      env:
+        SDL_VIDEODRIVER: dummy
+        CAMERADRIVER: dummy
       run: |
         pytest
