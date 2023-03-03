@@ -82,12 +82,17 @@ def _counters(counters):
 
 class PygameMenu(object):
 
-    def __init__(self, application, configuration, callback=None):
+    def __init__(self, application, configuration, plugin_manager, callback=None):
         self.app = application
         self.cfg = configuration
+        self.pm = plugin_manager
         self.callback = callback
         self.size = (600, 400)
         self._changed = False
+        self._main_menu = None
+
+    def _build_menu(self):
+        """Create all sub-menus"""
         self._main_menu = pgm.Menu(title="Settings v{}".format(pibooth.__version__),
                                    width=self.size[0],
                                    height=self.size[1],
@@ -290,37 +295,47 @@ class PygameMenu(object):
     def enable(self):
         """Show the menu.
         """
+        if not self._main_menu:
+            self._build_menu()
         self._main_menu.enable()
 
     def disable(self):
         """Show the menu.
         """
-        self._main_menu.disable()
+        if self._main_menu:
+            self._main_menu.disable()
 
     def is_enabled(self):
         """Return True if the menu is shown.
         """
+        if not self._main_menu:
+            return False
         return self._main_menu.is_enabled()
 
     def resize(self, size):
-        self._main_menu.resize(size[0], size[1])
+        """Resize menu"""
+        if not self._main_menu:
+            self._main_menu.resize(size[0], size[1])
 
     def update(self, events):
         """Process the events related to the menu.
         """
-        self._main_menu.update(events)
-        if self._main_menu.is_enabled():  # Menu may have been closed
-            selected = self._main_menu.get_current().get_selected_widget()
-            if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
-                for event in events:
-                    if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN)\
-                            and selected.get_scrollarea().collide(selected, event):
-                        self._keyboard.enable()
-                        if isinstance(selected, pgm.widgets.ColorInput):
-                            self._keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
-                        else:
-                            self._keyboard.set_text(selected.get_value())
-                        return
+        if self._main_menu:
+            self._main_menu.update(events)
+            if self._main_menu.is_enabled():  # Menu may have been closed
+                selected = self._main_menu.get_current().get_selected_widget()
+                if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
+                    for event in events:
+                        if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN)\
+                                and selected.get_scrollarea().collide(selected, event):
+                            self._keyboard.enable()
+                            if isinstance(selected, pgm.widgets.ColorInput):
+                                self._keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
+                            else:
+                                self._keyboard.set_text(selected.get_value())
+                            return
 
     def draw(self, surface):
+        if not self._main_menu:
+            return []
         return self._main_menu.draw(surface)

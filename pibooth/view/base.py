@@ -143,7 +143,7 @@ class BaseWindow(object):
         self.scene.set_print_number(self.print_number, self.print_failure)
         self.resize(self._size)  # Force graphical element to be recalculated
 
-    def set_menu(self, app, cfg):
+    def set_menu(self, app, cfg, pm):
         """Set the menu.
         """
         pass

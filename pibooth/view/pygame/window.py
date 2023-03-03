@@ -54,11 +54,10 @@ class PygameWindow(BaseWindow):
         self._keyboard.disable()
         self._force_redraw = True
 
-    def set_menu(self, app, cfg):
+    def set_menu(self, app, cfg, pm):
         """Set the menu.
         """
-        return
-        self._menu = menu.PygameMenu(app, cfg, self._on_menu_event)
+        self._menu = menu.PygameMenu(app, cfg, pm, self._on_menu_event)
         self._menu.disable()
 
     def _create_scene(self, name):
