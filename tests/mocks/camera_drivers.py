@@ -3,7 +3,6 @@
 
 import io
 from PIL import Image
-from pibooth.camera import gphoto
 
 
 class RpiCameraProxyMock:
@@ -44,6 +43,9 @@ class GpConfigMock:
 
     def get_value(self):
         return 2
+        
+    def get_choices(self):
+        return []
 
     def set_value(self, value):
         pass
@@ -63,13 +65,35 @@ class GpFileMock:
         return self.image
 
 
+class GpAbilitiesMock:
+
+    operations = 1
+
+
 class GpCameraProxyMock:
+
+    GP_OPERATION_CAPTURE_PREVIEW = 1
+    GP_FILE_TYPE_NORMAL = 'normal'
+    GP_CAPTURE_IMAGE = 'capture'
+    GP_LOG_VERBOSE = 'verbose'
+    GP_WIDGET_RADIO = 'radio'
+    
+    GPhoto2Error = Exception
 
     def __init__(self, fake_captures):
         self.fake_captures = fake_captures
         
     def check_result(self, thing):
         return object()
+
+    def gp_log_add_func(self, level, callback):
+        pass
+
+    def gp_log_add_func(self, level, callback):
+        pass
+
+    def get_abilities(self):
+        return GpAbilitiesMock()
 
     def get_config(self):
         return GpConfigMock()
@@ -83,11 +107,11 @@ class GpCameraProxyMock:
     def file_get(self, folder, name, flag):
         return GpFileMock(Image.open(self.fake_captures[0]).tobytes("xbm", "rgb"))
 
+    def capture_preview(self):
+        return GpFileMock(Image.open(self.fake_captures[0]).tobytes("xbm", "rgb"))
+
     def capture(self, flag):
         return GpFileMock()
 
     def exit(self):
         pass
-
-
-gphoto.gp = GpCameraProxyMock([])
