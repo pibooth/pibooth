@@ -65,8 +65,6 @@ class GpFileMock:
 
 class GpCameraProxyMock:
 
-    gphoto.gp = GpCameraProxyMock([])
-
     def __init__(self, fake_captures):
         self.fake_captures = fake_captures
         
@@ -90,3 +88,6 @@ class GpCameraProxyMock:
 
     def exit(self):
         pass
+
+
+gphoto.gp = GpCameraProxyMock([])
