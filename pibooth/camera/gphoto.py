@@ -185,7 +185,7 @@ class GpCamera(BaseCamera):
             LOGGER.debug("Delete capture '%s' from internal memory", gp_path.name)
             self._cam.file_delete(gp_path.folder, gp_path.name)
         image = camera_file.get_data_and_size()
-        if not isinstance(image, Image.Image):
+        if not isinstance(image, Image.Image):  # For unittests
             image = Image.open(io.BytesIO(image))
         image = self._rotate_image(image, self.capture_rotation)
 

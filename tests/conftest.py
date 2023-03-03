@@ -118,7 +118,7 @@ def camera_rpi_gp(proxy_rpi, proxy_gp):
 def proxy_cv(init_pygame, init_tasks):
     if os.environ.get('CAMERA_CVDRIVER') == "dummy":
         import cv2
-        return cv2.VideoCapture("fake/cam_01.jpg")
+        return cv2.VideoCapture(os.path.join(CAPTURES_DIR, 'portrait', 'capture0.png'))
     return get_cv_camera_proxy()
 
 
