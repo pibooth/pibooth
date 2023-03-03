@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import pytest
 import pygame
 from pibooth.view.window import PiWindow
@@ -24,6 +25,10 @@ def loop(func, *args, **kwargs):
 
         pygame.display.update()
         clock.tick(fps)
+
+        if os.environ.get('SDL_VIDEODRIVER') == "dummy":
+            # Automatic tests without video device available
+            break
 
 
 def test_oops(init):
