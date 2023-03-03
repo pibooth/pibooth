@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest pylint
+        python -m pip install flake8 pytest pylint pytest-cov
         python -m pip install opencv-python
         python -m pip install -e .
     - name: Lint with flake8
@@ -44,4 +44,6 @@ jobs:
         SDL_VIDEODRIVER: dummy
         CAMERADRIVER: dummy
       run: |
-        pytest
+        pytest --cov pibooth
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
