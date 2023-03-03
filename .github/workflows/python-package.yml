@@ -44,4 +44,6 @@ jobs:
         SDL_VIDEODRIVER: dummy
         CAMERADRIVER: dummy
       run: |
-        pytest
+        pytest --cov pibooth
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
