@@ -59,7 +59,7 @@ class GpFileMock:
         self.image = image
     
     def get_data_and_size(self):
-        return image
+        return self.image
 
 
 class GpCameraProxyMock:
