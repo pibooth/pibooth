@@ -33,19 +33,33 @@ class RpiCameraProxyMock:
         pass
 
 
-class GpConfig:
+class GpConfigMock:
 
     def __init__(self, name=""):
         self.name = name
-        
+
     def get_type(self):
         return int
-        
+
     def get_value(self):
         return 2
-        
+
+    def set_value(self, value):
+        pass
+
     def get_child_by_name(self, name):
-        return GpConfig(name)
+        return GpConfigMock(name)
+
+
+class GpFileMock:
+
+    def __init__(self, image=None):
+        self.folder = 'fake'
+        self.name = 'cam_01.jpg'
+        self.image = image
+    
+    def get_data_and_size(self):
+        return image
 
 
 class GpCameraProxyMock:
@@ -54,13 +68,19 @@ class GpCameraProxyMock:
         self.fake_captures = fake_captures
 
     def get_config(self):
-        return GpConfig()
+        return GpConfigMock()
+        
+    def set_config(self, config):
+        pass
 
     def file_delete(self, folder, name):
         pass
 
+    def file_get(self, folder, name, flag):
+        return GpFileMock(Image.open(self.fake_captures[0]).tobytes("xbm", "rgb"))
+
     def capture(self, flag):
-        return Image.open(self.fake_captures[0]).tobytes("xbm", "rgb")
+        return GpFileMock()
 
     def exit(self):
         pass
