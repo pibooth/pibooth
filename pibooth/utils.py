@@ -9,16 +9,12 @@ import time
 import os.path as osp
 import logging
 import psutil
-import functools
+import platform
 from fnmatch import fnmatchcase
 import contextlib
 import errno
 import subprocess
-try:
-    from itertools import zip_longest, islice
-except ImportError:
-    # Python 2.x fallback
-    from itertools import izip_longest as zip_longest, islice
+import pygame
 
 
 LOGGER = logging.getLogger("pibooth")
@@ -92,6 +88,13 @@ class PoolingTimer(object):
         """
         self.time = None
 
+    def reset(self):
+        """Reset timer to its initial state.
+        """
+        self.time = None
+        self._paused_total = 0
+        self._paused_time = None
+
     def start(self):
         """Start the timer.
         """
@@ -158,7 +161,7 @@ def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=N
             dirname = osp.dirname(filename)
             if not osp.isdir(dirname):
                 os.makedirs(dirname)
-            hdlr = logging.FileHandler(filename)
+            hdlr = logging.FileHandler(filename, mode='w')
             hdlr.setFormatter(logging.Formatter(msgfmt, datefmt))
             hdlr.setLevel(logging.DEBUG)
             root.addHandler(hdlr)
@@ -186,6 +189,26 @@ def set_logging_level(level=None):
             hdlr.setLevel(level)
 
 
+def get_logging_filename():
+    """Return the absolute path to the logs filename if set.
+    """
+    for hdlr in logging.getLogger().handlers:
+        if isinstance(hdlr, logging.FileHandler):
+            return hdlr.baseFilename
+    return None
+
+
+def get_crash_message():
+    msg = "system='{}', node='{}', release='{}', version='{}', machine='{}', processor='{}'\n".format(*platform.uname())
+    msg += " " + "*" * 83 + "\n"
+    msg += " * " + "Oops! It seems that pibooth has crached".center(80) + "*\n"
+    msg += " * " + "You can report an issue on https://github.com/pibooth/pibooth/issues/new".center(80) + "*\n"
+    if get_logging_filename():
+        msg += " * " + ("and post the file: {}".format(get_logging_filename())).center(80) + "*\n"
+    msg += " " + "*" * 83
+    return msg
+
+
 @contextlib.contextmanager
 def timeit(description):
     """Measure time execution.
@@ -198,23 +221,6 @@ def timeit(description):
     finally:
         BlockConsoleHandler.dedent()
         LOGGER.debug("took %0.3f seconds", time.time() - start)
-
-
-def take(n, iterable):
-    """Return first n items of the iterable as a list.
-    """
-    return list(islice(iterable, n))
-
-
-def print_columns_words(words, column_count=3):
-    """Print a list of words into columns.
-    """
-    columns, dangling = divmod(len(words), column_count)
-    iter_words = iter(words)
-    columns = [take(columns + (dangling > i), iter_words) for i in range(column_count)]
-    paddings = [max(map(len, column)) for column in columns]
-    for row in zip_longest(*columns, fillvalue=''):
-        print('  '.join(word.ljust(pad) for word, pad in zip(row, paddings)))
 
 
 def pkill(pattern):
@@ -233,25 +239,10 @@ def pkill(pattern):
                                        "(kill it manually before starting pibooth)".format(proc.name()))
 
 
-def memorize(func):
-    """Decorator to memorize and return the latest result
-    of a function.
-    """
-    cache = {}
-
-    @functools.wraps(func)
-    def memorized_func_wrapper(*args, **kwargs):
-        if func not in cache:
-            cache[func] = func(*args, **kwargs)
-        return cache[func]
-
-    return memorized_func_wrapper
-
-
 def open_text_editor(filename):
     """Open a text editor to edit the configuration file.
     """
-    editors = ['leafpad', 'vi', 'emacs']
+    editors = ['leafpad', 'mousepad', 'vi', 'emacs']
     for editor in editors:
         try:
             process = subprocess.Popen([editor, filename])
@@ -278,8 +269,28 @@ def load_module(path):
         sys.path.append(dirname)
 
     for hook in sys.meta_path:
-        loader = hook.find_module(modname, [dirname])
-        if loader:
-            return loader.load_module(modname)
+        if hasattr(hook, 'find_module'):
+            # Deprecated since Python 3.4
+            loader = hook.find_module(modname, [dirname])
+            if loader:
+                return loader.load_module(modname)
+        else:
+            spec = hook.find_spec(modname, [dirname])
+            if spec:
+                return spec.loader.load_module(modname)
 
     LOGGER.warning("Can not load Python module '%s' from '%s'", modname, path)
+
+
+def get_event_pos(display_size, event):
+    """
+    Return the position from finger or mouse event on x-axis and y-axis (x, y).
+
+    :param display_size: size of display for relative positioning in finger events
+    :param event: pygame event object
+    :return: position (x, y) in px
+    """
+    if event.type in (pygame.FINGERDOWN, pygame.FINGERMOTION, pygame.FINGERUP):
+        finger_pos = (event.x * display_size[0], event.y * display_size[1])
+        return finger_pos
+    return event.pos

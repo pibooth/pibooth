@@ -6,13 +6,9 @@
 import io
 import os
 import os.path as osp
+from configparser import ConfigParser
 from pibooth.utils import LOGGER, open_text_editor
 
-try:
-    from configparser import ConfigParser
-except ImportError:
-    # Python 2.x fallback
-    from ConfigParser import ConfigParser
 
 PARSER = ConfigParser()
 
@@ -21,19 +17,35 @@ CURRENT = 'en'  # Dynamically set at startup
 DEFAULT = {
     'de': {
         'intro': "Foto aufnehmen",
-        'intro_print': "Sie können dieses\nfoto immer noch\nausdrucken",
-        'choose': "Wähle dein Layout",
-        '1': "1 foto",
-        '2': "2 fotos",
-        '3': "3 fotos",
-        '4': "4 fotos",
-        'chosen': "Los gehts!",
+        'intro_print': "Du kannst dieses\nFoto immer noch\nausdrucken",
+        'choose': "Wähle Dein Layout",
+        '1': "1 Foto",
+        '2': "2 Fotos",
+        '3': "3 Fotos",
+        '4': "4 Fotos",
+        'chosen': "Los geht's!",
         'smile': "Bitte lächeln!",
         'processing': "Bearbeitung...",
         'print': "Foto drucken?",
-        'print_forget': "Bitte\nvergessen Sie\ndieses Foto",
+        'print_forget': "Dieses Foto\nbitte löschen",
         'finished': "Danke",
-        'oops': "Ups Irgendwas lief schief",
+        'oops': "Ups! Etwas ist schiefgelaufen",
+    },
+    'dk': {
+        'intro': "Tag et foto",
+        'intro_print': 'Eller du kan\nstadig udskrive\ndette foto',
+        'choose': "Vælg dit layout",
+        '1': "1 Foto",
+        '2': "2 Fotos",
+        '3': "3 Fotos",
+        '4': "4 Fotos",
+        'chosen': "Gør dig klar!",
+        'smile': "Smil !",
+        'processing': "Fremkalder Foto...",
+        'print': "Print foto?",
+        'print_forget': "Venligst\nglem dette\nfoto",
+        'finished': "Tak",
+        'oops': "Ups! Noget gik galt",
     },
     'en': {
         'intro': "Take a photo",
@@ -99,6 +111,22 @@ DEFAULT = {
         'finished': "Köszi",
         'oops': "Sajnos valami hiba történt",
     },
+    'it': {
+        'intro': "Scatta una foto",
+        'intro_print': 'Oppure puoi\nstampare\nquesta foto',
+        'choose': "Scegli il formato",
+        '1': "1 foto",
+        '2': "2 foto",
+        '3': "3 foto",
+        '4': "4 foto",
+        'chosen': "Andiamo!",
+        'smile': "Sorridi!",
+        'processing': "Elaborazione...",
+        'print': "Stampo la foto?",
+        'print_forget': "Per favore\nignora questa\nfoto",
+        'finished': "Grazie",
+        'oops': "Oops qualcosa è andato storto",
+    },
     'nl': {
         'intro': "Neem een foto",
         'intro_print': "Of je kan\nnog altijd \ndeze foto printen",
@@ -114,6 +142,38 @@ DEFAULT = {
         'print_forget': "Vergeet\ndeze foto\nalstublieft",
         'finished': "Bedankt",
         'oops': "Oeps er ging iets mis",
+    },
+    'no': {
+        'intro': "Ta et bilde",
+        'intro_print': 'Eller du kan\nfremdeles printe\ndette bildet',
+        'choose': "Velg ditt utseende",
+        '1': "1 bilde",
+        '2': "2 bilder",
+        '3': "3 bilder",
+        '4': "4 bilder",
+        'chosen': "Start!",
+        'smile': "Smil !",
+        'processing': "Behandler...",
+        'print': "Printe bildet?",
+        'print_forget': "Glem\ndette\nbildet",
+        'finished': "Takk",
+        'oops': "Ops, noe gikk galt",
+    },
+    'pt': {
+        'intro': "Tira uma foto",
+        'intro_print': 'Ainda podes\nimprimir esta\nfoto',
+        'choose': "Escolhe o teu formato",
+        '1': "1 foto",
+        '2': "2 fotos",
+        '3': "3 fotos",
+        '4': "4 fotos",
+        'chosen': "Vamos!",
+        'smile': "Sorri!",
+        'processing': "A processar...",
+        'print': "Imprimir foto?",
+        'print_forget': "Por favor\nesqueçe-te\ndesta foto",
+        'finished': "Obrigado!",
+        'oops': "Oops, ocorreu um erro.",
     },
 }
 

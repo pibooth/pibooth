@@ -1,0 +1,894 @@
+Pibooth version installed: 2.0.3
+Installed plugins:
+Listing all connected DSLR camera
+00 : addr-> usb:001,010  name-> Fuji Fujifilm X-T2
+
+================================================================================
+Stating diagnostic of connected DSLR camera
+* Preview compatible: True
+* Capture compatible: True
+/actions/bulb
+  Label       : Bulb Mode
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 2
+  Choices     : [0, 1]
+/actions/autofocusdrive
+  Label       : Drive Fuji Autofocus
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 2
+  Choices     : [0, 1]
+/actions/movie
+  Label       : Movie Capture
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 2
+  Choices     : [0, 1]
+/actions/opcode
+  Label       : PTP Opcode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0x1001,0xparam1,0xparam2
+  Choices     : n/a
+/settings/datetime
+  Label       : Camera Date and Time
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Date entering
+  Current     : 1626977700
+  Choices     : n/a
+/settings/imagecomment
+  Label       : Image Comment
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     :
+  Choices     : n/a
+/settings/devicename
+  Label       : Device Name
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     :
+  Choices     : n/a
+/settings/copyright
+  Label       : Copyright
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     :
+  Choices     : n/a
+/settings/cameraaction
+  Label       : Camera Action
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Shoot
+  Choices     : ['Unknown value 0104', 'AF', 'Cancel AF', 'Shoot', 'Bulb On', 'Bulb Off', 'Unknown value a000', 'Unknown value 0006', 'Unknown value 9000', 'Unknown value 0002', 'Unknown value 9100', 'Unknown value 0001', 'Unknown value 9300', 'Unknown value 0005']
+/status/serialnumber
+  Label       : Serial Number
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 59353331303216082465202062083D
+  Choices     : n/a
+/status/manufacturer
+  Label       : Camera Manufacturer
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : FUJIFILM
+  Choices     : n/a
+/status/cameramodel
+  Label       : Camera Model
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : X-T2
+  Choices     : n/a
+/status/deviceversion
+  Label       : Device Version
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 4.30
+  Choices     : n/a
+/status/vendorextension
+  Label       : Vendor Extension
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : fujifilm.co.jp: 1.0;
+  Choices     : n/a
+/status/lensname
+  Label       : Lens Name
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : ,,
+  Choices     : n/a
+/status/shuttercounter
+  Label       : Shutter Counter
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 24583
+  Choices     : n/a
+/imgsettings/imageformat
+  Label       : Image Format
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : JPEG Normal
+  Choices     : ['RAW', 'JPEG Fine', 'JPEG Normal', 'RAW + JPEG Fine', 'RAW + JPEG Normal']
+/imgsettings/filmsimulation
+  Label       : Film Simulation
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : PRO Neg.Std
+  Choices     : ['PROVIA/Standard', 'Velvia/Vivid', 'ASTIA/Soft', 'PRO Neg.Hi', 'PRO Neg.Std', 'Black & White', 'Black & White+Ye Filter', 'Black & White+R Filter', 'Black & White+G Filter', 'Sepia', 'Classic Chrome', 'ACROS', 'ACROS+Ye Filter', 'ACROS+R Filter,', 'ACROS+G Filter']
+/imgsettings/imagesize
+  Label       : Image Size
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 3008x2000
+  Choices     : ['3008x2000', '3008x1688', '2000x2000', '4240x2832', '4240x2384', '2832x2832', '6000x4000', '6000x3376', '4000x4000']
+/imgsettings/iso
+  Label       : ISO Speed
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : -1
+  Choices     : ['100', '125', '160', '200', '250', '320', '400', '500', '640', '800', '1000', '1250', '1600', '2000', '2500', '3200', '4000', '5000', '6400', '8000', '10000', '12800', '25600', '51200', '-1', '-2', '-3']
+/imgsettings/colortemperature
+  Label       : Color Temperature
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 10000
+  Choices     : ['2500', '2550', '2650', '2700', '2800', '2850', '2950', '3000', '3100', '3200', '3300', '3400', '3600', '3700', '3800', '4000', '4200', '4300', '4500', '4800', '5000', '5300', '5600', '5900', '6300', '6700', '7100', '7700', '8300', '9100', '10000']
+/imgsettings/whitebalance
+  Label       : WhiteBalance
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Automatic
+  Choices     : ['Automatic', 'Daylight', 'Tungsten', 'Unknown value 0008', 'Fluorescent Lamp 1', 'Fluorescent Lamp 2', 'Fluorescent Lamp 3', 'Shade', 'Choose Color Temperature', 'Preset Custom 1', 'Preset Custom 2', 'Preset Custom 3']
+/imgsettings/colorspace
+  Label       : Color Space
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : AdobeRGB
+  Choices     : ['sRGB', 'AdobeRGB']
+/capturesettings/f-number
+  Label       : F-Number
+  Readonly    : no
+  Data type   : <class 'NoneType'>
+  Widget type : Radio button
+  Current     : None
+  Choices     : ['f/1.2', 'f/1.4', 'f/1.6', 'f/1.8', 'f/2', 'f/2.2', 'f/2.5', 'f/2.8', 'f/3.2', 'f/3.6', 'f/4', 'f/4.5', 'f/5', 'f/5.6', 'f/6.4', 'f/7.1', 'f/8', 'f/9', 'f/10', 'f/11', 'f/13', 'f/14', 'f/16', 'f/18', 'f/20', 'f/22']
+/capturesettings/focusmode
+  Label       : Focus Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Manual
+  Choices     : ['Manual', 'Single-Servo AF', 'Continuous-Servo AF']
+/capturesettings/expprogram
+  Label       : Exposure Program
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : A
+  Choices     : ['M', 'A', 'S', 'Action']
+/capturesettings/capturemode
+  Label       : Still Capture Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Self-timer
+  Choices     : ['Self-timer']
+/capturesettings/focusmetermode
+  Label       : Focus Metering Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Single-area AF
+  Choices     : ['Single-area AF', 'Dynamic-area AF', 'Group-dynamic AF']
+/capturesettings/exposuremetermode
+  Label       : Exposure Metering Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Center Spot
+  Choices     : ['Average', 'Center Weighted', 'Multi Spot', 'Center Spot']
+/capturesettings/capturedelay
+  Label       : Capture Delay
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 0.000s
+  Choices     : ['10.000s', '2.000s', '0.000s']
+/capturesettings/shutterspeed
+  Label       : Shutter Speed
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 1/30
+  Choices     : ['bulb', '60m', '30m', '15m', '8m', '4m', '2m', '60s', '50s', '40s', '30s', '25s', '20s', '15s', '13s', '10s', '8s', '6s', '5s', '4s', '3s', '2.5s', '2s', '1.6s', '1.3s', '1s', '0.8s', '0.6s', '1/2', '0.4s', '1/3', '1/4', '1/5', '1/6', '1/8', '1/10', '1/13', '1/15', '1/20', '1/25', '1/30', '1/40', '1/50', '1/60', '1/80', '1/100', '1/125', '1/160', '1/200', '1/250', '1/320', '1/400', '1/500', '1/640', '1/800', '1/1000', '1/1250', '1/1600', '1/2000', '1/2500', '1/3200', '1/4000', '1/5000', '1/6400', '1/8000', '1/10000', '1/13000', '1/16000', '1/20000', '1/25000', '1/32000']
+/capturesettings/liveviewsize
+  Label       : Live View Size
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : VGA
+  Choices     : ['XGA', 'VGA', 'QVGA']
+/other/5003
+  Label       : Image Size
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 3008x2000
+  Choices     : ['3008x2000', '3008x1688', '2000x2000', '4240x2832', '4240x2384', '2832x2832', '6000x4000', '6000x3376', '4000x4000']
+/other/5005
+  Label       : White Balance
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 2
+  Choices     : ['2', '4', '6', '8', '32769', '32770', '32771', '32774', '32775', '32776', '32777', '32778']
+/other/500a
+  Label       : Focus Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '32769', '32770']
+/other/500b
+  Label       : Exposure Metering Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 4
+  Choices     : ['1', '2', '3', '4']
+/other/500e
+  Label       : Exposure Program Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 3
+  Choices     : ['1', '3', '4', '6']
+/other/500f
+  Label       : Exposure Index (film speed ISO)
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : -1
+  Choices     : ['100', '125', '160', '200', '250', '320', '400', '500', '640', '800', '1000', '1250', '1600', '2000', '2500', '3200', '4000', '5000', '6400', '8000', '10000', '12800', '25600', '51200', '-1', '-2', '-3']
+/other/5011
+  Label       : Date & Time
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 20210722T191500
+  Choices     : n/a
+/other/5012
+  Label       : Pre-Capture Delay
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 0
+  Choices     : ['10000', '2000', '0']
+/other/5015
+  Label       : Sharpness
+  Readonly    : no
+  Data type   : <class 'float'>
+  Widget type : Slider
+  Current     : 0.0
+  Choices     : min=-40.0, max=40.0, step=10.0
+/other/501c
+  Label       : Focus Metering Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 32769
+  Choices     : ['32769', '32770', '32771']
+/other/d001
+  Label       : Film Simulation
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 5
+  Choices     : ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15']
+/other/d007
+  Label       : DRangeMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 65535
+  Choices     : ['65535', '100', '200', '400']
+/other/d008
+  Label       : ColorMode
+  Readonly    : no
+  Data type   : <class 'float'>
+  Widget type : Slider
+  Current     : 30.0
+  Choices     : min=-40.0, max=40.0, step=10.0
+/other/d00a
+  Label       : ColorSpace
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 2
+  Choices     : ['1', '2']
+/other/d00b
+  Label       : WhitebalanceTune1
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 0
+  Choices     : ['-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+/other/d00c
+  Label       : WhitebalanceTune2
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 0
+  Choices     : ['-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+/other/d017
+  Label       : Color Temperature
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 10000
+  Choices     : ['2500', '2550', '2650', '2700', '2800', '2850', '2950', '3000', '3100', '3200', '3300', '3400', '3600', '3700', '3800', '4000', '4200', '4300', '4500', '4800', '5000', '5300', '5600', '5900', '6300', '6700', '7100', '7700', '8300', '9100', '10000']
+/other/d018
+  Label       : Quality
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 3
+  Choices     : ['1', '2', '3', '4', '5']
+/other/d01b
+  Label       : ThroughImageZoom
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2', '3']
+/other/d01c
+  Label       : NoiseReduction
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 8192
+  Choices     : ['0', '4096', '8192', '12288', '16384', '20480', '24576', '28672', '32768']
+/other/d100
+  Label       : Comment
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     :
+  Choices     : n/a
+/other/d106
+  Label       : FrameGuideMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2', '3']
+/other/d10a
+  Label       : ShutterPriorityMode1
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2']
+/other/d10b
+  Label       : ShutterPriorityMode2
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2']
+/other/d112
+  Label       : AFIlluminator
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2']
+/other/d136
+  Label       : FunctionLock
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2', '3']
+/other/d145
+  Label       : Password
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0000
+  Choices     : n/a
+/other/d153
+  Label       : FirmwareVersion
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 1072
+  Choices     : n/a
+/other/d154
+  Label       : ShotCount
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 1269628928
+  Choices     : n/a
+/other/d155
+  Label       : ShutterExchangeCount
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/other/d201
+  Label       : ReleaseMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 4
+  Choices     : ['4']
+/other/d207
+  Label       : PriorityMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 2
+  Choices     : ['1', '2']
+/other/d208
+  Label       : PTP Property 0xd208
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 772
+  Choices     : ['260', '512', '4', '772', '1280', '12', '40960', '6', '36864', '2', '37120', '1', '37632', '5']
+/other/d209
+  Label       : AFStatus
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 4
+  Choices     : ['1', '2', '3', '4']
+/other/d20b
+  Label       : DeviceName
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     :
+  Choices     : n/a
+/other/d20c
+  Label       : MediaRecord
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2', '3', '4']
+/other/d20d
+  Label       : MediaCapacity
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 6002,14,29592064,9,0,0,0,0
+  Choices     : n/a
+/other/d20e
+  Label       : FreeSDRAMImages
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 19
+  Choices     : ['0', '1']
+/other/d211
+  Label       : MediaStatus
+  Readonly    : yes
+  Data type   : <class 'float'>
+  Widget type : Slider
+  Current     : 769.0
+  Choices     : min=0.0, max=65535.0, step=1.0
+/other/d215
+  Label       : Copyright
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     :
+  Choices     : n/a
+/other/d216
+  Label       : Copyright2
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     :
+  Choices     : n/a
+/other/d406
+  Label       : PTP Property 0xd406
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     :
+  Choices     : n/a
+/other/d407
+  Label       : PTP Property 0xd407
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 1
+  Choices     : n/a
+/other/500d
+  Label       : Exposure Time
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 31250
+  Choices     : []
+/other/5007
+  Label       : F-Number
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 0
+  Choices     : ['120', '140', '160', '180', '200', '220', '250', '280', '320', '360', '400', '450', '500', '560', '640', '710', '800', '900', '1000', '1100', '1300', '1400', '1600', '1800', '2000', '2200']
+/other/d38c
+  Label       : LensZoomPosCaps
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1']
+/other/d171
+  Label       : FocusPosition
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 0
+  Choices     : ['0', '0', '0', '0', '0', '0']
+/other/d21c
+  Label       : PTP Property 0xd21c
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 3
+  Choices     : ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']
+/other/d170
+  Label       : LensZoomPos
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1']
+/other/d174
+  Label       : LiveViewImageSize
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 2
+  Choices     : ['1', '2', '3']
+/other/d173
+  Label       : LiveViewImageQuality
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '3']
+/other/d230
+  Label       : ForceMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1']
+/other/d020
+  Label       : FaceDetectionMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 2
+  Choices     : ['1', '2']
+/other/d022
+  Label       : RawCompression
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2']
+/other/d023
+  Label       : GrainEffect
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2', '3']
+/other/d024
+  Label       : SetEyeAFMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2', '3', '4']
+/other/d025
+  Label       : FocusPoints
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2']
+/other/d026
+  Label       : MFAssistMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+/other/d027
+  Label       : InterlockAEAFArea
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2']
+/other/d02f
+  Label       : TNumber
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 0
+  Choices     : []
+/other/d320
+  Label       : HighLightTone
+  Readonly    : no
+  Data type   : <class 'float'>
+  Widget type : Slider
+  Current     : 0.0
+  Choices     : min=-20.0, max=40.0, step=10.0
+/other/d321
+  Label       : ShadowTone
+  Readonly    : no
+  Data type   : <class 'float'>
+  Widget type : Slider
+  Current     : -10.0
+  Choices     : min=-20.0, max=40.0, step=10.0
+/other/d322
+  Label       : LongExposureNR
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 2
+  Choices     : ['1', '2']
+/other/d323
+  Label       : FullTimeManualFocus
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 2
+  Choices     : ['1', '2']
+/other/d346
+  Label       : LensISSwitch
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 2
+  Choices     : ['1', '2']
+/other/d34a
+  Label       : InstantAFMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2']
+/other/d34b
+  Label       : PreAFMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 2
+  Choices     : ['1', '2']
+/other/d34d
+  Label       : LMOMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 2
+  Choices     : ['1', '2']
+/other/d351
+  Label       : ISMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 3
+  Choices     : ['1', '2', '3']
+/other/d35e
+  Label       : FocusCheckMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2']
+/other/d173
+  Label       : LiveViewImageQuality
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '3']
+/other/d365
+  Label       : FileNamePrefix1
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : DSCF
+  Choices     : n/a
+/other/d366
+  Label       : FileNamePrefix2
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : DSF
+  Choices     : n/a
+/other/d310
+  Label       : TotalShotCount
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 1611071488
+  Choices     : n/a
+/other/d359
+  Label       : ExposurePreview
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2', '3']
+/other/d375
+  Label       : FrameGuideGridInfo1
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0,0,0,0,850,0,0,0,0,850,0,0,0,0,
+  Choices     : n/a
+/other/d376
+  Label       : FrameGuideGridInfo2
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0,0,0,0,850,0,0,0,0,850,0,0,0,0,
+  Choices     : n/a
+/other/d33f
+  Label       : ViewMode1
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 5
+  Choices     : ['1', '2', '3', '4', '5']
+/other/d364
+  Label       : CustomAutoPowerOff
+  Readonly    : no
+  Data type   : <class 'float'>
+  Widget type : Slider
+  Current     : 0.0
+  Choices     : min=0.0, max=255.0, step=1.0
+/other/d34e
+  Label       : LockButtonMode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2']
+/other/d36d
+  Label       : LensNameAndSerial
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : ,,
+  Choices     : n/a
+/other/d38a
+  Label       : LensUnknownData
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1', '2', '3', '4', '5']
+/other/d36a
+  Label       : BatteryInfo1
+  Readonly    : yes
+  Data type   : <class 'float'>
+  Widget type : Slider
+  Current     : 11.0
+  Choices     : min=0.0, max=16777215.0, step=1.0
+/other/d36b
+  Label       : BatteryInfo2
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 72,0,0
+  Choices     : n/a
+/other/d36f
+  Label       : FunctionLockCategory1
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 65536
+  Choices     : n/a
+/other/d370
+  Label       : FunctionLockCategory2
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 65536
+  Choices     : n/a
+/other/d222
+  Label       : SensitivityFineTune1
+  Readonly    : no
+  Data type   : <class 'float'>
+  Widget type : Slider
+  Current     : 8192.0
+  Choices     : min=0.0, max=65535.0, step=1.0
+/other/d223
+  Label       : SensitivityFineTune2
+  Readonly    : no
+  Data type   : <class 'float'>
+  Widget type : Slider
+  Current     : 8192.0
+  Choices     : min=0.0, max=65535.0, step=1.0
+/other/d38c
+  Label       : LensZoomPosCaps
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1']
+/other/d38d
+  Label       : LensFNumberList
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     :
+  Choices     : n/a
+/other/d38e
+  Label       : LensFocalLengthList
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0,0
+  Choices     : n/a
+/other/d17b
+  Label       : PTP Property 0xd17b
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['1']
+
+================================================================================
+Testing commands used by pibooth
+Setting option imgsettings/iso="100"
+Setting option settings/capturetarget="Memory card"
+   -> unsupported setting settings/capturetarget=Memory card (nothing configured on DSLR)
+Unknown option actions/viewfinder
+Take capture preview
+Take a capture
+Download file from DSLR
+Save capture locally from memory buffer
+
+================================================================================
+SUCCESS : diagnostic completed
+If you are investigating why pibooth does not work with your DSLR camera,
+please paste the content of generated file 'diagnostic.log'
+on https://github.com/pibooth/pibooth/issues

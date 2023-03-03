@@ -3,7 +3,7 @@
 """Pibooth base states.
 """
 
-import traceback
+import time
 from pibooth.utils import LOGGER, BlockConsoleHandler
 
 
@@ -19,6 +19,8 @@ class StateMachine(object):
         self.win = window
         self.cfg = configuration
         self.pm = plugins_manager
+
+        self._start_time = time.time()
 
     def add_state(self, name):
         """Add a state to the internal dictionary.
@@ -56,8 +58,7 @@ class StateMachine(object):
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
-                if BlockConsoleHandler.is_debug():
-                    traceback.print_exc()
+                LOGGER.debug('Back to failsafe state due to error:', exc_info=True)
                 new_state_name = self.failsafe_state
             else:
                 raise
@@ -73,11 +74,12 @@ class StateMachine(object):
             if self.active_state is not None:
                 hook = getattr(self.pm.hook, 'state_{}_exit'.format(self.active_state))
                 hook(cfg=self.cfg, app=self.app, win=self.win)
+                BlockConsoleHandler.dedent()
+                LOGGER.debug("took %0.3f seconds", time.time() - self._start_time)
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
-                if BlockConsoleHandler.is_debug():
-                    traceback.print_exc()
+                LOGGER.debug('Back to failsafe state due to error:', exc_info=True)
                 state_name = self.failsafe_state
             else:
                 raise
@@ -86,6 +88,8 @@ class StateMachine(object):
             raise ValueError('"{}" not in registered states...'.format(state_name))
 
         # Switch to the new state and perform its entry actions
+        BlockConsoleHandler.indent()
+        self._start_time = time.time()
         LOGGER.debug("Activate state '%s'", state_name)
         self.active_state = state_name
 
@@ -95,8 +99,7 @@ class StateMachine(object):
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
                 LOGGER.error(str(ex))
-                if BlockConsoleHandler.is_debug():
-                    traceback.print_exc()
+                LOGGER.debug('Back to failsafe state due to error:', exc_info=True)
                 self.set_state(self.failsafe_state)
             else:
                 raise

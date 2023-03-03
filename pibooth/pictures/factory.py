@@ -3,7 +3,7 @@
 import os
 import os.path as osp
 from pibooth import fonts
-from pibooth.utils import timeit
+from pibooth.utils import LOGGER
 from pibooth.pictures import sizing
 from PIL import Image, ImageDraw
 
@@ -273,9 +273,9 @@ class PictureFactory(object):
         assert align in [self.CENTER, self.RIGHT, self.LEFT], "Unknown aligment '{}'".format(align)
         self._texts.append((text, fonts.get_filename(font_name), color, align))
         if self.is_portrait:
-            self._texts_height = 600
+            self._texts_height = int(self.height // 6)
         else:
-            self._texts_height = 300
+            self._texts_height = int(self.height // 8)
         self._final = None  # Force rebuild
 
     def set_background(self, color_or_path):
@@ -305,13 +305,19 @@ class PictureFactory(object):
         self._overlay_image = image_path
         self._final = None  # Force rebuild
 
-    def set_margin(self, margin):
+    def set_margin(self, margin, margin_text=None):
         """Set margin between concatenated images.
 
         :param margin: margin in pixels
         :type margin: int
+        :param margin_text: margin between texts in pixels
+        :type margin_text: int
         """
         self._margin = margin
+        if margin_text is None:
+            self._margin_text = margin
+        else:
+            self._margin_text = margin_text
         self._final = None  # Force rebuild
 
     def set_cropping(self, crop=True):
@@ -346,21 +352,21 @@ class PictureFactory(object):
         """
         if not self._final or rebuild:
 
-            with timeit("Use {} to create background".format(self.name)):
-                image = self._build_background()
+            LOGGER.info("Use %s to create background", self.name)
+            image = self._build_background()
 
-            with timeit("Use {} to concatenate images".format(self.name)):
-                image = self._build_matrix(image)
+            LOGGER.info("Use %s to concatenate images", self.name)
+            image = self._build_matrix(image)
 
-            with timeit("Use {} to assemble final image".format(self.name)):
-                self._final = self._build_final_image(image)
+            LOGGER.info("Use %s to assemble final image", self.name)
+            self._final = self._build_final_image(image)
 
-            with timeit("Use {} to draw texts".format(self.name)):
-                self._build_texts(self._final)
+            LOGGER.info("Use %s to draw texts", self.name)
+            self._build_texts(self._final)
 
             if self._outlines:
-                with timeit("Use {} to outline boundary borders".format(self.name)):
-                    self._build_outlines(self._final)
+                LOGGER.info("Use %s to outline boundary borders", self.name)
+                self._build_outlines(self._final)
 
         return self._final
 
@@ -377,8 +383,8 @@ class PictureFactory(object):
         if not osp.isdir(dirname):
             os.mkdir(dirname)
         image = self.build()
-        with timeit("Save image '{}'".format(path)):
-            image.save(path)
+        LOGGER.info("Save image '%s'", path)
+        image.save(path)
         return image
 
 
@@ -411,9 +417,10 @@ class PilPictureFactory(PictureFactory):
         """See upper class description.
         """
         if self._overlay_image:
-            overlay = Image.open(self._overlay_image)
+            overlay = Image.open(self._overlay_image).convert('RGBA')
             overlay, _, _ = self._image_resize_keep_ratio(overlay, self.width, self.height, True)
-            image.paste(overlay, (0, 0), overlay)
+            image = Image.alpha_composite(image.convert('RGBA'), overlay)
+            image = image.convert('RGB')
         return image
 
     def _build_background(self):
@@ -474,31 +481,33 @@ class OpenCvPictureFactory(PictureFactory):
             overlay = cv2.cvtColor(cv2.imread(self._overlay_image, cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2RGBA)
             overlay, _, _ = self._image_resize_keep_ratio(overlay, self.width, self.height, True)
 
-            # Fix the overlay. Why we have to do this? If we don't, pixels are marked
-            # as opaque when they shouldn't be. See:
-            # https://www.pyimagesearch.com/2016/04/25/watermarking-images-with-opencv-and-python
-            RR, GG, BB, A = cv2.split(overlay)
-            RR = cv2.bitwise_and(RR, RR, mask=A)
-            GG = cv2.bitwise_and(GG, GG, mask=A)
-            BB = cv2.bitwise_and(BB, BB, mask=A)
-            overlay = cv2.merge([RR, GG, BB, A])
+            x, y = 0, 0
+            image_width = image.shape[1]
+            image_height = image.shape[0]
 
-            # Add an extra dimension to the image (i.e., the alpha transparency)
-            if image.shape[2] == 3:
-                image = cv2.cvtColor(image, cv2.COLOR_RGB2RGBA)
+            h, w = overlay.shape[0], overlay.shape[1]
 
-            # Now create a mask of overlay and create its inverse mask also
-            img2gray = cv2.cvtColor(overlay, cv2.COLOR_RGB2GRAY)
-            _ret, mask = cv2.threshold(img2gray, 30, 255, cv2.THRESH_BINARY)
-            mask_inv = cv2.bitwise_not(mask)
-            # Now black-out the area of overlay in ROI (ie image)
-            img1_bg = cv2.bitwise_and(image, image, mask=mask_inv)
-            # Take only region of overlay from overlay image
-            img2_fg = cv2.bitwise_and(overlay, overlay, mask=mask)
-            # Generate the main image
-            image = cv2.add(img1_bg, img2_fg)
-            # Remove alpha dimension
-            image = cv2.cvtColor(image, cv2.COLOR_RGBA2RGB)
+            if x + w > image_width:
+                w = image_width - x
+                overlay = overlay[:, :w]
+
+            if y + h > image_height:
+                h = image_height - y
+                overlay = overlay[:h]
+
+            if overlay.shape[2] < 4:
+                overlay = np.concatenate(
+                    [
+                        overlay,
+                        np.ones((overlay.shape[0], overlay.shape[1], 1), dtype=overlay.dtype) * 255
+                    ],
+                    axis=2,
+                )
+
+            overlay_image = overlay[..., :3]
+            mask = overlay[..., 3:] / 255.0
+
+            image[y:y+h, x:x+w] = (1.0 - mask) * image[y:y+h, x:x+w] + mask * overlay_image
 
         return Image.fromarray(image)
 

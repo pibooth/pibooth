@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import os
-import os.path as osp
 import time
 import pygame
 import pibooth
-from pibooth.utils import LOGGER, timeit
+from pibooth import camera
+from pibooth.utils import LOGGER
 
 
 class CameraPlugin(object):
@@ -13,9 +12,27 @@ class CameraPlugin(object):
     """Plugin to manage the camera captures.
     """
 
+    name = 'pibooth-core:camera'
+
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.count = 0
+
+    @pibooth.hookimpl(hookwrapper=True)
+    def pibooth_setup_camera(self, cfg):
+        outcome = yield  # all corresponding hookimpls are invoked here
+        cam = outcome.get_result()
+
+        if not cam:
+            LOGGER.debug("Fallback to pibooth default camera management system")
+            cam = camera.find_camera()
+
+        cam.initialize(cfg.gettuple('CAMERA', 'iso', (int, str), 2),
+                       cfg.gettyped('CAMERA', 'resolution'),
+                       cfg.gettuple('CAMERA', 'rotation', int, 2),
+                       cfg.getboolean('CAMERA', 'flip'),
+                       cfg.getboolean('CAMERA', 'delete_internal_memory'))
+        outcome.force_result(cam)
 
     @pibooth.hookimpl
     def pibooth_cleanup(self, app):
@@ -25,14 +42,17 @@ class CameraPlugin(object):
     def state_failsafe_enter(self, app):
         """Reset variables set in this plugin.
         """
-        app.dirname = None
+        app.capture_date = None
         app.capture_nbr = None
         app.camera.drop_captures()  # Flush previous captures
 
     @pibooth.hookimpl
     def state_wait_enter(self, app):
-        app.dirname = None
-        app.capture_nbr = None
+        app.capture_date = None
+        if len(app.capture_choices) > 1:
+            app.capture_nbr = None
+        else:
+            app.capture_nbr = app.capture_choices[0]
 
     @pibooth.hookimpl
     def state_choose_do(self, app, events):
@@ -45,13 +65,9 @@ class CameraPlugin(object):
 
     @pibooth.hookimpl
     def state_preview_enter(self, cfg, app, win):
-        LOGGER.info("Take a new capture")
-        if not app.capture_nbr:
-            app.capture_nbr = app.capture_choices[0]
-        if not app.dirname:
-            savedir = cfg.getpath('GENERAL', 'directory')
-            app.dirname = osp.join(savedir, "raw", time.strftime("%Y-%m-%d-%H-%M-%S"))
-            os.makedirs(app.dirname)
+        LOGGER.info("Show preview before next capture")
+        if not app.capture_date:
+            app.capture_date = time.strftime("%Y-%m-%d-%H-%M-%S")
         app.camera.preview(win)
 
     @pibooth.hookimpl
@@ -69,7 +85,6 @@ class CameraPlugin(object):
 
     @pibooth.hookimpl
     def state_capture_do(self, cfg, app, win):
-        capture_path = osp.join(app.dirname, "pibooth{:03}.jpg".format(self.count))
         effects = cfg.gettyped('PICTURE', 'captures_effects')
         if not isinstance(effects, (list, tuple)):
             # Same effect for all captures
@@ -82,12 +97,12 @@ class CameraPlugin(object):
             raise ValueError("Not enough effects defined for {} captures {}".format(
                 app.capture_nbr, effects))
 
-        with timeit("Take a capture and save it in {}".format(capture_path)):
-            if cfg.getboolean('WINDOW', 'flash'):
-                with win.flash(2):  # Manage the window here, have no choice
-                    app.camera.capture(capture_path, effect)
-            else:
-                app.camera.capture(capture_path, effect)
+        LOGGER.info("Take a capture")
+        if cfg.getboolean('WINDOW', 'flash'):
+            with win.flash(2):  # Manage the window here, have no choice
+                app.camera.capture(effect)
+        else:
+            app.camera.capture(effect)
 
         self.count += 1
 
@@ -95,3 +110,7 @@ class CameraPlugin(object):
     def state_capture_exit(self, cfg, app):
         if not cfg.getboolean('WINDOW', 'preview_stop_on_capture'):
             app.camera.stop_preview()
+
+    @pibooth.hookimpl
+    def state_processing_enter(self, app):
+        self.count = 0

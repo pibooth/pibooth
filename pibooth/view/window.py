@@ -3,6 +3,7 @@
 """Pibooth view management.
 """
 
+import os
 import time
 import contextlib
 import pygame
@@ -14,11 +15,23 @@ from pibooth.utils import LOGGER
 from pibooth.pictures import sizing
 
 
-class PtbWindow(object):
+class PiWindow(object):
+
+    """Class to handle the window.
+    The following attributes are available for use in plugins:
+
+    :attr surface: surface on which sprites are displayed
+    :type surface: :py:class:`pygame.Surface`
+    :attr is_fullscreen: set to True if the window is display in full screen
+    :type is_fullscreen: bool
+    :attr display_size: tuple (width, height) represneting the size of the screen
+    :type display_size: tuple
+    """
 
     CENTER = 'center'
     RIGHT = 'right'
     LEFT = 'left'
+    FULLSCREEN = 'fullscreen'
 
     def __init__(self, title,
                  size=(800, 480),
@@ -33,6 +46,11 @@ class PtbWindow(object):
         self.text_color = text_color
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
+
+        # Prepare the pygame module for use
+        if 'SDL_VIDEO_WINDOW_POS' not in os.environ:
+            os.environ['SDL_VIDEO_CENTERED'] = '1'
+        pygame.init()
 
         # Save the desktop mode, shall be done before `setmode` (SDL 1.2.10, and pygame 1.8.0)
         info = pygame.display.Info()
@@ -51,15 +69,26 @@ class PtbWindow(object):
 
         self._pos_map = {self.CENTER: self._center_pos,
                          self.RIGHT: self._right_pos,
-                         self.LEFT: self._left_pos}
+                         self.LEFT: self._left_pos,
+                         self.FULLSCREEN: self._center_pos}
+
+        # Don't use pygame.mouse.get_cursor() because will be removed in pygame2
+        self._cursor = ((16, 16), (0, 0),
+                        (0, 0, 64, 0, 96, 0, 112, 0, 120, 0, 124, 0, 126, 0, 127, 0,
+                         127, 128, 124, 0, 108, 0, 70, 0, 6, 0, 3, 0, 3, 0, 0, 0),
+                        (192, 0, 224, 0, 240, 0, 248, 0, 252, 0, 254, 0, 255, 0, 255,
+                         128, 255, 192, 255, 224, 254, 0, 239, 0, 207, 0, 135, 128, 7, 128, 3, 0))
 
     def _update_foreground(self, pil_image, pos=CENTER, resize=True):
         """Show a PIL image on the foreground.
-        Only once is bufferized to avoid memory leak.
+        Only one is bufferized to avoid memory leak.
         """
         image_name = id(pil_image)
 
-        image_size_max = (2 * self.surface.get_size()[1] // 3, self.surface.get_size()[1])
+        if pos == self.FULLSCREEN:
+            image_size_max = (self.surface.get_size()[0] * 0.9, self.surface.get_size()[1] * 0.9)
+        else:
+            image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1])
 
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
@@ -77,6 +106,13 @@ class PtbWindow(object):
             self._buffered_images[image_name] = (image_size_max, image)
 
         self._current_foreground = (pil_image, pos, resize)
+
+        if self.debug and resize:
+            # Build rectangle around picture area for debuging purpose
+            outlines = pygame.Surface(image_size_max, pygame.SRCALPHA, 32)
+            pygame.draw.rect(outlines, pygame.Color(255, 0, 0), outlines.get_rect(), 2)
+            self.surface.blit(outlines, self._pos_map[pos](outlines))
+
         return self.surface.blit(image, self._pos_map[pos](image))
 
     def _update_background(self, bkgd):
@@ -117,7 +153,7 @@ class PtbWindow(object):
             return  # Dont show counter: no file in queue, no failure
 
         smaller = self.surface.get_size()[1] if self.surface.get_size(
-            )[1] < self.surface.get_size()[0] else self.surface.get_size()[0]
+        )[1] < self.surface.get_size()[0] else self.surface.get_size()[0]
         side = int(smaller * 0.05)  # 5% of the window
 
         if side > 0:
@@ -125,11 +161,20 @@ class PtbWindow(object):
                 image = pictures.get_pygame_image('printer_failure.png', (side, side), color=self.text_color)
             else:
                 image = pictures.get_pygame_image('printer.png', (side, side), color=self.text_color)
-            y = self.surface.get_rect().height - image.get_rect().height - 10
-            self.surface.blit(image, (10, y))
             font = pygame.font.Font(fonts.CURRENT, side)
             label = font.render(str(self._print_number), True, self.text_color)
-            self.surface.blit(label, (side + 20, y))
+
+            height = max((image.get_rect().height, label.get_rect().height)) + 20
+            bg = pygame.Surface((image.get_rect().width + label.get_rect().width + side + 10, height))
+            bg.fill(self._current_background.get_color())
+            rect = bg.get_rect()
+            rect.bottomleft = self.get_rect().bottomleft
+            rect_image = image.get_rect(left=10, centery=rect.centery)
+            rect_label = label.get_rect(centerx=rect_image.right + (rect.width -
+                                        rect_image.right) // 2, centery=rect.centery)
+            self.surface.blit(bg, rect.topleft)
+            self.surface.blit(image, rect_image.topleft)
+            self.surface.blit(label, rect_label.topleft)
 
     def _center_pos(self, image):
         """
@@ -152,11 +197,22 @@ class PtbWindow(object):
         pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
         return image.get_rect(center=pos) if image else pos
 
-    def get_rect(self):
-        """Return a Rect object (as defined in pygame) for this window. The position represent
-        the absolute position considering the window centered on screen.
+    def get_rect(self, absolute=False):
+        """Return a Rect object (as defined in pygame) for this window.
+
+        :param absolute: absolute position considering the window centered on screen
+        :type absolute: bool
         """
-        return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
+        if absolute:
+            return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
+        return self.surface.get_rect()
+
+    def get_image(self):
+        """Return the currently displayed foreground image.
+        """
+        if self._current_foreground:
+            return self._current_foreground[0]
+        return None
 
     def resize(self, size):
         """Resize the window keeping aspect ratio.
@@ -194,6 +250,9 @@ class PtbWindow(object):
 
         if pil_image:
             self._update_foreground(pil_image, self.RIGHT)
+        elif self._current_foreground:
+            self._buffered_images.pop(id(self._current_foreground[0]), None)
+            self._current_foreground = None
 
     def show_choice(self, choices, selected=None):
         """Show the choice view.
@@ -225,7 +284,7 @@ class PtbWindow(object):
         self._update_background(background.ProcessingBackground())
 
     def show_print(self, pil_image=None):
-        """Show print view.
+        """Show print view (image resized on the left).
         """
         self._capture_number = (0, self._capture_number[1])
         self._update_background(background.PrintBackground(self.arrow_location,
@@ -233,11 +292,18 @@ class PtbWindow(object):
         if pil_image:
             self._update_foreground(pil_image, self.LEFT)
 
-    def show_finished(self):
-        """Show finished view.
+    def show_finished(self, pil_image=None):
+        """Show finished view (image resized fullscreen).
         """
         self._capture_number = (0, self._capture_number[1])
-        self._update_background(background.FinishedBackground())
+        if pil_image:
+            bg = background.FinishedWithImageBackground(pil_image.size)
+            if self._buffered_images.get(str(bg), bg).foreground_size != pil_image.size:
+                self._buffered_images.pop(str(bg))  # Drop cache, foreground size ratio has changed
+            self._update_background(background.FinishedWithImageBackground(pil_image.size))
+            self._update_foreground(pil_image, self.FULLSCREEN)
+        else:
+            self._update_background(background.FinishedBackground())
 
     @contextlib.contextmanager
     def flash(self, count):
@@ -301,11 +367,13 @@ class PtbWindow(object):
         """
         if self.is_fullscreen:
             self.is_fullscreen = False  # Set before resize
-            pygame.mouse.set_visible(True)
+            pygame.mouse.set_cursor(*self._cursor)
             self.surface = pygame.display.set_mode(self.__size, pygame.RESIZABLE)
         else:
             self.is_fullscreen = True  # Set before resize
-            pygame.mouse.set_visible(False)
+            # Make an invisible cursor (don't use pygame.mouse.set_visible(False) because
+            # the mouse event will always return the window bottom-right coordinate)
+            pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
             self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
 
         self.update()

@@ -11,11 +11,17 @@ try:
 except ImportError:
     gp = None  # gphoto2 is optional
 import pibooth
+from pibooth.config import PiConfigParser
 from pibooth.utils import configure_logging
+from pibooth.plugins import create_plugin_manager
 
 
 LOGFILE = None
 APPNAME = 'diagnostic'
+
+
+def gp_logging(level, domain, string, data=None):
+    write_log('Gphoto2: {}: {}'.format(domain, string))
 
 
 def write_log(text, new_section=False):
@@ -120,14 +126,33 @@ def camera_connected():
 
 
 def main():
+    error = False
     configure_logging()
+    write_log("Pibooth version installed: {}".format(pibooth.__version__))
+
+    plugin_manager = create_plugin_manager()
+    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
+
+    # Register plugins
+    plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
+                                    config.gettuple('GENERAL', 'plugins_disabled', str))
+
+    write_log("Installed plugins: {}".format(", ".join(
+        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_external_plugins()])))
+
     if not gp:
         write_log("gPhoto2 not installed, cannot diagnose connected DSLR")
         sys.exit(1)
+    else:
+        try:
+            info = gp.version.gp_library_version(gp.version.GP_VERSION_VERBOSE)
+            write_log("GPhoto2 version installed: {}".format(info[0]))
+            for opt in info[1:]:
+                write_log("  - {}".format(opt))
+        except:
+            pass
 
-    gp.check_result(gp.use_python_logging())
-
-    write_log("Pibooth version installed: {}".format(pibooth.__version__))
+    gp_log_callback = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_logging))
     write_log("Listing all connected DSLR camera")
     cameras_list = camera_connected()
 
@@ -143,38 +168,56 @@ def main():
     camera = gp.Camera()
     camera.init()
 
-    try:
-        print_config(camera.get_config())
+    abilities = camera.get_abilities()
+    preview_compat = gp.GP_OPERATION_CAPTURE_PREVIEW ==\
+        abilities.operations & gp.GP_OPERATION_CAPTURE_PREVIEW
+    write_log("* Preview compatible: {}".format(preview_compat))
+    capture_compat = gp.GP_OPERATION_CAPTURE_IMAGE ==\
+        abilities.operations & gp.GP_OPERATION_CAPTURE_IMAGE
+    write_log("* Capture compatible: {}".format(capture_compat))
 
-        write_log("Testing commands used by pibooth", True)
-        set_config_value(camera, 'imgsettings', 'iso', '100')
-        set_config_value(camera, 'settings', 'capturetarget', 'Memory card')
+    if capture_compat:
+        try:
+            print_config(camera.get_config())
 
-        get_config_value(camera, 'actions', 'viewfinder')
-        set_config_value(camera, 'actions', 'viewfinder', 1)
+            write_log("Testing commands used by pibooth", True)
 
-        write_log("Take capture preview")
-        camera.capture_preview()
+            set_config_value(camera, 'imgsettings', 'iso', '100')
+            set_config_value(camera, 'settings', 'capturetarget', 'Memory card')
 
-        set_config_value(camera, 'actions', 'viewfinder', 0)
+            viewfinder = get_config_value(camera, 'actions', 'viewfinder')
+            if viewfinder is not None:
+                set_config_value(camera, 'actions', 'viewfinder', 1)
 
-        write_log("Take a capture")
-        gp_path = camera.capture(gp.GP_CAPTURE_IMAGE)
+            write_log("Take capture preview")
+            camera.capture_preview()
 
-        write_log("Download file from DSLR")
-        camera_file = camera.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
+            if viewfinder is not None:
+                set_config_value(camera, 'actions', 'viewfinder', 0)
 
-        write_log("Save capture locally from memory buffer")
-        image = Image.open(io.BytesIO(camera_file.get_data_and_size()))
-        image.save(APPNAME + '.jpg')
+            write_log("Take a capture")
+            gp_path = camera.capture(gp.GP_CAPTURE_IMAGE)
 
-    except Exception as ex:
-        write_log("ABORT   : exception occures: {}".format(ex), True)
-    else:
+            write_log("Download file from DSLR")
+            camera_file = camera.file_get(gp_path.folder, gp_path.name, gp.GP_FILE_TYPE_NORMAL)
+
+            write_log("Save capture locally from memory buffer")
+            data = camera_file.get_data_and_size()
+            with open(APPNAME + '.raw', 'wb') as fd:
+                fd.write(data)
+            image = Image.open(io.BytesIO(data))
+            image.save(APPNAME + '.jpg')
+
+        except Exception as ex:
+            write_log("ABORT   : exception occures: {}".format(ex), True)
+            error = True
+
+    if not error:
         write_log("SUCCESS : diagnostic completed", True)
 
+    del gp_log_callback
     camera.exit()
 
     write_log("If you are investigating why pibooth does not work with your DSLR camera,")
     write_log("please paste the content of generated file '{}'".format(APPNAME + '.log'))
-    write_log("on https://github.com/werdeil/pibooth/issues")
+    write_log("on https://github.com/pibooth/pibooth/issues")

@@ -6,27 +6,27 @@
 
 import os
 import os.path as osp
+import tempfile
 import shutil
 import logging
 import argparse
+import multiprocessing
 from warnings import filterwarnings
 
 import pygame
-import pluggy
 from gpiozero import Device, ButtonBoard, LEDBoard, pi_info
 from gpiozero.exc import BadPinFactory, PinFactoryFallback
 
 import pibooth
 from pibooth import fonts
 from pibooth import language
-from pibooth.utils import (LOGGER, configure_logging,
-                           set_logging_level, print_columns_words)
+from pibooth.counters import Counters
+from pibooth.utils import (LOGGER, PoolingTimer, configure_logging, get_crash_message,
+                           set_logging_level, get_event_pos)
 from pibooth.states import StateMachine
-from pibooth.plugins import hookspecs, load_plugins, list_plugin_names
-from pibooth.view import PtbWindow
+from pibooth.plugins import create_plugin_manager
+from pibooth.view import PiWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
-from pibooth import camera
-from pibooth.fonts import get_available_fonts
 from pibooth.printer import PRINTER_TASKS_UPDATED, Printer
 
 
@@ -45,21 +45,43 @@ BUTTONDOWN = pygame.USEREVENT + 1
 
 class PiApplication(object):
 
+    """Main class representing the ``pibooth`` software.
+    The following attributes are available for use in plugins:
+
+    :attr capture_nbr: number of capture to be done in the current sequence
+    :type capture_nbr: int
+    :attr capture_date: date (%Y-%m-%d-%H-%M-%S) of the first capture of the current sequence
+    :type capture_date: str
+    :attr capture_choices: possible choices of captures numbers.
+    :type capture_choices: tuple
+    :attr previous_picture: picture generated during last sequence
+    :type previous_picture: :py:class:`PIL.Image`
+    :attr previous_animated: infinite list of picture to display during animation
+    :type previous_animated: :py:func:`itertools.cycle`
+    :attr previous_picture_file: file name of the picture generated during last sequence
+    :type previous_picture_file: str
+    :attr count: holder for counter values
+    :type count: :py:class:`pibooth.counters.Counters`
+    :attr camera: camera used
+    :type camera: :py:class:`pibooth.camera.base.BaseCamera`
+    :attr buttons: access to hardware buttons ``capture`` and ``printer``
+    :type buttons: :py:class:`gpiozero.ButtonBoard`
+    :attr leds: access to hardware LED ``capture`` and ``printer``
+    :attr leds: :py:class:`gpiozero.LEDBoard`
+    :attr printer: printer used
+    :type printer: :py:class:`pibooth.printer.Printer`
+    """
+
     def __init__(self, config, plugin_manager):
         self._pm = plugin_manager
         self._config = config
 
-        # Clean directory where pictures are saved
-        savedir = config.getpath('GENERAL', 'directory')
-        if not osp.isdir(savedir):
-            os.makedirs(savedir)
-        elif osp.isdir(savedir) and config.getboolean('GENERAL', 'debug'):
-            shutil.rmtree(savedir)
-            os.makedirs(savedir)
-
-        # Prepare the pygame module for use
-        os.environ['SDL_VIDEO_CENTERED'] = '1'
-        pygame.init()
+        # Create directories where pictures are saved
+        for savedir in config.gettuple('GENERAL', 'directory', 'path'):
+            if osp.isdir(savedir) and config.getboolean('GENERAL', 'debug'):
+                shutil.rmtree(savedir)
+            if not osp.isdir(savedir):
+                os.makedirs(savedir)
 
         # Create window of (width, height)
         init_size = self._config.gettyped('WINDOW', 'size')
@@ -71,13 +93,15 @@ class PiApplication(object):
 
         title = 'Pibooth v{}'.format(pibooth.__version__)
         if not isinstance(init_size, str):
-            self._window = PtbWindow(title, init_size, color=init_color,
-                                     text_color=init_text_color, debug=init_debug)
+            self._window = PiWindow(title, init_size, color=init_color,
+                                    text_color=init_text_color, debug=init_debug)
         else:
-            self._window = PtbWindow(title, color=init_color,
-                                     text_color=init_text_color, debug=init_debug)
+            self._window = PiWindow(title, color=init_color,
+                                    text_color=init_text_color, debug=init_debug)
 
         self._menu = None
+        self._multipress_timer = PoolingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
+        self._fingerdown_events = []
 
         # Define states of the application
         self._machine = StateMachine(self._pm, self._config, self, self._window)
@@ -93,19 +117,18 @@ class PiApplication(object):
         # ---------------------------------------------------------------------
         # Variables shared with plugins
         # Change them may break plugins compatibility
-        self.dirname = None
         self.capture_nbr = None
+        self.capture_date = None
         self.capture_choices = (4, 1)
-        self.nbr_duplicates = 0
         self.previous_picture = None
         self.previous_animated = None
         self.previous_picture_file = None
 
-        self.camera = camera.get_camera(config.getint('CAMERA', 'iso'),
-                                        config.gettyped('CAMERA', 'resolution'),
-                                        config.getint('CAMERA', 'rotation'),
-                                        config.getboolean('CAMERA', 'flip'),
-                                        config.getboolean('CAMERA', 'delete_internal_memory'))
+        self.count = Counters(self._config.join_path("counters.pickle"),
+                              taken=0, printed=0, forgotten=0,
+                              remaining_duplicates=self._config.getint('PRINTER', 'max_duplicates'))
+
+        self.camera = self._pm.hook.pibooth_setup_camera(cfg=self._config)
 
         self.buttons = ButtonBoard(capture="BOARD" + config.get('CONTROLS', 'picture_btn_pin'),
                                    printer="BOARD" + config.get('CONTROLS', 'print_btn_pin'),
@@ -118,7 +141,9 @@ class PiApplication(object):
                              printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
 
         self.printer = Printer(config.get('PRINTER', 'printer_name'),
-                               config.getint('PRINTER', 'max_pages'))
+                               config.getint('PRINTER', 'max_pages'),
+                               config.gettyped('PRINTER', 'printer_options'),
+                               self.count)
         # ---------------------------------------------------------------------
 
     def _initialize(self):
@@ -128,7 +153,7 @@ class PiApplication(object):
         """
         # Handle the language configuration
         language.CURRENT = self._config.get('GENERAL', 'language')
-        fonts.CURRENT = fonts.get_filename(self._config.gettuple('PICTURE', 'text_fonts', str)[0])
+        fonts.CURRENT = fonts.get_filename(self._config.get('WINDOW', 'font'))
 
         # Set the captures choices
         choices = self._config.gettuple('PICTURE', 'captures', int)
@@ -141,7 +166,7 @@ class PiApplication(object):
         self.capture_choices = choices
 
         # Handle autostart of the application
-        self._config.enable_autostart(self._config.getboolean('GENERAL', 'autostart'))
+        self._config.handle_autostart()
 
         self._window.arrow_location = self._config.get('WINDOW', 'arrows')
         self._window.arrow_offset = self._config.getint('WINDOW', 'arrows_x_offset')
@@ -168,23 +193,29 @@ class PiApplication(object):
 
         # Reset the print counter (in case of max_pages is reached)
         self.printer.max_pages = self._config.getint('PRINTER', 'max_pages')
-        self.printer.nbr_printed = 0
 
     def _on_button_capture_held(self):
         """Called when the capture button is pressed.
         """
         if all(self.buttons.value):
-            # capture was held while printer was pressed
-            if self._menu and self._menu.is_shown():
-                # Convert HW button events to keyboard events for menu
-                event = self._menu.create_back_event()
-                LOGGER.debug("BUTTONDOWN: generate MENU-ESC event")
-            else:
-                event = pygame.event.Event(BUTTONDOWN, capture=1, printer=1,
-                                           button=self.buttons)
-                LOGGER.debug("BUTTONDOWN: generate DOUBLE buttons event")
+            self.buttons.capture.hold_repeat = True
+            if self._multipress_timer.elapsed() == 0:
+                self._multipress_timer.start()
+            if self._multipress_timer.is_timeout():
+                # Capture was held while printer was pressed
+                if self._menu and self._menu.is_shown():
+                    # Convert HW button events to keyboard events for menu
+                    event = self._menu.create_back_event()
+                    LOGGER.debug("BUTTONDOWN: generate MENU-ESC event")
+                else:
+                    event = pygame.event.Event(BUTTONDOWN, capture=1, printer=1,
+                                               button=self.buttons)
+                    LOGGER.debug("BUTTONDOWN: generate DOUBLE buttons event")
+                self.buttons.capture.hold_repeat = False
+                self._multipress_timer.reset()
+                pygame.event.post(event)
         else:
-            # capture was held but printer not pressed
+            # Capture was held but printer not pressed
             if self._menu and self._menu.is_shown():
                 # Convert HW button events to keyboard events for menu
                 event = self._menu.create_next_event()
@@ -193,17 +224,19 @@ class PiApplication(object):
                 event = pygame.event.Event(BUTTONDOWN, capture=1, printer=0,
                                            button=self.buttons.capture)
                 LOGGER.debug("BUTTONDOWN: generate CAPTURE button event")
-        pygame.event.post(event)
+            self.buttons.capture.hold_repeat = False
+            self._multipress_timer.reset()
+            pygame.event.post(event)
 
     def _on_button_printer_held(self):
         """Called when the printer button is pressed.
         """
         if all(self.buttons.value):
-            # printer was held while capture was pressed
+            # Printer was held while capture was pressed
             # but don't do anything here, let capture_held handle it instead
             pass
         else:
-            # printer was held but capture not pressed
+            # Printer was held but capture not pressed
             if self._menu and self._menu.is_shown():
                 # Convert HW button events to keyboard events for menu
                 event = self._menu.create_click_event()
@@ -213,6 +246,14 @@ class PiApplication(object):
                                            button=self.buttons.printer)
                 LOGGER.debug("BUTTONDOWN: generate PRINTER event")
             pygame.event.post(event)
+
+    @property
+    def picture_filename(self):
+        """Return the final picture file name.
+        """
+        if not self.capture_date:
+            raise EnvironmentError("The 'capture_date' attribute is not set yet")
+        return "{}_pibooth.jpg".format(self.capture_date)
 
     def find_quit_event(self, events):
         """Return the first found event if found in the list.
@@ -230,6 +271,17 @@ class PiApplication(object):
                 return event
             if event.type == BUTTONDOWN and event.capture and event.printer:
                 return event
+            if event.type == pygame.FINGERDOWN:
+                # Press but not release
+                self._fingerdown_events.append(event)
+            if event.type == pygame.FINGERUP:
+                # Resetting touch_events
+                self._fingerdown_events = []
+            if len(self._fingerdown_events) > 3:
+                # 4 fingers on the screen trigger the menu
+                self._fingerdown_events = []
+                return pygame.event.Event(BUTTONDOWN, capture=1, printer=1,
+                                          button=self.buttons)
         return None
 
     def find_fullscreen_event(self, events):
@@ -255,10 +307,10 @@ class PiApplication(object):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
-                # Don't consider the mouse wheel (button 4 & 5):
+            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
+                pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(pos):
                     return event
             if event.type == BUTTONDOWN and event.capture:
                 return event
@@ -269,12 +321,12 @@ class PiApplication(object):
         """
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e\
-                        and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                    and pygame.key.get_mods() & pygame.KMOD_CTRL:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
-                # Don't consider the mouse wheel (button 4 & 5):
+            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
+                pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
-                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(event.pos):
+                if pygame.Rect(rect.width // 2, 0, rect.width // 2, rect.height).collidepoint(pos):
                     return event
             if event.type == BUTTONDOWN and event.printer:
                 return event
@@ -296,10 +348,10 @@ class PiApplication(object):
                 return event
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                 return event
-            if event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3):
-                # Don't consider the mouse wheel (button 4 & 5):
+            if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
+                pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
-                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(event.pos):
+                if pygame.Rect(0, 0, rect.width // 2, rect.height).collidepoint(pos):
                     event.key = pygame.K_LEFT
                 else:
                     event.key = pygame.K_RIGHT
@@ -313,8 +365,6 @@ class PiApplication(object):
         return None
 
     def main_loop(self):
-        """Run the main game loop.
-        """
         try:
             fps = 40
             clock = pygame.time.Clock()
@@ -336,8 +386,9 @@ class PiApplication(object):
                     self._window.resize(event.size)
 
                 if not self._menu and self.find_settings_event(events):
+                    self.camera.stop_preview()
                     self.leds.off()
-                    self._menu = PiConfigMenu(self._window, self._config)
+                    self._menu = PiConfigMenu(self._pm, self._config, self, self._window)
                     self._menu.show()
                     self.leds.blink(on_time=0.1, off_time=1)
                 elif self._menu and self._menu.is_shown():
@@ -353,6 +404,9 @@ class PiApplication(object):
                 pygame.display.update()
                 clock.tick(fps)  # Ensure the program will never run at more than <fps> frames per second
 
+        except Exception as ex:
+            LOGGER.error(str(ex), exc_info=True)
+            LOGGER.error(get_crash_message())
         finally:
             self._pm.hook.pibooth_cleanup(app=self)
             pygame.quit()
@@ -361,7 +415,14 @@ class PiApplication(object):
 def main():
     """Application entry point.
     """
+    if hasattr(multiprocessing, 'set_start_method'):
+        # Avoid use 'fork': safely forking a multithreaded process is problematic
+        multiprocessing.set_start_method('spawn')
+
     parser = argparse.ArgumentParser(usage="%(prog)s [options]", description=pibooth.__doc__)
+
+    parser.add_argument("config_directory", nargs='?', default="~/.config/pibooth",
+                        help=u"path to configuration directory (default: %(default)s)")
 
     parser.add_argument('--version', action='version', version=pibooth.__version__,
                         help=u"show program's version number and exit")
@@ -375,11 +436,8 @@ def main():
     parser.add_argument("--reset", action='store_true',
                         help=u"restore the default configuration/translations and exit")
 
-    parser.add_argument("--fonts", action='store_true',
-                        help=u"display all available fonts and exit")
-
-    parser.add_argument("--log", default=None,
-                        help=u"save logs output to the given file")
+    parser.add_argument("--nolog", action='store_true', default=False,
+                        help=u"don't save console output in a file (avoid filling the /tmp directory)")
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-v", "--verbose", dest='logging', action='store_const', const=logging.DEBUG,
@@ -387,28 +445,36 @@ def main():
     group.add_argument("-q", "--quiet", dest='logging', action='store_const', const=logging.WARNING,
                        help=u"report only errors and warnings", default=logging.INFO)
 
-    options, _args = parser.parse_known_args()
+    options = parser.parse_args()
 
-    configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=options.log)
+    if not options.nolog:
+        filename = osp.join(tempfile.gettempdir(), 'pibooth.log')
+    else:
+        filename = None
+    configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=filename)
 
-    # Create plugin manager and defined hooks specification
-    plugin_manager = pluggy.PluginManager(hookspecs.hookspec.project_name)
-    plugin_manager.add_hookspecs(hookspecs)
-    plugin_manager.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
+    plugin_manager = create_plugin_manager()
 
-    # Load the configuration and languages
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager, options.reset)
-    language.init("~/.config/pibooth/translations.cfg", options.reset)
+    # Load the configuration
+    config = PiConfigParser(osp.join(options.config_directory, "pibooth.cfg"), plugin_manager, not options.reset)
 
     # Register plugins
-    custom_paths = [p for p in config.gettuple('GENERAL', 'plugins', 'path') if p]
-    load_plugins(plugin_manager, *custom_paths)
-    LOGGER.info("Installed plugins: %s", ", ".join(list_plugin_names(plugin_manager)))
+    plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
+                                    config.gettuple('GENERAL', 'plugins_disabled', str))
+    LOGGER.info("Installed plugins: %s", ", ".join(
+        [plugin_manager.get_friendly_name(p) for p in plugin_manager.list_external_plugins()]))
 
-    # Update plugins configuration
+    # Load the languages
+    language.init(config.join_path("translations.cfg"), options.reset)
+
+    # Update configuration with plugins ones
     plugin_manager.hook.pibooth_configure(cfg=config)
-    if not osp.isfile(config.filename):
-        config.save()
+
+    # Ensure config files are present in case of first pibooth launch
+    if not options.reset:
+        if not osp.isfile(config.filename):
+            config.save(default=True)
+        plugin_manager.hook.pibooth_reset(cfg=config, hard=False)
 
     if options.config:
         LOGGER.info("Editing the pibooth configuration...")
@@ -416,11 +482,9 @@ def main():
     elif options.translate:
         LOGGER.info("Editing the GUI translations...")
         language.edit()
-    elif options.fonts:
-        LOGGER.info("Listing all fonts available...")
-        print_columns_words(get_available_fonts(), 3)
     elif options.reset:
-        config.save()
+        config.save(default=True)
+        plugin_manager.hook.pibooth_reset(cfg=config, hard=True)
     else:
         LOGGER.info("Starting the photo booth application %s", GPIO_INFO)
         app = PiApplication(config, plugin_manager)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
-import fnmatch
 import os.path as osp
+import fnmatch
 from difflib import SequenceMatcher
 import pygame
 from PIL import ImageFont
@@ -42,7 +42,7 @@ def get_filename(name):
     if system_path and osp.isfile(system_path):
         return system_path
 
-    # Show avaiable fonts
+    # Show available fonts
     most_similar = None
     most_similar_ratio = 0
     for font_name in get_available_fonts():
@@ -104,6 +104,7 @@ def get_pygame_font(text, font_name, max_width, max_height):
             end = k
         else:
             start = k + 1
+        del font  # Run garbage collector, to avoid opening too many files
     return pygame.font.Font(get_filename(font_name), start)
 
 

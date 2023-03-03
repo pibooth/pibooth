@@ -1,0 +1,409 @@
+Pibooth version installed: 2.0.0
+Listing all connected DSLR camera
+00 : addr-> usb:001,009  name-> Canon EOS 450D (PTP mode)
+
+================================================================================
+Stating diagnostic of connected DSLR camera
+/actions/syncdatetime
+  Label       : Synchronize camera date and time with PC
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 0
+  Choices     : [0, 1]
+/actions/bulb
+  Label       : Bulb Mode
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 2
+  Choices     : [0, 1]
+/actions/uilock
+  Label       : UI Lock
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 2
+  Choices     : [0, 1]
+/actions/autofocusdrive
+  Label       : Drive Canon DSLR Autofocus
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 0
+  Choices     : [0, 1]
+/actions/manualfocusdrive
+  Label       : Drive Canon DSLR Manual focus
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : None
+  Choices     : ['Near 1', 'Near 2', 'Near 3', 'None', 'Far 1', 'Far 2', 'Far 3']
+/actions/eoszoom
+  Label       : Canon EOS Zoom
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/actions/eoszoomposition
+  Label       : Canon EOS Zoom Position
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0,0
+  Choices     : n/a
+/actions/viewfinder
+  Label       : Canon EOS Viewfinder
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 2
+  Choices     : [0, 1]
+/actions/opcode
+  Label       : PTP Opcode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0x1001,0xparam1,0xparam2
+  Choices     : n/a
+/settings/datetime
+  Label       : Camera Date and Time
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Date entering
+  Current     : 1601242178
+  Choices     : n/a
+/settings/reviewtime
+  Label       : Quick Review Time
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 4 seconds
+  Choices     : ['None', '2 seconds', '4 seconds', '8 seconds', 'Hold']
+/settings/output
+  Label       : Camera Output
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Off
+  Choices     : ['TFT', 'PC', 'Off']
+/settings/evfmode
+  Label       : EVF Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 1
+  Choices     : ['0', '1']
+/settings/ownername
+  Label       : Owner Name
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 
+  Choices     : n/a
+/settings/customfuncex
+  Label       : Custom Functions Ex
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : d4,4,1,20,2,101,1,0,10f,1,0,2,38,4,201,1,0,202,1,0,203,1,0,204,1,0,3,2c,3,50e,1,0,511,1,0,60f,1,0,4,38,4,701,1,0,704,1,0,811,1,0,80f,1,0,
+  Choices     : n/a
+/settings/autopoweroff
+  Label       : Auto Power Off
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/settings/depthoffield
+  Label       : Depth of Field
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/settings/capturetarget
+  Label       : Capture Target
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Memory card
+  Choices     : ['Internal RAM', 'Memory card']
+/settings/capture
+  Label       : Capture
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 0
+  Choices     : [0, 1]
+/status/serialnumber
+  Label       : Serial Number
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 5bdd23d9acbd47dc9989f30ea2de510b
+  Choices     : n/a
+/status/manufacturer
+  Label       : Camera Manufacturer
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : Canon Inc.
+  Choices     : n/a
+/status/cameramodel
+  Label       : Camera Model
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : Canon EOS 450D
+  Choices     : n/a
+/status/deviceversion
+  Label       : Device Version
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 3-1.1.0
+  Choices     : n/a
+/status/vendorextension
+  Label       : Vendor Extension
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : None
+  Choices     : n/a
+/status/model
+  Label       : Camera Model
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 2147484022
+  Choices     : n/a
+/status/ptpversion
+  Label       : PTP Version
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 256
+  Choices     : n/a
+/status/dpofversion
+  Label       : DPOF Version
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 257
+  Choices     : n/a
+/status/batterylevel
+  Label       : Battery Level
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 100%
+  Choices     : n/a
+/status/eosserialnumber
+  Label       : Serial Number
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 330119900
+  Choices     : n/a
+/status/shuttercounter
+  Label       : Shutter Counter
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 38667
+  Choices     : n/a
+/status/availableshots
+  Label       : Available Shots
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 250637
+  Choices     : n/a
+/imgsettings/imageformat
+  Label       : Image Format
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Large Fine JPEG
+  Choices     : ['Large Fine JPEG', 'Large Normal JPEG', 'Medium Fine JPEG', 'Medium Normal JPEG', 'Small Fine JPEG', 'Small Normal JPEG', 'RAW + Large Fine JPEG', 'RAW']
+/imgsettings/imageformatsd
+  Label       : Image Format SD
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Large Fine JPEG
+  Choices     : ['Large Fine JPEG', 'Large Normal JPEG', 'Medium Fine JPEG', 'Medium Normal JPEG', 'Small Fine JPEG', 'Small Normal JPEG', 'RAW + Large Fine JPEG', 'RAW']
+/imgsettings/imageformatcf
+  Label       : Image Format CF
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : RAW
+  Choices     : ['RAW']
+/imgsettings/iso
+  Label       : ISO Speed
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 100
+  Choices     : ['Auto', '100', '200', '400', '800', '1600']
+/imgsettings/whitebalance
+  Label       : WhiteBalance
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Shadow
+  Choices     : ['Auto', 'Daylight', 'Shadow', 'Cloudy', 'Tungsten', 'Fluorescent', 'Flash', 'Manual']
+/imgsettings/colortemperature
+  Label       : Color Temperature
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/imgsettings/whitebalanceadjusta
+  Label       : WhiteBalance Adjust A
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 0
+  Choices     : ['-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+/imgsettings/whitebalanceadjustb
+  Label       : WhiteBalance Adjust B
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 0
+  Choices     : ['-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+/imgsettings/whitebalancexa
+  Label       : WhiteBalance X A
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/imgsettings/whitebalancexb
+  Label       : WhiteBalance X B
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/imgsettings/colorspace
+  Label       : Color Space
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : sRGB
+  Choices     : ['sRGB', 'AdobeRGB']
+/capturesettings/exposurecompensation
+  Label       : Exposure Compensation
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 0
+  Choices     : ['-2', '-1.6', '-1.3', '-1', '-0.6', '-0.3', '0', '0.3', '0.6', '1', '1.3', '1.6', '2']
+/capturesettings/focusmode
+  Label       : Focus Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Manual
+  Choices     : ['Manual']
+/capturesettings/storageid
+  Label       : Storage Device
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 00020000
+  Choices     : n/a
+/capturesettings/autoexposuremode
+  Label       : Canon Auto Exposure Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : TV
+  Choices     : ['P', 'TV', 'AV', 'Manual', 'Bulb', 'A_DEP', 'DEP', 'Custom', 'Lock', 'Green', 'Night Portrait', 'Sports', 'Portrait', 'Landscape', 'Closeup', 'Flash Off']
+/capturesettings/drivemode
+  Label       : Drive Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Single
+  Choices     : ['Single', 'Continuous', 'Timer 10 sec', 'Timer 2 sec', 'Unknown value 0007']
+/capturesettings/picturestyle
+  Label       : Picture Style
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Neutral
+  Choices     : ['Standard', 'Portrait', 'Landscape', 'Neutral', 'Faithful', 'Monochrome', 'User defined 1', 'User defined 2', 'User defined 3']
+/capturesettings/aperture
+  Label       : Aperture
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : implicit auto
+  Choices     : ['implicit auto']
+/capturesettings/shutterspeed
+  Label       : Shutter Speed
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 1/125
+  Choices     : ['30', '25', '20', '15', '13', '10', '8', '6', '5', '4', '3.2', '2.5', '2', '1.6', '1.3', '1', '0.8', '0.6', '0.5', '0.4', '0.3', '1/4', '1/5', '1/6', '1/8', '1/10', '1/13', '1/15', '1/20', '1/25', '1/30', '1/40', '1/50', '1/60', '1/80', '1/100', '1/125', '1/160', '1/200', '1/250', '1/320', '1/400', '1/500', '1/640', '1/800', '1/1000', '1/1250', '1/1600', '1/2000', '1/2500', '1/3200', '1/4000']
+/capturesettings/meteringmode
+  Label       : Metering Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Center-weighted average
+  Choices     : ['Evaluative', 'Partial', 'Spot', 'Center-weighted average']
+/capturesettings/bracketmode
+  Label       : Bracket Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/other/d402
+  Label       : PTP Property 0xd402
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : Canon EOS 450D
+  Choices     : n/a
+/other/d407
+  Label       : PTP Property 0xd407
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 1
+  Choices     : n/a
+/other/d406
+  Label       : PTP Property 0xd406
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : Unknown Initiator
+  Choices     : n/a
+
+================================================================================
+Testing commands used by pibooth
+Setting option imgsettings/iso="100"
+Setting option settings/capturetarget="Memory card"
+Getting option actions/viewfinder=2
+Setting option actions/viewfinder="1"
+Take capture preview
+Setting option actions/viewfinder="0"
+Take a capture
+Download file from DSLR
+Save capture locally from memory buffer
+
+================================================================================
+SUCCESS : diagnostic completed
+If you are investigating why pibooth does not work with your DSLR camera,
+please paste the content of generated file 'diagnostic.log'
+on https://github.com/pibooth/pibooth/issues
