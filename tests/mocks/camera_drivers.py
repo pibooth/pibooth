@@ -3,6 +3,9 @@
 
 import io
 from PIL import Image
+from pibooth.camera import gphoto
+
+gphoto.gp = GpCameraProxyMock([])
 
 
 class RpiCameraProxyMock:
@@ -66,6 +69,9 @@ class GpCameraProxyMock:
 
     def __init__(self, fake_captures):
         self.fake_captures = fake_captures
+        
+    def check_result(self, thing):
+        return object()
 
     def get_config(self):
         return GpConfigMock()
