@@ -156,7 +156,7 @@ def pygame_loop():
             pygame.display.update(event_handler(screen, events))
             clock.tick(5)
 
-            if os.env.get('SDL_VIDEODRIVER') == "dummy":
+            if os.environ.get('SDL_VIDEODRIVER') == "dummy":
                 # Automatic tests without video device available
                 break
 
