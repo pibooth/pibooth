@@ -5,7 +5,7 @@ import os
 import pytest
 import pygame
 from PIL import Image
-from pibooth import language
+from pibooth import language, utils
 from pibooth.tasks import AsyncTasksPool
 from pibooth.counters import Counters
 from pibooth.config.parser import PiboothConfigParser
@@ -20,9 +20,17 @@ MOCKS_DIR = os.path.join(os.path.dirname(__file__), 'mocks')
 CAPTURES_DIR = os.path.join(os.path.dirname(__file__), 'captures')
 
 
+cameramocks = utils.load_module(os.path.join(MOCKS_DIR, 'camera_drivers.py'))
+
+
 @pytest.fixture
 def init(tmpdir):
     return language.init(str(tmpdir.join('translations.cfg')))
+
+
+@pytest.fixture(scope='session')
+def init_tasks():
+    return AsyncTasksPool()
 
 
 @pytest.fixture(scope='session')
@@ -74,12 +82,9 @@ def counters(tmpdir):
 
 
 @pytest.fixture(scope='session')
-def init_tasks():
-    return AsyncTasksPool()
-
-
-@pytest.fixture(scope='session')
-def proxy_rpi():
+def proxy_rpi(captures_portrait):
+    if os.environ.get('CAMERA_RPIDRIVER') == "dummy":
+        return cameramocks.RpiCameraProxyMock(captures_portrait)
     return get_rpi_camera_proxy()
 
 
@@ -101,6 +106,9 @@ def camera_rpi_gp(proxy_rpi, proxy_gp):
 
 @pytest.fixture(scope='session')
 def proxy_cv():
+    if os.environ.get('CAMERA_CVDRIVER') == "dummy":
+        import cv2
+        return cv2.VideoCapture("fake/cam_01.jpg")
     return get_cv_camera_proxy()
 
 
@@ -121,7 +129,9 @@ def camera_cv_gp(proxy_cv, proxy_gp):
 
 
 @pytest.fixture(scope='session')
-def proxy_gp():
+def proxy_gp(captures_portrait):
+    if os.environ.get('CAMERA_GPDRIVER') == "dummy":
+        return cameramocks.GpCameraProxyMock(captures_portrait)
     return get_gp_camera_proxy()
 
 
