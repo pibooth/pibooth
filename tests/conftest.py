@@ -133,6 +133,8 @@ def camera_cv_gp(proxy_cv, proxy_gp):
 @pytest.fixture(scope='session')
 def proxy_gp(init_tasks, captures_portrait):
     if os.environ.get('CAMERA_GPDRIVER') == "dummy":
+        from pibooth.camera import gphoto
+        gphoto.gp = cameramocks.GpCameraProxyMock([])
         return cameramocks.GpCameraProxyMock(captures_portrait)
     return get_gp_camera_proxy()
 
