@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import pytest
 import pygame
 
+@pytest.mark.parametrize("name", ['wait', 'choose', 'chosen', 'preview' 'capture', 'processing', 'print', 'finish'])
+def test_scene(init, pygame_loop, scene_builder, name):
 
-def test_scene(init, pygame_loop, scene_builder):
-
-    scene = scene_builder('preview')
+    scene = scene_builder(name)
 
     def handler(screen, events):
         for event in events:
@@ -15,5 +16,3 @@ def test_scene(init, pygame_loop, scene_builder):
 
         scene.update(events)
         return scene.draw(screen)
-
-    pygame_loop(handler)
