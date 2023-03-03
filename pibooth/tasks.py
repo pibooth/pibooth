@@ -22,9 +22,12 @@ class AsyncTasksPool(object):
             AsyncTask.POOL = self
         else:
             self._pool = AsyncTask.POOL._pool
+        self._pool.stop_event = threading.Event()
 
     def start_task(self, task):
         "Start an asynchronous task and add future on tracking list."
+        if self._pool.stop_event.is_set():
+            raise RuntimeError("AsyncTasksPool is shutting down")
         assert isinstance(task, AsyncTask)
         future = self._pool.submit(task)
         self.FUTURES[future] = task
@@ -40,7 +43,8 @@ class AsyncTasksPool(object):
     def quit(self):
         """Stop all tasks and don't accept new one.
         """
-        for task in self.FUTURES.values():
+        self._pool.stop_event.set()
+        for task in self.FUTURES.copy().values():
             task.kill()
         self.FUTURES.clear()
         self._pool.shutdown(wait=True)
