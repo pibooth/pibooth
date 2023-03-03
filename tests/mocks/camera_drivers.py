@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-import io
-from PIL import Image
-
-
 class RpiCameraProxyMock:
 
     MAX_RESOLUTION = (3280, 2464)
@@ -13,7 +9,7 @@ class RpiCameraProxyMock:
         self.preview = None
         self.fake_captures = fake_captures
 
-    def add_overlay(imagebytes, size, layer=3, window=tuple(), fullscreen=False):
+    def add_overlay(self, imagebytes, size, layer=3, window=tuple(), fullscreen=False):
         return object()
 
     def remove_overlay(self, overlay):
@@ -26,8 +22,7 @@ class RpiCameraProxyMock:
         self.preview = None
 
     def capture(self, stream, format='jpeg'):
-        im = Image.open(self.fake_captures[0])
-        im.save(stream, format=format)
+        self.fake_captures[0].convert('RGB').save(stream, format=format)
 
     def close(self):
         pass
@@ -43,7 +38,7 @@ class GpConfigMock:
 
     def get_value(self):
         return 2
-        
+
     def get_choices(self):
         return []
 
@@ -60,7 +55,7 @@ class GpFileMock:
         self.folder = 'fake'
         self.name = 'cam_01.jpg'
         self.image = image
-    
+
     def get_data_and_size(self):
         return self.image
 
@@ -77,17 +72,14 @@ class GpCameraProxyMock:
     GP_CAPTURE_IMAGE = 'capture'
     GP_LOG_VERBOSE = 'verbose'
     GP_WIDGET_RADIO = 'radio'
-    
+
     GPhoto2Error = Exception
 
     def __init__(self, fake_captures):
         self.fake_captures = fake_captures
-        
+
     def check_result(self, thing):
         return object()
-
-    def gp_log_add_func(self, level, callback):
-        pass
 
     def gp_log_add_func(self, level, callback):
         pass
@@ -97,7 +89,7 @@ class GpCameraProxyMock:
 
     def get_config(self):
         return GpConfigMock()
-        
+
     def set_config(self, config):
         pass
 
@@ -105,10 +97,10 @@ class GpCameraProxyMock:
         pass
 
     def file_get(self, folder, name, flag):
-        return GpFileMock(Image.open(self.fake_captures[0]).tobytes("xbm", "rgb"))
+        return self.capture_preview()
 
     def capture_preview(self):
-        return GpFileMock(Image.open(self.fake_captures[0]).tobytes("xbm", "rgb"))
+        return GpFileMock(self.fake_captures[0].convert('RGB'))
 
     def capture(self, flag):
         return GpFileMock()

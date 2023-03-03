@@ -92,7 +92,8 @@ class RpiCamera(BaseCamera):
 
         # Define Rect() object for resizing preview captures to fit to the defined
         # preview rect keeping same aspect ratio than camera resolution.
-        size = sizing.new_size_keep_aspect_ratio(self.resolution, (min(rect.width, self._cam.MAX_RESOLUTION[0]), min(rect.height, self._cam.MAX_RESOLUTION[1])))
+        size = sizing.new_size_keep_aspect_ratio(self.resolution, (min(
+            rect.width, self._cam.MAX_RESOLUTION[0]), min(rect.height, self._cam.MAX_RESOLUTION[1])))
         self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
 
         if self._cam.hflip:

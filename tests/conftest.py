@@ -29,6 +29,13 @@ def init(tmpdir):
 
 
 @pytest.fixture(scope='session')
+def init_pygame():
+    pygame.init()
+    yield None
+    pygame.quit()
+
+
+@pytest.fixture(scope='session')
 def init_tasks():
     pool = AsyncTasksPool()
     yield pool
@@ -84,8 +91,9 @@ def counters(tmpdir):
 
 
 @pytest.fixture(scope='session')
-def proxy_rpi(init_tasks, captures_portrait):
+def proxy_rpi(init_pygame, init_tasks, captures_portrait):
     if os.environ.get('CAMERA_RPIDRIVER') == "dummy":
+        RpiCamera.IMAGE_EFFECTS = ['none']
         return cameramocks.RpiCameraProxyMock(captures_portrait)
     return get_rpi_camera_proxy()
 
@@ -107,7 +115,7 @@ def camera_rpi_gp(proxy_rpi, proxy_gp):
 
 
 @pytest.fixture(scope='session')
-def proxy_cv(init_tasks):
+def proxy_cv(init_pygame, init_tasks):
     if os.environ.get('CAMERA_CVDRIVER') == "dummy":
         import cv2
         return cv2.VideoCapture("fake/cam_01.jpg")
@@ -131,7 +139,7 @@ def camera_cv_gp(proxy_cv, proxy_gp):
 
 
 @pytest.fixture(scope='session')
-def proxy_gp(init_tasks, captures_portrait):
+def proxy_gp(init_pygame, init_tasks, captures_portrait):
     if os.environ.get('CAMERA_GPDRIVER') == "dummy":
         from pibooth.camera import gphoto
         gphoto.gp = cameramocks.GpCameraProxyMock([])
@@ -148,9 +156,7 @@ def camera_gp(proxy_gp):
 
 
 @pytest.fixture(scope='session')
-def pygame_loop():
-
-    pygame.init()
+def pygame_loop(init_pygame):
     pygame.display.set_caption("Hit [ESC] to end the test")
     screen = pygame.display.set_mode((400, 400), pygame.RESIZABLE)
     screen.fill((0, 0, 0))

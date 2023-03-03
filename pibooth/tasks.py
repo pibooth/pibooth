@@ -6,7 +6,7 @@
 import threading
 from concurrent import futures
 
-from pibooth import evts
+from pibooth import evts, utils
 
 
 class AsyncTasksPool(object):
@@ -38,7 +38,6 @@ class AsyncTasksPool(object):
         """Remove future from tracking list.
         """
         self.FUTURES.pop(future)
-        future.result()  # Re-raise exception if it has occured during run
 
     def quit(self):
         """Stop all tasks and don't accept new one.
@@ -109,16 +108,14 @@ class AsyncTask(object):
     def wait(self, timeout=None):
         """Wait for task ends or cancelled and return the result.
         """
-        try:
-            return self.future.result(timeout)
-        except futures.TimeoutError:
-            raise
-        except Exception:
-            return None
+        return self.future.result(timeout)
 
     def kill(self):
         """Stop running.
         """
         self._stop_event.set()
         self.future.cancel()
-        self.wait(30)  # Max 30 seconds
+        try:
+            self.wait(30)  # Max 30 seconds
+        except Exception as ex:
+            utils.LOGGER.warning("AsyncTask.kill() failed: %s", ex)

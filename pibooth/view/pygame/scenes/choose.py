@@ -109,7 +109,7 @@ class ChooseScene(BasePygameScene):
         super(ChooseScene, self).update(events)
         self.slider.update(events)
 
-    def draw(self, surface, force):
+    def draw(self, surface, force=False):
         rects = super(ChooseScene, self).draw(surface, force)
         rects += self.slider.draw(surface, force)
         return rects
