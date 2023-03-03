@@ -153,9 +153,12 @@ def pygame_loop():
                     pygame.display.update()
                     return
 
-            event_handler(screen, events)
-            pygame.display.update()
+            pygame.display.update(event_handler(screen, events))
             clock.tick(5)
+
+            if os.env.get('SDL_VIDEODRIVER') == "dummy":
+                # Automatic tests without video device available
+                break
 
     return loop
 
