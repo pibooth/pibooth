@@ -30,7 +30,9 @@ def init(tmpdir):
 
 @pytest.fixture(scope='session')
 def init_tasks():
-    return AsyncTasksPool()
+    pool = AsyncTasksPool()
+    yield pool
+    pool.quit()
 
 
 @pytest.fixture(scope='session')
@@ -82,7 +84,7 @@ def counters(tmpdir):
 
 
 @pytest.fixture(scope='session')
-def proxy_rpi(captures_portrait):
+def proxy_rpi(init_tasks, captures_portrait):
     if os.environ.get('CAMERA_RPIDRIVER') == "dummy":
         return cameramocks.RpiCameraProxyMock(captures_portrait)
     return get_rpi_camera_proxy()
@@ -105,7 +107,7 @@ def camera_rpi_gp(proxy_rpi, proxy_gp):
 
 
 @pytest.fixture(scope='session')
-def proxy_cv():
+def proxy_cv(init_tasks):
     if os.environ.get('CAMERA_CVDRIVER') == "dummy":
         import cv2
         return cv2.VideoCapture("fake/cam_01.jpg")
@@ -129,7 +131,7 @@ def camera_cv_gp(proxy_cv, proxy_gp):
 
 
 @pytest.fixture(scope='session')
-def proxy_gp(captures_portrait):
+def proxy_gp(init_tasks, captures_portrait):
     if os.environ.get('CAMERA_GPDRIVER') == "dummy":
         return cameramocks.GpCameraProxyMock(captures_portrait)
     return get_gp_camera_proxy()
