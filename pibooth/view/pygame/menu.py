@@ -3,6 +3,7 @@
 """Pibooth config menu.
 """
 
+import sys
 import pygame
 import pygame_menu as pgm
 import pibooth
@@ -290,7 +291,7 @@ class PygameMenu(object):
         """Called when the application is exited by menu.
         """
         self.on_close()
-        exit(0)
+        sys.exit(0)
 
     def enable(self):
         """Show the menu.

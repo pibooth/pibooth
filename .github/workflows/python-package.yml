@@ -38,7 +38,7 @@ jobs:
         flake8 pibooth --count --exit-zero --max-complexity=10 --max-line-length=160 --statistics
     - name: Lint with pylint
       run: |
-        pylint $(git ls-files '*.py') || echo "pylint exited with $?"
+        pylint --rcfile=.pylintrc $(git ls-files 'pibooth/*.py' 'docs/*.py') || echo "pylint exited with $?"
     - name: Test with pytest
       env:
         SDL_VIDEODRIVER: dummy

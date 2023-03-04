@@ -12,7 +12,6 @@ except ImportError:
 import tempfile
 import os.path as osp
 
-import pygame
 from PIL import Image
 from pibooth.utils import LOGGER
 from pibooth import evts

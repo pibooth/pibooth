@@ -25,7 +25,7 @@ def get_rpi_camera_proxy(port=None):
         process = subprocess.Popen(['vcgencmd', 'get_camera'],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, _stderr = process.communicate()
-        if stdout and u'detected=1' in stdout.decode('utf-8'):
+        if stdout and 'detected=1' in stdout.decode('utf-8'):
             if port is not None:
                 return picamera.PiCamera(camera_num=port)
             return picamera.PiCamera()

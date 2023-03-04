@@ -41,17 +41,17 @@ class CvCamera(BaseCamera):
     """OpenCV camera management.
     """
 
-    IMAGE_EFFECTS = [u'none',
-                     u'blur',
-                     u'contour',
-                     u'detail',
-                     u'edge_enhance',
-                     u'edge_enhance_more',
-                     u'emboss',
-                     u'find_edges',
-                     u'smooth',
-                     u'smooth_more',
-                     u'sharpen']
+    IMAGE_EFFECTS = ['none',
+                     'blur',
+                     'contour',
+                     'detail',
+                     'edge_enhance',
+                     'edge_enhance_more',
+                     'emboss',
+                     'find_edges',
+                     'smooth',
+                     'smooth_more',
+                     'sharpen']
 
     def __init__(self, camera_proxy):
         super(CvCamera, self).__init__(camera_proxy)

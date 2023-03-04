@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""Module gathering PIL and Pygame images hepers.
+"""
+
+
 import os.path as osp
-from PIL import Image, ImageOps
+from PIL import ImageOps
 import pygame
 from pibooth import language
 from pibooth import fonts
@@ -189,7 +193,7 @@ def text_to_pygame_image(text, size, color, align='center', bg_color=None):
         elif align.endswith('right'):
             loc['right'] = surface.get_rect().right
         else:
-            raise ValueError("Invalid horizontal alignment '{}'".format(align))
+            raise ValueError(f"Invalid horizontal alignment '{align}'")
 
         line_height = text_surface.get_rect().height
         if align.startswith('top'):
@@ -199,7 +203,7 @@ def text_to_pygame_image(text, size, color, align='center', bg_color=None):
         elif align.startswith('bottom'):
             loc['bottom'] = surface.get_rect().bottom - (len(lines) - 1 - i) * line_height
         else:
-            raise ValueError("Invalid vertical alignment '{}'".format(align))
+            raise ValueError(f"Invalid vertical alignment '{align}'")
 
         if bg_color:
             bg_surface = pygame.Surface(text_surface.get_size(), pygame.SRCALPHA, 32)
@@ -261,7 +265,7 @@ def get_best_orientation(captures):
         else:
             orientation = PORTRAIT
     else:
-        raise ValueError("List of max 4 pictures expected, got {}".format(len(captures)))
+        raise ValueError(f"List of max 4 pictures expected, got {len(captures)}")
     return orientation
 
 
@@ -282,7 +286,7 @@ def get_picture_factory(captures, orientation=AUTO, paper_format=(4, 6), force_p
     :return: PictureFactory instance
     :rtype: object
     """
-    assert orientation in (AUTO, PORTRAIT, LANDSCAPE), "Unknown orientation '{}'".format(orientation)
+    assert orientation in (AUTO, PORTRAIT, LANDSCAPE), f"Unknown orientation '{orientation}'"
     if orientation == AUTO:
         orientation = get_best_orientation(captures)
 

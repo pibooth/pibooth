@@ -149,7 +149,7 @@ def main():
             write_log("GPhoto2 version installed: {}".format(info[0]))
             for opt in info[1:]:
                 write_log("  - {}".format(opt))
-        except:
+        except Exception:
             pass
 
     gp_log_callback = gp.check_result(gp.gp_log_add_func(gp.GP_LOG_VERBOSE, gp_logging))

@@ -4,6 +4,7 @@
 """
 
 import os
+import sys
 import pygame
 import pygame_vkeyboard as vkb
 
@@ -109,7 +110,7 @@ class PygameWindow(BaseWindow):
                 self._menu.disable()
         else:
             LOGGER.debug("[ESC] pressed. No menu configured -> exit")
-            exit(0)
+            sys.exit(0)
 
     def update(self, events):
         """Update sprites according to Pygame events.
