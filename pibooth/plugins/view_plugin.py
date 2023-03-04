@@ -124,9 +124,9 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_preview_do(self, win, events):
-        for event in events:
-            if event.type == evts.EVT_PIBOOTH_CAM_PREVIEW:
-                win.scene.set_image(event.result)
+        event = evts.find_event(events, evts.EVT_PIBOOTH_CAM_PREVIEW)
+        if event:
+            win.scene.set_image(event.result)
 
     @pibooth.hookimpl
     def state_capture_enter(self, cfg, app, win):
@@ -135,8 +135,9 @@ class ViewPlugin(object):
         win.scene.set_capture_number(self.count, app.capture_nbr)
 
     @pibooth.hookimpl
-    def state_capture_do(self, events):
-        if evts.find_event(events, evts.EVT_PIBOOTH_CAM_CAPTURE):
+    def state_capture_do(self, win, events):
+        event = evts.find_event(events, evts.EVT_PIBOOTH_CAM_CAPTURE)
+        if event:
             self.capture_finished = True
 
     @pibooth.hookimpl

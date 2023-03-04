@@ -94,8 +94,7 @@ class CameraPlugin(object):
             effect = effects[self.count]
         else:
             # Not possible
-            raise ValueError("Not enough effects defined for {} captures {}".format(
-                app.capture_nbr, effects))
+            raise ValueError("Not enough effects defined for {} captures {}".format(app.capture_nbr, effects))
 
         LOGGER.info("Take a capture")
         app.camera.capture(effect)
