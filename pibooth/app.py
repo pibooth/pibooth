@@ -220,6 +220,37 @@ class PiboothApplication(object):
             raise EnvironmentError("The 'capture_date' attribute is not set yet")
         return "{}_pibooth.jpg".format(self.capture_date)
 
+    def enable_plugin(self, name):
+        """Enable plugin with given name. The "configure" and "startup" hooks will
+        be called if never done before.
+
+        :param name: plugin name
+        :type name: str
+        """
+        plugin = self._pm.get_plugin(name)
+        if not self._pm.is_registered(plugin):
+            self._pm.register(plugin)
+            LOGGER.debug("Plugin '%s' enable", name)
+            # Because no hook is called for plugins disabled at pibooth startup, need to
+            # ensure that mandatory hooks have been called when enabling a plugin
+            if 'pibooth_configure' not in self._pm.get_calls_history(plugin):
+                hook = self._pm.subset_hook_caller_for_plugin('pibooth_configure', plugin)
+                hook(cfg=self._config)
+            if 'pibooth_startup' not in self._pm.get_calls_history(plugin):
+                hook = self._pm.subset_hook_caller_for_plugin('pibooth_startup', plugin)
+                hook(cfg=self._config, app=self)
+
+    def disable_plugin(self, name):
+        """Disable plugin with given name.
+
+        :param name: plugin name
+        :type name: str
+        """
+        plugin = self._pm.get_plugin(name)
+        if self._pm.is_registered(plugin):
+            LOGGER.debug("Plugin '%s' disabled", name)
+            self._pm.unregister(plugin)
+
     def update(self, events):
         """Update application and call plugins according to Pygame events.
         Better to call it in the main thread to avoid plugin thread-safe issues.

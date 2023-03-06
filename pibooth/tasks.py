@@ -25,7 +25,8 @@ class AsyncTasksPool(object):
         self._pool.stop_event = threading.Event()
 
     def start_task(self, task):
-        "Start an asynchronous task and add future on tracking list."
+        """Start an asynchronous task and add future on tracking list.
+        """
         if self._pool.stop_event.is_set():
             raise RuntimeError("AsyncTasksPool is shutting down")
         assert isinstance(task, AsyncTask)

@@ -66,7 +66,13 @@ class PygameWindow(BaseWindow):
         return scenes.get_scene(name)
 
     def _on_keyboard_event(self, text):
-        print(text)
+        """Callback when new letter is typed on keyboard.
+
+        :param text: new value
+        :type text: str
+        """
+        if self._menu and self._menu.is_enabled():
+            self._menu.set_text(text)
 
     def _on_menu_event(self, text):
         print(text)
@@ -108,6 +114,7 @@ class PygameWindow(BaseWindow):
                 self._menu.enable()
             else:
                 self._menu.disable()
+                self._force_redraw = True  # Because pygame-menu does not manage direty rects
         else:
             LOGGER.debug("[ESC] pressed. No menu configured -> exit")
             sys.exit(0)
@@ -149,6 +156,7 @@ class PygameWindow(BaseWindow):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.toggle_menu()
                 evts.post(evts.EVT_PIBOOTH_BTN_SETTINGS, is_shown=self.is_menu_shown)
+                return  # Avoid menu.update() else it we be closed again by K_ESCAPE in the events list
 
             elif evts.is_fingers_event(event, 4):
                 self.toggle_menu()
@@ -171,6 +179,9 @@ class PygameWindow(BaseWindow):
         """Draw all Sprites on surface and return updated Pygame rects.
         """
         rects = self.scene.draw(self.surface, self._force_redraw)
+
+        if self._menu and self._menu.is_enabled():
+            rects += self._menu.draw(self.surface)
 
         if self._keyboard.is_enabled():
             rects += self._keyboard.draw(self.surface, self._force_redraw)

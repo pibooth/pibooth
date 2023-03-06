@@ -202,23 +202,8 @@ class PygameMenu(object):
                                    # Parameters passed to callback:
                                    section='GENERAL',
                                    option='plugins_disabled',
-                                   plugin=plugin)
+                                   plugin_name=self.pm.get_name(plugin))
         return menu
-
-    def on_keyboard_event(self, text):
-        """Called after each option changed.
-        """
-        if self._main_menu.is_enabled():  # Menu may have been closed
-            selected = self._main_menu.get_current().get_selected_widget()
-            if isinstance(selected, pgm.widgets.TextInput):
-                if isinstance(selected, pgm.widgets.ColorInput):
-                    try:
-                        selected.set_value(tuple([int(c) for c in text.split(',')]))
-                    except Exception as ex:
-                        LOGGER.error("Invalid color value '%s' (%s)", text, ex)
-                else:
-                    selected.set_value(text)
-                selected.change()
 
     def on_selector_changed(self, value, **kwargs):
         """Called after each option changed.
@@ -231,7 +216,7 @@ class PygameMenu(object):
         """Called after each text input changed.
         """
         if self._main_menu.is_enabled():  # Menu may have been closed
-            self.cfg.set(kwargs['section'], kwargs['option'], '"{}"'.format(str(value)))
+            self.cfg.set(kwargs['section'], kwargs['option'], f"{str(value)}")
             self._changed = True
 
     def on_color_changed(self, value, **kwargs):
@@ -251,26 +236,14 @@ class PygameMenu(object):
     def on_plugin_toggled(self, activated, **kwargs):
         """Called when a plugin active state is toggled.
         """
-        plugin = kwargs['plugin']
+        plugin_name = kwargs['plugin_name']
         disabled = self.cfg.gettuple(kwargs['section'], kwargs['option'], str)
-        if activated and not self.pm.is_registered(plugin):
-            self.pm.register(plugin)
-            plugin_name = self.pm.get_name(plugin)
+        if activated:
+            self.app.enable_plugin(plugin_name)
             disabled = tuple([name for name in disabled if plugin_name != name])
             self._changed = True
-
-            # Because no hook is called for plugins disabled at pibooth startup, need to
-            # ensure that mandatory hooks have been called when enabling a plugin
-            if 'pibooth_configure' not in self.pm.get_calls_history(plugin):
-                hook = self.pm.subset_hook_caller_for_plugin('pibooth_configure', plugin)
-                hook(cfg=self.cfg)
-            if 'pibooth_startup' not in self.pm.get_calls_history(plugin):
-                hook = self.pm.subset_hook_caller_for_plugin('pibooth_startup', plugin)
-                hook(cfg=self.cfg, app=self.app)
-
-        elif not activated and self.pm.is_registered(plugin):
-            plugin_name = self.pm.get_name(plugin)
-            self.pm.unregister(plugin)
+        elif not activated:
+            self.app.disable_plugin(plugin_name)
             if plugin_name not in disabled:
                 disabled += (plugin_name,)
                 self._changed = True
@@ -313,6 +286,24 @@ class PygameMenu(object):
             return False
         return self._main_menu.is_enabled()
 
+    def set_text(self, text):
+        """Change displayed text if the currently selected widget is a text entry.
+
+        :param text: text to set
+        :type text: str
+        """
+        if self._main_menu:
+            selected = self._main_menu.get_current().get_selected_widget()
+            if isinstance(selected, pgm.widgets.TextInput):
+                if isinstance(selected, pgm.widgets.ColorInput):
+                    try:
+                        selected.set_value(tuple([int(c) for c in text.split(',')]))
+                    except Exception as ex:
+                        LOGGER.error("Invalid color value '%s' (%s)", text, ex)
+                else:
+                    selected.set_value(text)
+                selected.change()
+
     def resize(self, size):
         """Resize menu"""
         if not self._main_menu:
@@ -326,6 +317,7 @@ class PygameMenu(object):
             if self._main_menu.is_enabled():  # Menu may have been closed
                 selected = self._main_menu.get_current().get_selected_widget()
                 if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
+                    return
                     for event in events:
                         if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN)\
                                 and selected.get_scrollarea().collide(selected, event):
@@ -339,4 +331,5 @@ class PygameMenu(object):
     def draw(self, surface):
         if not self._main_menu:
             return []
-        return self._main_menu.draw(surface)
+        self._main_menu.draw(surface)
+        return [self._main_menu.get_rect()]
