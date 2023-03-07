@@ -58,7 +58,8 @@ class PygameWindow(BaseWindow):
     def set_menu(self, app, cfg, pm):
         """Set the menu.
         """
-        self._menu = menu.PygameMenu(app, cfg, pm, self._on_menu_event)
+        size = self.get_rect().size
+        self._menu = menu.PygameMenu((size[0]*0.75, size[1]*0.75), app, cfg, pm, self._on_menu_event)
         self._menu.disable()
 
     def _create_scene(self, name):
@@ -130,14 +131,17 @@ class PygameWindow(BaseWindow):
                 # Manual resizing
                 self.surface = pygame.display.set_mode(event.size, pygame.RESIZABLE)
                 self.resize(event.size)
+                self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
                 if self._menu and self._menu.is_enabled():
-                    self._menu.resize(event.size)
+                    self._menu.resize((event.size[0]*0.75, event.size[1]*0.75))
 
             elif evts.is_fullscreen_event(event):
                 self.toggle_fullscreen()
                 self.resize(self.get_rect().size)
+                self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
                 if self._menu and self._menu.is_enabled():
-                    self._menu.resize(self.get_rect().size)
+                    size = self.get_rect().size
+                    self._menu.resize((size[0]*0.75, size[1]*0.75))
 
             elif evts.is_button_print_event(event):
                 # Convert HW button events to keyboard events for menu
@@ -168,12 +172,14 @@ class PygameWindow(BaseWindow):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 evts.post_button_print_event()
 
-        self.scene.update(events)
-
         if self._keyboard.is_enabled():
+            # Events only acts on the keyboard
             self._keyboard.update(events)
         elif self._menu and self._menu.is_enabled():
+            # Events only acts on the menu
             self._menu.update(events)
+        else:
+            self.scene.update(events)
 
     def draw(self):
         """Draw all Sprites on surface and return updated Pygame rects.

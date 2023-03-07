@@ -272,7 +272,7 @@ def pkill(pattern):
 
 
 def open_text_editor(filename):
-    """Open a text editor to edit the configuration file.
+    """Open a text editor to edit a file.
     """
     editors = ['leafpad', 'mousepad', 'vi', 'emacs']
     for editor in editors:
@@ -295,7 +295,7 @@ def take(n, iterable):
 
 
 def format_columns_words(words, column_count=3):
-    """Print a list of words into columns.
+    """Return a list of words into columns.
     """
     lines = []
     columns, dangling = divmod(len(words), column_count)

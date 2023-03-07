@@ -83,12 +83,12 @@ def _counters(counters):
 
 class PygameMenu(object):
 
-    def __init__(self, application, configuration, plugin_manager, callback=None):
+    def __init__(self, size, application, configuration, plugin_manager, callback=None):
         self.app = application
         self.cfg = configuration
         self.pm = plugin_manager
         self.callback = callback
-        self.size = (600, 400)
+        self.size = size
         self._changed = False
         self._main_menu = None
 
@@ -306,7 +306,7 @@ class PygameMenu(object):
 
     def resize(self, size):
         """Resize menu"""
-        if not self._main_menu:
+        if self._main_menu:
             self._main_menu.resize(size[0], size[1])
 
     def update(self, events):

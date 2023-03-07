@@ -466,30 +466,38 @@ class BasePygameScene(BaseScene):
         self.sprites.set_timing_threshold(200)
 
     def add_sprite(self, sprite, outlines=True, layer=0):
-        """Declare a new sprite to draw.
+        """Declare a new sprite to draw. If layer is not defined (layer=0),
+        layer is automatically assigned depending on the sprite type.
 
-        Sprites are drawn as ordered. Four layers are defined:
+        Sprites are drawn as ordered. Six layers are defined:
 
-            - 0: one background sprite
+            - 0: only ONE background sprite
             - 1: texts sprites
             - 2: assets sprites
-            - 3: one speciale image sprite
+            - 3: only ONE speciale image sprite
             - 4: arrows sprites
             - 5: outlines sprites
 
         :param sprite: sprite to add in the draw mechanism
         :type sprite: object
-        :param outlines: enable outlines
+        :param outlines: enable outlines on sprite
         :type outlines: bool
         :param layer: layer indice
         :type layer: int
         """
+        assert layer != 5, "Layer 5 is reserved for outlines, use outlines=True to enable it"
         if layer == 0 and isinstance(sprite, ArrowSprite):
             layer = 4
         elif layer == 0 and isinstance(sprite, (ImageSprite, DotsSprite)):
             layer = 2
         elif layer == 0 and isinstance(sprite, TextSprite):
             layer = 1
+        elif layer == 0:
+            count = len(self.sprites.get_sprites_from_layer(layer))
+            assert count == 0, f"Only one background sprite can be defined (current={count})"
+        elif layer == 3:
+            count = len(self.sprites.get_sprites_from_layer(layer))
+            assert count == 0, f"Only one main image sprite can be defined (current={count})"
         self.sprites.add(sprite, layer=layer)
         if outlines:
             self.sprites.add(OutlinesSprite(sprite), layer=5)
@@ -506,7 +514,7 @@ class BasePygameScene(BaseScene):
     def set_background(self, color_or_path, size):
         """Set background sprite.
 
-        :param color_or_path: color of path to an imgae
+        :param color_or_path: color of path to an image
         :type color_or_path: tuple or str
         :param size: size tuple (width, height) of the image.
         :type size: tuple
@@ -603,7 +611,7 @@ class BasePygameScene(BaseScene):
                 # Don't consider the mouse wheel (button 4 & 5):
                 for sprite in self.sprites.sprites():
                     if hasattr(sprite, 'set_pressed'):
-                        # Outlines can not be pressed
+                        # Some sprites can not be pressed (ex: Outlines)
                         sprite.set_pressed(0)
 
         self.sprites.update(events)
@@ -621,7 +629,7 @@ class BasePygameScene(BaseScene):
         The `force` parameter shall be used if the surface has been redrawn:
         it reset the eraser and redraw all view elements.
 
-        :param surface: surface the slider will be displayed at
+        :param surface: surface the scene will be displayed at
         :type surface: object
         :param force: force the drawing of the entire surface (time consuming)
         :type force: bool
