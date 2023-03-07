@@ -100,6 +100,8 @@ class PygameMenu(object):
                                    theme=THEME_DARK,
                                    touchscreen=True,
                                    onclose=self.on_close)
+
+        self._main_menu.disable_render()
         self._main_menu.add.vertical_margin(20)
 
         for name in DEFAULT:
@@ -108,6 +110,7 @@ class PygameMenu(object):
                 self._main_menu.add.button(submenu.get_title(), submenu)
         self._main_menu.add.button('Exit', self.on_exit)
         self._main_menu.add.vertical_margin(20)
+        self._main_menu.enable_render()
 
     def _build_submenu(self, section):
         """Build sub-menu"""
@@ -122,6 +125,7 @@ class PygameMenu(object):
                         height=self.size[1],
                         theme=SUBTHEME1_DARK,
                         touchscreen=True)
+        menu.disable_render()
         menu.add.vertical_margin(20)
 
         for name, option in DEFAULT[section].items():
@@ -167,6 +171,7 @@ class PygameMenu(object):
                                 margin=(self.size[0] // 2 - 105, 0))
 
         menu.add.vertical_margin(20)
+        menu.enable_render()
         return menu
 
     def _build_submenu_counters(self, title):
@@ -175,11 +180,13 @@ class PygameMenu(object):
                         height=self.size[1],
                         theme=SUBTHEME2_DARK,
                         touchscreen=True)
+        menu.disable_render()
         labels = []
         for text in _counters(self.app.count):
             labels.append(menu.add.label(text))
         menu.add.vertical_margin(40)
         menu.add.button("Reset all", self.on_counters_reset, labels)
+        menu.enable_render()
         return menu
 
     def _build_submenu_plugins(self, title):
@@ -189,6 +196,7 @@ class PygameMenu(object):
                         theme=SUBTHEME2_DARK,
                         touchscreen=True)
 
+        menu.disable_render()
         plugins = self.pm.list_external_plugins()
         long_name = max([self.pm.get_friendly_name(p) for p in plugins], key=len)
         pattern = '{:.<' + str(max(len(long_name) + 2, 25)) + '}'
@@ -203,6 +211,7 @@ class PygameMenu(object):
                                    section='GENERAL',
                                    option='plugins_disabled',
                                    plugin_name=self.pm.get_name(plugin))
+        menu.enable_render()
         return menu
 
     def on_selector_changed(self, value, **kwargs):
@@ -256,6 +265,7 @@ class PygameMenu(object):
         """Called when the menu is closed.
         """
         self._main_menu.disable()
+        self._main_menu = None  # Temp fix : waiting for pygame-menu resizes submenus
         if self._changed:
             self.cfg.save()
             self._changed = False
@@ -278,6 +288,7 @@ class PygameMenu(object):
         """
         if self._main_menu:
             self._main_menu.disable()
+            self._main_menu = None  # Temp fix : waiting for pygame-menu resizes submenus
 
     def is_enabled(self):
         """Return True if the menu is shown.
@@ -306,6 +317,7 @@ class PygameMenu(object):
 
     def resize(self, size):
         """Resize menu"""
+        self.size = size
         if self._main_menu:
             self._main_menu.resize(size[0], size[1])
 

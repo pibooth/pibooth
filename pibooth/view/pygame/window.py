@@ -106,6 +106,12 @@ class PygameWindow(BaseWindow):
             pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
             self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
 
+        self.resize(self.get_rect().size)
+        self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
+        if self._menu:
+            size = self.get_rect().size
+            self._menu.resize((size[0]*0.75, size[1]*0.75))
+
     def toggle_menu(self):
         """Show/hide settings menu.
         """
@@ -132,16 +138,11 @@ class PygameWindow(BaseWindow):
                 self.surface = pygame.display.set_mode(event.size, pygame.RESIZABLE)
                 self.resize(event.size)
                 self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
-                if self._menu and self._menu.is_enabled():
+                if self._menu:
                     self._menu.resize((event.size[0]*0.75, event.size[1]*0.75))
 
             elif evts.is_fullscreen_event(event):
                 self.toggle_fullscreen()
-                self.resize(self.get_rect().size)
-                self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
-                if self._menu and self._menu.is_enabled():
-                    size = self.get_rect().size
-                    self._menu.resize((size[0]*0.75, size[1]*0.75))
 
             elif evts.is_button_print_event(event):
                 # Convert HW button events to keyboard events for menu

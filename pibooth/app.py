@@ -259,11 +259,11 @@ class PiboothApplication(object):
         :type events: list
         """
         if evts.find_event(events, evts.EVT_PIBOOTH_BTN_SETTINGS):
-            if not self._window.is_menu_shown:  # Settings menu is opened
+            if self._window.is_menu_shown:  # Settings menu is opened
                 self.camera.stop_preview()
                 self.leds.off()
                 self.leds.blink(on_time=0.1, off_time=1)
-            elif self._window.is_menu_shown:  # Settings menu is closed
+            elif not self._window.is_menu_shown:  # Settings menu is closed
                 self.leds.off()
                 self._initialize()
                 self._machine.set_state('wait')
