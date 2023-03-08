@@ -106,10 +106,10 @@ class PygameWindow(BaseWindow):
             pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
             self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
 
-        self.resize(self.get_rect().size)
+        size = self.get_rect().size
+        self.resize(size)
         self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
         if self._menu:
-            size = self.get_rect().size
             self._menu.resize((size[0]*0.75, size[1]*0.75))
 
     def toggle_menu(self):
@@ -160,12 +160,12 @@ class PygameWindow(BaseWindow):
             # Convert GUI events to pibooth events (plugins are based on them)
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.toggle_menu()
-                evts.post(evts.EVT_PIBOOTH_BTN_SETTINGS, is_shown=self.is_menu_shown)
+                evts.post_button_settings_event()
                 return  # Avoid menu.update() else it we be closed again by K_ESCAPE in the events list
 
             elif evts.is_fingers_event(event, 4):
                 self.toggle_menu()
-                evts.post(evts.EVT_PIBOOTH_BTN_SETTINGS, is_shown=self.is_menu_shown)
+                evts.post_button_settings_event()
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
                 evts.post_button_capture_event()

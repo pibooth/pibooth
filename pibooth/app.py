@@ -194,6 +194,7 @@ class PiboothApplication(object):
                 # Capture was held while printer was pressed
                 self.buttons.capture.hold_repeat = False
                 self._multipress_timer.reset()
+                self._window.toggle_menu()
                 evts.post_button_settings_event()
         else:
             # Capture was held but printer not pressed
