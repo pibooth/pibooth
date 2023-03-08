@@ -23,24 +23,7 @@ CAPTURES_DIR = os.path.join(os.path.dirname(__file__), 'captures')
 cameramocks = utils.load_module(os.path.join(MOCKS_DIR, 'camera_drivers.py'))
 
 
-@pytest.fixture
-def init(tmpdir):
-    return language.init(str(tmpdir.join('translations.cfg')))
-
-
-@pytest.fixture(scope='session')
-def init_pygame():
-    pygame.init()
-    yield None
-    pygame.quit()
-
-
-@pytest.fixture(scope='session')
-def init_tasks():
-    pool = AsyncTasksPool()
-    yield pool
-    pool.quit()
-
+# --- Resources ---------------------------------------------------------------
 
 @pytest.fixture(scope='session')
 def captures_portrait():
@@ -85,9 +68,81 @@ def cfg(cfg_path):
     return PiboothConfigParser(cfg_path, None)
 
 
+# --- Pibooth initialization --------------------------------------------------
+
+@pytest.fixture
+def init(tmpdir):
+    return language.init(str(tmpdir.join('translations.cfg')))
+
+
+@pytest.fixture(scope='session')
+def init_pygame():
+    pygame.init()
+    yield None
+    pygame.quit()
+
+
+@pytest.fixture(scope='session')
+def init_tasks():
+    pool = AsyncTasksPool()
+    yield pool
+    pool.quit()
+
+
 @pytest.fixture
 def counters(tmpdir):
     return Counters(str(tmpdir.join('data.pickle')), nbr_printed=0)
+
+
+# --- Window events loop ------------------------------------------------------
+
+
+@pytest.fixture(scope='session')
+def pygame_loop(init_pygame):
+    pygame.display.set_caption("Hit [ESC] to end the test")
+    screen = pygame.display.set_mode((400, 400), pygame.RESIZABLE)
+    screen.fill((0, 0, 0))
+    clock = pygame.time.Clock()
+
+    def loop(event_handler):
+        while True:
+            events = pygame.event.get()
+
+            for event in events:
+                if event.type == pygame.QUIT or\
+                        (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                    screen.fill((0, 0, 0))
+                    pygame.display.update()
+                    return
+
+            pygame.display.update(event_handler(screen, events))
+            clock.tick(5)
+
+            if os.environ.get('SDL_VIDEODRIVER') == "dummy":
+                # Automatic tests without video device available
+                break
+
+    return loop
+
+
+@pytest.fixture(scope='session')
+def scene_builder():
+
+    def create(name):
+        scene = get_scene(name)
+        scene.set_outlines(True)
+        scene.set_background((0, 0, 0), (400, 400))
+        scene.set_text_color((255, 255, 255))
+        scene.set_arrows(scene.ARROW_BOTTOM, 0)
+        scene.set_print_number(2, False)
+        scene.need_resize = True
+        scene.resize((400, 400))
+        return scene
+
+    return create
+
+
+# --- Camera drivers ----------------------------------------------------------
 
 
 @pytest.fixture(scope='session')
@@ -153,48 +208,3 @@ def camera_gp(proxy_gp):
     cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
     yield cam
     cam.quit()
-
-
-@pytest.fixture(scope='session')
-def pygame_loop(init_pygame):
-    pygame.display.set_caption("Hit [ESC] to end the test")
-    screen = pygame.display.set_mode((400, 400), pygame.RESIZABLE)
-    screen.fill((0, 0, 0))
-    clock = pygame.time.Clock()
-
-    def loop(event_handler):
-        while True:
-            events = pygame.event.get()
-
-            for event in events:
-                if event.type == pygame.QUIT or\
-                        (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-                    screen.fill((0, 0, 0))
-                    pygame.display.update()
-                    return
-
-            pygame.display.update(event_handler(screen, events))
-            clock.tick(5)
-
-            if os.environ.get('SDL_VIDEODRIVER') == "dummy":
-                # Automatic tests without video device available
-                break
-
-    return loop
-
-
-@pytest.fixture(scope='session')
-def scene_builder():
-
-    def create(name):
-        scene = get_scene(name)
-        scene.set_outlines(True)
-        scene.set_background((0, 0, 0), (400, 400))
-        scene.set_text_color((255, 255, 255))
-        scene.set_arrows(scene.ARROW_BOTTOM, 0)
-        scene.set_print_number(2, False)
-        scene.need_resize = True
-        scene.resize((400, 400))
-        return scene
-
-    return create
