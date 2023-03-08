@@ -4,10 +4,10 @@ import pygame
 
 
 def test_rpi_preview(camera_rpi):
-    assert not camera_cv.preview_flip
+    assert not camera_rpi.preview_flip
     assert camera_rpi.preview is None
     camera_rpi.preview(pygame.Rect(0, 0, 800, 480))
-    assert camera_cv.preview_flip
+    assert camera_rpi.preview_flip
     assert camera_rpi.preview is not None
     camera_rpi.stop_preview()
     assert camera_rpi.preview is None
