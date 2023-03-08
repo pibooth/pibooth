@@ -96,14 +96,15 @@ class RpiCamera(BaseCamera):
             rect.width, self._cam.MAX_RESOLUTION[0]), min(rect.height, self._cam.MAX_RESOLUTION[1])))
         self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
 
+        self.preview_flip = flip
         if self._cam.hflip:
-            if flip:
+            if self.preview_flip:
                 # Don't flip again, already done at init
-                flip = False
+                reflip = False
             else:
                 # Flip again because flipped once at init
-                flip = True
-        self._cam.start_preview(resolution=(self._rect.width, self._rect.height), hflip=flip,
+                reflip = True
+        self._cam.start_preview(resolution=(self._rect.width, self._rect.height), hflip=reflip,
                                 fullscreen=False, window=tuple(self._rect))
 
     def stop_preview(self):
