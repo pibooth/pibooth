@@ -5,12 +5,11 @@ import pygame
 
 def test_rpi_preview(camera_rpi):
     assert not camera_rpi.preview_flip
-    assert camera_rpi.preview is None
+    assert camera_rpi.preview_iso == 100
+    assert camera_rpi.resolution == (1934, 2464)
     camera_rpi.preview(pygame.Rect(0, 0, 800, 480))
     assert camera_rpi.preview_flip
-    assert camera_rpi.preview is not None
     camera_rpi.stop_preview()
-    assert camera_rpi.preview is None
 
 
 def test_rpi_capture(camera_rpi):
@@ -20,6 +19,8 @@ def test_rpi_capture(camera_rpi):
 
 def test_cv_preview(camera_cv):
     assert not camera_cv.preview_flip
+    assert camera_cv.preview_iso == 100
+    assert camera_cv.resolution == (1934, 2464)
     camera_cv.preview(pygame.Rect(0, 0, 800, 480))
     assert camera_cv.preview_flip
     camera_cv.stop_preview()
@@ -32,6 +33,8 @@ def test_cv_capture(camera_cv):
 
 def test_gp_preview(camera_gp):
     assert not camera_gp.preview_flip
+    assert camera_gp.preview_iso == 100
+    assert camera_gp.resolution == (1934, 2464)
     camera_gp.preview(pygame.Rect(0, 0, 800, 480))
     assert camera_gp.preview_flip
     camera_gp.stop_preview()
