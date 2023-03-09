@@ -2,7 +2,6 @@
 
 
 import os
-import pytest
 import pygame
 from PIL import Image
 from pibooth import language, utils
@@ -13,14 +12,16 @@ from pibooth.view.pygame.scenes import get_scene
 from pibooth.camera import get_rpi_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
 from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
 
+# Modules for tests purpose
+import pytest
+from mocks import camera_drivers
+
 
 ISO = 100
 RESOLUTION = (1934, 2464)
 MOCKS_DIR = os.path.join(os.path.dirname(__file__), 'mocks')
 CAPTURES_DIR = os.path.join(os.path.dirname(__file__), 'captures')
 
-
-cameramocks = utils.load_module(os.path.join(MOCKS_DIR, 'camera_drivers.py'))
 
 
 # --- Resources ---------------------------------------------------------------
@@ -149,7 +150,7 @@ def scene_builder():
 def proxy_rpi(init_pygame, init_tasks, captures_portrait):
     if os.environ.get('CAMERA_RPIDRIVER') == "dummy":
         RpiCamera.IMAGE_EFFECTS = ['none']
-        return cameramocks.RpiCameraProxyMock(captures_portrait)
+        return camera_drivers.RpiCameraProxyMock(captures_portrait)
     return get_rpi_camera_proxy()
 
 
@@ -197,8 +198,8 @@ def camera_cv_gp(proxy_cv, proxy_gp):
 def proxy_gp(init_pygame, init_tasks, captures_portrait):
     if os.environ.get('CAMERA_GPDRIVER') == "dummy":
         from pibooth.camera import gphoto
-        gphoto.gp = cameramocks.GpCameraProxyMock([])
-        return cameramocks.GpCameraProxyMock(captures_portrait)
+        gphoto.gp = camera_drivers.GpCameraProxyMock([])
+        return camera_drivers.GpCameraProxyMock(captures_portrait)
     return get_gp_camera_proxy()
 
 
