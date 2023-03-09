@@ -7,7 +7,7 @@ import sys
 import pygame
 import pygame_menu as pgm
 import pibooth
-from pibooth import fonts
+from pibooth import fonts, evts
 from pibooth.utils import LOGGER
 from pibooth.config.default import DEFAULT
 
@@ -265,10 +265,11 @@ class PygameMenu(object):
         """Called when the menu is closed.
         """
         self._main_menu.disable()
-        self._main_menu = None  # Temp fix : waiting for pygame-menu resizes submenus
         if self._changed:
             self.cfg.save()
             self._changed = False
+        if self.callback:
+            self.callback()
 
     def on_exit(self):
         """Called when the application is exited by menu.
@@ -297,6 +298,37 @@ class PygameMenu(object):
             return False
         return self._main_menu.is_enabled()
 
+    def is_top_level(self):
+        """Return True if current menu is the top level (main) menu.
+        """
+        return self._main_menu.get_current() == self._main_menu
+
+    def back(self):
+        """Simulate a back event to go previous menu.
+        """
+        LOGGER.debug("Generate MENU-NEXT event")
+        evts.post(pygame.KEYDOWN, key=pgm.controls.KEY_BACK, unicode=u'\x1b',
+                  mod=0, scancode=53, window=None, test=True)
+
+    def next(self):
+        """Simulate a next event to change selected widget.
+        """
+        LOGGER.debug("Generate MENU-NEXT event")
+        evts.post(pygame.KEYDOWN, key=pgm.controls.KEY_MOVE_UP,
+                  unicode=u'\uf701', mod=0, scancode=125, window=None, test=True)
+
+    def click(self):
+        """Simulate a click event on the currently selected widget on the menu.
+        If the currently selected widget is a button, ENTER event is created, else
+        LEFT event is created.
+        """
+        if isinstance(self._main_menu.get_current().get_selected_widget(), pgm.widgets.Button):
+            evts.post(pygame.KEYDOWN, key=pgm.controls.KEY_APPLY,
+                      unicode='\r', mod=0, scancode=36, window=None, test=True)
+        else:
+            evts.post(pygame.KEYDOWN, key=pgm.controls.KEY_RIGHT, unicode=u'\uf703',
+                      mod=0, scancode=124, window=None, test=True)
+
     def set_text(self, text):
         """Change displayed text if the currently selected widget is a text entry.
 
@@ -319,14 +351,14 @@ class PygameMenu(object):
         """Resize menu"""
         self.size = size
         if self._main_menu:
-            self._main_menu.resize(size[0], size[1])
+            self._main_menu.resize(size[0], size[1], recursive=True)
 
     def update(self, events):
         """Process the events related to the menu.
         """
         if self._main_menu:
             self._main_menu.update(events)
-            if self._main_menu.is_enabled():  # Menu may have been closed
+            if self._main_menu and self._main_menu.is_enabled():  # Menu may have been closed
                 selected = self._main_menu.get_current().get_selected_widget()
                 if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
                     return
@@ -341,6 +373,11 @@ class PygameMenu(object):
                             return
 
     def draw(self, surface):
+        """Draw menu on surface.
+
+        :param surface: surface menu will be displayed at.
+        :type surface: object
+        """
         if not self._main_menu:
             return []
         self._main_menu.draw(surface)

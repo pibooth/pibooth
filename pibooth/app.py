@@ -117,14 +117,14 @@ class PiboothApplication(object):
 
         self.camera = self._pm.hook.pibooth_setup_camera(cfg=self._config)
 
-        self.buttons = ButtonBoard(capture="BOARD" + config.get('CONTROLS', 'picture_btn_pin'),
+        self.buttons = ButtonBoard(capture="BOARD" + config.get('CONTROLS', 'capture_btn_pin'),
                                    printer="BOARD" + config.get('CONTROLS', 'print_btn_pin'),
                                    hold_time=config.getfloat('CONTROLS', 'debounce_delay'),
                                    pull_up=True)
         self.buttons.capture.when_held = self._on_button_capture_held
         self.buttons.printer.when_held = self._on_button_printer_held
 
-        self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
+        self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'capture_led_pin'),
                              printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
 
         self.printer = Printer(config.get('PRINTER', 'printer_name'),
@@ -194,13 +194,14 @@ class PiboothApplication(object):
                 # Capture was held while printer was pressed
                 self.buttons.capture.hold_repeat = False
                 self._multipress_timer.reset()
-                self._window.toggle_menu()
-                evts.post_button_settings_event()
+                LOGGER.debug("Event triggered: EVT_PIBOOTH_BTN_SETTINGS")
+                evts.post(evts.EVT_PIBOOTH_BTN_SETTINGS, buttons=self.buttons, leds=self.leds)
         else:
             # Capture was held but printer not pressed
             self.buttons.capture.hold_repeat = False
             self._multipress_timer.reset()
-            evts.post_button_capture_event()
+            LOGGER.debug("Event triggered: EVT_PIBOOTH_BTN_CAPTURE")
+            evts.post(evts.EVT_PIBOOTH_BTN_CAPTURE, buttons=self.buttons, leds=self.leds)
 
     def _on_button_printer_held(self):
         """Called when the printer button is pressed.
@@ -211,7 +212,8 @@ class PiboothApplication(object):
             pass
         else:
             # Printer was held but capture not pressed
-            evts.post_button_print_event()
+            LOGGER.debug("Event triggered: EVT_PIBOOTH_BTN_PRINT")
+            evts.post(evts.EVT_PIBOOTH_BTN_PRINT, buttons=self.buttons, leds=self.leds)
 
     @property
     def picture_filename(self):
@@ -219,7 +221,7 @@ class PiboothApplication(object):
         """
         if not self.capture_date:
             raise EnvironmentError("The 'capture_date' attribute is not set yet")
-        return "{}_pibooth.jpg".format(self.capture_date)
+        return f"{self.capture_date}_pibooth.jpg"
 
     def enable_plugin(self, name):
         """Enable plugin with given name. The "configure" and "startup" hooks will
@@ -259,7 +261,7 @@ class PiboothApplication(object):
         :param events: list of events to process.
         :type events: list
         """
-        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_SETTINGS):
+        if evts.find_event(events, evts.EVT_PIBOOTH_SETTINGS):
             if self._window.is_menu_shown:  # Settings menu is opened
                 self.camera.stop_preview()
                 self.leds.off()

@@ -59,7 +59,7 @@ class PygameWindow(BaseWindow):
         """Set the menu.
         """
         size = self.get_rect().size
-        self._menu = menu.PygameMenu((size[0]*0.75, size[1]*0.75), app, cfg, pm, self._on_menu_event)
+        self._menu = menu.PygameMenu((size[0]*0.75, size[1]*0.75), app, cfg, pm, self._on_menu_closed)
         self._menu.disable()
 
     def _create_scene(self, name):
@@ -75,8 +75,12 @@ class PygameWindow(BaseWindow):
         if self._menu and self._menu.is_enabled():
             self._menu.set_text(text)
 
-    def _on_menu_event(self, text):
-        print(text)
+    def _on_menu_closed(self):
+        """Callback when menu is closed by graphical action on menu.
+        """
+        self.is_menu_shown = False
+        self._force_redraw = True  # Because pygame-menu does not manage direty rects
+        evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.
@@ -115,8 +119,8 @@ class PygameWindow(BaseWindow):
     def toggle_menu(self):
         """Show/hide settings menu.
         """
-        super(PygameWindow, self).toggle_menu()
         if self._menu:
+            super(PygameWindow, self).toggle_menu()
             if self.is_menu_shown:
                 self._menu.enable()
             else:
@@ -144,11 +148,6 @@ class PygameWindow(BaseWindow):
             elif evts.is_fullscreen_event(event):
                 self.toggle_fullscreen()
 
-            elif evts.is_button_print_event(event):
-                # Convert HW button events to keyboard events for menu
-                event = evts.create_click_event()
-                LOGGER.debug("Generate MENU-APPLY event for menu")
-
             elif self._keyboard.is_enabled() and \
                     (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3) or event.type == pygame.FINGERDOWN)\
                     and not self._keyboard.get_rect().collidepoint(evts.get_event_pos(self.display_size, event)):
@@ -157,21 +156,31 @@ class PygameWindow(BaseWindow):
             elif self._keyboard.is_enabled() and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self._keyboard.disable()
 
-            # Convert GUI events to pibooth events (plugins are based on them)
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and not self.is_menu_shown:
                 self.toggle_menu()
-                evts.post_button_settings_event()
+                evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
                 return  # Avoid menu.update() else it we be closed again by K_ESCAPE in the events list
 
-            elif evts.is_fingers_event(event, 4):
+            elif evts.is_fingers_event(event, 4) and not self.is_menu_shown:
                 self.toggle_menu()
-                evts.post_button_settings_event()
+                evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
-                evts.post_button_capture_event()
+                LOGGER.debug("Event triggered: KEP C")
+                evts.post(evts.EVT_PIBOOTH_BTN_CAPTURE)  # Use HW event to update sprites
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                evts.post_button_print_event()
+                LOGGER.debug("Event triggered: KEP P")
+                evts.post(evts.EVT_PIBOOTH_BTN_PRINT)  # Use HW event to update sprites
+
+            elif event.type == evts.EVT_PIBOOTH_BTN_SETTINGS and self.is_menu_shown:
+                self._menu.back()
+
+            elif event.type == evts.EVT_PIBOOTH_BTN_CAPTURE and self.is_menu_shown:
+                self._menu.click()
+
+            elif event.type == evts.EVT_PIBOOTH_BTN_PRINT and self.is_menu_shown:
+                self._menu.next()
 
         if self._keyboard.is_enabled():
             # Events only acts on the keyboard

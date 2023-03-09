@@ -58,8 +58,8 @@ class ChooseScene(BasePygameScene):
         self.right_arrow = self.add_sprite(RightArrowSprite())
 
         self.right_arrow.set_skin('arrow_double.png')
-        self.left_arrow.on_pressed = evts.post_button_capture_event
-        self.right_arrow.on_pressed = evts.post_button_print_event
+        self.left_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
+        self.right_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
 
     def resize(self, size):
         # Slider

@@ -15,11 +15,11 @@ class PrintScene(BasePygameScene):
         self.text = self.add_sprite(TextSprite(get_translated_text('print')))
         self.text_print = self.add_sprite(TextSprite(get_translated_text('print_forget')))
 
-        self.text.on_pressed = evts.post_button_capture_event
-        self.left_arrow.on_pressed = evts.post_button_capture_event
-        self.image.on_pressed = evts.post_button_print_event
-        self.text_print.on_pressed = evts.post_button_print_event
-        self.right_arrow.on_pressed = evts.post_button_print_event
+        self.text.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
+        self.left_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
+        self.image.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
+        self.text_print.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
+        self.right_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
 
     def resize(self, size):
         # Previous picture
