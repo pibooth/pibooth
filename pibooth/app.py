@@ -194,14 +194,14 @@ class PiboothApplication(object):
                 # Capture was held while printer was pressed
                 self.buttons.capture.hold_repeat = False
                 self._multipress_timer.reset()
-                LOGGER.debug("Event triggered: EVT_PIBOOTH_BTN_SETTINGS")
-                evts.post(evts.EVT_PIBOOTH_BTN_SETTINGS, buttons=self.buttons, leds=self.leds)
+                LOGGER.debug("Event triggered: EVT_BUTTON_SETTINGS")
+                evts.post(evts.EVT_BUTTON_SETTINGS, buttons=self.buttons, leds=self.leds)
         else:
             # Capture was held but printer not pressed
             self.buttons.capture.hold_repeat = False
             self._multipress_timer.reset()
-            LOGGER.debug("Event triggered: EVT_PIBOOTH_BTN_CAPTURE")
-            evts.post(evts.EVT_PIBOOTH_BTN_CAPTURE, buttons=self.buttons, leds=self.leds)
+            LOGGER.debug("Event triggered: EVT_BUTTON_CAPTURE")
+            evts.post(evts.EVT_BUTTON_CAPTURE, buttons=self.buttons, leds=self.leds)
 
     def _on_button_printer_held(self):
         """Called when the printer button is pressed.
@@ -212,8 +212,8 @@ class PiboothApplication(object):
             pass
         else:
             # Printer was held but capture not pressed
-            LOGGER.debug("Event triggered: EVT_PIBOOTH_BTN_PRINT")
-            evts.post(evts.EVT_PIBOOTH_BTN_PRINT, buttons=self.buttons, leds=self.leds)
+            LOGGER.debug("Event triggered: EVT_BUTTON_PRINT")
+            evts.post(evts.EVT_BUTTON_PRINT, buttons=self.buttons, leds=self.leds)
 
     @property
     def picture_filename(self):

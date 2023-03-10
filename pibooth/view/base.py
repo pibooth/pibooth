@@ -84,6 +84,11 @@ class BaseWindow(object):
 
     """Base class for window.
 
+    It is responsible to emit the following event that are consumed by plugins:
+        - EVT_PIBOOTH_CAPTURE
+        - EVT_PIBOOTH_PRINT
+        - EVT_PIBOOTH_SETTINGS
+
     The following attributes are available for use in plugins:
 
     :attr is_fullscreen: True if the window is display in full screen

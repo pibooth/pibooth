@@ -92,17 +92,18 @@ class NoGuiWindow(BaseWindow):
                 if event.type == pygame.QUIT:
                     return
 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE\
+                        or event.type == evts.EVT_BUTTON_SETTINGS:
                     LOGGER.debug("[ESC] pressed. No menu configured -> exit")
                     return
 
                 if (event.type == pygame.KEYDOWN and event.key == pygame.K_c)\
-                        or event.type == evts.EVT_PIBOOTH_BTN_CAPTURE:
+                        or event.type == evts.EVT_BUTTON_CAPTURE:
                     LOGGER.debug("Event triggered: KEY C")
                     evts.post(evts.EVT_PIBOOTH_CAPTURE)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_p\
-                        or event.type == evts.EVT_PIBOOTH_BTN_PRINT:
+                        or event.type == evts.EVT_BUTTON_PRINT:
                     LOGGER.debug("Event triggered: KEP P")
                     evts.post(evts.EVT_PIBOOTH_PRINT)
 
