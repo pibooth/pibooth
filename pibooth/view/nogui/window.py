@@ -99,12 +99,12 @@ class NoGuiWindow(BaseWindow):
 
                 if (event.type == pygame.KEYDOWN and event.key == pygame.K_c)\
                         or event.type == evts.EVT_BUTTON_CAPTURE:
-                    LOGGER.debug("Event triggered: KEY C")
+                    LOGGER.debug("Event triggered: KEY C -> generate EVT_BUTTON_CAPTURE")
                     evts.post(evts.EVT_PIBOOTH_CAPTURE)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_p\
                         or event.type == evts.EVT_BUTTON_PRINT:
-                    LOGGER.debug("Event triggered: KEP P")
+                    LOGGER.debug("Event triggered: KEY P -> generate EVT_BUTTON_PRINT")
                     evts.post(evts.EVT_PIBOOTH_PRINT)
 
             # 2. Ensure the program will never run at more than <fps> frames per second

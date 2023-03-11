@@ -6,6 +6,7 @@ import pygame
 
 from pibooth import pictures
 from pibooth import evts
+from pibooth.utils import PollingTimer
 from pibooth.view.base import BaseScene
 
 
@@ -32,6 +33,11 @@ class OutlinesSprite(pygame.sprite.DirtySprite):
 
     def __repr__(self):
         return f"{self.__class__.__name__}(rect={tuple(self.rect)}"
+
+    def set_pressed(self, state):
+        """Outline can not be pressed.
+        """
+        del state
 
     def enable(self):
         """Show outlines (only if reference sprite is visible).
@@ -75,6 +81,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
         self.outlines = None  # Dynamically set by outlines sprite class
         self.pressed = 0
         self.on_pressed = None
+        self.toggle_timer = PollingTimer(start=False)
 
     def show(self):
         """Show image.
@@ -134,22 +141,33 @@ class BaseSprite(pygame.sprite.DirtySprite):
         else:
             return pygame.transform.average_color(self.image)
 
-    def set_pressed(self, state):
+    def set_pressed(self, state, toggle_timeout=None):
         """Set the pressed state (1 for pressed 0 for released)
         and redraws it.
 
         :param state: new sprite state.
         :type state: bool.
+        :param toggle_timeout: timeout after which state is toggled.
+        :type toggle_timeout: int.
         """
         if self.pressed != int(state):
             self.pressed = int(state)
+            if toggle_timeout:
+                self.toggle_timer.start(toggle_timeout)
             if self.on_pressed is not None:
                 if self.pressed and self.visible:
                     self.visible = 0
-                else:
+                elif not self.pressed and not self.visible:
                     self.visible = 1
                     # Trigger callback when press is released
                     self.on_pressed()
+
+    def update(self, events):
+        """Update pressed state if a toggle_timeout is defined.
+        """
+        if self.toggle_timer.is_started() and self.toggle_timer.is_timeout():
+            self.toggle_timer.reset()
+            self.set_pressed(not self.pressed)
 
 
 class ImageSprite(BaseSprite):
@@ -263,12 +281,13 @@ class ImageSprite(BaseSprite):
     def update(self, events):
         """Draw image if has changed and visible.
         """
+        super(ImageSprite, self).update(events)
         if self.image is None and self.visible:
             if self.image_orig is None:
                 if self.path:
                     self.image_orig = pictures.load_pygame_image(self.path)
                 else:
-                    raise ValueError("Path to image is missing")
+                    raise ValueError(f"Path to image is missing for '{self.__class__}'")
 
             if isinstance(self.image_orig, (tuple, list)):
                 self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
@@ -332,6 +351,7 @@ class TextSprite(BaseSprite):
     def update(self, events):
         """Draw image if has changed and visible.
         """
+        super(TextSprite, self).update(events)
         if self.image is None and self.visible:
             self.image = pictures.text_to_pygame_image(self.text, self.rect.size, self.color, self.align)
 
@@ -386,6 +406,13 @@ class LeftArrowSprite(ArrowSprite):
         x -= self.offset
         super(LeftArrowSprite, self).set_rect(x, y, width, height)
 
+    def update(self, events):
+        super(LeftArrowSprite, self).update(events)
+        if self.visible:
+            for event in events:
+                if event.type == evts.EVT_BUTTON_CAPTURE:
+                    self.set_pressed(1, 0.2)  # Timeout because not release event for HW buttons
+
 
 class RightArrowSprite(LeftArrowSprite):
 
@@ -401,6 +428,13 @@ class RightArrowSprite(LeftArrowSprite):
         """
         x += self.offset
         ArrowSprite.set_rect(self, x, y, width, height)
+
+    def update(self, events):
+        super(LeftArrowSprite, self).update(events)
+        if self.visible:
+            for event in events:
+                if event.type == evts.EVT_BUTTON_PRINT:
+                    self.set_pressed(1, 0.2)  # Timeout because not release event for HW buttons
 
 
 class DotsSprite(BaseSprite):
@@ -427,6 +461,7 @@ class DotsSprite(BaseSprite):
             self.dirty = 1
 
     def update(self, events):
+        super(DotsSprite, self).update(events)
         if self.image is None and self.visible:
             self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
             border = 20
@@ -600,19 +635,19 @@ class BasePygameScene(BaseScene):
                 sprite = evts.get_top_visible(self.sprites.get_sprites_at(event.pos))
                 if sprite:
                     sprite.set_pressed(1)
+
             elif event.type == pygame.FINGERDOWN:
                 display_size = pygame.display.get_surface().get_size()
                 finger_pos = (event.x * display_size[0], event.y * display_size[1])
                 sprite = evts.get_top_visible(self.sprites.get_sprites_at(finger_pos))
                 if sprite:
                     sprite.set_pressed(1)
+
             elif (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3))\
                     or event.type == pygame.FINGERUP:
                 # Don't consider the mouse wheel (button 4 & 5):
                 for sprite in self.sprites.sprites():
-                    if hasattr(sprite, 'set_pressed'):
-                        # Some sprites can not be pressed (ex: Outlines)
-                        sprite.set_pressed(0)
+                    sprite.set_pressed(0)
 
         self.sprites.update(events)
 

@@ -123,9 +123,11 @@ class PygameWindow(BaseWindow):
             super(PygameWindow, self).toggle_menu()
             if self.is_menu_shown:
                 self._menu.enable()
+                evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
             else:
                 self._menu.disable()
                 self._force_redraw = True  # Because pygame-menu does not manage direty rects
+                evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
 
     def update(self, events):
         """Update sprites according to Pygame events.
@@ -155,30 +157,34 @@ class PygameWindow(BaseWindow):
 
             elif ((event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE) or evts.is_fingers_event(event, 4))\
                     and not self.is_menu_shown:
-                if self._menu:
+                LOGGER.debug("Event triggered: KEY ESCAPE -> generate EVT_BUTTON_SETTINGS")
+                evts.post(evts.EVT_BUTTON_SETTINGS)  # Use HW event to update sprites if necessary
+
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+                LOGGER.debug("Event triggered: KEY C -> generate EVT_BUTTON_CAPTURE")
+                evts.post(evts.EVT_BUTTON_CAPTURE)  # Use HW event to update sprites if necessary
+
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                LOGGER.debug("Event triggered: KEY P -> generate EVT_BUTTON_PRINT")
+                evts.post(evts.EVT_BUTTON_PRINT)  # Use HW event to update sprites if necessary
+
+            elif event.type == evts.EVT_BUTTON_SETTINGS:
+                if self._menu and self.is_menu_shown:
+                    self._menu.back()
+                elif self._menu:
                     self.toggle_menu()
-                    evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
                     return  # Avoid menu.update() else it we be closed again by K_ESCAPE in the events list
                 else:
                     LOGGER.debug("[ESC] pressed. No menu configured -> exit")
                     sys.exit(0)
 
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
-                LOGGER.debug("Event triggered: KEP C")
-                evts.post(evts.EVT_BUTTON_CAPTURE)  # Use HW event to update sprites
+            elif event.type == evts.EVT_BUTTON_CAPTURE:
+                if self.is_menu_shown:
+                    self._menu.click()
 
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                LOGGER.debug("Event triggered: KEP P")
-                evts.post(evts.EVT_BUTTON_PRINT)  # Use HW event to update sprites
-
-            elif event.type == evts.EVT_BUTTON_SETTINGS and self.is_menu_shown:
-                self._menu.back()
-
-            elif event.type == evts.EVT_BUTTON_CAPTURE and self.is_menu_shown:
-                self._menu.click()
-
-            elif event.type == evts.EVT_BUTTON_PRINT and self.is_menu_shown:
-                self._menu.next()
+            elif event.type == evts.EVT_BUTTON_PRINT:
+                if self.is_menu_shown:
+                    self._menu.next()
 
         if self._keyboard.is_enabled():
             # Events only acts on the keyboard

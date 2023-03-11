@@ -104,7 +104,7 @@ class WaitScene(BasePygameScene):
             self.right_arrow.set_rect(x, y, size[0], size[1])
 
     def update(self, events):
-        if evts.find_event(events, evts.EVT_PIBOOTH_PRINT):
+        if self.right_arrow.visible and evts.find_event(events, evts.EVT_PIBOOTH_PRINT):
             self.image.hide()
             self.image_check.show()
             self.printer_ongoing_timer.start()
