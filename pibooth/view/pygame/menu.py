@@ -210,7 +210,7 @@ class PygameMenu(object):
                                    # Parameters passed to callback:
                                    section='GENERAL',
                                    option='plugins_disabled',
-                                   plugin_name=self.pm.get_name(plugin))
+                                   plugin=plugin)
         menu.enable_render()
         return menu
 
@@ -245,14 +245,15 @@ class PygameMenu(object):
     def on_plugin_toggled(self, activated, **kwargs):
         """Called when a plugin active state is toggled.
         """
-        plugin_name = kwargs['plugin_name']
+        plugin = kwargs['plugin']
+        plugin_name = self.pm.get_name(plugin)
         disabled = self.cfg.gettuple(kwargs['section'], kwargs['option'], str)
         if activated:
-            self.app.enable_plugin(plugin_name)
+            self.app.enable_plugin(plugin)
             disabled = tuple([name for name in disabled if plugin_name != name])
             self._changed = True
         elif not activated:
-            self.app.disable_plugin(plugin_name)
+            self.app.disable_plugin(plugin)
             if plugin_name not in disabled:
                 disabled += (plugin_name,)
                 self._changed = True

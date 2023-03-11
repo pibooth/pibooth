@@ -235,6 +235,17 @@ def edit():
     open_text_editor(PARSER.filename)
 
 
+def set_current(name):
+    """Set current language.
+
+    :param name: alpha-2 country name
+    :type name; str
+    """
+    global CURRENT
+    assert name in DEFAULT, f"Unknown '{name}' language (possible choice: {', '.join(get_supported_languages())})"
+    CURRENT = name
+
+
 def get_supported_languages():
     """Return the list of supported language.
     """

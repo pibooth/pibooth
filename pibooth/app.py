@@ -139,7 +139,7 @@ class PiboothApplication(object):
         Only parameters that can be changed at runtime are restored.
         """
         # Handle the language configuration
-        language.CURRENT = self._config.get('GENERAL', 'language')
+        language.set_current(self._config.get('GENERAL', 'language'))
         if self._config.get('WINDOW', 'font').endswith('.ttf') or self._config.get('WINDOW', 'font').endswith('.otf'):
             fonts.CURRENT = fonts.get_filename(self._config.getpath('WINDOW', 'font'))
         else:
@@ -223,17 +223,16 @@ class PiboothApplication(object):
             raise EnvironmentError("The 'capture_date' attribute is not set yet")
         return f"{self.capture_date}_pibooth.jpg"
 
-    def enable_plugin(self, name):
+    def enable_plugin(self, plugin):
         """Enable plugin with given name. The "configure" and "startup" hooks will
         be called if never done before.
 
-        :param name: plugin name
-        :type name: str
+        :param plugin: plugin to disable
+        :type plugin: object
         """
-        plugin = self._pm.get_plugin(name)
         if not self._pm.is_registered(plugin):
             self._pm.register(plugin)
-            LOGGER.debug("Plugin '%s' enable", name)
+            LOGGER.debug("Plugin '%s' enable", self._pm.get_name(plugin))
             # Because no hook is called for plugins disabled at pibooth startup, need to
             # ensure that mandatory hooks have been called when enabling a plugin
             if 'pibooth_configure' not in self._pm.get_calls_history(plugin):
@@ -243,15 +242,14 @@ class PiboothApplication(object):
                 hook = self._pm.subset_hook_caller_for_plugin('pibooth_startup', plugin)
                 hook(cfg=self._config, app=self)
 
-    def disable_plugin(self, name):
+    def disable_plugin(self, plugin):
         """Disable plugin with given name.
 
-        :param name: plugin name
-        :type name: str
+        :param plugin: plugin to disable
+        :type plugin: object
         """
-        plugin = self._pm.get_plugin(name)
         if self._pm.is_registered(plugin):
-            LOGGER.debug("Plugin '%s' disabled", name)
+            LOGGER.debug("Plugin '%s' disabled", self._pm.get_name(plugin))
             self._pm.unregister(plugin)
 
     def update(self, events):
