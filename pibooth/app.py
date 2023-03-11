@@ -139,7 +139,7 @@ class PiboothApplication(object):
         Only parameters that can be changed at runtime are restored.
         """
         # Handle the language configuration
-        language.CURRENT = self._config.get('GENERAL', 'language')
+        language.set_current(self._config.get('GENERAL', 'language'))
         if self._config.get('WINDOW', 'font').endswith('.ttf') or self._config.get('WINDOW', 'font').endswith('.otf'):
             fonts.CURRENT = fonts.get_filename(self._config.getpath('WINDOW', 'font'))
         else:
