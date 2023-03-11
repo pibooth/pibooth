@@ -42,37 +42,37 @@ def main():
     parser = argparse.ArgumentParser(usage="%(prog)s [options]", description=pibooth.__doc__)
 
     parser.add_argument("config_directory", nargs='?', default="~/.config/pibooth",
-                        help=u"path to configuration directory (default: %(default)s)")
+                        help="path to configuration directory (default: %(default)s)")
 
     parser.add_argument('--version', action='version', version=pibooth.__version__,
-                        help=u"show program's version number and exit")
+                        help="show program's version number and exit")
 
     parser.add_argument("--config", action='store_true',
-                        help=u"edit the current configuration and exit")
+                        help="edit the current configuration and exit")
 
     parser.add_argument("--translate", action='store_true',
-                        help=u"edit the GUI translations and exit")
+                        help="edit the GUI translations and exit")
 
     parser.add_argument("--reset", action='store_true',
-                        help=u"restore the default configuration/translations and exit")
+                        help="restore the default configuration/translations and exit")
 
     parser.add_argument("--nolog", action='store_true', default=False,
-                        help=u"don't save console output in a file (avoid filling the /tmp directory)")
+                        help="don't save console output in a file (avoid filling the /tmp directory)")
 
     parser.add_argument("--nogui", dest='gui', action='store_const', const='nogui',
-                        help=u"don't show Graphical User Interface", default='pygame')
+                        help="don't show Graphical User Interface", default='pygame')
 
     parser.add_argument("--noplugin", action='store_true', default=False,
-                        help=u"don't load external plugins")
+                        help="don't load external plugins")
 
     parser.add_argument("--profile", action='store_true',
-                        help=u"run the profiler to do CPU times analysis")
+                        help="run the profiler to do CPU times analysis")
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-v", "--verbose", dest='logging', action='store_const', const=logging.DEBUG,
-                       help=u"report more information about operations", default=logging.INFO)
+                       help="report more information about operations", default=logging.INFO)
     group.add_argument("-q", "--quiet", dest='logging', action='store_const', const=logging.WARNING,
-                       help=u"report only errors and warnings", default=logging.INFO)
+                       help="report only errors and warnings", default=logging.INFO)
 
     options = parser.parse_args()
 

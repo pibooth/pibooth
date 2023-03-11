@@ -85,7 +85,7 @@ class PiboothApplication(object):
 
         title = 'Pibooth v{}'.format(pibooth.__version__)
         self._window = view.get_window(window_type, title, init_size, init_color, init_text_color, init_debug)
-        self._window.set_menu(self, self._config)
+        self._window.set_menu(self, self._config, self._pm)
 
         self._multipress_timer = PollingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
 
@@ -117,14 +117,14 @@ class PiboothApplication(object):
 
         self.camera = self._pm.hook.pibooth_setup_camera(cfg=self._config)
 
-        self.buttons = ButtonBoard(capture="BOARD" + config.get('CONTROLS', 'picture_btn_pin'),
+        self.buttons = ButtonBoard(capture="BOARD" + config.get('CONTROLS', 'capture_btn_pin'),
                                    printer="BOARD" + config.get('CONTROLS', 'print_btn_pin'),
                                    hold_time=config.getfloat('CONTROLS', 'debounce_delay'),
                                    pull_up=True)
         self.buttons.capture.when_held = self._on_button_capture_held
         self.buttons.printer.when_held = self._on_button_printer_held
 
-        self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
+        self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'capture_led_pin'),
                              printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
 
         self.printer = Printer(config.get('PRINTER', 'printer_name'),
@@ -194,12 +194,14 @@ class PiboothApplication(object):
                 # Capture was held while printer was pressed
                 self.buttons.capture.hold_repeat = False
                 self._multipress_timer.reset()
-                evts.post_button_settings_event()
+                LOGGER.debug("Event triggered: EVT_BUTTON_SETTINGS")
+                evts.post(evts.EVT_BUTTON_SETTINGS, buttons=self.buttons, leds=self.leds)
         else:
             # Capture was held but printer not pressed
             self.buttons.capture.hold_repeat = False
             self._multipress_timer.reset()
-            evts.post_button_capture_event()
+            LOGGER.debug("Event triggered: EVT_BUTTON_CAPTURE")
+            evts.post(evts.EVT_BUTTON_CAPTURE, buttons=self.buttons, leds=self.leds)
 
     def _on_button_printer_held(self):
         """Called when the printer button is pressed.
@@ -210,7 +212,8 @@ class PiboothApplication(object):
             pass
         else:
             # Printer was held but capture not pressed
-            evts.post_button_print_event()
+            LOGGER.debug("Event triggered: EVT_BUTTON_PRINT")
+            evts.post(evts.EVT_BUTTON_PRINT, buttons=self.buttons, leds=self.leds)
 
     @property
     def picture_filename(self):
@@ -218,7 +221,38 @@ class PiboothApplication(object):
         """
         if not self.capture_date:
             raise EnvironmentError("The 'capture_date' attribute is not set yet")
-        return "{}_pibooth.jpg".format(self.capture_date)
+        return f"{self.capture_date}_pibooth.jpg"
+
+    def enable_plugin(self, name):
+        """Enable plugin with given name. The "configure" and "startup" hooks will
+        be called if never done before.
+
+        :param name: plugin name
+        :type name: str
+        """
+        plugin = self._pm.get_plugin(name)
+        if not self._pm.is_registered(plugin):
+            self._pm.register(plugin)
+            LOGGER.debug("Plugin '%s' enable", name)
+            # Because no hook is called for plugins disabled at pibooth startup, need to
+            # ensure that mandatory hooks have been called when enabling a plugin
+            if 'pibooth_configure' not in self._pm.get_calls_history(plugin):
+                hook = self._pm.subset_hook_caller_for_plugin('pibooth_configure', plugin)
+                hook(cfg=self._config)
+            if 'pibooth_startup' not in self._pm.get_calls_history(plugin):
+                hook = self._pm.subset_hook_caller_for_plugin('pibooth_startup', plugin)
+                hook(cfg=self._config, app=self)
+
+    def disable_plugin(self, name):
+        """Disable plugin with given name.
+
+        :param name: plugin name
+        :type name: str
+        """
+        plugin = self._pm.get_plugin(name)
+        if self._pm.is_registered(plugin):
+            LOGGER.debug("Plugin '%s' disabled", name)
+            self._pm.unregister(plugin)
 
     def update(self, events):
         """Update application and call plugins according to Pygame events.
@@ -227,12 +261,12 @@ class PiboothApplication(object):
         :param events: list of events to process.
         :type events: list
         """
-        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_SETTINGS):
-            if not self._window.is_menu_shown:  # Settings menu is opened
+        if evts.find_event(events, evts.EVT_PIBOOTH_SETTINGS):
+            if self._window.is_menu_shown:  # Settings menu is opened
                 self.camera.stop_preview()
                 self.leds.off()
                 self.leds.blink(on_time=0.1, off_time=1)
-            elif self._window.is_menu_shown:  # Settings menu is closed
+            elif not self._window.is_menu_shown:  # Settings menu is closed
                 self.leds.off()
                 self._initialize()
                 self._machine.set_state('wait')

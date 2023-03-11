@@ -11,10 +11,11 @@ import os.path as osp
 import logging
 import psutil
 import platform
-from fnmatch import fnmatchcase
 import contextlib
 import errno
 import subprocess
+from fnmatch import fnmatchcase
+from itertools import zip_longest, islice
 try:
     from pip._internal.operations import freeze
 except ImportError:  # pip < 10.0
@@ -219,13 +220,18 @@ def get_pkg_versions():
         if isinstance(val, types.ModuleType):
             found = [pkg for pkg in installed_pkgs if name in pkg]
             if found:
-                used_pkgs.extend(found)
-    return used_pkgs
+                for pkg in found:
+                    if pkg.startswith("-e ") or pkg.startswith("# "):
+                        pkg = pkg.rsplit("/")[-1].rsplit("#egg=")[-1] + "==dev"
+                    used_pkgs.append(pkg)
+    return set(used_pkgs)
 
 
 def get_crash_message():
-    msg = "system='{}', node='{}', release='{}', version='{}', machine='{}', processor='{}'\n".format(*platform.uname())
-    msg += "\n".join(get_pkg_versions()) + "\n"
+    """Format a message to give most information about environment.
+    """
+    msg = "system='{}', node='{}', release='{}', version='{}', machine='{}', processor='{}', ".format(*platform.uname())
+    msg += ", ".join(get_pkg_versions()) + "\n"
     msg += " " + "*" * 83 + "\n"
     msg += " * " + "Oops! It seems that pibooth has crashed".center(80) + "*\n"
     msg += " * " + "You can report an issue on https://github.com/pibooth/pibooth/issues/new".center(80) + "*\n"
@@ -266,7 +272,7 @@ def pkill(pattern):
 
 
 def open_text_editor(filename):
-    """Open a text editor to edit the configuration file.
+    """Open a text editor to edit a file.
     """
     editors = ['leafpad', 'mousepad', 'vi', 'emacs']
     for editor in editors:
@@ -280,6 +286,25 @@ def open_text_editor(filename):
                 raise
     LOGGER.critical("Can't find installed text editor among %s", editors)
     return False
+
+
+def take(n, iterable):
+    """Return first n items of the iterable as a list.
+    """
+    return list(islice(iterable, n))
+
+
+def format_columns_words(words, column_count=3):
+    """Return a list of words into columns.
+    """
+    lines = []
+    columns, dangling = divmod(len(words), column_count)
+    iter_words = iter(words)
+    columns = [take(columns + (dangling > i), iter_words) for i in range(column_count)]
+    paddings = [max(map(len, column)) for column in columns]
+    for row in zip_longest(*columns, fillvalue=''):
+        lines.append('  '.join(word.ljust(pad) for word, pad in zip(row, paddings)))
+    return lines
 
 
 def load_module(path):

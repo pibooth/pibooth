@@ -25,7 +25,7 @@ def get_rpi_camera_proxy(port=None):
         process = subprocess.Popen(['vcgencmd', 'get_camera'],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, _stderr = process.communicate()
-        if stdout and u'detected=1' in stdout.decode('utf-8'):
+        if stdout and 'detected=1' in stdout.decode('utf-8'):
             if port is not None:
                 return picamera.PiCamera(camera_num=port)
             return picamera.PiCamera()
@@ -96,8 +96,9 @@ class RpiCamera(BaseCamera):
             rect.width, self._cam.MAX_RESOLUTION[0]), min(rect.height, self._cam.MAX_RESOLUTION[1])))
         self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
 
+        self.preview_flip = flip
         if self._cam.hflip:
-            if flip:
+            if self.preview_flip:
                 # Don't flip again, already done at init
                 flip = False
             else:

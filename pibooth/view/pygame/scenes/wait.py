@@ -21,15 +21,15 @@ class WaitScene(BasePygameScene):
 
         self.printer_ongoing_timer = PollingTimer(1)
 
-        self.text.on_pressed = evts.post_button_capture_event
-        self.left_arrow.on_pressed = evts.post_button_capture_event
+        self.text.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
+        self.left_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
         self.image.on_pressed = self.on_event
-        self.text_print.on_pressed = evts.post_button_print_event
-        self.right_arrow.on_pressed = evts.post_button_print_event
+        self.text_print.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
+        self.right_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
 
     def on_event(self):
         self.image.hide()  # Do not show image after click, there is a timer before
-        evts.post_button_print_event()
+        evts.post(evts.EVT_PIBOOTH_PRINT)
 
     def resize(self, size):
         # Previous picture
@@ -104,7 +104,7 @@ class WaitScene(BasePygameScene):
             self.right_arrow.set_rect(x, y, size[0], size[1])
 
     def update(self, events):
-        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_PRINT):
+        if self.right_arrow.visible and evts.find_event(events, evts.EVT_PIBOOTH_PRINT):
             self.image.hide()
             self.image_check.show()
             self.printer_ongoing_timer.start()

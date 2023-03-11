@@ -67,7 +67,7 @@ def main():
             'picamera2>=0.3.2 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
             'Pillow>=9.2.0',
             'pygame>=2.1.2',
-            'pygame-menu==4.2.8',
+            'pygame-menu==4.3.9',
             'pygame-vkeyboard>=2.0.8',
             'pygame-imslider>=1.0.1',
             'psutil>=5.9.1',

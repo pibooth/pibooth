@@ -65,12 +65,12 @@ class ViewPlugin(object):
         if evts.find_event(events, evts.EVT_PIBOOTH_PRINTER_UPDATE) and app.printer.is_installed():
             win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())
 
-        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_PRINT):
+        if evts.find_event(events, evts.EVT_PIBOOTH_PRINT):
             win.scene.update_print_action(app.printer.is_ready() and app.count.remaining_duplicates > 0)
 
     @pibooth.hookimpl
     def state_wait_validate(self, cfg, app, events):
-        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_CAPTURE):
+        if evts.find_event(events, evts.EVT_PIBOOTH_CAPTURE):
             if len(app.capture_choices) > 1:
                 return 'choose'
             if cfg.getfloat('WINDOW', 'chosen_delay') > 0:
@@ -90,9 +90,9 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_choose_do(self, app, win, events):
-        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_CAPTURE):
+        if evts.find_event(events, evts.EVT_PIBOOTH_CAPTURE):
             app.capture_nbr = win.scene.get_selection()
-        if evts.find_event(events, evts.EVT_PIBOOTH_BTN_PRINT):
+        if evts.find_event(events, evts.EVT_PIBOOTH_PRINT):
             win.scene.next()
 
     @pibooth.hookimpl
@@ -164,8 +164,8 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_print_validate(self, app, win, events):
-        printed = evts.find_event(events, evts.EVT_PIBOOTH_BTN_PRINT)
-        self.forgotten = evts.find_event(events, evts.EVT_PIBOOTH_BTN_CAPTURE)
+        printed = evts.find_event(events, evts.EVT_PIBOOTH_PRINT)
+        self.forgotten = evts.find_event(events, evts.EVT_PIBOOTH_CAPTURE)
         if self.print_view_timer.is_timeout() or printed or self.forgotten:
             if printed:
                 win.set_print_number(len(app.printer.get_all_tasks()), not app.printer.is_ready())

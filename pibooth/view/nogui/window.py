@@ -92,15 +92,20 @@ class NoGuiWindow(BaseWindow):
                 if event.type == pygame.QUIT:
                     return
 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE\
+                        or event.type == evts.EVT_BUTTON_SETTINGS:
                     LOGGER.debug("[ESC] pressed. No menu configured -> exit")
                     return
 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
-                    evts.post_button_capture_event()
+                if (event.type == pygame.KEYDOWN and event.key == pygame.K_c)\
+                        or event.type == evts.EVT_BUTTON_CAPTURE:
+                    LOGGER.debug("Event triggered: KEY C -> generate EVT_BUTTON_CAPTURE")
+                    evts.post(evts.EVT_PIBOOTH_CAPTURE)
 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                    evts.post_button_print_event()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_p\
+                        or event.type == evts.EVT_BUTTON_PRINT:
+                    LOGGER.debug("Event triggered: KEY P -> generate EVT_BUTTON_PRINT")
+                    evts.post(evts.EVT_PIBOOTH_PRINT)
 
             # 2. Ensure the program will never run at more than <fps> frames per second
             clock.tick(fps)

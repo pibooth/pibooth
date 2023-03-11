@@ -202,11 +202,11 @@ add_default_option("CONTROLS", "debounce_delay", 0.3,
 add_default_option("CONTROLS", "multi_press_delay", 0.5,
                    "How long to press multiple hardware buttons in seconds")
 
-add_default_option("CONTROLS", "picture_btn_pin", 11,
-                   "Physical GPIO IN pin to take a picture")
+add_default_option("CONTROLS", "capture_btn_pin", 11,
+                   "Physical GPIO IN pin to take a capture sequence")
 
-add_default_option("CONTROLS", "picture_led_pin", 7,
-                   "Physical GPIO OUT pin to light a LED when picture button is pressed")
+add_default_option("CONTROLS", "capture_led_pin", 7,
+                   "Physical GPIO OUT pin to light a LED when capture button is pressed")
 
 add_default_option("CONTROLS", "print_btn_pin", 13,
                    "Physical GPIO IN pin to print a picture")

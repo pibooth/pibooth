@@ -4,6 +4,7 @@
 """
 
 import os
+import sys
 import pygame
 import pygame_vkeyboard as vkb
 
@@ -54,11 +55,11 @@ class PygameWindow(BaseWindow):
         self._keyboard.disable()
         self._force_redraw = True
 
-    def set_menu(self, app, cfg):
+    def set_menu(self, app, cfg, pm):
         """Set the menu.
         """
-        return
-        self._menu = menu.PygameMenu(app, cfg, self._on_menu_event)
+        size = self.get_rect().size
+        self._menu = menu.PygameMenu((size[0]*0.75, size[1]*0.75), app, cfg, pm, self._on_menu_closed)
         self._menu.disable()
 
     def _create_scene(self, name):
@@ -66,10 +67,20 @@ class PygameWindow(BaseWindow):
         return scenes.get_scene(name)
 
     def _on_keyboard_event(self, text):
-        print(text)
+        """Callback when new letter is typed on keyboard.
 
-    def _on_menu_event(self, text):
-        print(text)
+        :param text: new value
+        :type text: str
+        """
+        if self._menu and self._menu.is_enabled():
+            self._menu.set_text(text)
+
+    def _on_menu_closed(self):
+        """Callback when menu is closed by graphical action on menu.
+        """
+        self.is_menu_shown = False
+        self._force_redraw = True  # Because pygame-menu does not manage direty rects
+        evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.
@@ -99,18 +110,24 @@ class PygameWindow(BaseWindow):
             pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
             self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
 
+        size = self.get_rect().size
+        self.resize(size)
+        self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
+        if self._menu:
+            self._menu.resize((size[0]*0.75, size[1]*0.75))
+
     def toggle_menu(self):
         """Show/hide settings menu.
         """
-        super(PygameWindow, self).toggle_menu()
         if self._menu:
+            super(PygameWindow, self).toggle_menu()
             if self.is_menu_shown:
                 self._menu.enable()
+                evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
             else:
                 self._menu.disable()
-        else:
-            LOGGER.debug("[ESC] pressed. No menu configured -> exit")
-            exit(0)
+                self._force_redraw = True  # Because pygame-menu does not manage direty rects
+                evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
 
     def update(self, events):
         """Update sprites according to Pygame events.
@@ -123,19 +140,12 @@ class PygameWindow(BaseWindow):
                 # Manual resizing
                 self.surface = pygame.display.set_mode(event.size, pygame.RESIZABLE)
                 self.resize(event.size)
-                if self._menu and self._menu.is_enabled():
-                    self._menu.resize(event.size)
+                self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
+                if self._menu:
+                    self._menu.resize((event.size[0]*0.75, event.size[1]*0.75))
 
             elif evts.is_fullscreen_event(event):
                 self.toggle_fullscreen()
-                self.resize(self.get_rect().size)
-                if self._menu and self._menu.is_enabled():
-                    self._menu.resize(self.get_rect().size)
-
-            elif evts.is_button_print_event(event):
-                # Convert HW button events to keyboard events for menu
-                event = evts.create_click_event()
-                LOGGER.debug("Generate MENU-APPLY event for menu")
 
             elif self._keyboard.is_enabled() and \
                     (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3) or event.type == pygame.FINGERDOWN)\
@@ -145,32 +155,53 @@ class PygameWindow(BaseWindow):
             elif self._keyboard.is_enabled() and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self._keyboard.disable()
 
-            # Convert GUI events to pibooth events (plugins are based on them)
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.toggle_menu()
-                evts.post(evts.EVT_PIBOOTH_BTN_SETTINGS, is_shown=self.is_menu_shown)
-
-            elif evts.is_fingers_event(event, 4):
-                self.toggle_menu()
-                evts.post(evts.EVT_PIBOOTH_BTN_SETTINGS, is_shown=self.is_menu_shown)
+            elif ((event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE) or evts.is_fingers_event(event, 4))\
+                    and not self.is_menu_shown:
+                LOGGER.debug("Event triggered: KEY ESCAPE -> generate EVT_BUTTON_SETTINGS")
+                evts.post(evts.EVT_BUTTON_SETTINGS)  # Use HW event to update sprites if necessary
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
-                evts.post_button_capture_event()
+                LOGGER.debug("Event triggered: KEY C -> generate EVT_BUTTON_CAPTURE")
+                evts.post(evts.EVT_BUTTON_CAPTURE)  # Use HW event to update sprites if necessary
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                evts.post_button_print_event()
+                LOGGER.debug("Event triggered: KEY P -> generate EVT_BUTTON_PRINT")
+                evts.post(evts.EVT_BUTTON_PRINT)  # Use HW event to update sprites if necessary
 
-        self.scene.update(events)
+            elif event.type == evts.EVT_BUTTON_SETTINGS:
+                if self._menu and self.is_menu_shown:
+                    self._menu.back()
+                elif self._menu:
+                    self.toggle_menu()
+                    return  # Avoid menu.update() else it we be closed again by K_ESCAPE in the events list
+                else:
+                    LOGGER.debug("[ESC] pressed. No menu configured -> exit")
+                    sys.exit(0)
+
+            elif event.type == evts.EVT_BUTTON_CAPTURE:
+                if self.is_menu_shown:
+                    self._menu.click()
+
+            elif event.type == evts.EVT_BUTTON_PRINT:
+                if self.is_menu_shown:
+                    self._menu.next()
 
         if self._keyboard.is_enabled():
+            # Events only acts on the keyboard
             self._keyboard.update(events)
         elif self._menu and self._menu.is_enabled():
+            # Events only acts on the menu
             self._menu.update(events)
+        else:
+            self.scene.update(events)
 
     def draw(self):
         """Draw all Sprites on surface and return updated Pygame rects.
         """
         rects = self.scene.draw(self.surface, self._force_redraw)
+
+        if self._menu and self._menu.is_enabled():
+            rects += self._menu.draw(self.surface)
 
         if self._keyboard.is_enabled():
             rects += self._keyboard.draw(self.surface, self._force_redraw)

@@ -84,6 +84,11 @@ class BaseWindow(object):
 
     """Base class for window.
 
+    It is responsible to emit the following event that are consumed by plugins:
+        - EVT_PIBOOTH_CAPTURE
+        - EVT_PIBOOTH_PRINT
+        - EVT_PIBOOTH_SETTINGS
+
     The following attributes are available for use in plugins:
 
     :attr is_fullscreen: True if the window is display in full screen
@@ -143,7 +148,7 @@ class BaseWindow(object):
         self.scene.set_print_number(self.print_number, self.print_failure)
         self.resize(self._size)  # Force graphical element to be recalculated
 
-    def set_menu(self, app, cfg):
+    def set_menu(self, app, cfg, pm):
         """Set the menu.
         """
         pass

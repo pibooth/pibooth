@@ -29,14 +29,14 @@ class StateMachine(object):
         self.win.add_scene(name)
 
     def add_failsafe_state(self, name):
-        """Add a state that will be call in case of exception.
+        """Add a state that will be called in case of exception.
         """
         self.failsafe_state = name
         self.states.add(name)
         self.win.add_scene(name)
 
     def remove_state(self, name):
-        """Remove a state to the internal dictionary.
+        """Remove a state from the internal dictionary.
         """
         self.states.discard(name)
         self.win.remove_scene(name)
