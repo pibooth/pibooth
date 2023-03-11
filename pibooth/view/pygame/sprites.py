@@ -6,7 +6,7 @@ import pygame
 
 from pibooth import pictures
 from pibooth import evts
-from pibooth.utils import PollingTimer
+from pibooth.utils import PollingTimer, LOGGER
 from pibooth.view.base import BaseScene
 
 
@@ -527,12 +527,11 @@ class BasePygameScene(BaseScene):
             layer = 2
         elif layer == 0 and isinstance(sprite, TextSprite):
             layer = 1
-        elif layer == 0:
-            count = len(self.sprites.get_sprites_from_layer(layer))
-            assert count == 0, f"Only one background sprite can be defined (current={count})"
-        elif layer == 3:
-            count = len(self.sprites.get_sprites_from_layer(layer))
-            assert count == 0, f"Only one main image sprite can be defined (current={count})"
+        elif layer == 0 or layer == 3:
+            for oldsprite in self.sprites.get_sprites_from_layer(layer):
+                LOGGER.debug("Remove %s sprite '%s'", "background" if layer == 0 else "main image", oldsprite)
+                self.sprites.remove(oldsprite)
+
         self.sprites.add(sprite, layer=layer)
         if outlines:
             self.sprites.add(OutlinesSprite(sprite), layer=5)
