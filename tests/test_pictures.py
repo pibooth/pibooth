@@ -40,6 +40,7 @@ def test_text_position(pygame_loop):
                                                align=text,
                                                bg_color=(234, 23, 89))
                 screen.blit(surface, (0, 0))
+                return surface.get_rect()
 
     pygame_loop(handler)
 
@@ -58,5 +59,6 @@ def test_text_multilines(pygame_loop):
                                                align=POSITIONS[MULTILINES.index(text)],
                                                bg_color=(234, 23, 89))
                 screen.blit(surface, (0, 0))
+                return surface.get_rect()
 
     pygame_loop(handler)

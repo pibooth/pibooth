@@ -127,10 +127,8 @@ class PiboothApplication(object):
         self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'capture_led_pin'),
                              printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
 
-        self.printer = Printer(config.get('PRINTER', 'printer_name'),
-                               config.getint('PRINTER', 'max_pages'),
-                               config.gettyped('PRINTER', 'printer_options'),
-                               self.count)
+        self.printer = self._pm.hook.pibooth_setup_printer(cfg=self._config)
+        self.printer.count = self.count
         # ---------------------------------------------------------------------
 
     def _initialize(self):
