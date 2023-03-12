@@ -32,6 +32,7 @@ class PrinterPlugin(object):
             printer = Printer(cfg.get('PRINTER', 'printer_name'),
                               cfg.getint('PRINTER', 'max_pages'),
                               cfg.gettyped('PRINTER', 'printer_options'))
+
         outcome.force_result(printer)
 
     @pibooth.hookimpl

@@ -35,16 +35,6 @@ def pibooth_reset(cfg, hard):
     """
 
 
-@hookspec
-def pibooth_startup(cfg, app):
-    """Actions performed at the startup of pibooth or when the plugin is enabled
-    for the first time.
-
-    :param cfg: application configuration
-    :param app: application instance
-    """
-
-
 @hookspec(firstresult=True)
 def pibooth_setup_picture_factory(cfg, opt_index, factory):
     """Hook used to setup the ``PictureFactory`` instance.
@@ -82,6 +72,16 @@ def pibooth_setup_printer(cfg):
     shall be returned by this hook, it will be used indead of the default one.
 
     :param cfg: application configuration
+    """
+
+
+@hookspec
+def pibooth_startup(cfg, app):
+    """Actions performed at the startup of pibooth or when the plugin is enabled
+    for the first time.
+
+    :param cfg: application configuration
+    :param app: application instance
     """
 
 

@@ -48,7 +48,7 @@ class PiPluginManager(pluggy.PluginManager):
 
     def load_all_plugins(self, paths, disabled=None):
         """Register the core plugins, load plugins from setuptools entry points
-        and the load given module/package paths.
+        and the ones from module/package paths.
 
         note:: by default hooks are called in LIFO registered order thus
                plugins register order is important.
@@ -61,15 +61,17 @@ class PiPluginManager(pluggy.PluginManager):
         plugins = []
 
         if disabled != 'all':
-            # Load plugins declared by setuptools entry points
+            # 1. Last called plugins: declared by setuptools entry points
             self.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
 
+            # 2. Then call custom plugins from paths
             for path in paths:
                 plugin = load_module(path)
                 if plugin:
                     LOGGER.debug("Plugin found at '%s'", path)
                     plugins.append(plugin)
 
+        # 3. First called plugins: core plugins
         plugins += [LightsPlugin(self),  # Last called
                     ViewPlugin(self),
                     PrinterPlugin(self),

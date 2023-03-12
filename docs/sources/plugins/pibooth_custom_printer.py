@@ -25,8 +25,6 @@ class CustomPrinter(Printer):
             with tempfile.NamedTemporaryFile(suffix=osp.basename(filename)) as fp:
                 picture = Image.open(filename)
                 factory = get_picture_factory((picture,) * self.pictures_per_page)
-                # Don't call setup factory hook here, as the selected parameters
-                # are the one necessary to render several pictures on same page.
                 factory.set_margin(2)
                 factory.save(fp.name)
                 super(CustomPrinter, self).print_file(fp.name)
