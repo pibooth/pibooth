@@ -113,7 +113,7 @@ class WaitScene(BasePygameScene):
             self.image.show()
             self.image_check.hide()
             self.printer_ongoing_timer.reset()
-        super(WaitScene, self).update(events)
+        super().update(events)
 
     def update_print_action(self, enabled=True):
         if enabled:

@@ -26,7 +26,7 @@ class PygameWindow(BaseWindow):
                  arrow_location=BaseScene.ARROW_BOTTOM,
                  arrow_offset=0,
                  debug=False):
-        super(PygameWindow, self).__init__(size, background, text_color, arrow_location, arrow_offset, debug)
+        super().__init__(size, background, text_color, arrow_location, arrow_offset, debug)
 
         # Prepare the pygame module for use
         if 'SDL_VIDEO_WINDOW_POS' not in os.environ:
@@ -51,7 +51,7 @@ class PygameWindow(BaseWindow):
         self._force_redraw = False
 
     def set_scene(self, name):
-        super(PygameWindow, self).set_scene(name)
+        super().set_scene(name)
         self._keyboard.disable()
         self._force_redraw = True
 
@@ -116,7 +116,7 @@ class PygameWindow(BaseWindow):
         """Show/hide settings menu.
         """
         if self._menu:
-            super(PygameWindow, self).toggle_menu()
+            super().toggle_menu()
             if self.is_menu_shown:
                 self._menu.enable()
                 evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)

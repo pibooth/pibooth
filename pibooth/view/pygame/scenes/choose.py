@@ -11,12 +11,12 @@ from pibooth.view.pygame.sprites import BasePygameScene, LeftArrowSprite, RightA
 class Renderer(ImSliderRenderer):
 
     def __init__(self, scene):
-        super(Renderer, self).__init__(arrow_color=((182, 183, 184), (124, 183, 62)),
-                                       dot_color=((182, 183, 184), (124, 183, 62)),
-                                       slide_color=None,
-                                       selection_color=(124, 183, 62),
-                                       selection_page_color=(180, 220, 130),
-                                       background_color=None)
+        super().__init__(arrow_color=((182, 183, 184), (124, 183, 62)),
+                         dot_color=((182, 183, 184), (124, 183, 62)),
+                         slide_color=None,
+                         selection_color=(124, 183, 62),
+                         selection_page_color=(180, 220, 130),
+                         background_color=None)
         self.scene = scene
 
     @property
@@ -106,11 +106,11 @@ class ChooseScene(BasePygameScene):
             self.right_arrow.set_rect(x, y, size[0], size[1])
 
     def update(self, events):
-        super(ChooseScene, self).update(events)
+        super().update(events)
         self.slider.update(events)
 
     def draw(self, surface, force=False):
-        rects = super(ChooseScene, self).draw(surface, force)
+        rects = super().draw(surface, force)
         rects += self.slider.draw(surface, force)
         return rects
 

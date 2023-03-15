@@ -23,7 +23,7 @@ class CaptureScene(BasePygameScene):
     def update(self, events):
         if self.flash_timer.is_started() and self.flash_timer.is_timeout():
             self.trigger_flash()
-        super(CaptureScene, self).update(events)
+        super().update(events)
 
     def set_capture_number(self, current, total):
         self.count_flash = 0

@@ -77,7 +77,7 @@ class GpCamera(BaseCamera):
                      'sharpen']
 
     def __init__(self, camera_proxy):
-        super(GpCamera, self).__init__(camera_proxy)
+        super().__init__(camera_proxy)
         self._gp_logcb = None
         self._preview_compatible = True
         self._preview_viewfinder = False
@@ -208,7 +208,7 @@ class GpCamera(BaseCamera):
         if self._preview_compatible:
             if self._preview_viewfinder:
                 self.set_config_value('actions', 'viewfinder', 1)
-        super(GpCamera, self).preview(rect, flip)
+        super().preview(rect, flip)
 
     def get_capture_image(self, effect=None):
         """Capture a new picture.

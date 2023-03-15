@@ -15,7 +15,7 @@ __version__ = "1.0.0"
 class CustomPrinter(Printer):
 
     def __init__(self, name='default', max_pages=-1, options=None, pictures_per_page=1):
-        super(CustomPrinter, self).__init__(name, max_pages, options)
+        super().__init__(name, max_pages, options)
         self.pictures_per_page = pictures_per_page
 
     def print_file(self, filename):
@@ -27,9 +27,9 @@ class CustomPrinter(Printer):
                 factory = get_picture_factory((picture,) * self.pictures_per_page)
                 factory.set_margin(2)
                 factory.save(fp.name)
-                super(CustomPrinter, self).print_file(fp.name)
+                super().print_file(fp.name)
         else:
-            super(CustomPrinter, self).print_file(filename)
+            super().print_file(filename)
 
 
 @pibooth.hookimpl

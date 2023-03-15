@@ -23,7 +23,7 @@ def create_plugin_manager():
 class PiPluginManager(pluggy.PluginManager):
 
     def __init__(self, *args, **kwargs):
-        super(PiPluginManager, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._plugin2calls = {}
 
         def before(hook_name, methods, kwargs):
@@ -42,7 +42,7 @@ class PiPluginManager(pluggy.PluginManager):
         """Override to keep all plugins that have already been registered
         at least one time.
         """
-        plugin_name = super(PiPluginManager, self).register(plugin, name)
+        plugin_name = super().register(plugin, name)
         if plugin not in self._plugin2calls:
             self._plugin2calls[plugin] = set()
         return plugin_name
