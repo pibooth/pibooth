@@ -66,13 +66,10 @@ class NoGuiWindow(BaseWindow):
                  arrow_location=BaseScene.ARROW_BOTTOM,
                  arrow_offset=0,
                  debug=False):
-        super(NoGuiWindow, self).__init__(size, background, text_color, arrow_location, arrow_offset, debug)
+        super().__init__(size, background, text_color, arrow_location, arrow_offset, debug)
         LOGGER.info("@@@@@ %s @@@@@ : %s", self.__class__.__name__, title)
 
         pygame.init()  # Necessary to enable pygame event loop
-
-    def _create_scene(self, name):
-        return NoGuiScene(name)
 
     def eventloop(self, app_update):
         """Main GUI events loop (blocking).

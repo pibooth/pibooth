@@ -16,7 +16,7 @@ class GpCameraRetry(camera.GpCamera):
         max_retry = 2
         while retry < max_retry:
             try:
-                return super(GpCameraRetry, self).get_capture_image(effect)
+                return super().get_capture_image(effect)
             except Exception:
                 LOGGER.warning("Gphoto2 fails to capture, trying again...")
             retry += 1
@@ -26,7 +26,7 @@ class GpCameraRetry(camera.GpCamera):
 class HybridRpiCameraRetry(camera.HybridRpiCamera):
 
     def __init__(self, rpi_camera_proxy, gp_camera_proxy):
-        super(HybridRpiCameraRetry, self).__init__(rpi_camera_proxy, gp_camera_proxy)
+        super().__init__(rpi_camera_proxy, gp_camera_proxy)
         self._gp_cam = GpCameraRetry(gp_camera_proxy)
         self._gp_cam._captures = self._captures  # Same dict for both cameras
 

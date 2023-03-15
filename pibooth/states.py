@@ -22,18 +22,20 @@ class StateMachine(object):
 
         self._start_time = time.time()
 
-    def add_state(self, name):
+    def add_state(self, name, scene):
         """Add a state to the internal dictionary.
         """
         self.states.add(name)
-        self.win.add_scene(name)
+        scene.name = name
+        self.win.add_scene(scene)
 
-    def add_failsafe_state(self, name):
+    def add_failsafe_state(self, name, scene):
         """Add a state that will be called in case of exception.
         """
         self.failsafe_state = name
         self.states.add(name)
-        self.win.add_scene(name)
+        scene.name = name
+        self.win.add_scene(scene)
 
     def remove_state(self, name):
         """Remove a state from the internal dictionary.
@@ -52,11 +54,11 @@ class StateMachine(object):
 
         try:
             # Perform the actions of the active state
-            hook = getattr(self.pm.hook, 'state_{}_do'.format(self.active_state))
+            hook = self.pm.get_hookcaller(f'state_{self.active_state}_do', optional=True)
             hook(cfg=self.cfg, app=self.app, win=self.win, events=events)
 
             # Check conditions to activate the next state
-            hook = getattr(self.pm.hook, 'state_{}_validate'.format(self.active_state))
+            hook = self.pm.get_hookcaller(f'state_{self.active_state}_validate', optional=True)
             new_state_name = hook(cfg=self.cfg, app=self.app, win=self.win, events=events)
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
@@ -66,7 +68,9 @@ class StateMachine(object):
             else:
                 raise
 
-        if new_state_name is not None:
+        if new_state_name not in (None, [], ()):
+            if isinstance(new_state_name, (tuple, list)):
+                new_state_name = new_state_name[-1]
             self.set_state(new_state_name)
 
     def set_state(self, state_name):
@@ -75,7 +79,7 @@ class StateMachine(object):
         try:
             # Perform any exit actions of the current state
             if self.active_state is not None:
-                hook = getattr(self.pm.hook, 'state_{}_exit'.format(self.active_state))
+                hook = self.pm.get_hookcaller(f'state_{self.active_state}_exit', optional=True)
                 hook(cfg=self.cfg, app=self.app, win=self.win)
                 BlockConsoleHandler.dedent()
                 LOGGER.debug("took %0.3f seconds", time.time() - self._start_time)
@@ -88,7 +92,7 @@ class StateMachine(object):
                 raise
 
         if state_name not in self.states:
-            raise ValueError('"{}" not in registered states...'.format(state_name))
+            raise ValueError(f'"{state_name}" not in registered states...')
 
         # Switch to the new state and perform its entry actions
         BlockConsoleHandler.indent()
@@ -98,7 +102,7 @@ class StateMachine(object):
 
         try:
             self.win.set_scene(self.active_state)
-            hook = getattr(self.pm.hook, 'state_{}_enter'.format(self.active_state))
+            hook = self.pm.get_hookcaller(f'state_{self.active_state}_enter', optional=True)
             hook(cfg=self.cfg, app=self.app, win=self.win)
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:

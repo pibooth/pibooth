@@ -24,15 +24,17 @@ implements a subset of those functions.
 
 There are 2 families of hooks implemented in `pibooth`:
 
- - Pibooth state-independent hooks
- - State dependant hooks (see below)
+ - **Pibooth state-independent hooks**: used to change de default components likes camera, printer, ...
+   Note that plugins defining those hooks may not be dinamically enabled/disabled.
+ - **State dependant hooks** (see below): used to change state behavior.
 
 Influencing states
 ^^^^^^^^^^^^^^^^^^
 
-The ``pibooth`` application is built on the principle of states. Each state
-is defined by a specific ``scene`` (with same name as state one) and possible actions available
-to the user.
+The ``pibooth`` application is built on the principle of states. Each state is defined by a specific
+``scene`` (with same name as state one) and possible ``hooks`` to handle the user actions.
+
+A ``scene`` represent the visual interface displayed to the user while the state is active.
 
 The following states are defined:
 

@@ -13,6 +13,7 @@ from pibooth.config.default import DEFAULT
 
 
 pgm.controls.KEY_BACK = pygame.K_ESCAPE
+EVT_MENU_TEXT_EDIT = pygame.USEREVENT + 401
 
 THEME_WHITE = pgm.themes.Theme(
     background_color=(255, 255, 255),
@@ -362,15 +363,13 @@ class PygameMenu(object):
             if self._main_menu and self._main_menu.is_enabled():  # Menu may have been closed
                 selected = self._main_menu.get_current().get_selected_widget()
                 if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
-                    return
                     for event in events:
                         if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN)\
                                 and selected.get_scrollarea().collide(selected, event):
-                            self._keyboard.enable()
                             if isinstance(selected, pgm.widgets.ColorInput):
-                                self._keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
+                                evts.post(EVT_MENU_TEXT_EDIT, text=",".join([str(c) for c in selected.get_value()]))
                             else:
-                                self._keyboard.set_text(selected.get_value())
+                                evts.post(EVT_MENU_TEXT_EDIT, text=selected.get_value())
                             return
 
     def draw(self, surface):

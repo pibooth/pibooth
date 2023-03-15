@@ -20,9 +20,6 @@ class BaseScene(object):
     ARROW_HIDDEN = 'hidden'
     ARROW_TOUCH = 'touchscreen'
 
-    def __init__(self, name):
-        self.name = name
-
     def resize(self, size):
         """Recalculate sizes of elements according to the new given size.
 
@@ -106,6 +103,7 @@ class BaseWindow(object):
                  debug=False):
         self._size = size  # Size of the window when not fullscreen
 
+        self.type = None
         self.debug = debug
         self.text_color = text_color
         self.bg_color_or_path = background
@@ -120,14 +118,15 @@ class BaseWindow(object):
         self.scenes = {}
         self.scene = None
 
-    def _create_scene(self, name):
-        """Create scene instance."""
-        raise NotImplementedError
-
-    def add_scene(self, name):
+    def add_scene(self, scene):
         """Add a scene to the internal dictionary.
+
+        :param scene: scene to add
+        :type scene: sub-class instance of BaseScene
         """
-        self.scenes[name] = self._create_scene(name)
+        assert isinstance(scene, BaseScene), "Scene shall inherite from BaseScene"
+        assert isinstance(scene.name, str) and len(scene.name) > 0, "Scene name shall be defined"
+        self.scenes[scene.name] = scene
 
     def remove_scene(self, name):
         """Remove a scene from the internal dictionary.

@@ -41,7 +41,7 @@ class Counters(object):
             self.data[name] = value
             self.save()
         else:
-            super(Counters, self).__setattr__(name, value)
+            super().__setattr__(name, value)
 
     def names(self):
         """Return the list of counters.

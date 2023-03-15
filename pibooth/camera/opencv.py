@@ -54,7 +54,7 @@ class CvCamera(BaseCamera):
                      'sharpen']
 
     def __init__(self, camera_proxy):
-        super(CvCamera, self).__init__(camera_proxy)
+        super().__init__(camera_proxy)
         self._overlay_alpha = 255
         self._preview_resolution = None
 

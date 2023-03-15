@@ -11,7 +11,7 @@ import pygame_vkeyboard as vkb
 from pibooth import evts
 from pibooth.utils import LOGGER
 from pibooth.view.base import BaseWindow, BaseScene
-from pibooth.view.pygame import scenes, menu
+from pibooth.view.pygame import menu
 
 
 class PygameWindow(BaseWindow):
@@ -26,7 +26,7 @@ class PygameWindow(BaseWindow):
                  arrow_location=BaseScene.ARROW_BOTTOM,
                  arrow_offset=0,
                  debug=False):
-        super(PygameWindow, self).__init__(size, background, text_color, arrow_location, arrow_offset, debug)
+        super().__init__(size, background, text_color, arrow_location, arrow_offset, debug)
 
         # Prepare the pygame module for use
         if 'SDL_VIDEO_WINDOW_POS' not in os.environ:
@@ -51,7 +51,7 @@ class PygameWindow(BaseWindow):
         self._force_redraw = False
 
     def set_scene(self, name):
-        super(PygameWindow, self).set_scene(name)
+        super().set_scene(name)
         self._keyboard.disable()
         self._force_redraw = True
 
@@ -61,10 +61,6 @@ class PygameWindow(BaseWindow):
         size = self.get_rect().size
         self._menu = menu.PygameMenu((size[0]*0.75, size[1]*0.75), app, cfg, pm, self._on_menu_closed)
         self._menu.disable()
-
-    def _create_scene(self, name):
-        """Create scene instance."""
-        return scenes.get_scene(name)
 
     def _on_keyboard_event(self, text):
         """Callback when new letter is typed on keyboard.
@@ -120,7 +116,7 @@ class PygameWindow(BaseWindow):
         """Show/hide settings menu.
         """
         if self._menu:
-            super(PygameWindow, self).toggle_menu()
+            super().toggle_menu()
             if self.is_menu_shown:
                 self._menu.enable()
                 evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
@@ -146,6 +142,10 @@ class PygameWindow(BaseWindow):
 
             elif evts.is_fullscreen_event(event):
                 self.toggle_fullscreen()
+
+            elif event.type == menu.EVT_MENU_TEXT_EDIT:
+                self._keyboard.enable()
+                self._keyboard.set_text(event.text)
 
             elif self._keyboard.is_enabled() and \
                     (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3) or event.type == pygame.FINGERDOWN)\

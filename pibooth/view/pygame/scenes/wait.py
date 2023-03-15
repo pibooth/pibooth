@@ -10,8 +10,8 @@ from pibooth.view.pygame.sprites import (BasePygameScene, LeftArrowSprite, Right
 
 class WaitScene(BasePygameScene):
 
-    def __init__(self, name):
-        super(WaitScene, self).__init__(name)
+    def __init__(self):
+        super().__init__()
         self.left_arrow = self.add_sprite(LeftArrowSprite())
         self.right_arrow = self.add_sprite(RightArrowSprite())
         self.text = self.add_sprite(TextSprite(get_translated_text('intro')))
@@ -113,7 +113,7 @@ class WaitScene(BasePygameScene):
             self.image.show()
             self.image_check.hide()
             self.printer_ongoing_timer.reset()
-        super(WaitScene, self).update(events)
+        super().update(events)
 
     def update_print_action(self, enabled=True):
         if enabled:

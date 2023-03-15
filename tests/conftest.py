@@ -8,7 +8,7 @@ from pibooth import language, utils
 from pibooth.tasks import AsyncTasksPool
 from pibooth.counters import Counters
 from pibooth.config.parser import PiboothConfigParser
-from pibooth.view.pygame.scenes import get_scene
+from pibooth.view import get_scene
 from pibooth.camera import get_rpi_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
 from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
 
@@ -21,7 +21,6 @@ ISO = 100
 RESOLUTION = (1934, 2464)
 MOCKS_DIR = os.path.join(os.path.dirname(__file__), 'mocks')
 CAPTURES_DIR = os.path.join(os.path.dirname(__file__), 'captures')
-
 
 
 # --- Resources ---------------------------------------------------------------
@@ -130,7 +129,7 @@ def pygame_loop(init_pygame):
 def scene_builder():
 
     def create(name):
-        scene = get_scene(name)
+        scene = get_scene('pygame', name)
         scene.set_outlines(True)
         scene.set_background((0, 0, 0), (400, 400))
         scene.set_text_color((255, 255, 255))

@@ -3,19 +3,15 @@
 """Pibooth printer handling.
 """
 
+import os.path as osp
 try:
     import cups
     from cups_notify import Subscriber, event
 except ImportError:
     cups = None  # CUPS is optional
 
-import tempfile
-import os.path as osp
-
-from PIL import Image
 from pibooth.utils import LOGGER
 from pibooth import evts
-from pibooth.pictures import get_picture_factory
 
 
 PAPER_FORMATS = {
@@ -29,6 +25,9 @@ PAPER_FORMATS = {
 
 
 class Printer(object):
+
+    """Printer driver. 
+    """
 
     def __init__(self, name='default', max_pages=-1, options=None, counters=None):
         self._conn = cups.Connection() if cups else None
@@ -83,7 +82,7 @@ class Printer(object):
             return True
         return self.count.printed < self.max_pages
 
-    def print_file(self, filename, copies=1):
+    def print_file(self, filename):
         """Send a file to the CUPS server to the default printer.
         """
         if not self.name:
@@ -97,17 +96,7 @@ class Printer(object):
                                                       event.CUPS_EVT_PRINTER_STATE_CHANGED,
                                                       event.CUPS_EVT_PRINTER_STOPPED])
 
-        if copies > 1:
-            with tempfile.NamedTemporaryFile(suffix=osp.basename(filename)) as fp:
-                picture = Image.open(filename)
-                factory = get_picture_factory((picture,) * copies)
-                # Don't call setup factory hook here, as the selected parameters
-                # are the one necessary to render several pictures on same page.
-                factory.set_margin(2)
-                factory.save(fp.name)
-                self._conn.printFile(self.name, fp.name, osp.basename(filename), self.options)
-        else:
-            self._conn.printFile(self.name, filename, osp.basename(filename), self.options)
+        self._conn.printFile(self.name, filename, osp.basename(filename), self.options)
         LOGGER.debug("File '%s' sent to the printer with options %s", filename, self.options)
 
     def cancel_all_tasks(self):

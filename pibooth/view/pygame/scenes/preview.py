@@ -5,8 +5,8 @@ from pibooth.view.pygame.sprites import BasePygameScene, ImageSprite, DotsSprite
 
 class PreviewScene(BasePygameScene):
 
-    def __init__(self, name):
-        super(PreviewScene, self).__init__(name)
+    def __init__(self):
+        super().__init__()
         self.left_image = self.add_sprite(ImageSprite('capture_left.png'))
         self.right_image = self.add_sprite(ImageSprite('capture_right.png'))
         self.dots = self.add_sprite(DotsSprite(4))

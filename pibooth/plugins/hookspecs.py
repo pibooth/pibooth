@@ -35,13 +35,17 @@ def pibooth_reset(cfg, hard):
     """
 
 
-@hookspec
-def pibooth_startup(cfg, app):
-    """Actions performed at the startup of pibooth or when the plugin is enabled
-    for the first time.
+@hookspec(firstresult=True)
+def pibooth_setup_states(cfg, win, machine):
+    """Hook used to setup the states of the ``pibooth`` state-machine.
+
+    A state is defined using ``machine.add_state(name, scene)`` where:
+     - name is the name of the state (shall be unique among all states)
+     - scene to display during state is active
 
     :param cfg: application configuration
-    :param app: application instance
+    :param win: graphical window instance
+    :param machine: state-machine
     """
 
 
@@ -71,6 +75,27 @@ def pibooth_setup_camera(cfg):
     shall be returned by this hook, it will be used indead of the default one.
 
     :param cfg: application configuration
+    """
+
+
+@hookspec(firstresult=True)
+def pibooth_setup_printer(cfg):
+    """Hook used to setup the ``printer`` interface.
+
+    A new printer instance (inheriting from :py:class:`pibooth.printer.Printer`)
+    shall be returned by this hook, it will be used indead of the default one.
+
+    :param cfg: application configuration
+    """
+
+
+@hookspec
+def pibooth_startup(cfg, app):
+    """Actions performed at the startup of pibooth or when the plugin is enabled
+    for the first time.
+
+    :param cfg: application configuration
+    :param app: application instance
     """
 
 

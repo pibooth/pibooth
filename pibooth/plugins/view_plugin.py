@@ -2,6 +2,7 @@
 
 import pibooth
 from pibooth import evts
+from pibooth.view import get_scene
 from pibooth.utils import LOGGER, get_crash_message, PollingTimer
 
 
@@ -29,6 +30,11 @@ class ViewPlugin(object):
         self.print_view_timer = PollingTimer(0)
         # Seconds to display the finished view
         self.finish_timer = PollingTimer(1)
+
+    @pibooth.hookimpl
+    def pibooth_setup_states(self, win, machine):
+        for name in ('wait', 'choose', 'chosen', 'preview', 'capture', 'processing', 'print', 'finish'):
+            machine.add_state(name, get_scene(win.type, name))
 
     @pibooth.hookimpl
     def state_failsafe_enter(self):

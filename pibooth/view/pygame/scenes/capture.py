@@ -6,8 +6,8 @@ from pibooth.view.pygame.sprites import BasePygameScene
 
 class CaptureScene(BasePygameScene):
 
-    def __init__(self, name):
-        super(CaptureScene, self).__init__(name)
+    def __init__(self):
+        super().__init__()
         self.count_flash = 0
         self.is_flash_on = False
         self.saved_skin = None
@@ -23,7 +23,7 @@ class CaptureScene(BasePygameScene):
     def update(self, events):
         if self.flash_timer.is_started() and self.flash_timer.is_timeout():
             self.trigger_flash()
-        super(CaptureScene, self).update(events)
+        super().update(events)
 
     def set_capture_number(self, current, total):
         self.count_flash = 0

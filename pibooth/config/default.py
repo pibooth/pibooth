@@ -190,10 +190,6 @@ add_default_option("PRINTER", "max_duplicates", 3,
                    "Maximum number of duplicate pages sent to the printer (avoid paper waste)",
                    "Maximum of printed duplicates", [str(i) for i in range(0, 10)])
 
-add_default_option("PRINTER", "pictures_per_page", 1,
-                   "Print 1, 2, 3 or 4 picture copies per page",
-                   "Number of copies per page", [str(i) for i in range(1, 5)])
-
 # --- CONTROLS -----------------------------------------------------------------
 
 add_default_option("CONTROLS", "debounce_delay", 0.3,

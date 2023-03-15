@@ -8,8 +8,8 @@ from pibooth.view.pygame.sprites import BasePygameScene, LeftArrowSprite, RightA
 
 class PrintScene(BasePygameScene):
 
-    def __init__(self, name):
-        super(PrintScene, self).__init__(name)
+    def __init__(self):
+        super().__init__()
         self.left_arrow = self.add_sprite(LeftArrowSprite())
         self.right_arrow = self.add_sprite(RightArrowSprite())
         self.text = self.add_sprite(TextSprite(get_translated_text('print')))
