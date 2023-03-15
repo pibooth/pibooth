@@ -6,8 +6,8 @@ from pibooth.view.pygame.sprites import BasePygameScene, TextSprite
 
 class ProcessingScene(BasePygameScene):
 
-    def __init__(self, name):
-        super(ProcessingScene, self).__init__(name)
+    def __init__(self):
+        super().__init__()
         self.set_image('processing.png')
         self.text = self.add_sprite(TextSprite(get_translated_text('processing')))
 

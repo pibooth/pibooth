@@ -6,8 +6,8 @@ from pibooth.view.pygame.sprites import BasePygameScene, ImageSprite, TextSprite
 
 class FinishScene(BasePygameScene):
 
-    def __init__(self, name):
-        super(FinishScene, self).__init__(name)
+    def __init__(self):
+        super().__init__()
         self.left_image = self.add_sprite(ImageSprite('finish_left.png'))
         self.right_image = self.add_sprite(ImageSprite('finish_right.png'))
         self.text = self.add_sprite(TextSprite(get_translated_text('finished')))

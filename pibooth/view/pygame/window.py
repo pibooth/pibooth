@@ -11,7 +11,7 @@ import pygame_vkeyboard as vkb
 from pibooth import evts
 from pibooth.utils import LOGGER
 from pibooth.view.base import BaseWindow, BaseScene
-from pibooth.view.pygame import scenes, menu
+from pibooth.view.pygame import menu
 
 
 class PygameWindow(BaseWindow):
@@ -61,10 +61,6 @@ class PygameWindow(BaseWindow):
         size = self.get_rect().size
         self._menu = menu.PygameMenu((size[0]*0.75, size[1]*0.75), app, cfg, pm, self._on_menu_closed)
         self._menu.disable()
-
-    def _create_scene(self, name):
-        """Create scene instance."""
-        return scenes.get_scene(name)
 
     def _on_keyboard_event(self, text):
         """Callback when new letter is typed on keyboard.
@@ -146,6 +142,10 @@ class PygameWindow(BaseWindow):
 
             elif evts.is_fullscreen_event(event):
                 self.toggle_fullscreen()
+
+            elif event.type == menu.EVT_MENU_TEXT_EDIT:
+                self._keyboard.enable()
+                self._keyboard.set_text(event.text)
 
             elif self._keyboard.is_enabled() and \
                     (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3) or event.type == pygame.FINGERDOWN)\

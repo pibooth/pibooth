@@ -486,8 +486,7 @@ class BasePygameScene(BaseScene):
 
     BACKGROUND = None
 
-    def __init__(self, name):
-        super(BasePygameScene, self).__init__(name)
+    def __init__(self):
         self.sprites = pygame.sprite.LayeredDirty()
         self.image = ImageSprite()
         self.image.visible = 0

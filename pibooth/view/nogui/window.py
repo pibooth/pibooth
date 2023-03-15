@@ -71,9 +71,6 @@ class NoGuiWindow(BaseWindow):
 
         pygame.init()  # Necessary to enable pygame event loop
 
-    def _create_scene(self, name):
-        return NoGuiScene(name)
-
     def eventloop(self, app_update):
         """Main GUI events loop (blocking).
         """

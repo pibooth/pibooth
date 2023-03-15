@@ -6,8 +6,8 @@ from pibooth.view.pygame.sprites import BasePygameScene
 
 class CaptureScene(BasePygameScene):
 
-    def __init__(self, name):
-        super(CaptureScene, self).__init__(name)
+    def __init__(self):
+        super().__init__()
         self.count_flash = 0
         self.is_flash_on = False
         self.saved_skin = None

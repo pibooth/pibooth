@@ -57,3 +57,12 @@ Setup a custom picture factory
 
 .. literalinclude:: pibooth_custom_factory.py
     :language: python
+
+Setup a custom custom state
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:download:`pibooth_custom_state.py<pibooth_custom_state.py>`
+
+.. literalinclude:: pibooth_custom_state.py
+    :language: python
+

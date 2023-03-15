@@ -49,8 +49,8 @@ class Renderer(ImSliderRenderer):
 
 class ChooseScene(BasePygameScene):
 
-    def __init__(self, name):
-        super(ChooseScene, self).__init__(name)
+    def __init__(self):
+        super().__init__()
         self.choices = ()
         self.slider = ImSlider((200, 100), focus=False, renderer=Renderer(self), stype=STYPE_LOOP)
         self.text = self.add_sprite(TextSprite(get_translated_text('choose')))
