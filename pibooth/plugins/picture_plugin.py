@@ -29,7 +29,7 @@ def build_and_save(factory, savedirs, date, filename):
     return factory, picture_path
 
 
-class PicturePlugin(object):
+class PicturePlugin:
 
     """Plugin to build the final picture.
     """

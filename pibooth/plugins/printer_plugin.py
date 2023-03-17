@@ -6,7 +6,7 @@ from pibooth.utils import LOGGER
 from pibooth.printer import Printer
 
 
-class PrinterPlugin(object):
+class PrinterPlugin:
 
     """Plugin to manage the printer.
     """

@@ -82,7 +82,7 @@ def _counters(counters):
     return [pattern.format(name.replace("_", " ").capitalize(), counters[name]) for name in counters]
 
 
-class PygameMenu(object):
+class PygameMenu:
 
     def __init__(self, size, application, configuration, plugin_manager, callback=None):
         self.app = application
@@ -364,8 +364,8 @@ class PygameMenu(object):
                 selected = self._main_menu.get_current().get_selected_widget()
                 if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
                     for event in events:
-                        if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN)\
-                                and selected.get_scrollarea().collide(selected, event):
+                        if event.type in (pygame.MOUSEBUTTONDOWN, pygame.FINGERDOWN) and\
+                                selected.get_scrollarea().collide(selected, event):
                             if isinstance(selected, pgm.widgets.ColorInput):
                                 evts.post(EVT_MENU_TEXT_EDIT, text=",".join([str(c) for c in selected.get_value()]))
                             else:

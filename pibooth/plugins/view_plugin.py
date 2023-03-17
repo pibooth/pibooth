@@ -6,7 +6,7 @@ from pibooth.view import get_scene
 from pibooth.utils import LOGGER, get_crash_message, PollingTimer
 
 
-class ViewPlugin(object):
+class ViewPlugin:
 
     """Plugin to manage the pibooth window dans transitions.
     """

@@ -8,7 +8,7 @@ from pibooth.tasks import AsyncTask
 from pibooth.pictures import sizing
 
 
-class BaseCamera(object):
+class BaseCamera:
     """Base class for camera.
 
     It is responsible to emit the following event that are consumed by plugins:

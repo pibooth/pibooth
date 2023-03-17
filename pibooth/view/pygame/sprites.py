@@ -138,8 +138,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
         """
         if self.color:
             return tuple(min(int(c * abs(factor)), 255) for c in self.color)
-        else:
-            return pygame.transform.average_color(self.image)
+        return pygame.transform.average_color(self.image)
 
     def set_pressed(self, state, toggle_timeout=None):
         """Set the pressed state (1 for pressed 0 for released)
@@ -526,7 +525,7 @@ class BasePygameScene(BaseScene):
             layer = 2
         elif layer == 0 and isinstance(sprite, TextSprite):
             layer = 1
-        elif layer == 0 or layer == 3:
+        elif layer in (0, 3):
             for oldsprite in self.sprites.get_sprites_from_layer(layer):
                 LOGGER.debug("Remove %s sprite '%s'", "background" if layer == 0 else "main image", oldsprite)
                 self.sprites.remove(oldsprite)

@@ -5,7 +5,7 @@ import os.path as osp
 from pibooth.utils import LOGGER
 
 
-class Counters(object):
+class Counters:
 
     def __init__(self, filename='', **kwargs):
         self.data = kwargs.copy()

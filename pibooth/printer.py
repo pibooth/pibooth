@@ -24,7 +24,7 @@ PAPER_FORMATS = {
 }
 
 
-class Printer(object):
+class Printer:
 
     """Printer driver. 
     """

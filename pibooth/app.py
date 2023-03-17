@@ -36,7 +36,7 @@ def load_last_saved_picture(path):
     return (None, None)
 
 
-class PiboothApplication(object):
+class PiboothApplication:
 
     """Main class representing the ``pibooth`` software.
     The following attributes are available for use in plugins:

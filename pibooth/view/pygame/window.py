@@ -88,8 +88,7 @@ class PygameWindow(BaseWindow):
             if 'SDL_VIDEO_WINDOW_POS' in os.environ:
                 posx, posy = [int(v) for v in os.environ['SDL_VIDEO_WINDOW_POS'].split(',')]
                 return self.surface.get_rect(x=posx, y=posy)
-            else:
-                return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
+            return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
         return self.surface.get_rect()
 
     def toggle_fullscreen(self):

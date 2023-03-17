@@ -7,7 +7,7 @@ import time
 from pibooth.utils import LOGGER, BlockConsoleHandler
 
 
-class StateMachine(object):
+class StateMachine:
 
     def __init__(self, plugins_manager, configuration, application, window):
         self.states = set()

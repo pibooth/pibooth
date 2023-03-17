@@ -7,7 +7,7 @@ import pygame
 from pibooth.utils import LOGGER
 
 
-class BaseScene(object):
+class BaseScene:
     """Base class for scene.
 
     Methodes defined here are abstarct and shall be implemented in child classes.
@@ -77,7 +77,7 @@ class BaseScene(object):
         raise NotImplementedError
 
 
-class BaseWindow(object):
+class BaseWindow:
 
     """Base class for window.
 

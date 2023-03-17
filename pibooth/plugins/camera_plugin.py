@@ -8,7 +8,7 @@ from pibooth.language import get_translated_text
 from pibooth.utils import LOGGER, PollingTimer
 
 
-class CameraPlugin(object):
+class CameraPlugin:
 
     """Plugin to manage the camera captures.
     """

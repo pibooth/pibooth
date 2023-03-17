@@ -2,19 +2,19 @@
 
 import os
 import os.path as osp
-from pibooth import fonts
-from pibooth.utils import LOGGER
-from pibooth.pictures import sizing
 from PIL import Image, ImageDraw
-
 try:
     import cv2
     import numpy as np
 except ImportError:
     cv2 = None
 
+from pibooth import fonts
+from pibooth.utils import LOGGER
+from pibooth.pictures import sizing
 
-class PictureFactory(object):
+
+class PictureFactory:
 
     """
     Concatenate up to 4 PIL images in portrait orientation...

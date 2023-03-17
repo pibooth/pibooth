@@ -68,7 +68,7 @@ class BlockConsoleHandler(logging.StreamHandler):
             cls.current_indent = (cls.current_indent[:-len(cls.pattern_block)] + cls.pattern_end)
 
 
-class PollingTimer(object):
+class PollingTimer:
 
     """
     Timer to be used in a pooling loop to check if timeout has been exceed.
