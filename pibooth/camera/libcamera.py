@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import time
+import numpy
 import pygame
 try:
     import picamera2
@@ -8,10 +8,9 @@ try:
     from libcamera import Transform
 except ImportError:
     picamera2 = None  # picamera2 is optional
-from PIL import Image, ImageFilter
+from PIL import ImageFilter
 from pibooth.pictures import sizing
-from pibooth.utils import PollingTimer, LOGGER
-from pibooth.language import get_translated_text
+from pibooth.utils import LOGGER
 from pibooth.camera.base import BaseCamera
 
 
@@ -76,38 +75,46 @@ class LibCamera(BaseCamera):
         # Create an image padded to the required size (required by picamera)
         size = (((self._rect.width + 31) // 32) * 32, ((self._rect.height + 15) // 16) * 16)
 
-        image = self.build_overlay(size, self._overlay_text, self._overlay_alpha)
-        self._overlay = self._cam.add_overlay(image.tobytes(), image.size, layer=3,
-                                              window=tuple(self._rect), fullscreen=False)
+        self._overlay = self.build_overlay(size, self._overlay_text, self._overlay_alpha)
+        self._cam.set_overlay(numpy.array(self._overlay))
 
     def _hide_overlay(self):
         """Remove any existing overlay.
         """
         if self._overlay:
-            self._cam.remove_overlay(self._overlay)
+            self._cam.set_overlay(None)
             self._overlay = None
             self._overlay_text = None
 
     def _process_capture(self, capture_data):
         """Rework capture data.
 
-        :param capture_data: binary data as stream
-        :type capture_data: :py:class:`io.BytesIO`
+        :param capture_data: couple (PIL Image, effect)
+        :type capture_data: tuple
         """
-        return capture_data
+        image, effect = capture_data
+        if effect != 'none':
+            image = image.filter(getattr(ImageFilter, effect.upper()))
+        return image
 
     def preview(self, rect, flip=True):
         """Display a preview on the given Rect (flip if necessary).
         """
+        if self._cam._preview is not None:
+            # Already running
+            return
+
+        self.preview_flip = flip
+        self._preview_config.transform = Transform(hflip=self.preview_flip)
+
         # Define Rect() object for resizing preview captures to fit to the defined
         # preview rect keeping same aspect ratio than camera resolution.
         size = sizing.new_size_keep_aspect_ratio(self.resolution, (rect.width, rect.height))
         self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
+
         self._cam.start_preview(Preview.DRM, x=self._rect.x, y=self._rect.y,
                                 width=self._rect.width, height=self._rect.height)
 
-        self.preview_flip = flip
-        self._preview_config.transform = Transform(hflip=self.preview_flip)
         self._cam.configure(self._preview_config)
         self._cam.start()
 
@@ -122,7 +129,7 @@ class LibCamera(BaseCamera):
         """Capture a new picture in a file.
         """
         image = self._cam.switch_mode_and_capture_image(self._capture_config, "main")
-        self._captures.append(image)
+        self._captures.append((image, effect))
         return image
 
     def _specific_cleanup(self):
