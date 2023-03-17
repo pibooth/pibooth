@@ -3,12 +3,12 @@
 import time
 import pygame
 try:
-    import libcamera
+    import picamera2
 except ImportError:
-    libcamera = None  # libcamera is optional
+    picamera2 = None  # picamera2 is optional
 from PIL import Image, ImageFilter
 from pibooth.pictures import sizing
-from pibooth.utils import PoolingTimer, LOGGER
+from pibooth.utils import PollingTimer, LOGGER
 from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
@@ -20,12 +20,12 @@ def get_libcamera_camera_proxy(port=None):
     :param port: look on given port number
     :type port: int
     """
-    if not libcamera:
-        return None  # libcamera is not installed
+    if not picamera2:
+        return None  # picamera2 is not installed
     try:
         if port is not None:
-            return libcamera.libcamera(camera_num=port)
-        return libcamera.libcamera()
+            return picamera2.libcamera(camera_num=port)
+        return picamera2.libcamera()
     except OSError:
         pass
     return None
@@ -49,7 +49,7 @@ class LibCamera(BaseCamera):
                      u'sharpen']
 
     def __init__(self, camera_proxy):
-        super(LibCamera, self).__init__(camera_proxy)
+        super().__init__(camera_proxy)
         self._overlay_alpha = 255
 
     def _specific_initialization(self):
@@ -133,7 +133,7 @@ class LibCamera(BaseCamera):
         if timeout < 1:
             raise ValueError("Start time shall be greater than 0")
 
-        timer = PoolingTimer(timeout)
+        timer = PollingTimer(timeout)
         while not timer.is_timeout():
             remaining = int(timer.remaining() + 1)
             if self._overlay is None or remaining != timeout:
@@ -156,7 +156,7 @@ class LibCamera(BaseCamera):
         if timeout < 1:
             raise ValueError("Start time shall be greater than 0")
 
-        timer = PoolingTimer(timeout)
+        timer = PollingTimer(timeout)
         while not timer.is_timeout():
             updated_rect = self._window.show_image(self._get_preview_image())
             pygame.event.pump()
