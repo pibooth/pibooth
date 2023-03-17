@@ -15,8 +15,8 @@ class HybridLibCamera(LibCamera):
 
     IMAGE_EFFECTS = GpCamera.IMAGE_EFFECTS
 
-    def __init__(self, rpi_camera_proxy, gp_camera_proxy):
-        super().__init__(rpi_camera_proxy)
+    def __init__(self, libcamera_camera_proxy, gp_camera_proxy):
+        super().__init__(libcamera_camera_proxy)
         self._gp_cam = GpCamera(gp_camera_proxy)
         self._gp_cam._captures = self._captures  # Same dict for both cameras
 

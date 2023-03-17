@@ -55,8 +55,8 @@ class LibCamera(BaseCamera):
                      u'smooth_more',
                      u'sharpen']
 
-    def __init__(self, camera_proxy):
-        super().__init__(camera_proxy)
+    def __init__(self, libcamera_camera_proxy):
+        super().__init__(libcamera_camera_proxy)
         self._preview_config = self._cam.create_preview_configuration()
         self._capture_config = self._cam.create_still_configuration()
 
