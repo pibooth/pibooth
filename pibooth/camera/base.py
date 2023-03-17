@@ -40,7 +40,7 @@ class BaseCamera(object):
             rotation = (rotation, rotation)
         self.preview_rotation, self.capture_rotation = rotation
         for name in ('preview', 'capture'):
-            rotation = getattr(self, '{}_rotation'.format(name))
+            rotation = getattr(self, f'{name}_rotation')
             if rotation not in (0, 90, 180, 270):
                 raise ValueError(f"Invalid {name} camera rotation value '{rotation}' (should be 0, 90, 180 or 270)")
         self.resolution = resolution
@@ -140,7 +140,7 @@ class BaseCamera(object):
         """
         effect = str(effect).lower()
         if effect not in self.IMAGE_EFFECTS:
-            raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
+            raise ValueError(f"Invalid capture effect '{effect}' (choose among {self.IMAGE_EFFECTS})")
 
         if self._worker:
             self.stop_preview()

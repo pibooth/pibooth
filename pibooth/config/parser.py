@@ -53,13 +53,13 @@ class PiboothConfigParser(RawConfigParser):
 
         with io.open(self.filename, 'w', encoding="utf-8") as fp:
             for section, options in DEFAULT.items():
-                fp.write("[{}]\n".format(section))
+                fp.write(f"[{section}]\n")
                 for name, value in options.items():
                     if default:
                         val = value[0]
                     else:
                         val = self.get(section, name)
-                    fp.write("# {}\n{} = {}\n\n".format(value[1], name, val))
+                    fp.write(f"# {value[1]}\n{name} = {val}\n\n")
 
         self.handle_autostart()
 
@@ -148,11 +148,11 @@ class PiboothConfigParser(RawConfigParser):
 
         # Check that the option is not already created
         if section in DEFAULT and option in DEFAULT[section]:
-            raise ValueError("The plugin '{}' try to define the option [{}][{}] "
-                             "which is already defined.".format(plugin_name, section, option))
+            raise ValueError(f"The plugin '{plugin_name}' try to define the option [{section}][{option}] "
+                             "which is already defined.")
 
         # Add the option to the default dictionary
-        description = "{}\n# Required by '{}' plugin".format(description, plugin_name)
+        description = f"{description}\n# Required by '{plugin_name}' plugin"
         add_default_option(section, option, default, description, menu_name, menu_choices)
 
     def get(self, section, option, **kwargs):
@@ -259,7 +259,7 @@ class PiboothConfigParser(RawConfigParser):
 
         if not isinstance(values, (tuple, list)):
             if not isinstance(values, types):
-                raise ValueError("Invalid config value [{}][{}]={}".format(section, option, values))
+                raise ValueError(f"Invalid config value [{section}][{option}]={values}")
             if values == '' and extend == 0:
                 # Empty config key and empty tuple accepted
                 values = ()
@@ -270,7 +270,7 @@ class PiboothConfigParser(RawConfigParser):
             if color and len(values) == 3 and all(isinstance(elem, int) for elem in values):
                 values = (values,)
             elif not all(isinstance(elem, types) for elem in values):
-                raise ValueError("Invalid config value [{}][{}]={}".format(section, option, values))
+                raise ValueError(f"Invalid config value [{section}][{option}]={values}")
 
         if path:
             new_values = []

@@ -18,7 +18,7 @@ def build_and_save(factory, savedirs, date, filename):
         os.makedirs(rawdir)
 
         for count, capture in enumerate(factory._images):
-            capture.save(osp.join(rawdir, "pibooth{:03}.jpg".format(count)))
+            capture.save(osp.join(rawdir, f"pibooth{count:03}.jpg"))
 
     LOGGER.info("Creating the final picture")
     factory.build()

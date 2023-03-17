@@ -28,7 +28,7 @@ def main():
         try:
             print("\nUpdating counters (current value in square bracket):\n")
             for name in counters:
-                value = input(" -> {:.<20} [{:>4}] : ".format(name.capitalize(), counters[name]))
+                value = input(f" -> {name.capitalize():.<20} [{counters[name]:>4}] : ")
                 if value.strip():
                     setattr(counters, name, int(value))
         except KeyboardInterrupt:
@@ -37,7 +37,7 @@ def main():
     else:
         print("\nListing current counters:\n")
         for name in counters:
-            print(" -> {:.<27} : {:>4}".format(name.capitalize(), counters[name]))
+            print(f" -> {name.capitalize():.<27} : {counters[name]:>4}")
         print()
 
 

@@ -196,13 +196,13 @@ def init(filename, clear=False):
 
         with io.open(PARSER.filename, 'w', encoding="utf-8") as fp:
             for section, options in DEFAULT.items():
-                fp.write("[{}]\n".format(section))
+                fp.write(f"[{section}]\n")
                 for name, value in options.items():
                     value = value.splitlines()
-                    fp.write("{} = {}\n".format(name, value[0]))
+                    fp.write(f"{name} = {value[0]}\n")
                     if len(value) > 1:
                         for part in value[1:]:
-                            fp.write("    {}\n".format(part))
+                            fp.write(f"    {part}\n")
                 fp.write("\n\n")
 
     PARSER.read(PARSER.filename, encoding='utf-8')

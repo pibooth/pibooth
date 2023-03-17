@@ -270,7 +270,7 @@ class PictureFactory(object):
         :param align: text alignment: left, right or center
         :type align: str
         """
-        assert align in [self.CENTER, self.RIGHT, self.LEFT], "Unknown aligment '{}'".format(align)
+        assert align in [self.CENTER, self.RIGHT, self.LEFT], f"Unknown aligment '{align}'"
         self._texts.append((text, fonts.get_filename(font_name), color, align))
         if self.is_portrait:
             self._texts_height = int(self.height // 6)
@@ -290,7 +290,7 @@ class PictureFactory(object):
             self._background_color = color_or_path
         else:
             if not osp.isfile(color_or_path):
-                raise ValueError("Invalid background image '{}'".format(color_or_path))
+                raise ValueError(f"Invalid background image '{color_or_path}'")
             self._background_image = color_or_path
         self._final = None  # Force rebuild
 
@@ -301,7 +301,7 @@ class PictureFactory(object):
         :type image_path: str
         """
         if not osp.isfile(image_path):
-            raise ValueError("Invalid background image '{}'".format(image_path))
+            raise ValueError(f"Invalid background image '{image_path}'")
         self._overlay_image = image_path
         self._final = None  # Force rebuild
 

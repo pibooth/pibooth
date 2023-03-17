@@ -20,7 +20,7 @@ class GpCameraRetry(camera.GpCamera):
             except Exception:
                 LOGGER.warning("Gphoto2 fails to capture, trying again...")
             retry += 1
-        raise EnvironmentError("Gphoto2 fails to capture {} times".format(max_retry))
+        raise EnvironmentError(f"Gphoto2 fails to capture {max_retry} times")
 
 
 class HybridRpiCameraRetry(camera.HybridRpiCamera):

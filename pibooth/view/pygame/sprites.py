@@ -22,7 +22,7 @@ class OutlinesSprite(pygame.sprite.DirtySprite):
         :param color: RGB color tuple for the outlines
         :type color: tuple
         """
-        super(OutlinesSprite, self).__init__()
+        super().__init__()
         self.image = pygame.Surface((10, 10), pygame.SRCALPHA, 32)
         self.rect = sprite.rect
         self.color = color
@@ -74,7 +74,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
     """
 
     def __init__(self, size):
-        super(BaseSprite, self).__init__()
+        super().__init__()
         self.image = None
         self.rect = pygame.Rect((0, 0), size)
         self.color = None
@@ -187,7 +187,7 @@ class ImageSprite(BaseSprite):
         :param colorize: recolorize picture if a color is set.
         :type colorize: tuple
         """
-        super(ImageSprite, self).__init__(size)
+        super().__init__(size)
         self.image_orig = None
         self.path = None
         self.crop = False
@@ -281,7 +281,7 @@ class ImageSprite(BaseSprite):
     def update(self, events):
         """Draw image if has changed and visible.
         """
-        super(ImageSprite, self).update(events)
+        super().update(events)
         if self.image is None and self.visible:
             if self.image_orig is None:
                 if self.path:
@@ -316,7 +316,7 @@ class TextSprite(BaseSprite):
         :param path: image file path
         :type path: str
         """
-        super(TextSprite, self).__init__(size)
+        super().__init__(size)
         self.text = text
         self.color = (255, 255, 255)
         self.align = pictures.ALIGN_CENTER
@@ -351,7 +351,7 @@ class TextSprite(BaseSprite):
     def update(self, events):
         """Draw image if has changed and visible.
         """
-        super(TextSprite, self).update(events)
+        super().update(events)
         if self.image is None and self.visible:
             self.image = pictures.text_to_pygame_image(self.text, self.rect.size, self.color, self.align)
 
@@ -363,7 +363,7 @@ class ArrowSprite(ImageSprite):
     """
 
     def __init__(self, *args, **kwargs):
-        super(ArrowSprite, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.location = BaseScene.ARROW_BOTTOM
         self.offset = 0
 
@@ -384,11 +384,11 @@ class LeftArrowSprite(ArrowSprite):
     """
 
     def __init__(self, *args, **kwargs):
-        super(LeftArrowSprite, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.set_skin('arrow.png')
 
     def set_location(self, location):
-        super(LeftArrowSprite, self).set_location(location)
+        super().set_location(location)
         if location == BaseScene.ARROW_BOTTOM:
             self.set_flip(vflip=False)
             self.show()
@@ -404,10 +404,10 @@ class LeftArrowSprite(ArrowSprite):
         """Set the sprite absolute position and size.
         """
         x -= self.offset
-        super(LeftArrowSprite, self).set_rect(x, y, width, height)
+        super().set_rect(x, y, width, height)
 
     def update(self, events):
-        super(LeftArrowSprite, self).update(events)
+        super().update(events)
         if self.visible:
             for event in events:
                 if event.type == evts.EVT_BUTTON_CAPTURE:
@@ -420,7 +420,7 @@ class RightArrowSprite(LeftArrowSprite):
     """
 
     def __init__(self, *args, **kwargs):
-        super(RightArrowSprite, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.set_flip(hflip=True)
 
     def set_rect(self, x, y, width, height):
@@ -443,7 +443,7 @@ class DotsSprite(BaseSprite):
     """
 
     def __init__(self, nbr_dots=4):
-        super(DotsSprite, self).__init__((100, 50))
+        super().__init__((100, 50))
         self.dots = []
         self.filled_orig = pictures.load_pygame_image('dot_filled.png')
         self.empty_orig = pictures.load_pygame_image('dot.png')
@@ -461,7 +461,7 @@ class DotsSprite(BaseSprite):
             self.dirty = 1
 
     def update(self, events):
-        super(DotsSprite, self).update(events)
+        super().update(events)
         if self.image is None and self.visible:
             self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
             border = 20

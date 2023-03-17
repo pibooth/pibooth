@@ -47,7 +47,7 @@ def main():
         ],
         author="Vincent Verdeil, Antoine Rousseaux",
         url="https://github.com/pibooth/pibooth",
-        download_url="https://github.com/pibooth/pibooth/archive/{}.tar.gz".format(pibooth.__version__),
+        download_url=f"https://github.com/pibooth/pibooth/archive/{pibooth.__version__}.tar.gz",
         license='MIT license',
         platforms=['unix', 'linux'],
         keywords=[

@@ -137,7 +137,7 @@ class BaseWindow(object):
         """Set the current scene.
         """
         if name not in self.scenes:
-            raise ValueError('"{}" not in registered scenes...'.format(name))
+            raise ValueError(f"'{name}' not in registered scenes...")
 
         LOGGER.debug("Set scene '%s'", name)
         self.scene = self.scenes[name]

@@ -15,7 +15,7 @@ class Counters(object):
             self.load()
 
     def __str__(self):
-        return ", ".join("{}:{}".format(key, value) for key, value in self.data.items())
+        return ", ".join(f"{key}:{value}" for key, value in self.data.items())
 
     def __iter__(self):
         """Iterate over counters names.
@@ -31,7 +31,7 @@ class Counters(object):
         """Called only when an attribute does not exist.
         """
         if name not in self.data:
-            raise AttributeError("No counter with name '{}'".format(name))
+            raise AttributeError(f"No counter with name '{name}'")
         return self.data[name]
 
     def __setattr__(self, name, value):

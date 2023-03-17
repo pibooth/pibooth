@@ -141,7 +141,7 @@ class GpCamera(BaseCamera):
             LOGGER.debug('Getting option %s/%s=%s', section, option, value)
             return value
         except gp.GPhoto2Error:
-            raise ValueError('Unknown option {}/{}'.format(section, option))
+            raise ValueError(f'Unknown option {section}/{option}')
 
     def _rotate_image(self, image, rotation):
         """Rotate a PIL image, same direction than RpiCamera.

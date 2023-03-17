@@ -129,9 +129,9 @@ class PiPluginManager(pluggy.PluginManager):
             vnumber = getattr(plugin, '__version__', '?.?.?')
 
         if version:
-            name = "{}-{}".format(name, vnumber)
+            name = f"{name}-{vnumber}"
         else:
-            name = "{}".format(name)
+            name = f"{name}"
 
         # Questionable convenience, but it keeps things short
         if name.startswith("pibooth-") or name.startswith("pibooth_"):

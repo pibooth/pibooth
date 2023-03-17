@@ -43,7 +43,7 @@ def main():
     groups = ppd.optionGroups
     options = []
     for group in groups:
-        group_name = "{} - {}".format(group.name, group.text)
+        group_name = f"{group.name} - {group.text}"
         for opt in group.options:
             option = {'group': group_name}
             values = list(map(lambda x: x["choice"], opt.choices))
@@ -61,13 +61,13 @@ def main():
         print(json.dumps(dict([(option['keyword'], option['value']) for option in options])))
     else:
         for option in options:
-            print("{} = {}".format(option['keyword'], option['value']))
-            print("     Description: {}".format(option['description']))
+            print(f"{option['keyword']} = {option['value']}")
+            print(f"     Description: {option['description']}")
             if isinstance(option['choices'], dict):
-                choices = ["{} = {}".format(value, descr) for value, descr in option['choices'].items()]
-                print("     Choices:     {}".format(choices[0]))
+                choices = [f"{value} = {descr}" for value, descr in option['choices'].items()]
+                print(f"     Choices:     {choices[0]}")
                 for choice in choices[1:]:
-                    print("                  {}".format(choice))
+                    print(f"                  {choice}")
             else:
                 print("     Choices:     {}".format(", ".join(option['choices'])))
 

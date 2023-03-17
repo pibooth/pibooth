@@ -23,7 +23,7 @@ def get_cv_camera_proxy(port=None):
 
     if port is not None:
         if not isinstance(port, int):
-            raise TypeError("Invalid OpenCV camera port '{}'".format(type(port)))
+            raise TypeError(f"Invalid OpenCV camera port '{type(port)}'")
         camera = cv2.VideoCapture(port)
         if camera.isOpened():
             return camera

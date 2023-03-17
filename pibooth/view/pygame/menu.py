@@ -95,7 +95,7 @@ class PygameMenu(object):
 
     def _build_menu(self):
         """Create all sub-menus"""
-        self._main_menu = pgm.Menu(title="Settings v{}".format(pibooth.__version__),
+        self._main_menu = pgm.Menu(title=f"Settings v{pibooth.__version__}",
                                    width=self.size[0],
                                    height=self.size[1],
                                    theme=THEME_DARK,
