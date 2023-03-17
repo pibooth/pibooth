@@ -26,7 +26,9 @@ Features
 * Custom texts can be added on the final picture (customizable fonts, colors, alignments)
 * Custom background(s) and overlay(s) can be added on the final picture
 * All settings available in a configuration file (most common options in a graphical interface)
-* Highly customizable thanks to its plugin system, you can develop your own plugin
+* Highly customizable thanks to its plugin system, you can install
+  `plugins developed by the community from PyPI  <https://pypi.org/search/?q=pibooth>`_
+  or develop your own plugin.
 
 Documentation
 -------------
@@ -36,6 +38,44 @@ Documentation
    :alt: Documentation
    :target: https://pibooth.readthedocs.io/en/latest
    :height: 200px
+
+Plugins
+-------
+
+Here is a list of known plugins compatible with Pibooth
+
+Pibooth organisation's plugin
+=============================
+
+- `pibooth-picture-template <https://github.com/pibooth/pibooth-picture-template>`_
+- `pibooth-google-photo <https://github.com/pibooth/pibooth-google-photo>`_
+- `pibooth-sound-effects <https://github.com/pibooth/pibooth-sound-effects>`_
+- `pibooth_dropbox <https://github.com/pibooth/pibooth-dropbox>`_
+- `pibooth-qrcode <https://github.com/pibooth/pibooth-qrcode>`_
+
+Third-party plugins
+===================
+
+Third-party plugins can be found on GitHub or on `plugins on PyPI  <https://pypi.org/search/?q=pibooth>`_.
+Here is a short list:
+
+- `pibooth-lcd-display <https://pypi.org/project/pibooth-lcd-display>`_
+- `pibooth-neopixel_spi <https://github.com/peteoheat/pibooth-neopixel_spi>`_
+- `pibooth-telegram-upload <https://pypi.org/project/pibooth-telegram-upload>`_
+- `pibooth-s3-upload <https://pypi.org/project/pibooth-s3-upload>`_
+
+Sponsors
+--------
+
+An enormous thanks to our sponsors:
+
+-  `@andhey <https://github.com/andhey>`_
+- `@philipbarwi <https://github.com/philipbarwi>`_
+- `@laurammiller <https://github.com/laurammiller>`_
+- `@neilrenfrey <https://github.com/neilrenfrey>`_
+- `@agrovista <https://github.com/agrovista>`_ 
+
+It means a lot to us!
 
 .. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/pibooth.png
    :align: middle

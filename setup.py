@@ -40,6 +40,7 @@ def main():
             'Natural Language :: French',
             'Natural Language :: German',
             'Natural Language :: Hungarian',
+            'Natural Language :: Italian',
             'Natural Language :: Norwegian',
             'Natural Language :: Spanish',
             'Topic :: Multimedia :: Graphics :: Capture :: Digital Camera',
@@ -63,29 +64,30 @@ def main():
         include_package_data=True,
         python_requires=">=3.6",
         install_requires=[
-            'picamera>=1.13 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
-            'Pillow>=8.3.1',
-            'pygame>=1.9.6',
-            'pygame-menu==4.0.7',
+            'picamera2>=0.3.2 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
+            'Pillow>=9.2.0',
+            'pygame>=2.1.2',
+            'pygame-menu==4.3.9',
             'pygame-vkeyboard>=2.0.8',
-            'psutil>=5.5.1',
-            'pluggy>=0.13.1',
-            'gpiozero>=1.5.1',
+            'pygame-imslider>=1.0.1',
+            'psutil>=5.9.1',
+            'pluggy>=1.0.0',
+            'gpiozero>=1.6.2',
             # RPi.GPIO backend for gpiozero (not always installed by default)
-            'RPi.GPIO>=0.7.0 ; platform_machine>="armv0l" and platform_machine<="armv9l"'
+            'RPi.GPIO>=0.7.1 ; platform_machine>="armv0l" and platform_machine<="armv9l"'
         ],
         extras_require={
-            'dslr': ['gphoto2>=2.0.0'],
-            'printer': ['pycups>=1.9.73', 'pycups-notify>=0.0.4'],
+            'dslr': ['gphoto2>=2.3.4'],
+            'printer': ['pycups>=2.0.1', 'pycups-notify>=0.0.6'],
             'doc': docs_require
         },
         zip_safe=False,  # Don't install the lib as an .egg zipfile
-        entry_points={'console_scripts': ["pibooth = pibooth.booth:main",
+        entry_points={'console_scripts': ["pibooth = pibooth.__main__:main",
                                           "pibooth-count = pibooth.scripts.count:main",
                                           "pibooth-diag = pibooth.scripts.diagnostic:main",
                                           "pibooth-fonts = pibooth.scripts.fonts:main",
                                           "pibooth-regen = pibooth.scripts.regenerate:main",
-                                          "pibooth-printcfg = pibooth.scripts.printer:main"]},
+                                          "pibooth-printer = pibooth.scripts.printer:main"]},
     )
 
 

@@ -1,23 +1,22 @@
 """Plugin to handle retry in case of exception with DSLR/gPhoto2 camera."""
 
-import time
 import pibooth
 from pibooth.utils import LOGGER
 from pibooth import camera
 
-__version__ = "4.0.2"
+__version__ = "4.0.3"
 
 
 class GpCameraRetry(camera.GpCamera):
 
-    def capture(self, effect=None):
+    def get_capture_image(self, effect=None):
         """Capture a new picture.
         """
         retry = 0
         max_retry = 2
         while retry < max_retry:
             try:
-                return super(GpCameraRetry, self).capture(effect)
+                return super().get_capture_image(effect)
             except Exception:
                 LOGGER.warning("Gphoto2 fails to capture, trying again...")
             retry += 1
@@ -27,13 +26,13 @@ class GpCameraRetry(camera.GpCamera):
 class HybridRpiCameraRetry(camera.HybridRpiCamera):
 
     def __init__(self, rpi_camera_proxy, gp_camera_proxy):
-        super(HybridRpiCamera, self).__init__(rpi_camera_proxy)
+        super().__init__(rpi_camera_proxy, gp_camera_proxy)
         self._gp_cam = GpCameraRetry(gp_camera_proxy)
         self._gp_cam._captures = self._captures  # Same dict for both cameras
 
 
 @pibooth.hookimpl
-def pibooth_setup_camera(cfg):
+def pibooth_setup_camera():
     rpi_cam_proxy = camera.get_rpi_camera_proxy()
     gp_cam_proxy = camera.get_gp_camera_proxy()
 

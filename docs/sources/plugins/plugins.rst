@@ -10,7 +10,7 @@ that gives users the ability to extend or modify its behavior thanks to plugins.
 Several plugins maintained by the community are available. They add extra features to
 ``pibooth``. Have a look to the `plugins on PyPI  <https://pypi.org/search/?q=pibooth>`_.
 
-You can also easily develop your own plugin, and declare it in the ``[GENERAL][plugins]``
+You can also easily develop your own plugin, and **declare it** in the ``[GENERAL][plugins]``
 key of the configuration.
 
 What is a plugin?
@@ -24,14 +24,17 @@ implements a subset of those functions.
 
 There are 2 families of hooks implemented in `pibooth`:
 
- - Pibooth state-independent hooks
- - State dependant hooks (see below)
+ - **Pibooth state-independent hooks**: used to change de default components likes camera, printer, ...
+   Note that plugins defining those hooks may not be dinamically enabled/disabled.
+ - **State dependant hooks** (see below): used to change state behavior.
 
 Influencing states
 ^^^^^^^^^^^^^^^^^^
 
-The ``pibooth`` application is built on the principle of states. Each state
-is defined by a specific screen and possible actions available to the user.
+The ``pibooth`` application is built on the principle of states. Each state is defined by a specific
+``scene`` (with same name as state one) and possible ``hooks`` to handle the user actions.
+
+A ``scene`` represent the visual interface displayed to the user while the state is active.
 
 The following states are defined:
 
@@ -107,18 +110,18 @@ Access to internal variables
 cfg
 ~~~
 
-.. autoclass:: pibooth.config.parser.PiConfigParser
+.. autoclass:: pibooth.config.parser.PiboothConfigParser
    :members: set, get, getint, getfloat, getboolean, gettyped, getpath, gettuple, add_option, join_path
    :undoc-members:
 
 app
 ~~~
 
-.. autoclass:: pibooth.booth.PiApplication
+.. autoclass:: pibooth.app.PiboothApplication
    :members:
 
 win
 ~~~
 
-.. autoclass:: pibooth.view.window.PiWindow
+.. autoclass:: pibooth.view.base.BaseWindow
    :members:

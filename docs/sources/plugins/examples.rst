@@ -41,3 +41,28 @@ Setup a custom camera
 
 .. literalinclude:: pibooth_custom_camera.py
     :language: python
+
+Setup a custom printer
+^^^^^^^^^^^^^^^^^^^^^^
+
+:download:`pibooth_custom_printer.py<pibooth_custom_printer.py>`
+
+.. literalinclude:: pibooth_custom_printer.py
+    :language: python
+
+Setup a custom picture factory
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:download:`pibooth_custom_factory.py<pibooth_custom_factory.py>`
+
+.. literalinclude:: pibooth_custom_factory.py
+    :language: python
+
+Setup a custom custom state
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:download:`pibooth_custom_state.py<pibooth_custom_state.py>`
+
+.. literalinclude:: pibooth_custom_state.py
+    :language: python
+

@@ -5,12 +5,14 @@
 
 import os
 from os import path as osp
+from datetime import datetime
 
 from PIL import Image
 
 from pibooth.utils import LOGGER, configure_logging
 from pibooth.plugins import create_plugin_manager
-from pibooth.config import PiConfigParser
+from pibooth.config import PiboothConfigParser
+from pibooth.counters import Counters
 from pibooth.pictures import get_picture_factory
 
 
@@ -34,7 +36,7 @@ def regenerate_all_images(plugin_manager, config, basepath):
     if not osp.isdir(osp.join(basepath, 'raw')):
         return
 
-    capture_choices = config.gettuple('PICTURE', 'captures', int, 2)
+    capture_choices = config.gettuple('PICTURE', 'captures', int)
 
     for captures_folder in os.listdir(osp.join(basepath, 'raw')):
         captures_folder_path = osp.join(basepath, 'raw', captures_folder)
@@ -43,14 +45,11 @@ def regenerate_all_images(plugin_manager, config, basepath):
         captures = get_captures(captures_folder_path)
         LOGGER.info("Generating image from raws in folder %s", captures_folder_path)
 
-        if len(captures) == capture_choices[0]:
-            idx = 0
-        elif len(captures) == capture_choices[1]:
-            idx = 1
-        else:
+        if len(captures) not in capture_choices:
             LOGGER.warning("Folder %s doesn't contain the correct number of pictures", captures_folder_path)
             continue
 
+        idx = capture_choices.index(len(captures))
         default_factory = get_picture_factory(captures, config.get('PICTURE', 'orientation'))
         factory = plugin_manager.hook.pibooth_setup_picture_factory(cfg=config,
                                                                     opt_index=idx,
@@ -65,7 +64,7 @@ def main():
     """
     configure_logging()
     plugin_manager = create_plugin_manager()
-    config = PiConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
+    config = PiboothConfigParser("~/.config/pibooth/pibooth.cfg", plugin_manager)
 
     # Register plugins
     plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
@@ -76,6 +75,13 @@ def main():
 
     # Update configuration with plugins ones
     plugin_manager.hook.pibooth_configure(cfg=config)
+
+    # Initialize text variables (normally done by the app)
+    picture_plugin = plugin_manager.get_plugin('pibooth-core:picture')
+    picture_plugin.texts_vars['date'] = datetime.now()
+    picture_plugin.texts_vars['count'] = Counters(config.join_path("counters.pickle"),
+                                                  taken=0, printed=0, forgotten=0,
+                                                  remaining_duplicates=config.getint('PRINTER', 'max_duplicates'))
 
     for path in config.gettuple('GENERAL', 'directory', 'path'):
         regenerate_all_images(plugin_manager, config, path)

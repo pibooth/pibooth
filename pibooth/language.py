@@ -111,6 +111,22 @@ DEFAULT = {
         'finished': "Köszi",
         'oops': "Sajnos valami hiba történt",
     },
+    'it': {
+        'intro': "Scatta una foto",
+        'intro_print': 'Oppure puoi\nstampare\nquesta foto',
+        'choose': "Scegli il formato",
+        '1': "1 foto",
+        '2': "2 foto",
+        '3': "3 foto",
+        '4': "4 foto",
+        'chosen': "Andiamo!",
+        'smile': "Sorridi!",
+        'processing': "Elaborazione...",
+        'print': "Stampo la foto?",
+        'print_forget': "Per favore\nignora questa\nfoto",
+        'finished': "Grazie",
+        'oops': "Oops qualcosa è andato storto",
+    },
     'nl': {
         'intro': "Neem een foto",
         'intro_print': "Of je kan\nnog altijd \ndeze foto printen",
@@ -142,6 +158,22 @@ DEFAULT = {
         'print_forget': "Glem\ndette\nbildet",
         'finished': "Takk",
         'oops': "Ops, noe gikk galt",
+    },
+    'pt': {
+        'intro': "Tira uma foto",
+        'intro_print': 'Ainda podes\nimprimir esta\nfoto',
+        'choose': "Escolhe o teu formato",
+        '1': "1 foto",
+        '2': "2 fotos",
+        '3': "3 fotos",
+        '4': "4 fotos",
+        'chosen': "Vamos!",
+        'smile': "Sorri!",
+        'processing': "A processar...",
+        'print': "Imprimir foto?",
+        'print_forget': "Por favor\nesqueçe-te\ndesta foto",
+        'finished': "Obrigado!",
+        'oops': "Oops, ocorreu um erro.",
     },
 }
 
@@ -201,6 +233,17 @@ def edit():
         raise EnvironmentError("Translation system is not initialized")
 
     open_text_editor(PARSER.filename)
+
+
+def set_current(name):
+    """Set current language.
+
+    :param name: alpha-2 country name
+    :type name; str
+    """
+    global CURRENT
+    assert name in DEFAULT, f"Unknown '{name}' language (possible choice: {', '.join(get_supported_languages())})"
+    CURRENT = name
 
 
 def get_supported_languages():

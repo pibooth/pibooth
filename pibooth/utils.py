@@ -6,26 +6,31 @@
 import os
 import sys
 import time
+import types
 import os.path as osp
 import logging
 import psutil
 import platform
-from fnmatch import fnmatchcase
 import contextlib
 import errno
 import subprocess
-import pygame
-
+from fnmatch import fnmatchcase
+from itertools import zip_longest, islice
+try:
+    from pip._internal.operations import freeze
+except ImportError:  # pip < 10.0
+    from pip.operations import freeze
 
 LOGGER = logging.getLogger("pibooth")
+logging.getLogger("pip").setLevel(logging.WARNING)
 
 
 class BlockConsoleHandler(logging.StreamHandler):
 
     default_level = logging.INFO
-    pattern_indent = '+< '
-    pattern_blocks = '|  '
-    pattern_dedent = '+> '
+    pattern_start = '+<- '
+    pattern_block = '|   '
+    pattern_end = '+-> '
     current_indent = ''
 
     def emit(self, record):
@@ -34,10 +39,10 @@ class BlockConsoleHandler(logging.StreamHandler):
             record.msg = '{}{}'.format(cls.current_indent, record.msg)
         logging.StreamHandler.emit(self, record)
 
-        if cls.current_indent.endswith(cls.pattern_indent):
-            cls.current_indent = (cls.current_indent[:-len(cls.pattern_indent)] + cls.pattern_blocks)
-        elif cls.current_indent.endswith(cls.pattern_dedent):
-            cls.current_indent = cls.current_indent[:-len(cls.pattern_dedent)]
+        if cls.current_indent.endswith(cls.pattern_start):
+            cls.current_indent = (cls.current_indent[:-len(cls.pattern_start)] + cls.pattern_block)
+        elif cls.current_indent.endswith(cls.pattern_end):
+            cls.current_indent = cls.current_indent[:-len(cls.pattern_end)]
 
     @classmethod
     def is_debug(cls):
@@ -53,23 +58,23 @@ class BlockConsoleHandler(logging.StreamHandler):
         """Begin a new log block.
         """
         if cls.is_debug():
-            cls.current_indent += cls.pattern_indent
+            cls.current_indent += cls.pattern_start
 
     @classmethod
     def dedent(cls):
         """End the current log block.
         """
         if cls.is_debug():
-            cls.current_indent = (cls.current_indent[:-len(cls.pattern_blocks)] + cls.pattern_dedent)
+            cls.current_indent = (cls.current_indent[:-len(cls.pattern_block)] + cls.pattern_end)
 
 
-class PoolingTimer(object):
+class PollingTimer(object):
 
     """
     Timer to be used in a pooling loop to check if timeout has been exceed.
     """
 
-    def __init__(self, timeout, start=True):
+    def __init__(self, timeout=0, start=True):
         self.timeout = timeout
         self.time = None
         self._paused_total = 0
@@ -95,17 +100,25 @@ class PoolingTimer(object):
         self._paused_total = 0
         self._paused_time = None
 
-    def start(self):
+    def start(self, timeout=None):
         """Start the timer.
         """
+        if timeout is not None:
+            self.timeout = timeout
+            self._paused_time = None
         if self.timeout < 0:
-            raise ValueError("PoolingTimer cannot be started if timeout is lower than zero")
+            raise ValueError("PollingTimer cannot be started if timeout is lower than zero")
         if self._paused_time:
             self._paused_total += time.time() - self._paused_time
             self._paused_time = None
         else:
             self._paused_total = 0
             self.time = time.time()
+
+    def is_started(self):
+        """Return True if time is started.
+        """
+        return self.time is not None
 
     def freeze(self):
         """Pause the timer.
@@ -142,7 +155,7 @@ class PoolingTimer(object):
         """Return True if the timer is in timeout.
         """
         if self.time is None:
-            raise RuntimeError("PoolingTimer has never been started")
+            raise RuntimeError("PollingTimer has never been started")
         return (time.time() - self.time - self.paused()) > self.timeout
 
 
@@ -198,10 +211,29 @@ def get_logging_filename():
     return None
 
 
+def get_pkg_versions():
+    """Return the list of Python packages and versions used by pibooth.
+    """
+    used_pkgs = []
+    installed_pkgs = [pkg for pkg in freeze.freeze()]
+    for name, val in sys.modules.items():
+        if isinstance(val, types.ModuleType):
+            found = [pkg for pkg in installed_pkgs if name in pkg]
+            if found:
+                for pkg in found:
+                    if pkg.startswith("-e ") or pkg.startswith("# "):
+                        pkg = pkg.rsplit("/")[-1].rsplit("#egg=")[-1] + "==dev"
+                    used_pkgs.append(pkg)
+    return set(used_pkgs)
+
+
 def get_crash_message():
-    msg = "system='{}', node='{}', release='{}', version='{}', machine='{}', processor='{}'\n".format(*platform.uname())
+    """Format a message to give most information about environment.
+    """
+    msg = "system='{}', node='{}', release='{}', version='{}', machine='{}', processor='{}', ".format(*platform.uname())
+    msg += ", ".join(get_pkg_versions()) + "\n"
     msg += " " + "*" * 83 + "\n"
-    msg += " * " + "Oops! It seems that pibooth has crached".center(80) + "*\n"
+    msg += " * " + "Oops! It seems that pibooth has crashed".center(80) + "*\n"
     msg += " * " + "You can report an issue on https://github.com/pibooth/pibooth/issues/new".center(80) + "*\n"
     if get_logging_filename():
         msg += " * " + ("and post the file: {}".format(get_logging_filename())).center(80) + "*\n"
@@ -240,7 +272,7 @@ def pkill(pattern):
 
 
 def open_text_editor(filename):
-    """Open a text editor to edit the configuration file.
+    """Open a text editor to edit a file.
     """
     editors = ['leafpad', 'mousepad', 'vi', 'emacs']
     for editor in editors:
@@ -256,6 +288,25 @@ def open_text_editor(filename):
     return False
 
 
+def take(n, iterable):
+    """Return first n items of the iterable as a list.
+    """
+    return list(islice(iterable, n))
+
+
+def format_columns_words(words, column_count=3):
+    """Return a list of words into columns.
+    """
+    lines = []
+    columns, dangling = divmod(len(words), column_count)
+    iter_words = iter(words)
+    columns = [take(columns + (dangling > i), iter_words) for i in range(column_count)]
+    paddings = [max(map(len, column)) for column in columns]
+    for row in zip_longest(*columns, fillvalue=''):
+        lines.append('  '.join(word.ljust(pad) for word, pad in zip(row, paddings)))
+    return lines
+
+
 def load_module(path):
     """Load a Python module dynamically.
     """
@@ -269,22 +320,14 @@ def load_module(path):
         sys.path.append(dirname)
 
     for hook in sys.meta_path:
-        loader = hook.find_module(modname, [dirname])
-        if loader:
-            return loader.load_module(modname)
+        if hasattr(hook, 'find_module'):
+            # Deprecated since Python 3.4
+            loader = hook.find_module(modname, [dirname])
+            if loader:
+                return loader.load_module(modname)
+        else:
+            spec = hook.find_spec(modname, [dirname])
+            if spec:
+                return spec.loader.load_module(modname)
 
     LOGGER.warning("Can not load Python module '%s' from '%s'", modname, path)
-
-
-def get_event_pos(display_size, event):
-    """
-    Return the position from finger or mouse event on x-axis and y-axis (x, y).
-
-    :param display_size: size of display for relative positioning in finger events
-    :param event: pygame event object
-    :return: position (x, y) in px
-    """
-    if event.type in (pygame.FINGERDOWN, pygame.FINGERMOTION, pygame.FINGERUP):
-        finger_pos = (event.x * display_size[0], event.y * display_size[1])
-        return finger_pos
-    return event.pos

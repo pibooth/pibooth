@@ -2,6 +2,7 @@
 
 import inspect
 import pluggy
+from pluggy._hooks import _HookCaller
 
 from pibooth.utils import LOGGER, load_module
 from pibooth.plugins import hookspecs
@@ -22,7 +23,7 @@ def create_plugin_manager():
 class PiPluginManager(pluggy.PluginManager):
 
     def __init__(self, *args, **kwargs):
-        super(PiPluginManager, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._plugin2calls = {}
 
         def before(hook_name, methods, kwargs):
@@ -41,33 +42,37 @@ class PiPluginManager(pluggy.PluginManager):
         """Override to keep all plugins that have already been registered
         at least one time.
         """
-        plugin_name = super(PiPluginManager, self).register(plugin, name)
+        plugin_name = super().register(plugin, name)
         if plugin not in self._plugin2calls:
             self._plugin2calls[plugin] = set()
         return plugin_name
 
     def load_all_plugins(self, paths, disabled=None):
         """Register the core plugins, load plugins from setuptools entry points
-        and the load given module/package paths.
+        and the ones from module/package paths.
 
         note:: by default hooks are called in LIFO registered order thus
                plugins register order is important.
 
         :param paths: list of Python module/package paths to load
         :type paths: list
-        :param disabled: list of plugins name to be disabled after loaded
+        :param disabled: list of plugins name to be disabled after loaded or 'all'
         :type disabled: list
         """
-        # Load plugins declared by setuptools entry points
-        self.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
-
         plugins = []
-        for path in paths:
-            plugin = load_module(path)
-            if plugin:
-                LOGGER.debug("Plugin found at '%s'", path)
-                plugins.append(plugin)
 
+        if disabled != 'all':
+            # 1. Last called plugins: declared by setuptools entry points
+            self.load_setuptools_entrypoints(hookspecs.hookspec.project_name)
+
+            # 2. Then call custom plugins from paths
+            for path in paths:
+                plugin = load_module(path)
+                if plugin:
+                    LOGGER.debug("Plugin found at '%s'", path)
+                    plugins.append(plugin)
+
+        # 3. First called plugins: core plugins
         plugins += [LightsPlugin(self),  # Last called
                     ViewPlugin(self),
                     PrinterPlugin(self),
@@ -82,7 +87,7 @@ class PiPluginManager(pluggy.PluginManager):
         self.check_pending()
 
         # Disable unwanted plugins
-        if disabled:
+        if disabled and disabled != 'all':
             for name in disabled:
                 self.unregister(name=name)
 
@@ -147,6 +152,26 @@ class PiPluginManager(pluggy.PluginManager):
 
     def subset_hook_caller_for_plugin(self, name, plugin):
         """ Return a new :py:class:`.hooks._HookCaller` instance for the named
-        method which manages calls to the given plugins."""
+        method which manages calls to the given plugins.
+        """
         exluded_plugins = [p for p in self.get_plugins() if self.get_name(p) != self.get_name(plugin)]
         return self.subset_hook_caller(name, exluded_plugins)
+
+    def get_hookcaller(self, name, optional=False):
+        """Return a hook caller used to call a chain of given hook name.
+
+        :param name: name of the hook to call
+        :type name: str
+        :param optional: don't raise error if hookspec is not defined
+        :type optional: bool
+        """
+        if optional:
+            # Accept undefined hookspec
+            hook = getattr(self.hook, name, None)
+        else:
+            # Raise AttributeError if no hookspec defined
+            hook = getattr(self.hook, name)
+        if hook is None:
+            hook = _HookCaller(name, self._hookexec)
+            setattr(self.hook, name, hook)
+        return hook

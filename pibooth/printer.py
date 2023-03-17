@@ -3,22 +3,16 @@
 """Pibooth printer handling.
 """
 
+import os.path as osp
 try:
     import cups
     from cups_notify import Subscriber, event
 except ImportError:
     cups = None  # CUPS is optional
 
-import tempfile
-import os.path as osp
-
-import pygame
-from PIL import Image
 from pibooth.utils import LOGGER
-from pibooth.pictures import get_picture_factory
+from pibooth import evts
 
-
-PRINTER_TASKS_UPDATED = pygame.USEREVENT + 2
 
 PAPER_FORMATS = {
     '2x6': (2, 6),      # 2x6 pouces - 5x15 cm - 51x152 mm
@@ -31,6 +25,9 @@ PAPER_FORMATS = {
 
 
 class Printer(object):
+
+    """Printer driver. 
+    """
 
     def __init__(self, name='default', max_pages=-1, options=None, counters=None):
         self._conn = cups.Connection() if cups else None
@@ -64,13 +61,12 @@ class Printer(object):
         elif not self.options:
             self.options = {}
 
-    def _on_event(self, evt):
+    def _on_event(self, event):
         """
         Call for each new printer event.
         """
-        LOGGER.info(evt.title)
-        pygame.event.post(pygame.event.Event(PRINTER_TASKS_UPDATED,
-                                             tasks=self.get_all_tasks()))
+        LOGGER.info(event.title)
+        evts.post(evts.EVT_PIBOOTH_PRINTER_UPDATE, notification=event)
 
     def is_installed(self):
         """Return True if the CUPS server is available for printing.
@@ -86,7 +82,7 @@ class Printer(object):
             return True
         return self.count.printed < self.max_pages
 
-    def print_file(self, filename, copies=1):
+    def print_file(self, filename):
         """Send a file to the CUPS server to the default printer.
         """
         if not self.name:
@@ -100,17 +96,7 @@ class Printer(object):
                                                       event.CUPS_EVT_PRINTER_STATE_CHANGED,
                                                       event.CUPS_EVT_PRINTER_STOPPED])
 
-        if copies > 1:
-            with tempfile.NamedTemporaryFile(suffix=osp.basename(filename)) as fp:
-                picture = Image.open(filename)
-                factory = get_picture_factory((picture,) * copies)
-                # Don't call setup factory hook here, as the selected parameters
-                # are the one necessary to render several pictures on same page.
-                factory.set_margin(2)
-                factory.save(fp.name)
-                self._conn.printFile(self.name, fp.name, osp.basename(filename), self.options)
-        else:
-            self._conn.printFile(self.name, filename, osp.basename(filename), self.options)
+        self._conn.printFile(self.name, filename, osp.basename(filename), self.options)
         LOGGER.debug("File '%s' sent to the printer with options %s", filename, self.options)
 
     def cancel_all_tasks(self):

@@ -2,6 +2,7 @@
 
 import pickle
 import os.path as osp
+from pibooth.utils import LOGGER
 
 
 class Counters(object):
@@ -40,7 +41,7 @@ class Counters(object):
             self.data[name] = value
             self.save()
         else:
-            super(Counters, self).__setattr__(name, value)
+            super().__setattr__(name, value)
 
     def names(self):
         """Return the list of counters.
@@ -51,7 +52,11 @@ class Counters(object):
         """Load the saved counters.
         """
         with open(self.filename, 'rb') as fp:
-            self.data.update(pickle.load(fp))
+            try:
+                self.data.update(pickle.load(fp))
+            except (pickle.UnpicklingError, EOFError):
+                LOGGER.warning("File '%s' corrupted, counters data are lost", self.filename)
+                self.save()
 
     def reset(self):
         """Reset all counters.
