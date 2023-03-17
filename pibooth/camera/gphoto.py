@@ -35,8 +35,12 @@ def get_gp_camera_proxy(port=None):
         abilities_list.load()
         cameras = abilities_list.detect(port_info_list)
     if cameras:
-        LOGGER.debug("Found gPhoto2 cameras on ports: '%s'", "' / '".join([p for _, p in cameras]))
-        # Initialize first camera proxy and return it
+        LOGGER.debug("Found gPhoto2 cameras:")
+        for index, (name, addr) in enumerate(sorted(cameras, key=lambda x: x[0])):
+            selected = ">" if addr == port or (port is None and index == 0) else "*"
+            LOGGER.debug("  %s %s : name-> %s | addr-> %s", selected, f"{index:02d}", name, addr)
+
+        # Initialize camera proxy and return it
         camera = gp.Camera()
         if port is not None:
             port_info_list = gp.PortInfoList()

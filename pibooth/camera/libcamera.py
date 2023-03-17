@@ -4,6 +4,8 @@ import time
 import pygame
 try:
     import picamera2
+    from picamera2 import Picamera2, Preview
+    from libcamera import Transform
 except ImportError:
     picamera2 = None  # picamera2 is optional
 from PIL import Image, ImageFilter
@@ -17,17 +19,23 @@ def get_libcamera_camera_proxy(port=None):
     """Return camera proxy if a Raspberry Pi compatible camera is found
     else return None.
 
-    :param port: look on given port number
+    :param port: look on given index number
     :type port: int
     """
     if not picamera2:
         return None  # picamera2 is not installed
-    try:
+
+    cameras = Picamera2.global_camera_info()
+    if cameras:
+        LOGGER.debug("Found libcamera cameras:")
+        for index, info in enumerate(cameras):
+            selected = ">" if index == port or (port is None and index == 0) else "*"
+            LOGGER.debug("  %s %s : name-> %s | addr-> %s", selected, f"{index:02d}", info["Model"], info["Location"])
+
         if port is not None:
-            return picamera2.libcamera(camera_num=port)
-        return picamera2.libcamera()
-    except OSError:
-        pass
+            return Picamera2(camera_num=port)
+        return Picamera2()
+
     return None
 
 
@@ -50,155 +58,74 @@ class LibCamera(BaseCamera):
 
     def __init__(self, camera_proxy):
         super().__init__(camera_proxy)
-        self._overlay_alpha = 255
+        self._preview_config = self._cam.create_preview_configuration()
+        self._capture_config = self._cam.create_still_configuration()
 
     def _specific_initialization(self):
         """Camera initialization.
         """
-        # It seems that cameras are always in landscape
-        self._cam.initCamera(max(self.resolution), min(self.resolution),
-                             libcamera.PixelFormat.BGR888, buffercount=4,
-                             rotation=self.preview_rotation)
-        self._cam.startCamera()
-        framerate = 30
-        frame_time = 1000000 // framerate
-        self._cam.set(libcamera.FrameDurationLimits, [frame_time, frame_time])
-        self._cam.set(libcamera.ExposureTime, self.preview_iso)
+        self._preview_config.transform = Transform(hflip=self.preview_flip)
+        self._cam.configure(self._preview_config)
 
-    def _show_overlay(self, text, alpha):
+        self._capture_config.size = self.resolution
+        self._capture_config.transform = Transform(hflip=self.capture_flip)
+
+    def _show_overlay(self):
         """Add an image as an overlay.
         """
-        if self._window:  # No window means no preview displayed
-            rect = self.get_rect()
-            self._overlay_alpha = alpha
-            self._overlay = self.build_overlay((rect.width, rect.height), str(text), alpha)
+        # Create an image padded to the required size (required by picamera)
+        size = (((self._rect.width + 31) // 32) * 32, ((self._rect.height + 15) // 16) * 16)
 
-    def _get_preview_image(self):
-        """Capture a new preview image.
+        image = self.build_overlay(size, self._overlay_text, self._overlay_alpha)
+        self._overlay = self._cam.add_overlay(image.tobytes(), image.size, layer=3,
+                                              window=tuple(self._rect), fullscreen=False)
+
+    def _hide_overlay(self):
+        """Remove any existing overlay.
         """
-        rect = self.get_rect()
-
-        ret, data = self._cam.readFrame()
-        if not ret:
-            raise IOError("Can not get camera preview image")
-        image = Image.fromarray(data.imageData)
-
-        self._cam.returnFrameBuffer(data)
-        # Crop to keep aspect ratio of the resolution
-        image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
-        # Resize to fit the available space in the window
-        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, (rect.width, rect.height), 'outer'))
-
-        if self.preview_flip:
-            image = image.transpose(Image.FLIP_LEFT_RIGHT)
-
         if self._overlay:
-            image.paste(self._overlay, (0, 0), self._overlay)
-        return image
+            self._cam.remove_overlay(self._overlay)
+            self._overlay = None
+            self._overlay_text = None
 
-    def _post_process_capture(self, capture_data):
+    def _process_capture(self, capture_data):
         """Rework capture data.
 
-        :param capture_data: couple (frame, effect)
-        :type capture_data: tuple
+        :param capture_data: binary data as stream
+        :type capture_data: :py:class:`io.BytesIO`
         """
-        frame, effect = capture_data
-        image = Image.fromarray(frame)
+        return capture_data
 
-        # Crop to keep aspect ratio of the resolution
-        image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
-        # Resize to fit the resolution
-        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
-
-        if self.capture_flip:
-            image = image.transpose(Image.FLIP_LEFT_RIGHT)
-
-        if effect != 'none':
-            image = image.filter(getattr(ImageFilter, effect.upper()))
-
-        return image
-
-    def preview(self, window, flip=True):
-        """Setup the preview.
+    def preview(self, rect, flip=True):
+        """Display a preview on the given Rect (flip if necessary).
         """
-        self._window = window
+        # Define Rect() object for resizing preview captures to fit to the defined
+        # preview rect keeping same aspect ratio than camera resolution.
+        size = sizing.new_size_keep_aspect_ratio(self.resolution, (rect.width, rect.height))
+        self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
+        self._cam.start_preview(Preview.DRM, x=self._rect.x, y=self._rect.y,
+                                width=self._rect.width, height=self._rect.height)
+
         self.preview_flip = flip
-        self._window.show_image(self._get_preview_image())
-
-    def preview_countdown(self, timeout, alpha=80):
-        """Show a countdown of `timeout` seconds on the preview.
-        Returns when the countdown is finished.
-        """
-        timeout = int(timeout)
-        if timeout < 1:
-            raise ValueError("Start time shall be greater than 0")
-
-        timer = PollingTimer(timeout)
-        while not timer.is_timeout():
-            remaining = int(timer.remaining() + 1)
-            if self._overlay is None or remaining != timeout:
-                # Rebluid overlay only if remaining number has changed
-                self._show_overlay(str(remaining), alpha)
-                timeout = remaining
-
-            updated_rect = self._window.show_image(self._get_preview_image())
-            pygame.event.pump()
-            if updated_rect:
-                pygame.display.update(updated_rect)
-
-        self._show_overlay(get_translated_text('smile'), alpha)
-        self._window.show_image(self._get_preview_image())
-
-    def preview_wait(self, timeout, alpha=80):
-        """Wait the given time.
-        """
-        timeout = int(timeout)
-        if timeout < 1:
-            raise ValueError("Start time shall be greater than 0")
-
-        timer = PollingTimer(timeout)
-        while not timer.is_timeout():
-            updated_rect = self._window.show_image(self._get_preview_image())
-            pygame.event.pump()
-            if updated_rect:
-                pygame.display.update(updated_rect)
-
-        self._show_overlay(get_translated_text('smile'), alpha)
-        self._window.show_image(self._get_preview_image())
+        self._preview_config.transform = Transform(hflip=self.preview_flip)
+        self._cam.configure(self._preview_config)
+        self._cam.start()
 
     def stop_preview(self):
         """Stop the preview.
         """
+        self._rect = None
+        self._cam.stop_preview()
         self._hide_overlay()
-        self._window = None
 
-    def capture(self, effect=None):
-        """Capture a new picture.
+    def get_capture_image(self, effect=None):
+        """Capture a new picture in a file.
         """
-        effect = str(effect).lower()
-        if effect not in self.IMAGE_EFFECTS:
-            raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
+        image = self._cam.switch_mode_and_capture_image(self._capture_config, "main")
+        self._captures.append(image)
+        return image
 
-        if self.capture_iso != self.preview_iso:
-            self._cam.set(libcamera.ExposureTime, self.capture_iso)
-
-        LOGGER.debug("Taking capture at resolution %s", self.resolution)
-        ret, data = self._cam.readFrame()
-        if not ret:
-            raise IOError("Can not capture frame")
-
-        if self.capture_iso != self.preview_iso:
-            self._cam.set(libcamera.ExposureTime, self.preview_iso)
-
-        self._captures.append((data.imageData, effect))
-        self._cam.returnFrameBuffer(data)
-        time.sleep(0.5)  # To let time to see "Smile"
-
-        self._hide_overlay()  # If stop_preview() has not been called
-
-    def quit(self):
+    def _specific_cleanup(self):
         """Close the camera driver, it's definitive.
         """
-        if self._cam:
-            self._cam.stopCamera()
-            self._cam.closeCamera()
+        self._cam.close()

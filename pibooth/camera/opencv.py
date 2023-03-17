@@ -15,7 +15,7 @@ def get_cv_camera_proxy(port=None):
     """Return camera proxy if an OpenCV compatible camera is found
     else return None.
 
-    :param port: look on given port number
+    :param port: look on given index number
     :type port: int
     """
     if not cv2:
