@@ -228,7 +228,7 @@ class PiboothConfigParser(RawConfigParser):
         """
         return self._get_abs_path(self.get(section, option))
 
-    @ staticmethod
+    @staticmethod
     def _get_authorized_types(types):
         """Get a tuple of authorized types and if the color and path are accepted
         """
