@@ -150,8 +150,10 @@ class PiApplication(object):
         if MCP2221_wired:
             self.mcp2221_capture_button = digitalio.DigitalInOut(board.G1)
             self.mcp2221_capture_button.direction = digitalio.Direction.INPUT
+            self.mcp2221_capture_button_last = False
             self.mcp2221_print_button = digitalio.DigitalInOut(board.G3)
             self.mcp2221_print_button.direction = digitalio.Direction.INPUT
+            self.mcp2221_print_button_last = False
 
             self.mcp2221_picture_led = digitalio.DigitalInOut(board.G0)
             self.mcp2221_picture_led.direction = digitalio.Direction.OUTPUT
@@ -408,14 +410,21 @@ class PiApplication(object):
 
             while True:
                 if MCP2221_wired:
-                    if self.mcp2221_capture_button.value:
+                    if self.mcp2221_capture_button.value and not self.mcp2221_capture_button_last:
                         event = pygame.event.Event(BUTTONDOWN, capture=1, printer=0,
                                     button=self.buttons.capture)
                         pygame.event.post(event)
-                    if self.mcp2221_print_button.value:
+                        self.mcp2221_capture_button_last = True
+                    if self.mcp2221_print_button.value and not self.mcp2221_print_button_last:
                         event = pygame.event.Event(BUTTONDOWN, capture=0, printer=1,
                                     button=self.buttons.printer)
                         pygame.event.post(event)
+                        self.mcp2221_print_button_last = True
+                    if not self.mcp2221_capture_button.value:
+                        self.mcp2221_capture_button_last = False
+                    if not self.mcp2221_print_button.value:
+                        self.mcp2221_print_button_last = False
+
 
                 events = list(pygame.event.get())
 
