@@ -51,15 +51,34 @@ class PiboothConfigParser(RawConfigParser):
         if not osp.isdir(dirname):
             os.makedirs(dirname)
 
+        option_pattern = "# {comment}\n{name} = {value}\n\n"
+
         with io.open(self.filename, 'w', encoding="utf-8") as fp:
             for section, options in DEFAULT.items():
+
+                # 1. Write defined options
                 fp.write(f"[{section}]\n")
                 for name, value in options.items():
                     if default:
                         val = value[0]
                     else:
                         val = self.get(section, name)
-                    fp.write(f"# {value[1]}\n{name} = {val}\n\n")
+                    fp.write(option_pattern.format(comment=value[1], name=name, value=val))
+
+                # 2. Write options that are not in DEFAULT (maybe an option from a disabled plugin)
+                for name, value in self.items(section):
+                    if name not in DEFAULT[section]:
+                        fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
+                                                       name=name, value=value))
+
+            # 3. Write sections that are not in DEFAULT (maybe a section from a disabled plugin)
+            for section in self.sections():
+                if section not in DEFAULT:
+                    fp.write(f"[{section}]\n")
+                    for name, value in self.items(section):
+                        fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
+                                                       name=name, value=value))
+
 
         self.handle_autostart()
 
