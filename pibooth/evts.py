@@ -98,5 +98,8 @@ def find_event(events, event_type):
     """
     for event in events:
         if event.type == event_type:
+            # Re-raise exception from async tasks
+            if getattr(event, 'exception', None):
+                raise event.exception
             return event
     return None
