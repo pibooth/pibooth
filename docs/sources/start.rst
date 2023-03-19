@@ -116,7 +116,7 @@ variables defined in the configuration (see :ref:`Configure` below):
 Captures effects
 ^^^^^^^^^^^^^^^^
 
-Image effects can be applied on the capture using the ``[PICTURE][effect]`` variable defined in the
+Image effects can be applied on the capture using the ``[PICTURE][effect]`` option defined in the
 configuration.
 
 .. code-block:: ini
