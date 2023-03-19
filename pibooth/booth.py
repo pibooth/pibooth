@@ -39,6 +39,13 @@ except BadPinFactory:
     Device.pin_factory = MockFactory()
     GPIO_INFO = "without physical GPIO, fallback to GPIO mock"
 
+try:
+    import board
+    import digitalio
+    MCP2221_wired = True
+except RuntimeError:
+    MCP2221_wired = None
+
 
 BUTTONDOWN = pygame.USEREVENT + 1
 
@@ -139,6 +146,22 @@ class PiApplication(object):
 
         self.leds = LEDBoard(capture="BOARD" + config.get('CONTROLS', 'picture_led_pin'),
                              printer="BOARD" + config.get('CONTROLS', 'print_led_pin'))
+
+        if MCP2221_wired:
+            self.mcp2221_capture_button = digitalio.DigitalInOut(board.G1)
+            self.mcp2221_capture_button.direction = digitalio.Direction.INPUT
+            self.mcp2221_print_button = digitalio.DigitalInOut(board.G3)
+            self.mcp2221_print_button.direction = digitalio.Direction.INPUT
+
+            self.mcp2221_picture_led = digitalio.DigitalInOut(board.G0)
+            self.mcp2221_picture_led.direction = digitalio.Direction.OUTPUT
+            self.mcp2221_print_led = digitalio.DigitalInOut(board.G2)
+            self.mcp2221_print_led.direction = digitalio.Direction.OUTPUT
+        
+        try:
+            self.joystick = pygame.joystick.Joystick(0)
+        except pygame.error:
+            pass
 
         self.printer = Printer(config.get('PRINTER', 'printer_name'),
                                config.getint('PRINTER', 'max_pages'),
@@ -307,6 +330,9 @@ class PiApplication(object):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 return event
+            if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
+                # print(event.joy, event.instance_id, event.button)
+                return event
             if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
                 pos = get_event_pos(self._window.display_size, event)
                 rect = self._window.get_rect()
@@ -322,6 +348,8 @@ class PiApplication(object):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e\
                     and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                return event
+            if event.type == pygame.JOYBUTTONDOWN and event.button == 1:
                 return event
             if (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3)) or event.type == pygame.FINGERUP:
                 pos = get_event_pos(self._window.display_size, event)
@@ -362,6 +390,12 @@ class PiApplication(object):
                 else:
                     event.key = pygame.K_RIGHT
                 return event
+            if event.type == pygame.JOYBUTTONDOWN:
+                if event.button == 0:
+                    event.key = pygame.K_LEFT
+                else:
+                    event.key = pygame.K_RIGHT
+                return event
         return None
 
     def main_loop(self):
@@ -373,6 +407,16 @@ class PiApplication(object):
             self._machine.set_state('wait')
 
             while True:
+                if MCP2221_wired:
+                    if self.mcp2221_capture_button.value:
+                        event = pygame.event.Event(BUTTONDOWN, capture=1, printer=0,
+                                    button=self.buttons.capture)
+                        pygame.event.post(event)
+                    if self.mcp2221_print_button.value:
+                        event = pygame.event.Event(BUTTONDOWN, capture=0, printer=1,
+                                    button=self.buttons.printer)
+                        pygame.event.post(event)
+
                 events = list(pygame.event.get())
 
                 if self.find_quit_event(events):
