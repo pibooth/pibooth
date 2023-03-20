@@ -87,7 +87,7 @@ class AsyncTask(object):
                 if not self.loop:
                     break
             except Exception as ex:
-                self.emit(result, ex)
+                self.emit(None, ex)
                 break
         return result
 
