@@ -64,19 +64,21 @@ class PiboothConfigParser(RawConfigParser):
                         val = self.get(section, name)
                     fp.write(option_pattern.format(comment=value[1], name=name, value=val))
 
-                # 2. Write options that are not in DEFAULT (maybe an option from a disabled plugin)
-                for name, value in self.items(section):
-                    if name not in DEFAULT[section]:
-                        fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
-                                                       name=name, value=value))
-
-            # 3. Write sections that are not in DEFAULT (maybe a section from a disabled plugin)
-            for section in self.sections():
-                if section not in DEFAULT:
-                    fp.write(f"[{section}]\n")
+                if not default and self.has_section(section):
+                    # 2. Write options that are not in DEFAULT (maybe an option from a disabled plugin)
                     for name, value in self.items(section):
-                        fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
-                                                       name=name, value=value))
+                        if name not in DEFAULT[section]:
+                            fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
+                                                           name=name, value=value))
+
+            if not default:
+                # 3. Write sections that are not in DEFAULT (maybe a section from a disabled plugin)
+                for section in self.sections():
+                    if section not in DEFAULT:
+                        fp.write(f"[{section}]\n")
+                        for name, value in self.items(section):
+                            fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
+                                                           name=name, value=value))
 
         self.handle_autostart()
 

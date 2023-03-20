@@ -15,7 +15,7 @@ class ViewPlugin(object):
 
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
-        self.count = 0
+        self.count = 1
         self.capture_finished = False
         self.forgotten = False
         # Seconds to display the failed message
@@ -81,11 +81,9 @@ class ViewPlugin(object):
                 return 'choose'
             if cfg.getfloat('WINDOW', 'chosen_delay') > 0:
                 return 'chosen'
-            return 'preview'
-
-    @pibooth.hookimpl
-    def state_wait_exit(self):
-        self.count = 0
+            if cfg.getint('WINDOW', 'preview_delay') > 0:
+                return 'preview'
+            return 'capture'
 
     @pibooth.hookimpl
     def state_choose_enter(self, app, win):
@@ -124,8 +122,6 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_preview_enter(self, app, win):
-        self.count += 1
-        self.capture_finished = False
         win.scene.set_capture_number(self.count, app.capture_nbr)
 
     @pibooth.hookimpl
@@ -136,6 +132,7 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_capture_enter(self, cfg, app, win):
+        self.capture_finished = False
         if cfg.getboolean('WINDOW', 'flash'):
             win.scene.trigger_flash()
         win.scene.set_capture_number(self.count, app.capture_nbr)
@@ -145,13 +142,20 @@ class ViewPlugin(object):
         event = evts.find_event(events, evts.EVT_PIBOOTH_CAM_CAPTURE)
         if event:
             self.capture_finished = True
+            self.count += 1
 
     @pibooth.hookimpl
     def state_capture_validate(self, cfg, app, win):
         if self.capture_finished and (not cfg.getboolean('WINDOW', 'flash') or win.scene.count_flash >= 3):
-            if self.count >= app.capture_nbr:
+            if self.count > app.capture_nbr:
                 return 'processing'
-            return 'preview'
+            if cfg.getint('WINDOW', 'preview_delay') > 0:
+                return 'preview'
+            return 'capture'
+
+    @pibooth.hookimpl
+    def state_processing_enter(self):
+        self.count = 1
 
     @pibooth.hookimpl
     def state_processing_validate(self, cfg, app):
