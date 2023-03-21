@@ -15,7 +15,7 @@ class ViewPlugin(object):
 
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
-        self.count = 1
+        self.capture_count = 0
         self.capture_finished = False
         self.forgotten = False
         # Seconds to display the failed message
@@ -122,7 +122,7 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_preview_enter(self, app, win):
-        win.scene.set_capture_number(self.count, app.capture_nbr)
+        win.scene.set_capture_number(self.capture_count + 1, app.capture_nbr)
 
     @pibooth.hookimpl
     def state_preview_do(self, win, events):
@@ -135,19 +135,19 @@ class ViewPlugin(object):
         self.capture_finished = False
         if cfg.getboolean('WINDOW', 'flash'):
             win.scene.trigger_flash()
-        win.scene.set_capture_number(self.count, app.capture_nbr)
+        win.scene.set_capture_number(self.capture_count + 1, app.capture_nbr)
 
     @pibooth.hookimpl
     def state_capture_do(self, win, events):
         event = evts.find_event(events, evts.EVT_PIBOOTH_CAM_CAPTURE)
         if event:
             self.capture_finished = True
-            self.count += 1
+            self.capture_count += 1
 
     @pibooth.hookimpl
     def state_capture_validate(self, cfg, app, win):
         if self.capture_finished and (not cfg.getboolean('WINDOW', 'flash') or win.scene.count_flash >= 3):
-            if self.count > app.capture_nbr:
+            if self.capture_count >= app.capture_nbr:
                 return 'processing'
             if cfg.getint('WINDOW', 'preview_delay') > 0:
                 return 'preview'
@@ -155,7 +155,7 @@ class ViewPlugin(object):
 
     @pibooth.hookimpl
     def state_processing_enter(self):
-        self.count = 1
+        self.capture_count = 0
 
     @pibooth.hookimpl
     def state_processing_validate(self, cfg, app):

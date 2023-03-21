@@ -3,6 +3,7 @@
 import time
 import math
 import pibooth
+from pibooth import evts
 from pibooth import camera
 from pibooth.language import get_translated_text
 from pibooth.utils import LOGGER, PollingTimer
@@ -18,7 +19,7 @@ class CameraPlugin(object):
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.timer = PollingTimer()
-        self.count = 0
+        self.capture_count = 0
 
     @pibooth.hookimpl(hookwrapper=True)
     def pibooth_setup_camera(self, cfg):
@@ -88,14 +89,19 @@ class CameraPlugin(object):
             effect = effects
         elif len(effects) >= app.capture_nbr:
             # Take the effect corresponding to the current capture
-            effect = effects[self.count]
+            effect = effects[self.capture_count]
         else:
             # Not possible
             raise ValueError("Not enough effects defined for {} captures {}".format(app.capture_nbr, effects))
 
         LOGGER.info("Take a capture")
         app.camera.capture(effect)
-        self.count += 1
+
+    @pibooth.hookimpl
+    def state_capture_do(self, events):
+        event = evts.find_event(events, evts.EVT_PIBOOTH_CAM_CAPTURE)
+        if event:
+            self.capture_count += 1
 
     @pibooth.hookimpl
     def state_capture_exit(self, app):
@@ -103,4 +109,4 @@ class CameraPlugin(object):
 
     @pibooth.hookimpl
     def state_processing_enter(self):
-        self.count = 0
+        self.capture_count = 0
