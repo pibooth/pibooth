@@ -4,7 +4,7 @@
 import os
 import pygame
 from PIL import Image
-from pibooth import language, utils
+from pibooth import language
 from pibooth.tasks import AsyncTasksPool
 from pibooth.counters import Counters
 from pibooth.config.parser import PiboothConfigParser
@@ -58,14 +58,19 @@ def fond_path():
     return os.path.join(CAPTURES_DIR, 'fond.jpg')
 
 
-@pytest.fixture(scope='session')
-def cfg_path():
-    return os.path.join(MOCKS_DIR, 'pibooth.cfg')
+@pytest.fixture
+def cfg_path(tmpdir):
+    tmpfile = tmpdir.join("test_pibooth_config.cfg")
+    with open(os.path.join(MOCKS_DIR, 'pibooth.cfg')) as fp:
+        tmpfile.write(fp.read())
+    return str(tmpfile)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def cfg(cfg_path):
-    return PiboothConfigParser(cfg_path, None)
+    config = PiboothConfigParser(cfg_path, None)
+    config.autostart_filename = os.path.dirname(cfg_path) + "/autostart"
+    return config
 
 
 # --- Pibooth initialization --------------------------------------------------

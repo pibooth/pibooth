@@ -26,7 +26,11 @@ PAPER_FORMATS = {
 
 class Printer(object):
 
-    """Printer driver. 
+    """Printer driver.
+
+    :py:class:`Printer` emits the following events consumed by plugins:
+
+        - EVT_PIBOOTH_PRINTER_UPDATE
     """
 
     def __init__(self, name='default', max_pages=-1, options=None, counters=None):
@@ -61,12 +65,12 @@ class Printer(object):
         elif not self.options:
             self.options = {}
 
-    def _on_event(self, event):
+    def _on_event(self, notification):
         """
         Call for each new printer event.
         """
-        LOGGER.info(event.title)
-        evts.post(evts.EVT_PIBOOTH_PRINTER_UPDATE, notification=event)
+        LOGGER.info(notification.title)
+        evts.post(evts.EVT_PIBOOTH_PRINTER_UPDATE, notification=notification)
 
     def is_installed(self):
         """Return True if the CUPS server is available for printing.

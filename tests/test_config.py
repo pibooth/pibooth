@@ -10,12 +10,23 @@ def test_join_path_to_config_directory(cfg):
 
 
 def test_not_in_config_option(cfg):
-    assert cfg.get('GENERAL', 'autostart') == 'False'
+    assert cfg.get('GENERAL', 'autostart_delay') == '0'
 
 
 def test_not_existing_option(cfg):
     with pytest.raises(KeyError):
         cfg.get('GENERAL', 'toto')
+
+
+def test_save(cfg):
+    cfg.save()
+    cfg.load()
+    assert cfg.get('OTHER', 'hello') == 'world'
+
+
+def test_handle_autostart(cfg):
+    cfg.handle_autostart()
+    assert osp.isfile(cfg.autostart_filename)
 
 
 def test_string(cfg):

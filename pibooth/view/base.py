@@ -74,6 +74,7 @@ class BaseScene(object):
         raise NotImplementedError
 
     def set_print_number(self, current_nbr=None, failure=False):
+        """Define the printer info to display on the view."""
         raise NotImplementedError
 
 
@@ -81,7 +82,8 @@ class BaseWindow(object):
 
     """Base class for window.
 
-    It emits the following event that are consumed by plugins:
+    :py:class:`BaseWindow` emits the following events consumed by plugins:
+
         - EVT_PIBOOTH_CAPTURE
         - EVT_PIBOOTH_PRINT
         - EVT_PIBOOTH_SETTINGS
@@ -89,13 +91,13 @@ class BaseWindow(object):
     The following attributes are available for use in plugins (``win`` reprensents
     the BaseWindow instance):
 
-    - ``win.type`` (str): type of the graphical backend library ('nogui' or 'pygame')
-    - ``win.text_color`` (tuple): RGB color tuple used for texts
-    - ``win.bg_color_or_path`` (tuple/str): RGB color tuple or path to image used for background
-    - ``win.is_fullscreen`` (bool): True if the window is display in full screen
-    - ``win.is_menu_shown`` (bool): True if the settings menu is displayed
-    - ``win.print_number`` (int): current number of files in printer queue
-    - ``win.print_failure`` (bool): True if a printer failure is displayed
+        - ``win.type`` (str): type of the graphical backend library (``nogui`` or ``pygame``)
+        - ``win.text_color`` (tuple): RGB color tuple used for texts
+        - ``win.bg_color_or_path`` (tuple/str): RGB color tuple or path to image used for background
+        - ``win.is_fullscreen`` (bool): True if the window is display in full screen
+        - ``win.is_menu_shown`` (bool): True if the settings menu is displayed
+        - ``win.print_number`` (int): current number of files in printer queue
+        - ``win.print_failure`` (bool): True if a printer failure is displayed
     """
 
     FULLSCREEN = 'fullscreen'
