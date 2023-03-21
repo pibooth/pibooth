@@ -61,9 +61,6 @@ class CameraPlugin(object):
     @pibooth.hookimpl
     def state_preview_enter(self, cfg, app, win):
         LOGGER.info("Show preview before next capture")
-        if not app.capture_date:
-            app.capture_date = time.strftime("%Y-%m-%d-%H-%M-%S")
-
         border = 100
         app.camera.preview(win.get_rect(absolute=True).inflate(-border, -border))
         self.timer.start(cfg.getint('WINDOW', 'preview_delay'))
@@ -84,6 +81,9 @@ class CameraPlugin(object):
     @pibooth.hookimpl
     def state_capture_enter(self, cfg, app):
         effects = cfg.gettyped('PICTURE', 'captures_effects')
+        if not app.capture_date:
+            app.capture_date = time.strftime("%Y-%m-%d-%H-%M-%S")
+
         if not isinstance(effects, (list, tuple)):
             # Same effect for all captures
             effect = effects
