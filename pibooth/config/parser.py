@@ -17,16 +17,22 @@ from pibooth.utils import LOGGER, open_text_editor
 class PiboothConfigParser(RawConfigParser):
 
     """Class to parse and store the configuration values.
-    The following attributes are available for use in plugins:
 
-    :attr filename: absolute path to the laoded config file
-    :type filename: str
+    The following attributes are available for use in plugins (``cfg`` reprensents
+    the PiboothConfigParser instance):
+
+    - ``cfg.filename`` (str): absolute path to the laoded config file
     """
 
     def __init__(self, filename, plugin_manager, load=True):
         super().__init__()
         self._pm = plugin_manager
+
+        # ---------------------------------------------------------------------
+        # Variables shared with plugins
+        # Change them may break plugins compatibility
         self.filename = osp.abspath(osp.expanduser(filename))
+        # ---------------------------------------------------------------------
 
         if osp.isfile(self.filename) and load:
             self.load()

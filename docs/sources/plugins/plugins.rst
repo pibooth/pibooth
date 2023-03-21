@@ -24,7 +24,7 @@ implements a subset of those functions.
 
 There are 2 families of hooks implemented in `pibooth`:
 
- - **Pibooth state-independent hooks**: used to change de default components likes camera, printer, ...
+ - **State-independent hooks**: used to change de default components likes camera, printer, ...
    Note that plugins defining those hooks may not be dinamically enabled/disabled.
  - **State dependant hooks** (see below): used to change state behavior.
 

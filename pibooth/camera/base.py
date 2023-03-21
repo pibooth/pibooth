@@ -11,7 +11,7 @@ from pibooth.pictures import sizing
 class BaseCamera(object):
     """Base class for camera.
 
-    It is responsible to emit the following event that are consumed by plugins:
+    It emits the following event that are consumed by plugins:
         - EVT_PIBOOTH_CAM_PREVIEW
         - EVT_PIBOOTH_CAM_CAPTURE
     """
