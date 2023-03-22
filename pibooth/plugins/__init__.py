@@ -15,12 +15,12 @@ from pibooth.plugins.view_plugin import ViewPlugin
 
 def create_plugin_manager():
     """Create plugin manager and defined hooks specification."""
-    plugin_manager = PiPluginManager(hookspecs.hookspec.project_name)
+    plugin_manager = PiboothPluginManager(hookspecs.hookspec.project_name)
     plugin_manager.add_hookspecs(hookspecs)
     return plugin_manager
 
 
-class PiPluginManager(pluggy.PluginManager):
+class PiboothPluginManager(pluggy.PluginManager):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -43,6 +43,11 @@ class PiPluginManager(pluggy.PluginManager):
         at least one time.
         """
         plugin_name = super().register(plugin, name)
+
+        # Check that each hookimpl is defined in the hookspec
+        # except for hookimpl with kwarg 'optionalhook=True'.
+        self.check_pending()
+
         if plugin not in self._plugin2calls:
             self._plugin2calls[plugin] = set()
         return plugin_name
@@ -82,10 +87,6 @@ class PiPluginManager(pluggy.PluginManager):
         for plugin in plugins:
             self.register(plugin)
 
-        # Check that each hookimpl is defined in the hookspec
-        # except for hookimpl with kwarg 'optionalhook=True'.
-        self.check_pending()
-
         # Disable unwanted plugins
         if disabled and disabled != 'all':
             for name in disabled:
@@ -100,9 +101,8 @@ class PiPluginManager(pluggy.PluginManager):
         """
         values = []
         for plugin in self._plugin2calls:
-            # The core plugins are classes, we don't want to include
-            # them here, thus we take only the modules objects.
-            if inspect.ismodule(plugin):
+            # Ignore pibooth internal plugins
+            if not getattr(plugin, '__name__', '').startswith('pibooth-core:'):
                 if plugin not in values:
                     values.append(plugin)
         return values
@@ -140,8 +140,8 @@ class PiPluginManager(pluggy.PluginManager):
         return name
 
     def get_calls_history(self, plugin):
-        """Return the ist of the hook names that has already been called at
-        least one time fr the given plugins.
+        """Return the list of the hook names that has already been called at
+        least one time for the given plugins.
 
         :param plugin: plugin for which calls history is requested
         :type plugin: object
@@ -150,28 +150,33 @@ class PiPluginManager(pluggy.PluginManager):
             return list(self._plugin2calls[plugin])
         return []
 
-    def subset_hook_caller_for_plugin(self, name, plugin):
-        """ Return a new :py:class:`.hooks._HookCaller` instance for the named
-        method which manages calls to the given plugins.
-        """
-        exluded_plugins = [p for p in self.get_plugins() if self.get_name(p) != self.get_name(plugin)]
-        return self.subset_hook_caller(name, exluded_plugins)
-
-    def get_hookcaller(self, name, optional=False):
-        """Return a hook caller used to call a chain of given hook name.
+    def subset_hook_caller(self, name, remove_plugins=(), optional=False):
+        """Return a new :py:class:`._hooks._HookCaller` instance for the named method
+        which manages calls to all registered plugins except the ones from
+        remove_plugins.
 
         :param name: name of the hook to call
         :type name: str
+        :param remove_plugins: list of excluded plugins
+        :type remove_plugins: list
         :param optional: don't raise error if hookspec is not defined
         :type optional: bool
         """
         if optional:
-            # Accept undefined hookspec
-            hook = getattr(self.hook, name, None)
-        else:
-            # Raise AttributeError if no hookspec defined
-            hook = getattr(self.hook, name)
-        if hook is None:
-            hook = _HookCaller(name, self._hookexec)
-            setattr(self.hook, name, hook)
-        return hook
+            # Accept undefined hookspec (avoid AttributeError)
+            if getattr(self.hook, name, None) is None:
+                hook = _HookCaller(name, self._hookexec)
+                setattr(self.hook, name, hook)
+        return super().subset_hook_caller(name, remove_plugins)
+
+    def subset_hook_caller_for_plugin(self, name, plugin):
+        """Return a new :py:class:`.hooks._HookCaller` instance for the named method
+        which manages calls to the given registered plugin.
+
+        :param name: name of the hook to call
+        :type name: str
+        :param plugin: plugin from which hook is called
+        :type plugin: object
+        """
+        exluded_plugins = [p for p in self.get_plugins() if self.get_name(p) != self.get_name(plugin)]
+        return self.subset_hook_caller(name, exluded_plugins)

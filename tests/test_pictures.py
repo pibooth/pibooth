@@ -30,7 +30,7 @@ def test_text_position(pygame_loop):
 
     index = itertools.cycle(POSITIONS)
 
-    def handler(screen, events):
+    def events_handler(screen, events):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 text = next(index)
@@ -42,14 +42,14 @@ def test_text_position(pygame_loop):
                 screen.blit(surface, (0, 0))
                 return surface.get_rect()
 
-    pygame_loop(handler)
+    pygame_loop(events_handler)
 
 
 def test_text_multilines(pygame_loop):
 
     index = itertools.cycle(MULTILINES)
 
-    def handler(screen, events):
+    def events_handler(screen, events):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 text = next(index)
@@ -61,4 +61,4 @@ def test_text_multilines(pygame_loop):
                 screen.blit(surface, (0, 0))
                 return surface.get_rect()
 
-    pygame_loop(handler)
+    pygame_loop(events_handler)
