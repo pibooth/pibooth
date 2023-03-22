@@ -24,9 +24,9 @@ implements a subset of those functions.
 
 There are 2 families of hooks implemented in `pibooth`:
 
- - **State-independent hooks**: used to change de default components likes camera, printer, ...
-   Note that plugins defining those hooks may not be dinamically enabled/disabled.
- - **State dependant hooks** (see below): used to change state behavior.
+- **State-independent hooks**: used to change de default components likes camera, printer, ...
+  Note that plugins defining those hooks may not be dinamically enabled/disabled.
+- **State dependant hooks** (see below): used to change state behavior.
 
 Influencing states
 ^^^^^^^^^^^^^^^^^^
@@ -38,15 +38,15 @@ A ``scene`` represent the visual interface displayed to the user while the state
 
 The following states are defined:
 
- - ``wait``       : wait for starting a new capture sequence
- - ``choose``     : selection of the number of captures
- - ``chosen``     : confirm the number of captures
- - ``preview``    : show preview and countdown
- - ``capture``    : take a capture
- - ``processing`` : build the final picture
- - ``print``      : show preview and ask for printing
- - ``finish``     : thank before going back to wait state
- - ``failsafe``   : oops message when an exception occurs
+- ``wait``       : wait for starting a new capture sequence
+- ``choose``     : selection of the number of captures
+- ``chosen``     : confirm the number of captures
+- ``preview``    : show preview and countdown
+- ``capture``    : take a capture
+- ``processing`` : build the final picture
+- ``print``      : show preview and ask for printing
+- ``finish``     : thank before going back to wait state
+- ``failsafe``   : oops message when an exception occurs
 
 .. _state_sequence_details:
 

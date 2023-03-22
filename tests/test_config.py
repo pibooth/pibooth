@@ -10,18 +10,33 @@ def test_join_path_to_config_directory(cfg):
 
 
 def test_not_in_config_option(cfg):
-    assert cfg.get('GENERAL', 'autostart_delay') == '0'
+    assert cfg.get('GENERAL', 'debug') == 'False'
+    assert cfg.get('OTHER', 'toto') == 'is a hero'
 
 
 def test_not_existing_option(cfg):
     with pytest.raises(KeyError):
-        cfg.get('GENERAL', 'toto')
+        cfg.get('HELLO', 'world')
 
 
 def test_save(cfg):
+    with pytest.raises(KeyError):
+        cfg.get('HELLO', 'world')
+    cfg.set('HELLO', 'world', "beautiful")
     cfg.save()
-    cfg.load()
-    assert cfg.get('OTHER', 'hello') == 'world'
+    cfg.load(clean=True)
+    assert cfg.get('HELLO', 'world') == "beautiful"
+    assert cfg.get('OTHER', 'toto') == 'is a hero'
+
+
+def test_save_default(cfg):
+    cfg.set('GENERAL', 'autostart_delay', '10')
+    assert cfg.get('GENERAL', 'autostart_delay') == '10'
+    cfg.save(default=True)
+    cfg.load(clean=True)
+    assert cfg.get('GENERAL', 'autostart_delay') == '0'
+    with pytest.raises(KeyError):
+        cfg.get('OTHER', 'toto') == 'is a hero'
 
 
 def test_handle_autostart(cfg):
@@ -76,3 +91,10 @@ def test_string_list_extended(cfg):
     assert cfg.gettuple('PICTURE', 'overlays', str, 1) == ('',)
     assert cfg.gettuple('PICTURE', 'backgrounds', str) == ('fond1.jpg', 'fond2.jpg')
     assert cfg.gettuple('PICTURE', 'backgrounds', str, 3) == ('fond1.jpg', 'fond2.jpg', 'fond2.jpg')
+
+
+def test_add_option(cfg):
+    with pytest.raises(KeyError):
+        cfg.get('HELLO', 'world')
+    cfg.add_option('HELLO', 'world', "beautiful", "This is a new dummy option")
+    assert cfg.get('HELLO', 'world') == "beautiful"

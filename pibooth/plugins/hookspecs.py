@@ -40,8 +40,9 @@ def pibooth_setup_states(cfg, win, machine):
     """Hook used to setup the states of the ``pibooth`` state-machine.
 
     A state is defined using ``machine.add_state(name, scene)`` where:
-     - name is the name of the state (shall be unique among all states)
-     - scene to display during state is active
+
+    - name is the name of the state (shall be unique among all states)
+    - scene to display during state is active
 
     :param cfg: application configuration
     :param win: graphical window instance

@@ -8,6 +8,7 @@ from pibooth import language
 from pibooth.tasks import AsyncTasksPool
 from pibooth.counters import Counters
 from pibooth.config.parser import PiboothConfigParser
+from pibooth.plugins import create_plugin_manager
 from pibooth.view import get_scene
 from pibooth.camera import get_rpi_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
 from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
@@ -58,25 +59,24 @@ def fond_path():
     return os.path.join(CAPTURES_DIR, 'fond.jpg')
 
 
+@pytest.fixture(scope='session')
+def plugin_path():
+    return os.path.join(MOCKS_DIR, 'testplugin.py')
+
+
 @pytest.fixture
 def cfg_path(tmpdir):
     tmpfile = tmpdir.join("test_pibooth_config.cfg")
+    # Create a dummy configuration file in a temporary directory
     with open(os.path.join(MOCKS_DIR, 'pibooth.cfg')) as fp:
         tmpfile.write(fp.read())
     return str(tmpfile)
 
 
-@pytest.fixture
-def cfg(cfg_path):
-    config = PiboothConfigParser(cfg_path, None)
-    config.autostart_filename = os.path.dirname(cfg_path) + "/autostart"
-    return config
-
-
 # --- Pibooth initialization --------------------------------------------------
 
 @pytest.fixture
-def init(tmpdir):
+def init_lang(tmpdir):
     return language.init(str(tmpdir.join('translations.cfg')))
 
 
@@ -92,6 +92,19 @@ def init_tasks():
     pool = AsyncTasksPool()
     yield pool
     pool.quit()
+
+
+@pytest.fixture
+def pm():
+    return create_plugin_manager()
+
+
+@pytest.fixture
+def cfg(cfg_path, pm):
+    config = PiboothConfigParser(cfg_path, pm)
+    # Update autostart location to a temporary directory
+    config.autostart_filename = os.path.dirname(cfg_path) + "/autostart"
+    return config
 
 
 @pytest.fixture

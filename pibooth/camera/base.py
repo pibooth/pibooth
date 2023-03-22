@@ -13,8 +13,8 @@ class BaseCamera(object):
 
     :py:class:`BaseCamera` emits the following events consumed by plugins:
 
-        - EVT_PIBOOTH_CAM_PREVIEW
-        - EVT_PIBOOTH_CAM_CAPTURE
+    - EVT_PIBOOTH_CAM_PREVIEW
+    - EVT_PIBOOTH_CAM_CAPTURE
     """
 
     IMAGE_EFFECTS = ['none']

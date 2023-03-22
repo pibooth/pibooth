@@ -30,7 +30,7 @@ class Printer(object):
 
     :py:class:`Printer` emits the following events consumed by plugins:
 
-        - EVT_PIBOOTH_PRINTER_UPDATE
+    - EVT_PIBOOTH_PRINTER_UPDATE
     """
 
     def __init__(self, name='default', max_pages=-1, options=None, counters=None):

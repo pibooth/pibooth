@@ -320,14 +320,13 @@ def load_module(path):
         sys.path.append(dirname)
 
     for hook in sys.meta_path:
-        if hasattr(hook, 'find_module'):
+        if hasattr(hook, 'find_spec'):
+            spec = hook.find_spec(modname, [dirname])
+            if spec:
+                return spec.loader.load_module(modname)
+        else:
             # Deprecated since Python 3.4
             loader = hook.find_module(modname, [dirname])
             if loader:
                 return loader.load_module(modname)
-        else:
-            spec = hook.find_spec(modname, [dirname])
-            if spec:
-                return spec.loader.load_module(modname)
-
     LOGGER.warning("Can not load Python module '%s' from '%s'", modname, path)

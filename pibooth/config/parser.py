@@ -21,8 +21,8 @@ class PiboothConfigParser(RawConfigParser):
     The following attributes are available for use in plugins (``cfg`` reprensents
     the PiboothConfigParser instance):
 
-        - ``cfg.filename`` (str): absolute path to the laoded config file
-        - ``cfg.autostart_filename`` (str): file used to start pibooth at Raspberry Pi startup
+    - ``cfg.filename`` (str): absolute path to the laoded config file
+    - ``cfg.autostart_filename`` (str): file used to start pibooth at Raspberry Pi startup
     """
 
     def __init__(self, filename, plugin_manager, load=True):
@@ -90,9 +90,12 @@ class PiboothConfigParser(RawConfigParser):
 
         self.handle_autostart()
 
-    def load(self):
+    def load(self, clean=False):
         """Load configuration from file.
         """
+        if clean:
+            for section in self.sections():
+                self.remove_section(section)
         self.read(self.filename, encoding="utf-8")
         self.handle_autostart()
 
