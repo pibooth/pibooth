@@ -54,11 +54,11 @@ class StateMachine:
 
         try:
             # Perform the actions of the active state
-            hook = self.pm.get_hookcaller(f'state_{self.active_state}_do', optional=True)
+            hook = self.pm.subset_hook_caller(f'state_{self.active_state}_do', optional=True)
             hook(cfg=self.cfg, app=self.app, win=self.win, events=events)
 
             # Check conditions to activate the next state
-            hook = self.pm.get_hookcaller(f'state_{self.active_state}_validate', optional=True)
+            hook = self.pm.subset_hook_caller(f'state_{self.active_state}_validate', optional=True)
             new_state_name = hook(cfg=self.cfg, app=self.app, win=self.win, events=events)
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:
@@ -79,7 +79,7 @@ class StateMachine:
         try:
             # Perform any exit actions of the current state
             if self.active_state is not None:
-                hook = self.pm.get_hookcaller(f'state_{self.active_state}_exit', optional=True)
+                hook = self.pm.subset_hook_caller(f'state_{self.active_state}_exit', optional=True)
                 hook(cfg=self.cfg, app=self.app, win=self.win)
                 BlockConsoleHandler.dedent()
                 LOGGER.debug("took %0.3f seconds", time.time() - self._start_time)
@@ -102,7 +102,7 @@ class StateMachine:
 
         try:
             self.win.set_scene(self.active_state)
-            hook = self.pm.get_hookcaller(f'state_{self.active_state}_enter', optional=True)
+            hook = self.pm.subset_hook_caller(f'state_{self.active_state}_enter', optional=True)
             hook(cfg=self.cfg, app=self.app, win=self.win)
         except Exception as ex:
             if self.failsafe_state and self.active_state != self.failsafe_state:

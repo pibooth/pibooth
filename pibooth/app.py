@@ -40,12 +40,18 @@ class PiboothApplication:
 
     """Main class representing the ``pibooth`` software.
 
+    :py:class:`PiboothApplication` emits the following events consumed by the view:
+
+    - EVT_BUTTON_CAPTURE
+    - EVT_BUTTON_PRINT
+    - EVT_BUTTON_SETTINGS
+
     The following attributes are available for use in plugins (``app`` reprensents
     the PiboothApplication instance):
 
     - ``app.capture_nbr`` (int): number of capture to be done in the current sequence
     - ``app.capture_date`` (str): date (% Y-%m-%d-%H-%M-%S) of the first capture of the current sequence
-    - ``app.capture_choices``(tuple): possible choices of captures numbers.
+    - ``app.capture_choices`` (tuple): possible choices of captures numbers.
     - ``app.previous_picture`` (:py:class:`PIL.Image`): picture generated during last sequence
     - ``app.previous_animated`` (:py:func:`itertools.cycle`): infinite list of picture to display during animation
     - ``app.previous_picture_file`` (str): file name of the picture generated during last sequence

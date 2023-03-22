@@ -74,6 +74,7 @@ class BaseScene:
         raise NotImplementedError
 
     def set_print_number(self, current_nbr=None, failure=False):
+        """Define the printer info to display on the view."""
         raise NotImplementedError
 
 
@@ -81,15 +82,16 @@ class BaseWindow:
 
     """Base class for window.
 
-    It emits the following event that are consumed by plugins:
-        - EVT_PIBOOTH_CAPTURE
-        - EVT_PIBOOTH_PRINT
-        - EVT_PIBOOTH_SETTINGS
+    :py:class:`BaseWindow` emits the following events consumed by plugins:
+
+    - EVT_PIBOOTH_CAPTURE
+    - EVT_PIBOOTH_PRINT
+    - EVT_PIBOOTH_SETTINGS
 
     The following attributes are available for use in plugins (``win`` reprensents
     the BaseWindow instance):
 
-    - ``win.type`` (str): type of the graphical backend library ('nogui' or 'pygame')
+    - ``win.type`` (str): name of the graphical backend library (``nogui`` or ``pygame``)
     - ``win.text_color`` (tuple): RGB color tuple used for texts
     - ``win.bg_color_or_path`` (tuple/str): RGB color tuple or path to image used for background
     - ``win.is_fullscreen`` (bool): True if the window is display in full screen

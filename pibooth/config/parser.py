@@ -22,6 +22,7 @@ class PiboothConfigParser(RawConfigParser):
     the PiboothConfigParser instance):
 
     - ``cfg.filename`` (str): absolute path to the laoded config file
+    - ``cfg.autostart_filename`` (str): file used to start pibooth at Raspberry Pi startup
     """
 
     def __init__(self, filename, plugin_manager, load=True):
@@ -32,6 +33,7 @@ class PiboothConfigParser(RawConfigParser):
         # Variables shared with plugins
         # Change them may break plugins compatibility
         self.filename = osp.abspath(osp.expanduser(filename))
+        self.autostart_filename = osp.expanduser('~/.config/autostart/pibooth.desktop')
         # ---------------------------------------------------------------------
 
         if osp.isfile(self.filename) and load:
@@ -90,9 +92,12 @@ class PiboothConfigParser(RawConfigParser):
 
         self.handle_autostart()
 
-    def load(self):
+    def load(self, clean=False):
         """Load configuration from file.
         """
+        if clean:
+            for section in self.sections():
+                self.remove_section(section)
         self.read(self.filename, encoding="utf-8")
         self.handle_autostart()
 
@@ -106,14 +111,13 @@ class PiboothConfigParser(RawConfigParser):
     def handle_autostart(self):
         """Handle desktop file to start pibooth at the Raspberry Pi startup.
         """
-        filename = osp.expanduser('~/.config/autostart/pibooth.desktop')
-        dirname = osp.dirname(filename)
+        dirname = osp.dirname(self.autostart_filename)
         enable = self.getboolean('GENERAL', 'autostart')
         delay = self.getint('GENERAL', 'autostart_delay')
         if enable:
             regenerate = True
-            if osp.isfile(filename):
-                with open(filename, 'r') as fp:
+            if osp.isfile(self.autostart_filename):
+                with open(self.autostart_filename, 'r') as fp:
                     txt = fp.read()
                     if delay > 0 and f"sleep {delay}" in txt or delay <= 0 and "sleep" not in txt:
                         regenerate = False
@@ -123,7 +127,7 @@ class PiboothConfigParser(RawConfigParser):
                     os.makedirs(dirname)
 
                 LOGGER.info("Generate the auto-startup file in '%s'", dirname)
-                with open(filename, 'w') as fp:
+                with open(self.autostart_filename, 'w') as fp:
                     fp.write("[Desktop Entry]\n")
                     fp.write("Name=pibooth\n")
                     if delay > 0:
@@ -132,9 +136,9 @@ class PiboothConfigParser(RawConfigParser):
                         fp.write("Exec=pibooth\n")
                     fp.write("Type=application\n")
 
-        elif not enable and osp.isfile(filename):
+        elif not enable and osp.isfile(self.autostart_filename):
             LOGGER.info("Remove the auto-startup file in '%s'", dirname)
-            os.remove(filename)
+            os.remove(self.autostart_filename)
 
     def join_path(self, *names):
         """Return the directory path of the configuration file
