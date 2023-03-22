@@ -3,6 +3,7 @@
 import time
 import math
 import pibooth
+from pibooth import evts
 from pibooth import camera
 from pibooth.language import get_translated_text
 from pibooth.utils import LOGGER, PollingTimer
@@ -18,7 +19,7 @@ class CameraPlugin(object):
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.timer = PollingTimer()
-        self.count = 0
+        self.capture_count = 0
 
     @pibooth.hookimpl(hookwrapper=True)
     def pibooth_setup_camera(self, cfg):
@@ -58,15 +59,8 @@ class CameraPlugin(object):
             app.capture_nbr = app.capture_choices[0]
 
     @pibooth.hookimpl
-    def state_wait_exit(self):
-        self.count = 0
-
-    @pibooth.hookimpl
     def state_preview_enter(self, cfg, app, win):
         LOGGER.info("Show preview before next capture")
-        if not app.capture_date:
-            app.capture_date = time.strftime("%Y-%m-%d-%H-%M-%S")
-
         border = 100
         app.camera.preview(win.get_rect(absolute=True).inflate(-border, -border))
         self.timer.start(cfg.getint('WINDOW', 'preview_delay'))
@@ -87,20 +81,32 @@ class CameraPlugin(object):
     @pibooth.hookimpl
     def state_capture_enter(self, cfg, app):
         effects = cfg.gettyped('PICTURE', 'captures_effects')
+        if not app.capture_date:
+            app.capture_date = time.strftime("%Y-%m-%d-%H-%M-%S")
+
         if not isinstance(effects, (list, tuple)):
             # Same effect for all captures
             effect = effects
         elif len(effects) >= app.capture_nbr:
             # Take the effect corresponding to the current capture
-            effect = effects[self.count]
+            effect = effects[self.capture_count]
         else:
             # Not possible
             raise ValueError("Not enough effects defined for {} captures {}".format(app.capture_nbr, effects))
 
         LOGGER.info("Take a capture")
         app.camera.capture(effect)
-        self.count += 1
+
+    @pibooth.hookimpl
+    def state_capture_do(self, events):
+        event = evts.find_event(events, evts.EVT_PIBOOTH_CAM_CAPTURE)
+        if event:
+            self.capture_count += 1
 
     @pibooth.hookimpl
     def state_capture_exit(self, app):
         app.camera.stop_preview()
+
+    @pibooth.hookimpl
+    def state_processing_enter(self):
+        self.capture_count = 0
