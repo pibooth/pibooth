@@ -98,8 +98,8 @@ add_default_option("WINDOW", "arrows_x_offset", 0,
                    "Apply horizontal offset to arrows position")
 
 add_default_option("WINDOW", "preview_delay", 3,
-                   "How long is the preview in seconds",
-                   "Preview delay", [str(i) for i in range(1, 21)])
+                   "How long is the preview in seconds (0 if never shown)",
+                   "Preview delay", [str(i) for i in range(0, 21)])
 
 add_default_option("WINDOW", "preview_countdown", True,
                    "Show a countdown timer during the preview",

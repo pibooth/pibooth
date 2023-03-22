@@ -17,16 +17,22 @@ from pibooth.utils import LOGGER, open_text_editor
 class PiboothConfigParser(RawConfigParser):
 
     """Class to parse and store the configuration values.
-    The following attributes are available for use in plugins:
 
-    :attr filename: absolute path to the laoded config file
-    :type filename: str
+    The following attributes are available for use in plugins (``cfg`` reprensents
+    the PiboothConfigParser instance):
+
+    - ``cfg.filename`` (str): absolute path to the laoded config file
     """
 
     def __init__(self, filename, plugin_manager, load=True):
         super().__init__()
         self._pm = plugin_manager
+
+        # ---------------------------------------------------------------------
+        # Variables shared with plugins
+        # Change them may break plugins compatibility
         self.filename = osp.abspath(osp.expanduser(filename))
+        # ---------------------------------------------------------------------
 
         if osp.isfile(self.filename) and load:
             self.load()
@@ -65,19 +71,21 @@ class PiboothConfigParser(RawConfigParser):
                         val = self.get(section, name)
                     fp.write(option_pattern.format(comment=value[1], name=name, value=val))
 
-                # 2. Write options that are not in DEFAULT (maybe an option from a disabled plugin)
-                for name, value in self.items(section):
-                    if name not in DEFAULT[section]:
-                        fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
-                                                       name=name, value=value))
-
-            # 3. Write sections that are not in DEFAULT (maybe a section from a disabled plugin)
-            for section in self.sections():
-                if section not in DEFAULT:
-                    fp.write(f"[{section}]\n")
+                if not default and self.has_section(section):
+                    # 2. Write options that are not in DEFAULT (maybe an option from a disabled plugin)
                     for name, value in self.items(section):
-                        fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
-                                                       name=name, value=value))
+                        if name not in DEFAULT[section]:
+                            fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
+                                                           name=name, value=value))
+
+            if not default:
+                # 3. Write sections that are not in DEFAULT (maybe a section from a disabled plugin)
+                for section in self.sections():
+                    if section not in DEFAULT:
+                        fp.write(f"[{section}]\n")
+                        for name, value in self.items(section):
+                            fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
+                                                           name=name, value=value))
 
 
         self.handle_autostart()

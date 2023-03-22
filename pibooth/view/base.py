@@ -81,15 +81,21 @@ class BaseWindow:
 
     """Base class for window.
 
-    It is responsible to emit the following event that are consumed by plugins:
+    It emits the following event that are consumed by plugins:
         - EVT_PIBOOTH_CAPTURE
         - EVT_PIBOOTH_PRINT
         - EVT_PIBOOTH_SETTINGS
 
-    The following attributes are available for use in plugins:
+    The following attributes are available for use in plugins (``win`` reprensents
+    the BaseWindow instance):
 
-    :attr is_fullscreen: True if the window is display in full screen
-    :type is_fullscreen: bool
+    - ``win.type`` (str): type of the graphical backend library ('nogui' or 'pygame')
+    - ``win.text_color`` (tuple): RGB color tuple used for texts
+    - ``win.bg_color_or_path`` (tuple/str): RGB color tuple or path to image used for background
+    - ``win.is_fullscreen`` (bool): True if the window is display in full screen
+    - ``win.is_menu_shown`` (bool): True if the settings menu is displayed
+    - ``win.print_number`` (int): current number of files in printer queue
+    - ``win.print_failure`` (bool): True if a printer failure is displayed
     """
 
     FULLSCREEN = 'fullscreen'
@@ -102,21 +108,23 @@ class BaseWindow:
                  arrow_offset=0,
                  debug=False):
         self._size = size  # Size of the window when not fullscreen
-
-        self.type = None
         self.debug = debug
-        self.text_color = text_color
-        self.bg_color_or_path = background
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
-        self.print_number = 0
-        self.print_failure = False
-
-        self.is_fullscreen = False
-        self.is_menu_shown = False
-
         self.scenes = {}
         self.scene = None
+
+        # ---------------------------------------------------------------------
+        # Variables shared with plugins
+        # Change them may break plugins compatibility
+        self.type = None
+        self.text_color = text_color
+        self.bg_color_or_path = background
+        self.print_number = 0
+        self.print_failure = False
+        self.is_fullscreen = False
+        self.is_menu_shown = False
+        # ---------------------------------------------------------------------
 
     def add_scene(self, scene):
         """Add a scene to the internal dictionary.
@@ -187,7 +195,7 @@ class BaseWindow:
     def set_print_number(self, current_nbr=None, failure=False):
         """Set the current number of tasks in the printer queue.
         """
-        assert current_nbr >= 0, "Current number of printed files shall be greater or equal to 0"
+        assert current_nbr >= 0, "Current number of files in printer queue shall be greater or equal to 0"
         self.print_number = current_nbr
         self.print_failure = failure
         self.scene.set_print_number(self.print_number, self.print_failure)

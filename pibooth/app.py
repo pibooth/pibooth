@@ -39,30 +39,21 @@ def load_last_saved_picture(path):
 class PiboothApplication:
 
     """Main class representing the ``pibooth`` software.
-    The following attributes are available for use in plugins:
 
-    :attr capture_nbr: number of capture to be done in the current sequence
-    :type capture_nbr: int
-    :attr capture_date: date (% Y-%m-%d-%H-%M-%S) of the first capture of the current sequence
-    :type capture_date: str
-    :attr capture_choices: possible choices of captures numbers.
-    :type capture_choices: tuple
-    :attr previous_picture: picture generated during last sequence
-    :type previous_picture: : py: class: `PIL.Image`
-    :attr previous_animated: infinite list of picture to display during animation
-    :type previous_animated: : py: func: `itertools.cycle`
-    :attr previous_picture_file: file name of the picture generated during last sequence
-    :type previous_picture_file: str
-    :attr count: holder for counter values
-    :type count: : py: class: `pibooth.counters.Counters`
-    :attr camera: camera used
-    :type camera: : py: class: `pibooth.camera.base.BaseCamera`
-    :attr buttons: access to hardware buttons ``capture`` and ``printer``
-    :type buttons: : py: class: `gpiozero.ButtonBoard`
-    :attr leds: access to hardware LED ``capture`` and ``printer``
-    :attr leds: : py: class: `gpiozero.LEDBoard`
-    :attr printer: printer used
-    :type printer: : py: class: `pibooth.printer.Printer`
+    The following attributes are available for use in plugins (``app`` reprensents
+    the PiboothApplication instance):
+
+    - ``app.capture_nbr`` (int): number of capture to be done in the current sequence
+    - ``app.capture_date`` (str): date (% Y-%m-%d-%H-%M-%S) of the first capture of the current sequence
+    - ``app.capture_choices``(tuple): possible choices of captures numbers.
+    - ``app.previous_picture`` (:py:class:`PIL.Image`): picture generated during last sequence
+    - ``app.previous_animated`` (:py:func:`itertools.cycle`): infinite list of picture to display during animation
+    - ``app.previous_picture_file`` (str): file name of the picture generated during last sequence
+    - ``app.count`` (:py:class:`pibooth.counters.Counters`): holder for counter values
+    - ``app.camera`` (:py:class:`pibooth.camera.base.BaseCamera`): camera used
+    - ``app.buttons`` (:py:class:`gpiozero.ButtonBoard`): access to hardware buttons ``capture`` and ``printer``
+    - ``app.leds`` (:py:class:`gpiozero.LEDBoard`): access to hardware LED ``capture`` and ``printer``
+    - ``app.printer`` (:py:class:`pibooth.printer.Printer`): printer used
     """
 
     def __init__(self, config, plugin_manager, window_type='pygame'):
