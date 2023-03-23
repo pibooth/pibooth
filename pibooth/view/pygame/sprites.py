@@ -503,14 +503,15 @@ class BasePygameScene(BaseScene):
         """Declare a new sprite to draw. If layer is not defined (layer=0),
         layer is automatically assigned depending on the sprite type.
 
-        Sprites are drawn as ordered. Six layers are defined:
+        Sprites are drawn as ordered. Seven layers are defined:
 
             - 0: only ONE background sprite
             - 1: texts sprites
             - 2: assets sprites
             - 3: only ONE speciale image sprite
             - 4: arrows sprites
-            - 5: outlines sprites
+            - 5: printer status
+            - 6: outlines sprites
 
         :param sprite: sprite to add in the draw mechanism
         :type sprite: object
@@ -533,7 +534,7 @@ class BasePygameScene(BaseScene):
 
         self.sprites.add(sprite, layer=layer)
         if outlines:
-            self.sprites.add(OutlinesSprite(sprite), layer=5)
+            self.sprites.add(OutlinesSprite(sprite), layer=6)
         return sprite
 
     @property
@@ -567,7 +568,7 @@ class BasePygameScene(BaseScene):
         :param enable: enable / disable outlines
         :type enable: bool
         """
-        for sprite in self.sprites.get_sprites_from_layer(5):
+        for sprite in self.sprites.get_sprites_from_layer(6):
             if enable:
                 sprite.enable()
             else:
@@ -618,7 +619,8 @@ class BasePygameScene(BaseScene):
             sprite.set_color(color)
 
     def set_print_number(self, current_nbr=None, failure=False):
-        pass
+        """Set the current number of tasks in the printer queue.
+        """
 
     def update(self, events):
         """Pygame events processing callback method.

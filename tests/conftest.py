@@ -83,7 +83,8 @@ def init_lang(tmpdir):
 @pytest.fixture(scope='session')
 def init_pygame():
     pygame.init()
-    yield None
+    pygame.display.set_caption("Hit [ESC] to end the test")
+    yield pygame.display.set_mode((400, 400), pygame.RESIZABLE)
     pygame.quit()
 
 
@@ -117,8 +118,7 @@ def counters(tmpdir):
 
 @pytest.fixture(scope='session')
 def pygame_loop(init_pygame):
-    pygame.display.set_caption("Hit [ESC] to end the test")
-    screen = pygame.display.set_mode((400, 400), pygame.RESIZABLE)
+    screen = init_pygame
     screen.fill((0, 0, 0))
     clock = pygame.time.Clock()
 
