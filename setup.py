@@ -42,6 +42,8 @@ def main():
             'Natural Language :: Hungarian',
             'Natural Language :: Italian',
             'Natural Language :: Norwegian',
+            'Natural Language :: Portuguese (Portugal)',
+            'Natural Language :: Portuguese (Brazil)',
             'Natural Language :: Spanish',
             'Topic :: Multimedia :: Graphics :: Capture :: Digital Camera',
         ],
