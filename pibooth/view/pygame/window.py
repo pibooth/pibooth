@@ -74,7 +74,7 @@ class PygameWindow(BaseWindow):
         """
         super().add_scene(scene)
         scene.add_sprite(self.background_sprite, False, layer=0)
-        #scene.add_sprite(self.status_sprite, False)
+        scene.add_sprite(self.status_sprite, False)
 
     def set_scene(self, name):
         """Override parent class to hide keyboard and full redraw scene.

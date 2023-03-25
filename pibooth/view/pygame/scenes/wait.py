@@ -19,7 +19,7 @@ class WaitScene(BasePygameScene):
         self.image_check = self.add_sprite(ImageSprite('check.png'))
         self.image_check.hide()
 
-        self.printer_ongoing_timer = PollingTimer(1)
+        self.printer_ongoing_timer = PollingTimer(1, False)
 
         self.text.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
         self.left_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)

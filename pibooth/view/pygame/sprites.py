@@ -172,6 +172,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
 
 
 class ImageSprite(BaseSprite):
+
     """Image Sprite. Handle transformation on a source image which can be:
      - RGB color tuple
      - path to an image
@@ -201,10 +202,10 @@ class ImageSprite(BaseSprite):
 
     def __repr__(self):
         if self.path:
-            path = osp.basename(self.path)
+            elem = f"path='{osp.basename(self.path)}'"
         else:
-            path = ''
-        return f"{self.__class__.__name__}(path='{path}', rect={tuple(self.rect)})"
+            elem = f"image={self.image_orig}"
+        return f"{self.__class__.__name__}({elem}, rect={tuple(self.rect)})"
 
     def set_skin(self, skin):
         """Set skin used to fill the sprite. Skin can be:
@@ -288,7 +289,7 @@ class ImageSprite(BaseSprite):
                 if self.path:
                     self.image_orig = pictures.load_pygame_image(self.path)
                 else:
-                    raise ValueError(f"Path to image is missing for '{self.__class__.__name__}'")
+                    raise ValueError(f"Path to image is missing for '{self}'")
 
             if isinstance(self.image_orig, (tuple, list)):
                 self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)

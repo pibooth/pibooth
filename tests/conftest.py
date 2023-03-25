@@ -10,6 +10,7 @@ from pibooth.counters import Counters
 from pibooth.config.parser import PiboothConfigParser
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import get_scene
+from pibooth.view.pygame import sprites
 from pibooth.camera import get_rpi_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
 from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
 
@@ -147,13 +148,14 @@ def pygame_loop(init_pygame):
 def scene_builder():
 
     def create(name):
+        background_sprite = sprites.ImageSprite((0, 0, 0), size=(400, 400))
+        background_sprite.set_crop()
+
         scene = get_scene('pygame', name)
+        scene.add_sprite(background_sprite, False, layer=0)
         scene.set_outlines(True)
-        scene.set_background((0, 0, 0), (400, 400))
         scene.set_text_color((255, 255, 255))
         scene.set_arrows(scene.ARROW_BOTTOM, 0)
-        scene.set_system_status(2, False)
-        scene.need_resize = True
         scene.resize((400, 400))
         return scene
 
