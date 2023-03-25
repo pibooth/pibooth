@@ -11,7 +11,7 @@ import pygame_vkeyboard as vkb
 from pibooth import evts
 from pibooth.utils import LOGGER
 from pibooth.view.base import BaseWindow, BaseScene
-from pibooth.view.pygame import menu
+from pibooth.view.pygame import menu, sprites
 
 
 class PygameWindow(BaseWindow):
@@ -39,6 +39,9 @@ class PygameWindow(BaseWindow):
         pygame.display.set_caption(title)
         self.display_size = (info.current_w, info.current_h)
         self.surface = pygame.display.set_mode(self._size, pygame.RESIZABLE)
+        self.background_sprite = sprites.ImageSprite(size=size)
+        self.set_background(self.bg_color_or_path)
+        self.status_sprite = sprites.SystemStatusSprite(size=(50, 50))
 
         self._keyboard = vkb.VKeyboard(self.surface,
                                        self._on_keyboard_event,
@@ -49,18 +52,6 @@ class PygameWindow(BaseWindow):
         self._keyboard.disable()
         self._menu = None
         self._force_redraw = False
-
-    def set_scene(self, name):
-        super().set_scene(name)
-        self._keyboard.disable()
-        self._force_redraw = True
-
-    def set_menu(self, app, cfg, pm):
-        """Set the menu.
-        """
-        size = self.get_rect().size
-        self._menu = menu.PygameMenu((size[0]*0.75, size[1]*0.75), app, cfg, pm, self._on_menu_closed)
-        self._menu.disable()
 
     def _on_keyboard_event(self, text):
         """Callback when new letter is typed on keyboard.
@@ -77,6 +68,55 @@ class PygameWindow(BaseWindow):
         self.is_menu_shown = False
         self._force_redraw = True  # Because pygame-menu does not manage direty rects
         evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
+
+    def add_scene(self, scene):
+        """Override parent class to add common sprites.
+        """
+        super().add_scene(scene)
+        scene.add_sprite(self.background_sprite, False, layer=0)
+        #scene.add_sprite(self.status_sprite, False)
+
+    def set_scene(self, name):
+        """Override parent class to hide keyboard and full redraw scene.
+        """
+        super().set_scene(name)
+        self.set_background(self.bg_color_or_path)
+        self._keyboard.disable()
+        self._force_redraw = True
+
+    def set_menu(self, app, cfg, pm):
+        """Set the menu.
+        """
+        size = self.get_rect().size
+        self._menu = menu.PygameMenu((size[0]*0.75, size[1]*0.75), app, cfg, pm, self._on_menu_closed)
+        self._menu.disable()
+
+    def set_background(self, color_or_path):
+        """Set background sprite.
+
+        :param color_or_path: color of path to an image
+        :type color_or_path: tuple or str
+        """
+        self.background_sprite.set_rect(*self.get_rect())
+        self.background_sprite.set_skin(color_or_path)
+        self.background_sprite.set_crop()
+
+    def set_system_status(self, printer_queue_size=None, printer_failure=False):
+        """Set system status.
+        """
+        pass
+
+    def resize(self, size):
+        """Resize common spritees, then scenes.
+        """
+        if not self.is_fullscreen:
+            self._size = size  # Size of the window when not fullscreen
+
+        # Call get_rect() to take new computed size if != self._size
+        self.background_sprite.set_rect(*self.get_rect())
+        min_size = min(self.get_rect().size)
+        self.status_sprite.set_rect(0, 0, min_size//10, min_size//10)
+        self.scene.resize(self.get_rect().size)
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.

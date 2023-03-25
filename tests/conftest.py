@@ -152,7 +152,7 @@ def scene_builder():
         scene.set_background((0, 0, 0), (400, 400))
         scene.set_text_color((255, 255, 255))
         scene.set_arrows(scene.ARROW_BOTTOM, 0)
-        scene.set_print_number(2, False)
+        scene.set_system_status(2, False)
         scene.need_resize = True
         scene.resize((400, 400))
         return scene

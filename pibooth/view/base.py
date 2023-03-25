@@ -45,16 +45,6 @@ class BaseScene(object):
         """
         raise NotImplementedError
 
-    def set_background(self, color_or_path, size):
-        """Set background sprite.
-
-        :param color_or_path: color of path to an imgae
-        :type color_or_path: tuple or str
-        :param size: size tuple (width, height) of the image.
-        :type size: tuple
-        """
-        raise NotImplementedError
-
     def set_text_color(self, color):
         """Set text font color.
 
@@ -71,10 +61,6 @@ class BaseScene(object):
         :param offset: x offset from current position to screen outer
         :type offset: int
         """
-        raise NotImplementedError
-
-    def set_print_number(self, current_nbr=None, failure=False):
-        """Define the printer info to display on the view."""
         raise NotImplementedError
 
 
@@ -154,7 +140,6 @@ class BaseWindow(object):
         self.scene.set_outlines(self.debug)
         self.scene.set_text_color(self.text_color)
         self.scene.set_arrows(self.arrow_location, self.arrow_offset)
-        self.scene.set_print_number(self.print_number, self.print_failure)
         self.resize(self._size)  # Force graphical element to be recalculated
 
     def set_menu(self, app, cfg, pm):
@@ -172,7 +157,6 @@ class BaseWindow(object):
             self._size = size  # Size of the window when not fullscreen
 
         # Call get_rect() to take new computed size if != self._size
-        self.scene.set_background(self.bg_color_or_path, self.get_rect().size)
         self.scene.resize(self.get_rect().size)
 
     def get_rect(self, absolute=False):
@@ -194,13 +178,20 @@ class BaseWindow(object):
     # ---------------------------------------------------------------------
     # Functions applicable to more than one scene
 
-    def set_print_number(self, current_nbr=None, failure=False):
+    def set_background(self, color_or_path):
+        """Set background sprite.
+
+        :param color_or_path: color of path to an imgae
+        :type color_or_path: tuple or str
+        """
+        pass
+
+    def set_system_status(self, printer_queue_size=None, printer_failure=False):
         """Set the current number of tasks in the printer queue.
         """
-        assert current_nbr >= 0, "Current number of files in printer queue shall be greater or equal to 0"
-        self.print_number = current_nbr
-        self.print_failure = failure
-        self.scene.set_print_number(self.print_number, self.print_failure)
+        assert printer_queue_size >= 0, "Current number of files in printer queue shall be greater or equal to 0"
+        self.print_number = printer_queue_size
+        self.print_failure = printer_failure
 
     def toggle_fullscreen(self):
         """Set window to full screen or initial size.

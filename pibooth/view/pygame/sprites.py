@@ -11,6 +11,7 @@ from pibooth.view.base import BaseScene
 
 
 class OutlinesSprite(pygame.sprite.DirtySprite):
+
     """Outlines Sprite. Paint a colored rectange around the given
     sprite.
     """
@@ -73,7 +74,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
       - event: manage pressed action
     """
 
-    def __init__(self, size):
+    def __init__(self, size=(10, 10)):
         super(BaseSprite, self).__init__()
         self.image = None
         self.rect = pygame.Rect((0, 0), size)
@@ -287,7 +288,7 @@ class ImageSprite(BaseSprite):
                 if self.path:
                     self.image_orig = pictures.load_pygame_image(self.path)
                 else:
-                    raise ValueError(f"Path to image is missing for '{self.__class__}'")
+                    raise ValueError(f"Path to image is missing for '{self.__class__.__name__}'")
 
             if isinstance(self.image_orig, (tuple, list)):
                 self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
@@ -478,13 +479,26 @@ class DotsSprite(BaseSprite):
                 x += (side + border)
 
 
+class SystemStatusSprite(BaseSprite):
+
+    """Sprite to display the current system status (printer queue, failure, ...).
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.printer_orig = pictures.load_pygame_image('printer.png')
+        self.failure_orig = pictures.load_pygame_image('failure.png')
+
+    def update(self, events):
+        super().update(events)
+        self.image = self.printer_orig
+
+
 class BasePygameScene(BaseScene):
 
     """Base class for Pygame scene. It use dirty sprite mechanism to
     save CPU usage.
     """
-
-    BACKGROUND = None
 
     def __init__(self):
         self.sprites = pygame.sprite.LayeredDirty()
@@ -499,7 +513,7 @@ class BasePygameScene(BaseScene):
         # at each draw() call.
         self.sprites.set_timing_threshold(200)
 
-    def add_sprite(self, sprite, outlines=True, layer=0):
+    def add_sprite(self, sprite, outlines=True, layer=None):
         """Declare a new sprite to draw. If layer is not defined (layer=0),
         layer is automatically assigned depending on the sprite type.
 
@@ -510,7 +524,7 @@ class BasePygameScene(BaseScene):
             - 2: assets sprites
             - 3: only ONE speciale image sprite
             - 4: arrows sprites
-            - 5: printer status
+            - 5: only ONE system status sprite
             - 6: outlines sprites
 
         :param sprite: sprite to add in the draw mechanism
@@ -520,16 +534,24 @@ class BasePygameScene(BaseScene):
         :param layer: layer indice
         :type layer: int
         """
-        assert layer != 5, "Layer 5 is reserved for outlines, use outlines=True to enable it"
-        if layer == 0 and isinstance(sprite, ArrowSprite):
+        assert layer != 6, "Layer 6 is reserved for outlines, use outlines=True to enable it"
+        if layer is None and isinstance(sprite, SystemStatusSprite):
+            layer = 5
+        elif layer is None and isinstance(sprite, ArrowSprite):
             layer = 4
-        elif layer == 0 and isinstance(sprite, (ImageSprite, DotsSprite)):
+        elif layer is None and isinstance(sprite, (ImageSprite, DotsSprite)):
             layer = 2
-        elif layer == 0 and isinstance(sprite, TextSprite):
+        elif layer is None and isinstance(sprite, TextSprite):
             layer = 1
-        elif layer == 0 or layer == 3:
+
+        if layer in (0, 3, 5):
             for oldsprite in self.sprites.get_sprites_from_layer(layer):
-                LOGGER.debug("Remove %s sprite '%s'", "background" if layer == 0 else "main image", oldsprite)
+                if layer == 0:
+                    LOGGER.debug("Remove background sprite '%s'", oldsprite)
+                if layer == 3:
+                    LOGGER.debug("Remove main image sprite '%s'", oldsprite)
+                else:
+                    LOGGER.debug("Remove system status sprite '%s'", oldsprite)
                 self.sprites.remove(oldsprite)
 
         self.sprites.add(sprite, layer=layer)
@@ -539,27 +561,14 @@ class BasePygameScene(BaseScene):
 
     @property
     def background(self):
-        return BasePygameScene.BACKGROUND
+        backgrounds = self.sprites.get_sprites_from_layer(0)
+        if not backgrounds:
+            raise RuntimeError("Background is not initialized")
+        return backgrounds[0]
 
     @property
     def rect(self):
-        return BasePygameScene.BACKGROUND.rect
-
-    def set_background(self, color_or_path, size):
-        """Set background sprite.
-
-        :param color_or_path: color of path to an image
-        :type color_or_path: tuple or str
-        :param size: size tuple (width, height) of the image.
-        :type size: tuple
-        """
-        if not BasePygameScene.BACKGROUND:
-            BasePygameScene.BACKGROUND = ImageSprite(size=size)
-        if not self.sprites.has(self.background):
-            self.sprites.add(self.background, layer=0)
-        self.background.set_rect(0, 0, size[0], size[1])
-        self.background.set_skin(color_or_path)
-        self.background.set_crop()
+        return self.background.rect
 
     def set_outlines(self, enable=True):
         """Draw outlines for each rectangle available for drawing
@@ -617,10 +626,6 @@ class BasePygameScene(BaseScene):
         # Arrows
         for sprite in self.sprites.get_sprites_from_layer(4):
             sprite.set_color(color)
-
-    def set_print_number(self, current_nbr=None, failure=False):
-        """Set the current number of tasks in the printer queue.
-        """
 
     def update(self, events):
         """Pygame events processing callback method.
