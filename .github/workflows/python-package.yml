@@ -42,7 +42,8 @@ jobs:
     - name: Test with pytest
       env:
         SDL_VIDEODRIVER: dummy
+        CAM_VIDEODRIVER: dummy
       run: |
-        pytest --ignore=test_camera.py --cov pibooth
+        pytest --cov pibooth
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
