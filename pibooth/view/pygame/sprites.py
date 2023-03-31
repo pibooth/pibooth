@@ -513,6 +513,7 @@ class StatusBarSprite(BaseSprite):
         start_padding = width // 2
         icon_height = (height - 2 * start_padding) // len(self.subsprites)
         padding = icon_height // 10
+        icon_height -= padding
 
         y += start_padding
         for sprite in self.subsprites:
