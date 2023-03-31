@@ -199,12 +199,10 @@ class PygameWindow(BaseWindow):
         """Draw all Sprites on surface and return updated Pygame rects.
         """
         rects = self.scene.draw(self.surface, self._force_redraw)
+        rects += self._keyboard.draw(self.surface, self._force_redraw)
 
-        if self._menu and self._menu.is_enabled():
+        if not self._keyboard.is_enabled() and self._menu and self._menu.is_enabled():
             rects += self._menu.draw(self.surface)
-
-        if self._keyboard.is_enabled():
-            rects += self._keyboard.draw(self.surface, self._force_redraw)
 
         self._force_redraw = False
         return rects
