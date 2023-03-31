@@ -3,6 +3,7 @@
 import os.path as osp
 import PIL
 import pygame
+from pygame import gfxdraw
 
 from pibooth import pictures
 from pibooth import evts
@@ -311,17 +312,20 @@ class TextSprite(BaseSprite):
     """Text Sprite.
     """
 
-    def __init__(self, text='', size=(10, 10)):
+    def __init__(self, text='', size=(10, 10), font_name=None):
         """
         :param size: size tuple (width, height) of the image.
         :type size: tuple
         :param path: image file path
         :type path: str
+        :param font_name: font name
+        :type font_name: str
         """
         super(TextSprite, self).__init__(size)
         self.text = text
         self.color = (255, 255, 255)
         self.align = pictures.ALIGN_CENTER
+        self.font_name = font_name
         if text is not None:
             self.set_text(text)
 
@@ -355,7 +359,8 @@ class TextSprite(BaseSprite):
         """
         super(TextSprite, self).update(events)
         if self.image is None and self.visible:
-            self.image = pictures.text_to_pygame_image(self.text, self.rect.size, self.color, self.align)
+            self.image = pictures.text_to_pygame_image(
+                self.text, self.rect.size, self.color, self.align, font_name=self.font_name)
 
 
 class ArrowSprite(ImageSprite):
@@ -447,7 +452,7 @@ class DotsSprite(BaseSprite):
     def __init__(self, nbr_dots=4):
         super(DotsSprite, self).__init__((100, 50))
         self.dots = []
-        self.filled_orig = pictures.load_pygame_image('dot_filled.png')
+        self.checked_orig = pictures.load_pygame_image('dot_checked.png')
         self.empty_orig = pictures.load_pygame_image('dot.png')
         self.current = 0
         self.total = nbr_dots
@@ -469,7 +474,7 @@ class DotsSprite(BaseSprite):
             border = 20
             side = min(self.rect.size) - 10
             empty_dot = pictures.transform_pygame_image(self.empty_orig, (side, side), color=self.color)
-            filled_dot = pictures.transform_pygame_image(self.filled_orig, (side, side), color=self.color)
+            filled_dot = pictures.transform_pygame_image(self.checked_orig, (side, side), color=self.color)
             x = (self.rect.width - (side * self.total + border * (self.total - 1))) // 2
             y = (self.rect.height - side) // 2
             for i in range(self.total):
@@ -480,19 +485,50 @@ class DotsSprite(BaseSprite):
                 x += (side + border)
 
 
-class SystemStatusSprite(BaseSprite):
+class StatusBarSprite(BaseSprite):
 
     """Sprite to display the current system status (printer queue, failure, ...).
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.printer_orig = pictures.load_pygame_image('printer.png')
-        self.failure_orig = pictures.load_pygame_image('failure.png')
+    def __init__(self, size=(10, 100)):
+        super().__init__(size)
+        self.location = pictures.ALIGN_BOTTOM_LEFT
+        self.printer_queue_nbr = TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf')
+        self.printer_queue_icon = ImageSprite('printer_progress.png', size=(8, 8))
+        self.printed_nbr = TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf')
+        self.printer_icon = ImageSprite('printer.png', size=(8, 8))
+        self.taken_nbr = TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf')
+        self.captures_icon = ImageSprite('capture.png', size=(8, 8))
+        self.subsprites = (self.printer_queue_nbr,
+                           self.printer_queue_icon,
+                           self.printed_nbr,
+                           self.printer_icon,
+                           self.taken_nbr,
+                           self.captures_icon)
+
+    def set_rect(self, x, y, width, height):
+        """Update picto position.
+        """
+        super().set_rect(x, y, width, height)
+        start_padding = width // 2
+        icon_height = (height - 2 * start_padding) // len(self.subsprites)
+        padding = icon_height // 10
+
+        y += start_padding
+        for sprite in self.subsprites:
+            sprite.set_rect(x, y, width, icon_height - padding)
+            y += (icon_height + padding)
 
     def update(self, events):
         super().update(events)
-        self.image = self.printer_orig
+        if self.image is None and self.visible:
+            self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+            width = min(self.rect.width, self.rect.height)
+            gfxdraw.aacircle(self.image, -1, width, width, (40, 41, 35))
+            gfxdraw.filled_circle(self.image, -1, width, width, (40, 41, 35))
+            gfxdraw.aacircle(self.image, -1, self.rect.height - width, width, (40, 41, 35))
+            gfxdraw.filled_circle(self.image, -1, self.rect.height - width, width, (40, 41, 35))
+            gfxdraw.box(self.image, (0, width, width, self.rect.height - 2 * width), (40, 41, 35))
 
 
 class BasePygameScene(BaseScene):
@@ -525,7 +561,7 @@ class BasePygameScene(BaseScene):
             - 2: assets sprites
             - 3: only ONE speciale image sprite
             - 4: arrows sprites
-            - 5: only ONE system status sprite
+            - 5: system status sprites
             - 6: outlines sprites
 
         :param sprite: sprite to add in the draw mechanism
@@ -536,7 +572,7 @@ class BasePygameScene(BaseScene):
         :type layer: int
         """
         assert layer != 6, "Layer 6 is reserved for outlines, use outlines=True to enable it"
-        if layer is None and isinstance(sprite, SystemStatusSprite):
+        if layer is None and isinstance(sprite, StatusBarSprite):
             layer = 5
         elif layer is None and isinstance(sprite, ArrowSprite):
             layer = 4
@@ -556,16 +592,24 @@ class BasePygameScene(BaseScene):
                 self.sprites.remove(oldsprite)
 
         self.sprites.add(sprite, layer=layer)
+        if layer == 5:
+            self.sprites.add(*sprite.subsprites, layer=layer)
         if outlines:
             self.sprites.add(OutlinesSprite(sprite), layer=6)
         return sprite
 
     @property
     def background(self):
-        backgrounds = self.sprites.get_sprites_from_layer(0)
-        if not backgrounds:
-            raise RuntimeError("Background is not initialized")
-        return backgrounds[0]
+        for sprite in self.sprites.get_sprites_from_layer(0):
+            return sprite
+        raise RuntimeError("Background is not initialized")
+
+    @property
+    def status(self):
+        for sprite in self.sprites.get_sprites_from_layer(5):
+            if isinstance(sprite, StatusBarSprite):
+                return sprite
+        raise RuntimeError("Status bar is not initialized")
 
     @property
     def rect(self):

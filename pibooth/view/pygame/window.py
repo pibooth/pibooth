@@ -41,7 +41,7 @@ class PygameWindow(BaseWindow):
         self.surface = pygame.display.set_mode(self._size, pygame.RESIZABLE)
         self.background_sprite = sprites.ImageSprite(size=size)
         self.set_background(self.bg_color_or_path)
-        self.status_sprite = sprites.SystemStatusSprite(size=(50, 50))
+        self.statusbar_sprite = sprites.StatusBarSprite(size=(50, 50))
 
         self._keyboard = vkb.VKeyboard(self.surface,
                                        self._on_keyboard_event,
@@ -74,7 +74,7 @@ class PygameWindow(BaseWindow):
         """
         super().add_scene(scene)
         scene.add_sprite(self.background_sprite, False, layer=0)
-        scene.add_sprite(self.status_sprite, False)
+        scene.add_sprite(self.statusbar_sprite, False)
 
     def set_scene(self, name):
         """Override parent class to hide keyboard and full redraw scene.
@@ -88,7 +88,7 @@ class PygameWindow(BaseWindow):
         """Set the menu.
         """
         size = self.get_rect().size
-        self._menu = menu.PygameMenu((size[0]*0.75, size[1]*0.75), app, cfg, pm, self._on_menu_closed)
+        self._menu = menu.PygameMenu((min(size[0]*0.75, 600), size[1]*0.75), app, cfg, pm, self._on_menu_closed)
         self._menu.disable()
 
     def set_background(self, color_or_path):
@@ -104,7 +104,7 @@ class PygameWindow(BaseWindow):
     def set_system_status(self, printer_queue_size=None, printer_failure=False):
         """Set system status.
         """
-        pass
+        super().set_system_status(printer_queue_size, printer_failure)
 
     def resize(self, size):
         """Resize common spritees, then scenes.
@@ -114,8 +114,8 @@ class PygameWindow(BaseWindow):
 
         # Call get_rect() to take new computed size if != self._size
         self.background_sprite.set_rect(*self.get_rect())
-        min_size = min(self.get_rect().size)
-        self.status_sprite.set_rect(0, 0, min_size//10, min_size//10)
+        width, height = self.get_rect().width // 20, self.get_rect().height * 2 // 5
+        self.statusbar_sprite.set_rect(0, self.get_rect().height - height, width, height)
         self.scene.resize(self.get_rect().size)
 
     def get_rect(self, absolute=False):
@@ -150,7 +150,7 @@ class PygameWindow(BaseWindow):
         self.resize(size)
         self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
         if self._menu:
-            self._menu.resize((size[0]*0.75, size[1]*0.75))
+            self._menu.resize((min(size[0]*0.75, 600), size[1]*0.75))
 
     def toggle_menu(self):
         """Show/hide settings menu.
@@ -178,7 +178,7 @@ class PygameWindow(BaseWindow):
                 self.resize(event.size)
                 self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
                 if self._menu:
-                    self._menu.resize((event.size[0]*0.75, event.size[1]*0.75))
+                    self._menu.resize((min(event.size[0]*0.75, 600), event.size[1]*0.75))
 
             elif evts.is_fullscreen_event(event):
                 self.toggle_fullscreen()
