@@ -237,3 +237,6 @@ Resolution       Automatic
 2-Sided Printing Off
 Shrink page ...  Shrink (print the whole page)
 ================ =============================
+
+
+Specific printer options can be passed to the `CUPS` printer through ``[PRINTER][printer_options]`` option.

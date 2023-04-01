@@ -138,7 +138,7 @@ class ViewPlugin(object):
         win.scene.set_capture_number(self.capture_count + 1, app.capture_nbr)
 
     @pibooth.hookimpl
-    def state_capture_do(self, win, events):
+    def state_capture_do(self, events):
         event = evts.find_event(events, evts.EVT_PIBOOTH_CAM_CAPTURE)
         if event:
             self.capture_finished = True

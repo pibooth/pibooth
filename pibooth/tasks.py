@@ -81,17 +81,21 @@ class AsyncTask(object):
         """
         result = None
         while not self._stop_event.is_set():
-            result = self.runnable(*self.args)
-            self.emit(result)
-            if not self.loop:
+            try:
+                result = self.runnable(*self.args)
+                self.emit(result)
+                if not self.loop:
+                    break
+            except Exception as ex:
+                self.emit(None, ex)
                 break
         return result
 
-    def emit(self, data):
+    def emit(self, data, exception=None):
         """Post event with the result of the task.
         """
         if self.event_type is not None:
-            evts.post(self.event_type, result=data)
+            evts.post(self.event_type, result=data, exception=exception)
 
     def result(self):
         """Return task result or None if task is not finished.
