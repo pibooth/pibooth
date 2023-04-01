@@ -82,8 +82,6 @@ class BaseWindow(object):
     - ``win.bg_color_or_path`` (tuple/str): RGB color tuple or path to image used for background
     - ``win.is_fullscreen`` (bool): True if the window is display in full screen
     - ``win.is_menu_shown`` (bool): True if the settings menu is displayed
-    - ``win.print_number`` (int): current number of files in printer queue
-    - ``win.print_failure`` (bool): True if a printer failure is displayed
     """
 
     FULLSCREEN = 'fullscreen'
@@ -108,8 +106,6 @@ class BaseWindow(object):
         self.type = None
         self.text_color = text_color
         self.bg_color_or_path = background
-        self.print_number = 0
-        self.print_failure = False
         self.is_fullscreen = False
         self.is_menu_shown = False
         # ---------------------------------------------------------------------
@@ -186,12 +182,10 @@ class BaseWindow(object):
         """
         pass
 
-    def set_system_status(self, printer_queue_size=None, printer_failure=False):
+    def set_system_status(self, printer_queue_size=None, printer_failure=None, total_printed=None, total_taken=None):
         """Set the current number of tasks in the printer queue.
         """
-        assert printer_queue_size >= 0, "Current number of files in printer queue shall be greater or equal to 0"
-        self.print_number = printer_queue_size
-        self.print_failure = printer_failure
+        pass
 
     def toggle_fullscreen(self):
         """Set window to full screen or initial size.

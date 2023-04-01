@@ -16,6 +16,9 @@ class CaptureScene(BasePygameScene):
         self.flash_timer = PollingTimer(0.3)
 
     def resize(self, size):
+        # Hide status bar
+        self.status_bar.hide()
+
         # Capture
         self.image.set_rect(self.rect.width // 6, 10,
                             self.rect.width * 2 // 3, self.rect.height * 7 // 8)

@@ -12,6 +12,9 @@ class PreviewScene(BasePygameScene):
         self.dots = self.add_sprite(DotsSprite(4))
 
     def resize(self, size):
+        # Hide status bar
+        self.status_bar.hide()
+
         # Preview capture
         self.image.set_rect(self.rect.width // 6, 10,
                             self.rect.width * 2 // 3, self.rect.height * 7 // 8)

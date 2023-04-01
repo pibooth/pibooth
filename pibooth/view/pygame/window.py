@@ -101,10 +101,17 @@ class PygameWindow(BaseWindow):
         self.background_sprite.set_skin(color_or_path)
         self.background_sprite.set_crop()
 
-    def set_system_status(self, printer_queue_size=None, printer_failure=False):
+    def set_system_status(self, printer_queue_size=None, printer_failure=None, total_printed=None, total_taken=None):
         """Set system status.
         """
-        super().set_system_status(printer_queue_size, printer_failure)
+        if printer_queue_size is not None:
+            self.statusbar_sprite.set_printer_queue(printer_queue_size)
+        if printer_failure is not None:
+            self.statusbar_sprite.set_printer_failure(printer_failure)
+        if total_printed is not None:
+            self.statusbar_sprite.set_printed_counter(total_printed)
+        if total_taken is not None:
+            self.statusbar_sprite.set_taken_counter(total_taken)
 
     def resize(self, size):
         """Resize common spritees, then scenes.

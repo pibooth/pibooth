@@ -84,22 +84,34 @@ class BaseSprite(pygame.sprite.DirtySprite):
         self.pressed = 0
         self.on_pressed = None
         self.toggle_timer = PollingTimer(start=False)
+        self.subsprites = []  # Elements composing the sprite
+
+    def add_subsprite(self, sprite):
+        """Add a sub-sprite to compose the sprite.
+        """
+        assert isinstance(sprite, BaseSprite), f"Sub-sprite '{sprite}' shall inherite from 'BaseSprite' class"
+        self.subsprites.append(sprite)
+        return sprite
 
     def show(self):
-        """Show image.
+        """Show sprite.
         """
         if not self.visible:
             self.visible = 1
             if self.outlines and self.outlines.enabled and not self.outlines.visible:
                 self.outlines.visible = 1
+            for sprite in self.subsprites:
+                sprite.show()
 
     def hide(self):
-        """Hide image.
+        """Hide sprite.
         """
         if self.visible:
             self.visible = 0
             if self.outlines and self.outlines.visible:
                 self.outlines.visible = 0
+            for sprite in self.subsprites:
+                sprite.hide()
 
     def set_rect(self, x, y, width, height):
         """Set the sprite absolute position and size.
@@ -492,19 +504,39 @@ class StatusBarSprite(BaseSprite):
 
     def __init__(self, size=(10, 100)):
         super().__init__(size)
-        self.location = pictures.ALIGN_BOTTOM_LEFT
-        self.printer_queue_nbr = TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf')
-        self.printer_queue_icon = ImageSprite('printer_progress.png', size=(8, 8))
-        self.printed_nbr = TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf')
-        self.printer_icon = ImageSprite('printer.png', size=(8, 8))
-        self.taken_nbr = TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf')
-        self.captures_icon = ImageSprite('capture.png', size=(8, 8))
-        self.subsprites = (self.printer_queue_nbr,
-                           self.printer_queue_icon,
-                           self.printed_nbr,
-                           self.printer_icon,
-                           self.taken_nbr,
-                           self.captures_icon)
+        self.printer_queue_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
+        self.printer_queue_icon = self.add_subsprite(ImageSprite('printer_progress.png', size=(8, 8)))
+        self.printed_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
+        self.printer_icon = self.add_subsprite(ImageSprite('printer.png', size=(8, 8)))
+        self.taken_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
+        self.captures_icon = self.add_subsprite(ImageSprite('capture.png', size=(8, 8)))
+        self._failure = False
+
+    def set_printer_queue(self, size):
+        """Set number of print in progress.
+        """
+        self.printer_queue_nbr.set_text(str(size))
+
+    def set_printer_failure(self, failure=False):
+        """Change printer status."""
+        if self._failure != failure:  # Avoid recreate failed icon
+            self._failure = failure
+            if self._failure:
+                skin = pictures.load_pygame_image('printer.png')
+                skin.blit(pictures.load_pygame_image('action_failed.png'), (0, 0))
+                self.printer_icon.set_skin(skin)
+            else:
+                self.printer_icon.set_skin('printer.png')
+
+    def set_printed_counter(self, count):
+        """Set counter.
+        """
+        self.printed_nbr.set_text(str(count))
+
+    def set_taken_counter(self, count):
+        """Set counter.
+        """
+        self.taken_nbr.set_text(str(count))
 
     def set_rect(self, x, y, width, height):
         """Update picto position.
@@ -523,6 +555,7 @@ class StatusBarSprite(BaseSprite):
     def update(self, events):
         super().update(events)
         if self.image is None and self.visible:
+            # Draw statusbar shape
             self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
             width = min(self.rect.width, self.rect.height)
             gfxdraw.aacircle(self.image, -1, width, width, (40, 41, 35))
@@ -593,8 +626,7 @@ class BasePygameScene(BaseScene):
                 self.sprites.remove(oldsprite)
 
         self.sprites.add(sprite, layer=layer)
-        if layer == 5:
-            self.sprites.add(*sprite.subsprites, layer=layer)
+        self.sprites.add(*sprite.subsprites, layer=layer)
         if outlines:
             self.sprites.add(OutlinesSprite(sprite), layer=6)
         return sprite
@@ -606,7 +638,7 @@ class BasePygameScene(BaseScene):
         raise RuntimeError("Background is not initialized")
 
     @property
-    def status(self):
+    def status_bar(self):
         for sprite in self.sprites.get_sprites_from_layer(5):
             if isinstance(sprite, StatusBarSprite):
                 return sprite
