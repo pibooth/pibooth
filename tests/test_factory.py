@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+from pibooth.pictures import get_picture_factory
 from pibooth.pictures.factory import PilPictureFactory, OpenCvPictureFactory
 
 footer_texts = ('This is the main title', 'Footer text 2', 'Footer text 3')
@@ -8,13 +9,24 @@ footer_fonts = ('Amatic-Bold', 'DancingScript-Regular', 'Roboto-LightItalic')
 footer_colors = ((10, 0, 0), (0, 50, 0), (0, 50, 50))
 
 
-def setup_factory(m, fond_path, overlay=''):
-    m.add_text(footer_texts[0], footer_fonts[0], footer_colors[0], 'left')
-    m.add_text(footer_texts[1], footer_fonts[1], footer_colors[1], 'center')
-    m.add_text(footer_texts[2], footer_fonts[2], footer_colors[2], 'right')
-    m.set_background(fond_path)
+def setup_factory(factory, fond_path, overlay=''):
+    factory.add_text(footer_texts[0], footer_fonts[0], footer_colors[0], 'left')
+    factory.add_text(footer_texts[1], footer_fonts[1], footer_colors[1], 'center')
+    factory.add_text(footer_texts[2], footer_fonts[2], footer_colors[2], 'right')
+    factory.set_background(fond_path)
     if overlay:
-        m.set_overlay(overlay)
+        factory.set_overlay(overlay)
+
+
+def test_get_picture_factory(captures_portrait, captures_landscape):
+    factory = get_picture_factory(captures_portrait, dpi=300)
+    assert factory.is_portrait
+    assert factory.width == 300 * 4
+    assert factory.height == 300 * 6
+    factory = get_picture_factory(captures_landscape, paper_format=(2, 6))
+    assert not factory.is_portrait
+    assert factory.width == 600 * 6
+    assert factory.height == 600 * 2
 
 
 @pytest.mark.parametrize('captures_nbr', [1, 2, 3, 4])
