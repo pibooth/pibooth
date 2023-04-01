@@ -23,14 +23,9 @@ class NoGuiScene(BaseScene):
 
     def set_image(self, image=None): pass  # Avoid "NotImplemented" error
 
-    def set_background(self, color_or_path, size): pass  # Avoid "NotImplemented" error
-
     def set_text_color(self, color): pass  # Avoid "NotImplemented" error
 
     def set_arrows(self, location, offset): pass  # Avoid "NotImplemented" error
-
-    def set_print_number(self, current_nbr=None, failure=False):  # Avoid "NotImplemented" error
-        self.nop('set_print_number', current_nbr, failure)
 
     def set_choices(self, choices):
         self.choices = choices
@@ -39,7 +34,7 @@ class NoGuiScene(BaseScene):
         if not self.selection:
             self.selection = self.choices[1]
         else:
-            self.selection = self.choices[self.choices.index(self.selection)+1]
+            self.selection = self.choices[(self.choices.index(self.selection)+1) % len(self.choices)]
 
     def get_selection(self):
         if not self.selection:
