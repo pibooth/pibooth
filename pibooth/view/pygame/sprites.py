@@ -504,13 +504,15 @@ class StatusBarSprite(BaseSprite):
 
     def __init__(self, size=(10, 100)):
         super().__init__(size)
+        self._failure = False
+
         self.printer_queue_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
         self.printer_queue_icon = self.add_subsprite(ImageSprite('printer_progress.png', size=(8, 8)))
         self.printed_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
         self.printer_icon = self.add_subsprite(ImageSprite('printer.png', size=(8, 8)))
         self.taken_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
         self.captures_icon = self.add_subsprite(ImageSprite('capture.png', size=(8, 8)))
-        self._failure = False
+        self.set_rect(0, 0, self.rect.width, self.rect.height)
 
     def set_printer_queue(self, size):
         """Set number of print in progress.

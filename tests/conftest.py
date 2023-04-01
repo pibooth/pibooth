@@ -150,9 +150,11 @@ def scene_builder():
     def create(name):
         background_sprite = sprites.ImageSprite((0, 0, 0), size=(400, 400))
         background_sprite.set_crop()
+        statusbar_sprite = sprites.StatusBarSprite()
 
         scene = get_scene('pygame', name)
         scene.add_sprite(background_sprite, False, layer=0)
+        scene.add_sprite(statusbar_sprite, False, layer=5)
         scene.set_outlines(True)
         scene.set_text_color((255, 255, 255))
         scene.set_arrows(scene.ARROW_BOTTOM, 0)
