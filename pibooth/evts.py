@@ -42,7 +42,7 @@ def get_event_pos(display_size, event):
     return event.pos
 
 
-def get_top_visible(sprites, from_layers=(1, 2, 3, 4)):
+def get_top_visible(sprites, from_layers=(1, 2, 3, 4, 5)):
     """Return the top sprite (last of the list) which is visible.
 
     :param sprites: sprites list
@@ -98,5 +98,8 @@ def find_event(events, event_type):
     """
     for event in events:
         if event.type == event_type:
+            # Re-raise exception from async tasks
+            if getattr(event, 'exception', None):
+                raise event.exception
             return event
     return None

@@ -8,7 +8,7 @@ except ImportError:
     gp = None  # gphoto2 is optional
 from PIL import Image, ImageFilter
 from pibooth.pictures import sizing
-from pibooth.utils import LOGGER, pkill
+from pibooth.utils import LOGGER, pkill, PollingTimer
 from pibooth.camera.base import BaseCamera
 
 
@@ -83,6 +83,7 @@ class GpCamera(BaseCamera):
     def __init__(self, camera_proxy):
         super().__init__(camera_proxy)
         self._gp_logcb = None
+        self._gp_capture_timer = PollingTimer(10)
         self._preview_compatible = True
         self._preview_viewfinder = False
 
@@ -223,11 +224,20 @@ class GpCamera(BaseCamera):
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.capture_iso)
 
-        self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
-        time.sleep(0.2)  # Necessary to let the time for the camera to save the image
+        self._cam.trigger_capture()
+        self._gp_capture_timer.start()
+        while not self._gp_capture_timer.is_timeout():
+            event_type, event_data = self._cam.wait_for_event(100)  # Check event every 100ms
+            if event_type == gp.GP_EVENT_FILE_ADDED:
+                self._captures.append((event_data, effect))
+                break
 
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.preview_iso)
+
+        if self._gp_capture_timer.is_timeout():
+            raise TimeoutError(
+                f"gPhoto2 capture failed or too long, abort (timeout={self._gp_capture_timer.timeout})")
 
         return self._captures[-1][0]
 

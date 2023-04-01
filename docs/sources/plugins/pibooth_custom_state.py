@@ -30,7 +30,7 @@ def pibooth_setup_states(machine):
 
 
 @pibooth.hookimpl(hookwrapper=True)
-def state_capture_validate():
+def state_capture_validate(win):
     """Catch the next scene defined after a capture. If next state is
     'preview', then go back to 'ready' state.
     """
@@ -39,7 +39,7 @@ def state_capture_validate():
     next_state = outcome.get_result()
 
     # If next state is 'preview' then replace it by 'ready' state
-    if next_state == 'preview':
+    if next_state == 'preview' and win.type == 'pygame':
         outcome.force_result('ready')
 
 

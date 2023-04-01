@@ -72,6 +72,7 @@ class GpCameraProxyMock:
     GP_CAPTURE_IMAGE = 'capture'
     GP_LOG_VERBOSE = 'verbose'
     GP_WIDGET_RADIO = 'radio'
+    GP_EVENT_FILE_ADDED = 'file'
 
     GPhoto2Error = Exception
 
@@ -104,6 +105,12 @@ class GpCameraProxyMock:
 
     def capture(self, flag):
         return GpFileMock()
+
+    def trigger_capture(self):
+        pass
+
+    def wait_for_event(self, timeout):
+        return (self.GP_EVENT_FILE_ADDED, self.capture(None))
 
     def exit(self):
         pass

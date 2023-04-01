@@ -163,7 +163,7 @@ def transform_pygame_image(surface, size, antialiasing=True, hflip=False, vflip=
     return image
 
 
-def text_to_pygame_image(text, size, color, align='center', bg_color=None):
+def text_to_pygame_image(text, size, color, align='center', bg_color=None, font_name=None):
     """Return a surface the text fit inside.
 
     The ``align`` parameter can be one of:
@@ -180,7 +180,7 @@ def text_to_pygame_image(text, size, color, align='center', bg_color=None):
     lines = text.splitlines()
     surface = pygame.Surface(size, pygame.SRCALPHA, 32)
 
-    font = fonts.get_pygame_font(max(lines, key=len), fonts.CURRENT, size[0], size[1] // len(lines))
+    font = fonts.get_pygame_font(max(lines, key=len), font_name or fonts.CURRENT, size[0], size[1] // len(lines))
     for i, line in enumerate(lines):
         text_surface = font.render(line, True, color)
 
