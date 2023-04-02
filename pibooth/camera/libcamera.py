@@ -122,8 +122,8 @@ class LibCamera(BaseCamera):
         """Stop the preview.
         """
         self._rect = None
-        self._cam.stop_preview()
         self._hide_overlay()
+        self._cam.stop_preview()
 
     def get_capture_image(self, effect=None):
         """Capture a new picture in a file.

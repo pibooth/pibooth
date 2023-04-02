@@ -28,10 +28,10 @@ Software
 ^^^^^^^^
 
 * Raspberry Pi OS **Bullseye** with desktop
-* Python ``3.7.3``
+* Python ``3.9.2``
 * libsdl2 ``2.0``
 * libgphoto2 ``2.5.27``
-* libcups ``2.2.10``
+* libcups ``2.3.3``
 
 
 Install
