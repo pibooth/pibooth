@@ -66,7 +66,7 @@ Manual procedure
 
    .. code-block:: bash
 
-        sudo apt-get install libsdl2-*
+        sudo apt-get install -y libsdl2-*
 
 5. Optionally install the last stable ``gPhoto2`` version (required only for
    DSLR camera):
@@ -84,8 +84,7 @@ Manual procedure
 
    .. code-block:: bash
 
-        sudo apt-get install cups libcups2-dev
-        sudo apt-get install printer-driver-gutenprint
+        sudo apt-get install -y cups libcups2-dev printer-driver-gutenprint
 
 7. Optionally install ``OpenCV`` to improve images generation efficiency or if a
    Webcam is used:

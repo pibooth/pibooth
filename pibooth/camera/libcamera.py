@@ -63,11 +63,11 @@ class LibCamera(BaseCamera):
     def _specific_initialization(self):
         """Camera initialization.
         """
-        self._preview_config.transform = Transform(hflip=self.preview_flip)
+        self._preview_config['transform'] = Transform(hflip=self.preview_flip)
         self._cam.configure(self._preview_config)
 
-        self._capture_config.size = self.resolution
-        self._capture_config.transform = Transform(hflip=self.capture_flip)
+        self._capture_config['size'] = self.resolution
+        self._capture_config['transform'] = Transform(hflip=self.capture_flip)
 
     def _show_overlay(self):
         """Add an image as an overlay.
@@ -105,7 +105,7 @@ class LibCamera(BaseCamera):
             return
 
         self.preview_flip = flip
-        self._preview_config.transform = Transform(hflip=self.preview_flip)
+        self._preview_config['transform'] = Transform(hflip=self.preview_flip)
 
         # Define Rect() object for resizing preview captures to fit to the defined
         # preview rect keeping same aspect ratio than camera resolution.
