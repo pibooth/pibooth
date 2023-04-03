@@ -63,11 +63,13 @@ class LibCamera(BaseCamera):
     def _specific_initialization(self):
         """Camera initialization.
         """
+        self._cam.stop()
         self._preview_config['transform'] = Transform(hflip=self.preview_flip)
         self._cam.configure(self._preview_config)
 
         self._capture_config['size'] = self.resolution
         self._capture_config['transform'] = Transform(hflip=self.capture_flip)
+        self._cam.start()
 
     def _show_overlay(self):
         """Add an image as an overlay.
@@ -112,10 +114,10 @@ class LibCamera(BaseCamera):
         size = sizing.new_size_keep_aspect_ratio(self.resolution, (rect.width, rect.height))
         self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
 
+        self._cam.stop()
+        self._cam.configure(self._preview_config)
         self._cam.start_preview(Preview.DRM, x=self._rect.x, y=self._rect.y,
                                 width=self._rect.width, height=self._rect.height)
-
-        self._cam.configure(self._preview_config)
         self._cam.start()
 
     def stop_preview(self):
@@ -123,7 +125,8 @@ class LibCamera(BaseCamera):
         """
         self._rect = None
         self._hide_overlay()
-        self._cam.stop_preview()
+        if self._cam._preview is not None:
+            self._cam.stop_preview()
 
     def get_capture_image(self, effect=None):
         """Capture a new picture in a file.

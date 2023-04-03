@@ -121,6 +121,6 @@ class AsyncTask:
         self._stop_event.set()
         self.future.cancel()
         try:
-            self.wait(30)  # Max 30 seconds
+            self.wait(10)  # Max 10 seconds
         except Exception as ex:
             utils.LOGGER.warning("AsyncTask.kill() failed: %s", ex)
