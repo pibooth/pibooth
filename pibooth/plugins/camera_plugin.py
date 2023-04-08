@@ -104,9 +104,7 @@ class CameraPlugin:
             self.capture_count += 1
 
     @pibooth.hookimpl
-    def state_capture_exit(self, app):
-        app.camera.stop_preview()
-
-    @pibooth.hookimpl
-    def state_processing_enter(self):
+    def state_processing_enter(self, app):
         self.capture_count = 0
+        LOGGER.info("Stopping preview")
+        app.camera.stop_preview()
