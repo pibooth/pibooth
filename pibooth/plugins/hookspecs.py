@@ -52,7 +52,7 @@ def pibooth_setup_picture_factory(cfg, opt_index, factory):
     the selected captures number.
 
     A new ``PictureFactory`` instance can be returned by this hook, it will be
-    used indead of the default one. The returned object shall have the same
+    used instead of the default one. The returned object shall have the same
     public API than :py:class:`pibooth.pictures.factory.PictureFactory`.
 
     :param cfg: application configuration
@@ -66,7 +66,7 @@ def pibooth_setup_camera(cfg):
     """Hook used to setup the ``camera`` interface.
 
     A new camera instance (inheriting from :py:class:`pibooth.camera.base.BaseCamera`)
-    shall be returned by this hook, it will be used indead of the default one.
+    shall be returned by this hook, it will be used instead of the default one.
 
     :param cfg: application configuration
     """
