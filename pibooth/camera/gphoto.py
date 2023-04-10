@@ -68,18 +68,6 @@ class GpCamera(BaseCamera):
     """gPhoto2 camera management.
     """
 
-    IMAGE_EFFECTS = ['none',
-                     'blur',
-                     'contour',
-                     'detail',
-                     'edge_enhance',
-                     'edge_enhance_more',
-                     'emboss',
-                     'find_edges',
-                     'smooth',
-                     'smooth_more',
-                     'sharpen']
-
     def __init__(self, camera_proxy):
         super().__init__(camera_proxy)
         self._gp_logcb = None

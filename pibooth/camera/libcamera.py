@@ -43,18 +43,6 @@ class LibCamera(BaseCamera):
     """Libcamera camera management.
     """
 
-    IMAGE_EFFECTS = [u'none',
-                     u'blur',
-                     u'contour',
-                     u'detail',
-                     u'edge_enhance',
-                     u'edge_enhance_more',
-                     u'emboss',
-                     u'find_edges',
-                     u'smooth',
-                     u'smooth_more',
-                     u'sharpen']
-
     def __init__(self, libcamera_camera_proxy):
         super().__init__(libcamera_camera_proxy)
         self._preview_config = self._cam.create_preview_configuration()

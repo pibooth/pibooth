@@ -17,7 +17,17 @@ class BaseCamera:
     - EVT_PIBOOTH_CAM_CAPTURE
     """
 
-    IMAGE_EFFECTS = ['none']
+    IMAGE_EFFECTS = [u'none',
+                     u'blur',
+                     u'contour',
+                     u'detail',
+                     u'edge_enhance',
+                     u'edge_enhance_more',
+                     u'emboss',
+                     u'find_edges',
+                     u'smooth',
+                     u'smooth_more',
+                     u'sharpen']
 
     def __init__(self, camera_proxy):
         self._cam = camera_proxy
