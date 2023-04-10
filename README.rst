@@ -14,7 +14,7 @@ photos of your version.
 Features
 --------
 
-* Interface available in Danish, Dutch, English, French, German, Hungarian, Norwegian , Portuguese (Portugal and Brazil) and Spanish (customizable)
+* Interface available in Danish, Dutch, English, French, German, Hungarian, Norwegian, Portuguese (Portugal and Brazil) and Spanish (customizable)
 * Capture from 1 to 4 photos and concatenate them in a final picture
 * Support all cameras compatible with gPhoto2, OpenCV and Raspberry Pi
 * Support for hardware buttons and lamps on Raspberry Pi GPIO
@@ -26,7 +26,9 @@ Features
 * Custom texts can be added on the final picture (customizable fonts, colors, alignments)
 * Custom background(s) and overlay(s) can be added on the final picture
 * All settings available in a configuration file (most common options in a graphical interface)
-* Highly customizable thanks to its plugin system, you can develop your own plugin
+* Highly customizable thanks to its plugin system, you can install
+  `plugins developed by the community from PyPI  <https://pypi.org/search/?q=pibooth>`_
+  or develop your own plugin.
 
 Documentation
 -------------
@@ -34,11 +36,11 @@ Documentation
 .. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/documentation.png
    :align: center
    :alt: Documentation
-   :target: https://pibooth.readthedocs.io
+   :target: https://pibooth.readthedocs.io/en/latest
    :height: 200px
 
 Plugins
--------------------
+-------
 
 Here is a list of known plugins compatible with Pibooth
 
@@ -65,7 +67,15 @@ Here is a short list:
 Sponsors
 --------
 
-An enormous thanks to to `@andhey <https://github.com/andhey>`_, `@philipbarwi <https://github.com/philipbarwi>`_ and `@laurasees <https://github.com/laurasees>`_ who sponsored us, it means a lot to us!
+An enormous thanks to our sponsors:
+
+-  `@andhey <https://github.com/andhey>`_
+- `@philipbarwi <https://github.com/philipbarwi>`_
+- `@laurammiller <https://github.com/laurammiller>`_
+- `@neilrenfrey <https://github.com/neilrenfrey>`_
+- `@agrovista <https://github.com/agrovista>`_ 
+
+It means a lot to us!
 
 .. |Pibooth| image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/pibooth.png
    :align: middle
