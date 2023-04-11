@@ -123,7 +123,8 @@ class PygameWindow(BaseWindow):
         self.background_sprite.set_rect(*self.get_rect())
         width, height = self.get_rect().width // 20, self.get_rect().height * 2 // 5
         self.statusbar_sprite.set_rect(0, self.get_rect().height - height, width, height)
-        self.scene.resize(self.get_rect().size)
+        if self.scene:
+            self.scene.resize(self.get_rect().size)
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.
@@ -155,7 +156,8 @@ class PygameWindow(BaseWindow):
 
         size = self.get_rect().size
         self.resize(size)
-        self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
+        if self.scene:
+            self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
         if self._menu:
             self._menu.resize((min(size[0]*0.75, 600), size[1]*0.75))
 
