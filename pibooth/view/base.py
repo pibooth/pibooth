@@ -153,7 +153,8 @@ class BaseWindow:
             self._size = size  # Size of the window when not fullscreen
 
         # Call get_rect() to take new computed size if != self._size
-        self.scene.resize(self.get_rect().size)
+        if self.scene:
+            self.scene.resize(self.get_rect().size)
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.

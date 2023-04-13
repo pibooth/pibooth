@@ -266,7 +266,6 @@ class PiboothApplication:
             profiler = cProfile.Profile()
 
         try:
-            self._window.set_scene('wait')
             self._initialize()
             self._pm.hook.pibooth_startup(cfg=self._config, app=self)
             self._machine.set_state('wait')

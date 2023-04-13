@@ -123,7 +123,9 @@ class PygameWindow(BaseWindow):
         self.background_sprite.set_rect(*self.get_rect())
         width, height = self.get_rect().width // 20, self.get_rect().height * 2 // 5
         self.statusbar_sprite.set_rect(0, self.get_rect().height - height, width, height)
-        self.scene.resize(self.get_rect().size)
+        if self.scene:
+            self.scene.resize(self.get_rect().size)
+            self.scene.update([])  # Do not acts on scene, but recreate sprites with correct size
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.
@@ -154,7 +156,6 @@ class PygameWindow(BaseWindow):
 
         size = self.get_rect().size
         self.resize(size)
-        self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
         if self._menu:
             self._menu.resize((min(size[0]*0.75, 600), size[1]*0.75))
 
@@ -182,7 +183,6 @@ class PygameWindow(BaseWindow):
                 # Manual resizing
                 self.surface = pygame.display.set_mode(event.size, pygame.RESIZABLE)
                 self.resize(event.size)
-                self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
                 if self._menu:
                     self._menu.resize((min(event.size[0]*0.75, 600), event.size[1]*0.75))
 
@@ -238,13 +238,17 @@ class PygameWindow(BaseWindow):
         elif self._menu and self._menu.is_enabled():
             # Events only acts on the menu
             self._menu.update(events)
-        else:
+        elif self.scene:
             self.scene.update(events)
 
     def draw(self):
         """Draw all Sprites on surface and return updated Pygame rects.
         """
-        rects = self.scene.draw(self.surface, self._force_redraw)
+        rects = []
+
+        if self.scene:
+            rects += self.scene.draw(self.surface, self._force_redraw)
+
         rects += self._keyboard.draw(self.surface, self._force_redraw)
 
         if not self._keyboard.is_enabled() and self._menu and self._menu.is_enabled():
