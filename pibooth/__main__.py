@@ -26,7 +26,7 @@ from pibooth.config import PiboothConfigParser
 # Set the default pin factory to a mock factory if pibooth is not started a Raspberry Pi
 try:
     filterwarnings("ignore", category=PinFactoryFallback)
-    GPIO_INFO = "on Raspberry pi {0}".format(pi_info().model)
+    GPIO_INFO = f"on Raspberry pi {pi_info().model}"
 except BadPinFactory:
     Device.pin_factory = MockFactory()
     GPIO_INFO = "without physical GPIO, fallback to GPIO mock"

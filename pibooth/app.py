@@ -36,7 +36,7 @@ def load_last_saved_picture(path):
     return (None, None)
 
 
-class PiboothApplication(object):
+class PiboothApplication:
 
     """Main class representing the ``pibooth`` software.
 
@@ -256,7 +256,7 @@ class PiboothApplication(object):
                 self.leds.off()
                 self._initialize()
                 self._machine.set_state('wait')
-        else:
+        elif not self._window.is_menu_shown:
             self._machine.process(events)
 
     def exec(self, enable_profiler=False):

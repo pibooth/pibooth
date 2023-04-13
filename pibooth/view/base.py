@@ -7,7 +7,7 @@ import pygame
 from pibooth.utils import LOGGER
 
 
-class BaseScene(object):
+class BaseScene:
     """Base class for scene.
 
     Methodes defined here are abstarct and shall be implemented in child classes.
@@ -64,7 +64,7 @@ class BaseScene(object):
         raise NotImplementedError
 
 
-class BaseWindow(object):
+class BaseWindow:
 
     """Base class for window.
 
@@ -129,7 +129,7 @@ class BaseWindow(object):
         """Set the current scene.
         """
         if name not in self.scenes:
-            raise ValueError('"{}" not in registered scenes...'.format(name))
+            raise ValueError(f"'{name}' not in registered scenes...")
 
         LOGGER.debug("Set scene '%s'", name)
         self.scene = self.scenes[name]
@@ -153,7 +153,8 @@ class BaseWindow(object):
             self._size = size  # Size of the window when not fullscreen
 
         # Call get_rect() to take new computed size if != self._size
-        self.scene.resize(self.get_rect().size)
+        if self.scene:
+            self.scene.resize(self.get_rect().size)
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.

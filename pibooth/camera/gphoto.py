@@ -35,8 +35,12 @@ def get_gp_camera_proxy(port=None):
         abilities_list.load()
         cameras = abilities_list.detect(port_info_list)
     if cameras:
-        LOGGER.debug("Found gPhoto2 cameras on ports: '%s'", "' / '".join([p for _, p in cameras]))
-        # Initialize first camera proxy and return it
+        LOGGER.debug("Found gPhoto2 cameras:")
+        for index, (name, addr) in enumerate(sorted(cameras, key=lambda x: x[0])):
+            selected = ">" if addr == port or (port is None and index == 0) else "*"
+            LOGGER.debug("  %s %s : name-> %s | addr-> %s", selected, f"{index:02d}", name, addr)
+
+        # Initialize camera proxy and return it
         camera = gp.Camera()
         if port is not None:
             port_info_list = gp.PortInfoList()
@@ -63,18 +67,6 @@ class GpCamera(BaseCamera):
 
     """gPhoto2 camera management.
     """
-
-    IMAGE_EFFECTS = ['none',
-                     'blur',
-                     'contour',
-                     'detail',
-                     'edge_enhance',
-                     'edge_enhance_more',
-                     'emboss',
-                     'find_edges',
-                     'smooth',
-                     'smooth_more',
-                     'sharpen']
 
     def __init__(self, camera_proxy):
         super().__init__(camera_proxy)
@@ -138,7 +130,7 @@ class GpCamera(BaseCamera):
             LOGGER.debug('Getting option %s/%s=%s', section, option, value)
             return value
         except gp.GPhoto2Error:
-            raise ValueError('Unknown option {}/{}'.format(section, option))
+            raise ValueError(f'Unknown option {section}/{option}')
 
     def _rotate_image(self, image, rotation):
         """Rotate a PIL image, same direction than RpiCamera.

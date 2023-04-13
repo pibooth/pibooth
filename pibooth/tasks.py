@@ -9,7 +9,7 @@ from concurrent import futures
 from pibooth import evts, utils
 
 
-class AsyncTasksPool(object):
+class AsyncTasksPool:
 
     """Class to manage a pool of asynchronous tasks.
     """
@@ -50,7 +50,7 @@ class AsyncTasksPool(object):
         self._pool.shutdown(wait=True)
 
 
-class AsyncTask(object):
+class AsyncTask:
 
     """Class to execute an asynchronous task.
 
@@ -121,6 +121,6 @@ class AsyncTask(object):
         self._stop_event.set()
         self.future.cancel()
         try:
-            self.wait(30)  # Max 30 seconds
+            self.wait(10)  # Max 10 seconds
         except Exception as ex:
             utils.LOGGER.warning("AsyncTask.kill() failed: %s", ex)

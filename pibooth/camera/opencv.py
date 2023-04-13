@@ -15,7 +15,7 @@ def get_cv_camera_proxy(port=None):
     """Return camera proxy if an OpenCV compatible camera is found
     else return None.
 
-    :param port: look on given port number
+    :param port: look on given index number
     :type port: int
     """
     if not cv2:
@@ -23,7 +23,7 @@ def get_cv_camera_proxy(port=None):
 
     if port is not None:
         if not isinstance(port, int):
-            raise TypeError("Invalid OpenCV camera port '{}'".format(type(port)))
+            raise TypeError(f"Invalid OpenCV camera port '{type(port)}'")
         camera = cv2.VideoCapture(port)
         if camera.isOpened():
             return camera
@@ -40,18 +40,6 @@ class CvCamera(BaseCamera):
 
     """OpenCV camera management.
     """
-
-    IMAGE_EFFECTS = ['none',
-                     'blur',
-                     'contour',
-                     'detail',
-                     'edge_enhance',
-                     'edge_enhance_more',
-                     'emboss',
-                     'find_edges',
-                     'smooth',
-                     'smooth_more',
-                     'sharpen']
 
     def __init__(self, camera_proxy):
         super().__init__(camera_proxy)

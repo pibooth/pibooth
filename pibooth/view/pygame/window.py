@@ -125,6 +125,7 @@ class PygameWindow(BaseWindow):
         self.statusbar_sprite.set_rect(0, self.get_rect().height - height, width, height)
         if self.scene:
             self.scene.resize(self.get_rect().size)
+            self.scene.update([])  # Do not acts on scene, but recreate sprites with correct size
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.
@@ -136,8 +137,7 @@ class PygameWindow(BaseWindow):
             if 'SDL_VIDEO_WINDOW_POS' in os.environ:
                 posx, posy = [int(v) for v in os.environ['SDL_VIDEO_WINDOW_POS'].split(',')]
                 return self.surface.get_rect(x=posx, y=posy)
-            else:
-                return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
+            return self.surface.get_rect(center=(self.display_size[0] / 2, self.display_size[1] / 2))
         return self.surface.get_rect()
 
     def toggle_fullscreen(self):
@@ -156,8 +156,6 @@ class PygameWindow(BaseWindow):
 
         size = self.get_rect().size
         self.resize(size)
-        if self.scene:
-            self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
         if self._menu:
             self._menu.resize((min(size[0]*0.75, 600), size[1]*0.75))
 
@@ -185,7 +183,6 @@ class PygameWindow(BaseWindow):
                 # Manual resizing
                 self.surface = pygame.display.set_mode(event.size, pygame.RESIZABLE)
                 self.resize(event.size)
-                self.scene.update([])  # Do not acts on scenes, but recreate sprites with correct size
                 if self._menu:
                     self._menu.resize((min(event.size[0]*0.75, 600), event.size[1]*0.75))
 
@@ -241,13 +238,17 @@ class PygameWindow(BaseWindow):
         elif self._menu and self._menu.is_enabled():
             # Events only acts on the menu
             self._menu.update(events)
-        else:
+        if self.scene and (not self._menu or not self._menu.is_enabled()):
             self.scene.update(events)
 
     def draw(self):
         """Draw all Sprites on surface and return updated Pygame rects.
         """
-        rects = self.scene.draw(self.surface, self._force_redraw)
+        rects = []
+
+        if self.scene and (not self._menu or not self._menu.is_enabled()):
+            rects += self.scene.draw(self.surface, self._force_redraw)
+
         rects += self._keyboard.draw(self.surface, self._force_redraw)
 
         if not self._keyboard.is_enabled() and self._menu and self._menu.is_enabled():

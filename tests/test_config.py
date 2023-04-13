@@ -36,7 +36,7 @@ def test_save_default(cfg):
     cfg.load(clean=True)
     assert cfg.get('GENERAL', 'autostart_delay') == '0'
     with pytest.raises(KeyError):
-        cfg.get('OTHER', 'toto') == 'is a hero'
+        cfg.get('OTHER', 'toto')
 
 
 def test_handle_autostart(cfg):

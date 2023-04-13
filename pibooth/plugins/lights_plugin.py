@@ -4,7 +4,7 @@ import pibooth
 from pibooth import evts
 
 
-class LightsPlugin(object):
+class LightsPlugin:
     """Plugin to manage the lights via GPIO.
     """
 

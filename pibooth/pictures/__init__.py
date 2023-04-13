@@ -55,10 +55,11 @@ def colorize_pil_image(pil_image, color, bg_color=None):
     """
     if not bg_color:
         bg_color = (abs(color[0] - 255), abs(color[1] - 255), abs(color[2] - 255))
-    _, _, _, alpha = pil_image.split()
     gray_pil_image = pil_image.convert('L')
     new_pil_image = ImageOps.colorize(gray_pil_image, black=bg_color, white=color)
-    new_pil_image.putalpha(alpha)
+    if pil_image.mode in ('RGBA', 'LA') or (pil_image.mode == 'P' and 'transparency' in pil_image.info):
+        _, _, _, alpha = pil_image.split()
+        new_pil_image.putalpha(alpha)
     return new_pil_image
 
 

@@ -23,7 +23,7 @@ def add_default_option(section, option, default, description, menu_name=None, me
 # --- GENERAL ------------------------------------------------------------------
 
 add_default_option("GENERAL", "language", "en",
-                   "User interface language: {}".format(values_list_repr(language.get_supported_languages())),
+                   f"User interface language: {values_list_repr(language.get_supported_languages())}",
                    "UI language", language.get_supported_languages())
 
 add_default_option("GENERAL", "directory", "~/Pictures/pibooth",

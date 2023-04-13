@@ -41,8 +41,6 @@ class RpiCamera(BaseCamera):
 
     if picamera:
         IMAGE_EFFECTS = list(picamera.PiCamera.IMAGE_EFFECTS.keys())
-    else:
-        IMAGE_EFFECTS = []
 
     def _specific_initialization(self):
         """Camera initialization.

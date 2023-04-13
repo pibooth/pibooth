@@ -9,7 +9,7 @@ from pibooth.language import get_translated_text
 from pibooth.utils import LOGGER, PollingTimer
 
 
-class CameraPlugin(object):
+class CameraPlugin:
 
     """Plugin to manage the camera captures.
     """
@@ -92,7 +92,7 @@ class CameraPlugin(object):
             effect = effects[self.capture_count]
         else:
             # Not possible
-            raise ValueError("Not enough effects defined for {} captures {}".format(app.capture_nbr, effects))
+            raise ValueError(f"Not enough effects defined for {app.capture_nbr} captures {effects}")
 
         LOGGER.info("Take a capture")
         app.camera.capture(effect)
@@ -104,9 +104,7 @@ class CameraPlugin(object):
             self.capture_count += 1
 
     @pibooth.hookimpl
-    def state_capture_exit(self, app):
-        app.camera.stop_preview()
-
-    @pibooth.hookimpl
-    def state_processing_enter(self):
+    def state_processing_enter(self, app):
         self.capture_count = 0
+        LOGGER.info("Stopping preview")
+        app.camera.stop_preview()

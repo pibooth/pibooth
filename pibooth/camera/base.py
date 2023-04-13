@@ -8,7 +8,7 @@ from pibooth.tasks import AsyncTask
 from pibooth.pictures import sizing
 
 
-class BaseCamera(object):
+class BaseCamera:
     """Base class for camera.
 
     :py:class:`BaseCamera` emits the following events consumed by plugins:
@@ -17,7 +17,17 @@ class BaseCamera(object):
     - EVT_PIBOOTH_CAM_CAPTURE
     """
 
-    IMAGE_EFFECTS = ['none']
+    IMAGE_EFFECTS = [u'none',
+                     u'blur',
+                     u'contour',
+                     u'detail',
+                     u'edge_enhance',
+                     u'edge_enhance_more',
+                     u'emboss',
+                     u'find_edges',
+                     u'smooth',
+                     u'smooth_more',
+                     u'sharpen']
 
     def __init__(self, camera_proxy):
         self._cam = camera_proxy
@@ -41,10 +51,9 @@ class BaseCamera(object):
             rotation = (rotation, rotation)
         self.preview_rotation, self.capture_rotation = rotation
         for name in ('preview', 'capture'):
-            rotation = getattr(self, '{}_rotation'.format(name))
+            rotation = getattr(self, f'{name}_rotation')
             if rotation not in (0, 90, 180, 270):
-                raise ValueError(
-                    "Invalid {} camera rotation value '{}' (should be 0, 90, 180 or 270)".format(name, rotation))
+                raise ValueError(f"Invalid {name} camera rotation value '{rotation}' (should be 0, 90, 180 or 270)")
         self.resolution = resolution
         self.capture_flip = flip
         if not isinstance(iso, (tuple, list)):
@@ -142,7 +151,7 @@ class BaseCamera(object):
         """
         effect = str(effect).lower()
         if effect not in self.IMAGE_EFFECTS:
-            raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
+            raise ValueError(f"Invalid capture effect '{effect}' (choose among {self.IMAGE_EFFECTS})")
 
         if self._worker:
             self.stop_preview()

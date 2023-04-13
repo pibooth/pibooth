@@ -50,7 +50,7 @@ def get_filename(name):
         if sim > most_similar_ratio:
             most_similar = font_name
             most_similar_ratio = sim
-    raise ValueError('System font "{0}" unknown, maybe you mean "{1}"'.format(name, most_similar))
+    raise ValueError(f"System font '{name}' unknown, maybe you mean '{most_similar}'")
 
 
 def get_pil_font(text, font_name, max_width, max_height):

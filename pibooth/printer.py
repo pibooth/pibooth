@@ -24,7 +24,7 @@ PAPER_FORMATS = {
 }
 
 
-class Printer(object):
+class Printer:
 
     """Printer driver.
 
@@ -92,7 +92,7 @@ class Printer(object):
         if not self.name:
             raise EnvironmentError("No printer found (check config file or CUPS config)")
         if not osp.isfile(filename):
-            raise IOError("No such file or directory: {}".format(filename))
+            raise IOError(f"No such file or directory: {filename}")
         if self._notifier and not self._notifier.is_subscribed(self._on_event):
             self._notifier.subscribe(self._on_event, [event.CUPS_EVT_JOB_COMPLETED,
                                                       event.CUPS_EVT_JOB_CREATED,

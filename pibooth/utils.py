@@ -9,13 +9,13 @@ import time
 import types
 import os.path as osp
 import logging
-import psutil
 import platform
 import contextlib
 import errno
 import subprocess
 from fnmatch import fnmatchcase
 from itertools import zip_longest, islice
+import psutil
 try:
     from pip._internal.operations import freeze
 except ImportError:  # pip < 10.0
@@ -36,7 +36,7 @@ class BlockConsoleHandler(logging.StreamHandler):
     def emit(self, record):
         cls = self.__class__
         if cls.is_debug():
-            record.msg = '{}{}'.format(cls.current_indent, record.msg)
+            record.msg = f'{cls.current_indent}{record.msg}'
         logging.StreamHandler.emit(self, record)
 
         if cls.current_indent.endswith(cls.pattern_start):
@@ -68,7 +68,7 @@ class BlockConsoleHandler(logging.StreamHandler):
             cls.current_indent = (cls.current_indent[:-len(cls.pattern_block)] + cls.pattern_end)
 
 
-class PollingTimer(object):
+class PollingTimer:
 
     """
     Timer to be used in a pooling loop to check if timeout has been exceed.
@@ -236,7 +236,7 @@ def get_crash_message():
     msg += " * " + "Oops! It seems that pibooth has crashed".center(80) + "*\n"
     msg += " * " + "You can report an issue on https://github.com/pibooth/pibooth/issues/new".center(80) + "*\n"
     if get_logging_filename():
-        msg += " * " + ("and post the file: {}".format(get_logging_filename())).center(80) + "*\n"
+        msg += " * " + f"and post the file: {get_logging_filename()}".center(80) + "*\n"
     msg += " " + "*" * 83
     return msg
 
@@ -267,8 +267,8 @@ def pkill(pattern):
             try:
                 proc.kill()
             except psutil.AccessDenied:
-                raise EnvironmentError("Can not kill '{}', root access is required. "
-                                       "(kill it manually before starting pibooth)".format(proc.name()))
+                raise EnvironmentError(f"Can not kill '{proc.name()}', root access is required. "
+                                       "(kill it manually before starting pibooth)")
 
 
 def open_text_editor(filename):
@@ -311,7 +311,7 @@ def load_module(path):
     """Load a Python module dynamically.
     """
     if not osp.isfile(path):
-        raise ValueError("Invalid Python module path '{}'".format(path))
+        raise ValueError(f"Invalid Python module path '{path}'")
 
     dirname, filename = osp.split(path)
     modname = osp.splitext(filename)[0]

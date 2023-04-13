@@ -49,7 +49,7 @@ def main():
         ],
         author="Vincent Verdeil, Antoine Rousseaux",
         url="https://github.com/pibooth/pibooth",
-        download_url="https://github.com/pibooth/pibooth/archive/{}.tar.gz".format(pibooth.__version__),
+        download_url=f"https://github.com/pibooth/pibooth/archive/{pibooth.__version__}.tar.gz",
         license='MIT license',
         platforms=['unix', 'linux'],
         keywords=[
@@ -66,7 +66,7 @@ def main():
         include_package_data=True,
         python_requires=">=3.6",
         install_requires=[
-            'picamera2>=0.3.2 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
+            'picamera2>=0.3.9 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
             'Pillow>=9.2.0',
             'pygame>=2.1.2',
             'pygame-menu==4.3.9',
