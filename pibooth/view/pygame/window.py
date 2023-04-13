@@ -238,7 +238,7 @@ class PygameWindow(BaseWindow):
         elif self._menu and self._menu.is_enabled():
             # Events only acts on the menu
             self._menu.update(events)
-        elif self.scene:
+        if self.scene and (not self._menu or not self._menu.is_enabled()):
             self.scene.update(events)
 
     def draw(self):
@@ -246,7 +246,7 @@ class PygameWindow(BaseWindow):
         """
         rects = []
 
-        if self.scene:
+        if self.scene and (not self._menu or not self._menu.is_enabled()):
             rects += self.scene.draw(self.surface, self._force_redraw)
 
         rects += self._keyboard.draw(self.surface, self._force_redraw)
