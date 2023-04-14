@@ -125,6 +125,11 @@ class BaseWindow:
         """
         self.scenes.pop(name, None)
 
+    def build_scene(self, name):
+        """Create scene object and return it.
+        """
+        raise NotImplementedError
+
     def set_scene(self, name):
         """Set the current scene.
         """
