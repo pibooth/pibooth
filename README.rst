@@ -96,6 +96,6 @@ It means a lot to us!
    :target: https://github.com/pibooth/pibooth/actions/workflows/tests.yml?query=branch%3Amaster
    :alt: Tests
 
-.. |Codecov| image:: https://codecov.io/gh/pibooth/pibooth/branch/3.x/graph/badge.svg
+.. |Codecov| image:: https://codecov.io/gh/pibooth/pibooth/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/pibooth/pibooth
     :alt: Codecov
