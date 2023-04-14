@@ -12,6 +12,28 @@ from pibooth import evts
 from pibooth.utils import LOGGER
 from pibooth.view.base import BaseWindow, BaseScene
 from pibooth.view.pygame import menu, sprites
+from pibooth.view.pygame.scenes.wait import WaitScene
+from pibooth.view.pygame.scenes.choose import ChooseScene
+from pibooth.view.pygame.scenes.chosen import ChosenScene
+from pibooth.view.pygame.scenes.preview import PreviewScene
+from pibooth.view.pygame.scenes.capture import CaptureScene
+from pibooth.view.pygame.scenes.processing import ProcessingScene
+from pibooth.view.pygame.scenes.print import PrintScene
+from pibooth.view.pygame.scenes.finish import FinishScene
+from pibooth.view.pygame.scenes.failsafe import FailsafeScene
+
+
+SCENES = {
+    'wait': WaitScene,
+    'choose': ChooseScene,
+    'chosen': ChosenScene,
+    'preview': PreviewScene,
+    'capture': CaptureScene,
+    'processing': ProcessingScene,
+    'print': PrintScene,
+    'finish': FinishScene,
+    'failsafe': FailsafeScene
+}
 
 
 class PygameWindow(BaseWindow):
@@ -75,6 +97,13 @@ class PygameWindow(BaseWindow):
         super().add_scene(scene)
         scene.add_sprite(self.background_sprite, False, layer=0)
         scene.add_sprite(self.statusbar_sprite, False)
+
+    def build_scene(self, name):
+        """Create scene object and return it.
+        """
+        if name not in SCENES:
+            raise ValueError(f"Unknown scene '{name}'")
+        return SCENES[name]()
 
     def set_scene(self, name):
         """Override parent class to hide keyboard and full redraw scene.
