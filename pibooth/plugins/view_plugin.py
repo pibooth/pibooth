@@ -2,7 +2,6 @@
 
 import pibooth
 from pibooth import evts
-from pibooth.view import get_scene
 from pibooth.utils import LOGGER, get_crash_message, PollingTimer
 
 
@@ -34,7 +33,7 @@ class ViewPlugin:
     @pibooth.hookimpl
     def pibooth_setup_states(self, win, machine):
         for name in ('wait', 'choose', 'chosen', 'preview', 'capture', 'processing', 'print', 'finish'):
-            machine.add_state(name, get_scene(win.type, name))
+            machine.add_state(name, win.build_scene(name))
 
     @pibooth.hookimpl
     def state_failsafe_enter(self):
