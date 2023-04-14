@@ -1,34 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from pibooth.view.pygame.window import PygameWindow
-from pibooth.view.nogui.window import NoGuiWindow, NoGuiScene
-from pibooth.view.pygame.scenes.wait import WaitScene
-from pibooth.view.pygame.scenes.choose import ChooseScene
-from pibooth.view.pygame.scenes.chosen import ChosenScene
-from pibooth.view.pygame.scenes.preview import PreviewScene
-from pibooth.view.pygame.scenes.capture import CaptureScene
-from pibooth.view.pygame.scenes.processing import ProcessingScene
-from pibooth.view.pygame.scenes.print import PrintScene
-from pibooth.view.pygame.scenes.finish import FinishScene
-from pibooth.view.pygame.scenes.failsafe import FailsafeScene
+from pibooth.view.nogui.window import NoGuiWindow
 
 
 WINDOWS = {
     'nogui': NoGuiWindow,
     'pygame': PygameWindow
-}
-
-
-SCENES = {
-    'wait': WaitScene,
-    'choose': ChooseScene,
-    'chosen': ChosenScene,
-    'preview': PreviewScene,
-    'capture': CaptureScene,
-    'processing': ProcessingScene,
-    'print': PrintScene,
-    'finish': FinishScene,
-    'failsafe': FailsafeScene
 }
 
 
@@ -61,22 +39,3 @@ def get_window(window_type, title, size, background, text_color, debug=False):
 
     window.type = window_type
     return window
-
-
-def get_scene(window_type, name):
-    """Return the scene according to the given name.
-
-    :param window_type: type of the GUI used
-    :type window_type: str
-    :param name: name of the scene
-    :type name: str
-    """
-    if window_type not in WINDOWS:
-        raise ValueError(f"Unknown window type '{window_type}'")
-    if name not in SCENES:
-        raise ValueError(f"Unknown scene '{name}'")
-
-    if window_type == 'nogui':
-        return NoGuiScene()
-    elif window_type == 'pygame':
-        return SCENES[name]()
