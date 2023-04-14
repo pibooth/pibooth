@@ -92,6 +92,6 @@ It means a lot to us!
    :target: https://pypi.org/project/pibooth
    :alt: PyPi downloads
 
-.. |Tests| image:: https://github.com/github/docs/actions/workflows/python-package.yml/badge.svg?branch=master
+.. |Tests| image:: https://github.com/pibooth/pibooth/actions/workflows/python-package.yml/badge.svg?branch=master
    :target: https://github.com/pibooth/pibooth/actions/workflows/python-package.yml?query=branch%3Amaster
-   :alt: tests
+   :alt: Tests
