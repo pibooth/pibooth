@@ -62,10 +62,7 @@ class LibCamera(BaseCamera):
     def _show_overlay(self):
         """Add an image as an overlay.
         """
-        # Create an image padded to the required size (required by picamera)
-        size = (((self._rect.width + 31) // 32) * 32, ((self._rect.height + 15) // 16) * 16)
-
-        self._overlay = self.build_overlay(size, self._overlay_text, self._overlay_alpha)
+        self._overlay = self._build_overlay(self._rect.size, self._overlay_text, self._overlay_alpha)
         self._cam.set_overlay(numpy.array(self._overlay))
 
     def _hide_overlay(self):
@@ -87,34 +84,12 @@ class LibCamera(BaseCamera):
             image = image.filter(getattr(ImageFilter, effect.upper()))
         return image
 
-    def preview(self, rect, flip=True):
-        """Display a preview on the given Rect (flip if necessary).
+    def get_preview_image(self, effect=None):
+        """Capture a new picture in a file.
         """
-        if self._cam._preview is not None:
-            # Already running
-            return
-
-        self.preview_flip = flip
-        self._preview_config['transform'] = Transform(hflip=self.preview_flip)
-
-        # Define Rect() object for resizing preview captures to fit to the defined
-        # preview rect keeping same aspect ratio than camera resolution.
-        size = sizing.new_size_keep_aspect_ratio(self.resolution, (rect.width, rect.height))
-        self._rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
-
-        self._cam.stop()
-        self._cam.configure(self._preview_config)
-        self._cam.start_preview(Preview.DRM, x=self._rect.x, y=self._rect.y,
-                                width=self._rect.width, height=self._rect.height)
-        self._cam.start()
-
-    def stop_preview(self):
-        """Stop the preview.
-        """
-        self._rect = None
-        self._hide_overlay()
-        if self._cam._preview is not None:
-            self._cam.stop_preview()
+        image = self._cam.switch_mode_and_capture_image(self._capture_config, "main")
+        self._captures.append((image, effect))
+        return image
 
     def get_capture_image(self, effect=None):
         """Capture a new picture in a file.

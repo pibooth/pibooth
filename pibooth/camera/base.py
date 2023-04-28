@@ -79,7 +79,7 @@ class BaseCamera:
             self._overlay_alpha = alpha
             self._show_overlay()
 
-    def build_overlay(self, size, text, alpha):
+    def _build_overlay(self, size, text, alpha):
         """Return a PIL image with the given text that can be used
         as an overlay for the camera.
         """
@@ -96,9 +96,9 @@ class BaseCamera:
     def _show_overlay(self):
         """Add an image as an overlay.
         """
-        self._overlay = self.build_overlay(self._rect.size,
-                                           self._overlay_text,
-                                           self._overlay_alpha)
+        self._overlay = self._build_overlay(self._rect.size,
+                                            self._overlay_text,
+                                            self._overlay_alpha)
 
     def _hide_overlay(self):
         """Remove any existing overlay.
