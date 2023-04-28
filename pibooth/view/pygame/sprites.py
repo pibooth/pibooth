@@ -506,9 +506,9 @@ class StatusBarSprite(BaseSprite):
         self._failure = False
 
         self.printer_queue_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
-        self.printer_queue_icon = self.add_subsprite(ImageSprite('printer_progress.png', size=(8, 8)))
+        self.printer_queue_icon = self.add_subsprite(ImageSprite('printer.png', size=(8, 8)))
         self.printed_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
-        self.printer_icon = self.add_subsprite(ImageSprite('printer.png', size=(8, 8)))
+        self.printer_icon = self.add_subsprite(ImageSprite('sheet.png', size=(8, 8)))
         self.taken_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
         self.captures_icon = self.add_subsprite(ImageSprite('capture.png', size=(8, 8)))
         self.set_rect(0, 0, self.rect.width, self.rect.height)
@@ -525,9 +525,9 @@ class StatusBarSprite(BaseSprite):
             if self._failure:
                 skin = pictures.load_pygame_image('printer.png')
                 skin.blit(pictures.load_pygame_image('action_failed.png'), (0, 0))
-                self.printer_icon.set_skin(skin)
+                self.printer_queue_icon.set_skin(skin)
             else:
-                self.printer_icon.set_skin('printer.png')
+                self.printer_queue_icon.set_skin('printer.png')
 
     def set_printed_counter(self, count):
         """Set counter.

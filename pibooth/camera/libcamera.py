@@ -4,7 +4,7 @@ import numpy
 import pygame
 try:
     import picamera2
-    from picamera2 import Picamera2, Preview
+    from picamera2 import Picamera2
     from libcamera import Transform
 except ImportError:
     picamera2 = None  # picamera2 is optional
@@ -89,7 +89,7 @@ class LibCamera(BaseCamera):
     def get_preview_image(self):
         """Capture a new picture in a file.
         """
-        return self._cam.capture_image("main")
+        return self._cam.capture_image('main')
 
     def preview(self, rect, flip=True):
         """Display a preview on the given Rect (flip if necessary).
@@ -109,7 +109,7 @@ class LibCamera(BaseCamera):
         """Capture a new picture in a file.
         """
         self._cam.switch_mode(self._capture_config)
-        image = self._cam.capture_image("main")
+        image = self._cam.capture_image('main')
         self._captures.append((image, effect))
         return image
 
