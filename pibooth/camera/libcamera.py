@@ -52,11 +52,13 @@ class LibCamera(BaseCamera):
         """Camera initialization.
         """
         self._cam.stop()
+        self._preview_config['format'] = 'BGR888'
         self._preview_config['transform'] = Transform(hflip=self.preview_flip)
         self._cam.configure(self._preview_config)
 
         self._capture_config['size'] = self.resolution
         self._capture_config['transform'] = Transform(hflip=self.capture_flip)
+        self._cam.configure(self._preview_config)
         self._cam.start()
 
     def _show_overlay(self):
@@ -84,17 +86,30 @@ class LibCamera(BaseCamera):
             image = image.filter(getattr(ImageFilter, effect.upper()))
         return image
 
-    def get_preview_image(self, effect=None):
+    def get_preview_image(self):
         """Capture a new picture in a file.
         """
-        image = self._cam.switch_mode_and_capture_image(self._capture_config, "main")
-        self._captures.append((image, effect))
-        return image
+        return self._cam.capture_image("main")
+
+    def preview(self, rect, flip=True):
+        """Display a preview on the given Rect (flip if necessary).
+        """
+        # Define Rect() object for resizing preview captures to fit to the defined
+        # preview rect keeping same aspect ratio than camera resolution.
+        size = sizing.new_size_keep_aspect_ratio(self.resolution, (min(
+            rect.width, self._cam.sensor_resolution[0]), min(rect.height, self._cam.sensor_resolution[1])))
+        rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
+
+        self._preview_config['main']['size'] = rect.size
+        self._preview_config['transform'] = Transform(hflip=flip)
+        self._cam.switch_mode(self._preview_config)
+        super().preview(rect, flip)
 
     def get_capture_image(self, effect=None):
         """Capture a new picture in a file.
         """
-        image = self._cam.switch_mode_and_capture_image(self._capture_config, "main")
+        self._cam.switch_mode(self._capture_config)
+        image = self._cam.capture_image("main")
         self._captures.append((image, effect))
         return image
 

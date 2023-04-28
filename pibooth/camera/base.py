@@ -3,6 +3,7 @@
 import pygame
 from PIL import Image, ImageDraw
 
+from pibooth.utils import LOGGER
 from pibooth import fonts, evts
 from pibooth.tasks import AsyncTask
 from pibooth.pictures import sizing
@@ -116,7 +117,7 @@ class BaseCamera:
         """Start the preview fitting the given Rect object.
         """
         if self._worker and self._worker.is_alive():
-            # Already running
+            LOGGER.warning("Can not start preview, capture or preview already running")
             return
 
         # Define Rect() object for resizing preview captures to fit to the defined
