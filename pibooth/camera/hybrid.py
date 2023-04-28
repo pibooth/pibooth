@@ -39,11 +39,11 @@ class HybridLibCamera(LibCamera):
         """
         return self._gp_cam.get_capture_image(effect)
 
-    def _specific_cleanup(self):
-        """Ensure that both cameras are cleaned.
+    def quit(self):
+        """Ensure that both cameras are closed.
         """
-        super()._specific_cleanup()
-        self._gp_cam._specific_cleanup()
+        super().quit()
+        self._gp_cam.quit()
 
 
 class HybridRpiCamera(RpiCamera):
@@ -79,11 +79,11 @@ class HybridRpiCamera(RpiCamera):
         """
         return self._gp_cam.get_capture_image(effect)
 
-    def _specific_cleanup(self):
-        """Ensure that both cameras are cleaned.
+    def quit(self):
+        """Ensure that both cameras are closed.
         """
-        super()._specific_cleanup()
-        self._gp_cam._specific_cleanup()
+        super().quit()
+        self._gp_cam.quit()
 
 
 class HybridCvCamera(CvCamera):
@@ -119,8 +119,8 @@ class HybridCvCamera(CvCamera):
         """
         return self._gp_cam.get_capture_image(effect)
 
-    def _specific_cleanup(self):
-        """Ensure that both cameras are cleaned.
+    def quit(self):
+        """Ensure that both cameras are closed.
         """
-        super()._specific_cleanup()
-        self._gp_cam._specific_cleanup()
+        super().quit()
+        self._gp_cam.quit()
