@@ -29,8 +29,8 @@ class OutlinesSprite(pygame.sprite.DirtySprite):
         self.rect = sprite.rect
         self.color = color
         self.visible = 0
-        self._sp = sprite
-        self._sp.outlines = self
+        self._outlined_sprite = sprite
+        self._outlined_sprite.outlines = self
         self.enabled = True
 
     def __repr__(self):
@@ -45,7 +45,7 @@ class OutlinesSprite(pygame.sprite.DirtySprite):
         """Show outlines (only if reference sprite is visible).
         """
         self.enabled = True
-        if self._sp.visible and not self.visible:
+        if self._outlined_sprite.visible and not self.visible:
             self.visible = 1
 
     def disable(self):
@@ -58,7 +58,7 @@ class OutlinesSprite(pygame.sprite.DirtySprite):
     def update(self, events):
         """Draw outlines only if visible.
         """
-        if self._sp.dirty and self.visible:
+        if self._outlined_sprite.dirty and self.visible:
             self.dirty = 1
             self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
             pygame.draw.rect(self.image, self.color, (0, 0, self.rect.width, self.rect.height), 2)
@@ -77,7 +77,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
 
     def __init__(self, size=(10, 10)):
         super().__init__()
-        self.image = None
+        self._image_cache = None
         self.rect = pygame.Rect((0, 0), size)
         self.color = None
         self.outlines = None  # Dynamically set by outlines sprite class
@@ -85,6 +85,28 @@ class BaseSprite(pygame.sprite.DirtySprite):
         self.on_pressed = None
         self.toggle_timer = PollingTimer(start=False)
         self.subsprites = []  # Elements composing the sprite
+
+    def draw(self):
+        """Render sprite image.
+
+        :return: image for the sprite
+        :rtype: Pygame surface
+        """
+        raise NotImplementedError
+
+    @property
+    def image(self):
+        """Return current image.
+        """
+        if not self._image_cache:
+            self._image_cache = self.draw()
+        return self._image_cache
+
+    @image.setter
+    def image(self, value):
+        """Set current image.
+        """
+        self._image_cache = value
 
     def add_subsprite(self, sprite):
         """Add a sub-sprite to compose the sprite.
@@ -202,7 +224,7 @@ class ImageSprite(BaseSprite):
         :type colorize: tuple
         """
         super().__init__(size)
-        self.image_orig = None
+        self._image_orig = None
         self.path = None
         self.crop = False
         self.hflip = False
@@ -216,8 +238,32 @@ class ImageSprite(BaseSprite):
         if self.path:
             elem = f"path='{osp.basename(self.path)}'"
         else:
-            elem = f"image={self.image_orig}"
+            elem = f"image={self._image_orig}"
         return f"{self.__class__.__name__}({elem}, rect={tuple(self.rect)})"
+
+    def draw(self):
+        """Render image.
+        """
+        if self._image_orig is None:
+            if self.path:
+                self._image_orig = pictures.load_pygame_image(self.path)
+            else:
+                raise ValueError(f"Path to image is missing for '{self}'")
+
+        if isinstance(self._image_orig, (tuple, list)):
+            image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+            image.fill(self._image_orig)
+            return image
+        elif isinstance(self._image_orig, PIL.Image.Image):
+            surface = pygame.image.frombuffer(self._image_orig.tobytes(),
+                                              self._image_orig.size, self._image_orig.mode)
+            return pictures.transform_pygame_image(surface, self.rect.size, hflip=self.hflip,
+                                                   vflip=self.vflip, angle=self.angle, crop=self.crop,
+                                                   color=self.color if self.colorize else None)
+        else:
+            return pictures.transform_pygame_image(self._image_orig, self.rect.size, hflip=self.hflip,
+                                                   vflip=self.vflip, angle=self.angle, crop=self.crop,
+                                                   color=self.color if self.colorize else None)
 
     def set_skin(self, skin):
         """Set skin used to fill the sprite. Skin can be:
@@ -233,25 +279,25 @@ class ImageSprite(BaseSprite):
         if isinstance(skin, str):
             if skin != self.path:
                 self.path, self.image = skin, None  # Force rendering
-                self.image_orig = None
+                self._image_orig = None
                 self.dirty = 1
         elif isinstance(skin, (tuple, list)):
             assert len(skin) == 3, "Length of 3 is required for RGB tuple"
-            if skin != self.image_orig:
+            if skin != self._image_orig:
                 self.path, self.image = None, None  # Force rendering
-                self.image_orig = skin
+                self._image_orig = skin
                 self.dirty = 1
         else:
             assert isinstance(skin, (PIL.Image.Image, pygame.Surface)), "PIL Image or Pygame Surface is required"
-            if skin != self.image_orig:
+            if skin != self._image_orig:
                 self.path, self.image = None, None  # Force rendering
-                self.image_orig = skin
+                self._image_orig = skin
                 self.dirty = 1
 
     def get_skin(self):
         """Return the current skin.
         """
-        return self.path or self.image_orig
+        return self.path or self._image_orig
 
     def set_crop(self, crop=True):
         """Crop the skin to fit sprite size.
@@ -292,31 +338,6 @@ class ImageSprite(BaseSprite):
             self.image = None  # Force rendering
             self.dirty = 1
 
-    def update(self, events):
-        """Draw image if has changed and visible.
-        """
-        super().update(events)
-        if self.image is None and self.visible:
-            if self.image_orig is None:
-                if self.path:
-                    self.image_orig = pictures.load_pygame_image(self.path)
-                else:
-                    raise ValueError(f"Path to image is missing for '{self}'")
-
-            if isinstance(self.image_orig, (tuple, list)):
-                self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
-                self.image.fill(self.image_orig)
-            elif isinstance(self.image_orig, PIL.Image.Image):
-                surface = pygame.image.frombuffer(self.image_orig.tobytes(),
-                                                  self.image_orig.size, self.image_orig.mode)
-                self.image = pictures.transform_pygame_image(surface, self.rect.size, hflip=self.hflip,
-                                                             vflip=self.vflip, angle=self.angle, crop=self.crop,
-                                                             color=self.color if self.colorize else None)
-            else:
-                self.image = pictures.transform_pygame_image(self.image_orig, self.rect.size, hflip=self.hflip,
-                                                             vflip=self.vflip, angle=self.angle, crop=self.crop,
-                                                             color=self.color if self.colorize else None)
-
 
 class TextSprite(BaseSprite):
 
@@ -343,6 +364,12 @@ class TextSprite(BaseSprite):
     def __repr__(self):
         return f"{self.__class__.__name__}(text='{self.text}', rect={tuple(self.rect)})"
 
+    def draw(self):
+        """Render text.
+        """
+        return pictures.text_to_pygame_image(
+            self.text, self.rect.size, self.color, self.align, font_name=self.font_name)
+
     def set_text(self, text):
         """Set text.
 
@@ -364,14 +391,6 @@ class TextSprite(BaseSprite):
             self.align = align
             self.image = None  # Force rendering
             self.dirty = 1
-
-    def update(self, events):
-        """Draw image if has changed and visible.
-        """
-        super().update(events)
-        if self.image is None and self.visible:
-            self.image = pictures.text_to_pygame_image(
-                self.text, self.rect.size, self.color, self.align, font_name=self.font_name)
 
 
 class ArrowSprite(ImageSprite):
@@ -468,6 +487,24 @@ class DotsSprite(BaseSprite):
         self.current = 0
         self.total = nbr_dots
 
+    def draw(self):
+        """Render dot.
+        """
+        image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+        border = 20
+        side = min(self.rect.size) - 10
+        empty_dot = pictures.transform_pygame_image(self.empty_orig, (side, side), color=self.color)
+        filled_dot = pictures.transform_pygame_image(self.checked_orig, (side, side), color=self.color)
+        x = (self.rect.width - (side * self.total + border * (self.total - 1))) // 2
+        y = (self.rect.height - side) // 2
+        for i in range(self.total):
+            if i < self.current:
+                image.blit(filled_dot, (x, y))
+            else:
+                image.blit(empty_dot, (x, y))
+            x += (side + border)
+        return image
+
     def set_status(self, current, total):
         if self.total != total:
             self.total = total
@@ -477,23 +514,6 @@ class DotsSprite(BaseSprite):
             self.current = current
             self.image = None  # Force rendering
             self.dirty = 1
-
-    def update(self, events):
-        super().update(events)
-        if self.image is None and self.visible:
-            self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
-            border = 20
-            side = min(self.rect.size) - 10
-            empty_dot = pictures.transform_pygame_image(self.empty_orig, (side, side), color=self.color)
-            filled_dot = pictures.transform_pygame_image(self.checked_orig, (side, side), color=self.color)
-            x = (self.rect.width - (side * self.total + border * (self.total - 1))) // 2
-            y = (self.rect.height - side) // 2
-            for i in range(self.total):
-                if i < self.current:
-                    self.image.blit(filled_dot, (x, y))
-                else:
-                    self.image.blit(empty_dot, (x, y))
-                x += (side + border)
 
 
 class StatusBarSprite(BaseSprite):
@@ -512,6 +532,18 @@ class StatusBarSprite(BaseSprite):
         self.taken_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
         self.captures_icon = self.add_subsprite(ImageSprite('capture.png', size=(8, 8)))
         self.set_rect(0, 0, self.rect.width, self.rect.height)
+
+    def draw(self):
+        """Render statusbar.
+        """
+        image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+        width = min(self.rect.width, self.rect.height)
+        gfxdraw.aacircle(image, -1, width, width, (40, 41, 35))
+        gfxdraw.filled_circle(image, -1, width, width, (40, 41, 35))
+        gfxdraw.aacircle(image, -1, self.rect.height - width, width, (40, 41, 35))
+        gfxdraw.filled_circle(image, -1, self.rect.height - width, width, (40, 41, 35))
+        gfxdraw.box(image, (0, width, width, self.rect.height - 2 * width), (40, 41, 35))
+        return image
 
     def set_printer_queue(self, size):
         """Set number of print in progress.
@@ -552,18 +584,6 @@ class StatusBarSprite(BaseSprite):
         for sprite in self.subsprites:
             sprite.set_rect(x, y, width, icon_height - padding)
             y += (icon_height + padding)
-
-    def update(self, events):
-        super().update(events)
-        if self.image is None and self.visible:
-            # Draw statusbar shape
-            self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
-            width = min(self.rect.width, self.rect.height)
-            gfxdraw.aacircle(self.image, -1, width, width, (40, 41, 35))
-            gfxdraw.filled_circle(self.image, -1, width, width, (40, 41, 35))
-            gfxdraw.aacircle(self.image, -1, self.rect.height - width, width, (40, 41, 35))
-            gfxdraw.filled_circle(self.image, -1, self.rect.height - width, width, (40, 41, 35))
-            gfxdraw.box(self.image, (0, width, width, self.rect.height - 2 * width), (40, 41, 35))
 
 
 class BasePygameScene(BaseScene):

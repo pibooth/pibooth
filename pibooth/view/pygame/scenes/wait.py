@@ -23,12 +23,14 @@ class WaitScene(BasePygameScene):
 
         self.text.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
         self.left_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
-        self.image.on_pressed = self.on_event
-        self.text_print.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
-        self.right_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
+        self.image.on_pressed = self.on_print_event
+        self.text_print.on_pressed = self.on_print_event
+        self.right_arrow.on_pressed = self.on_print_event
 
-    def on_event(self):
+    def on_print_event(self):
         self.image.hide()  # Do not show image after click, there is a timer before
+        self.image_check.show()
+        self.printer_ongoing_timer.start()
         evts.post(evts.EVT_PIBOOTH_PRINT)
 
     def resize(self, size):
@@ -104,15 +106,12 @@ class WaitScene(BasePygameScene):
             self.right_arrow.set_rect(x, y, size[0], size[1])
 
     def update(self, events):
-        if self.right_arrow.visible and evts.find_event(events, evts.EVT_PIBOOTH_PRINT):
-            self.image.hide()
-            self.image_check.show()
-            self.printer_ongoing_timer.start()
 
         if self.printer_ongoing_timer.is_started() and self.printer_ongoing_timer.is_timeout():
             self.image.show()
             self.image_check.hide()
             self.printer_ongoing_timer.reset()
+
         super().update(events)
 
     def update_print_action(self, enabled=True):
@@ -120,7 +119,7 @@ class WaitScene(BasePygameScene):
             self.text_print.show()
             if self.arrow_location != self.ARROW_HIDDEN:
                 self.right_arrow.show()
-            self.image.on_pressed = self.on_event
+            self.image.on_pressed = self.on_print_event
         else:
             self.text_print.hide()
             if self.arrow_location != self.ARROW_HIDDEN:
