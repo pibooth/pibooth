@@ -7,9 +7,9 @@ class PreviewScene(BasePygameScene):
 
     def __init__(self):
         super().__init__()
-        self.left_image = self.add_sprite(ImageSprite('capture_left.png'))
-        self.right_image = self.add_sprite(ImageSprite('capture_right.png'))
-        self.dots = self.add_sprite(DotsSprite(4))
+        self.left_image = ImageSprite(self, 'capture_left.png')
+        self.right_image = ImageSprite(self, 'capture_right.png')
+        self.dots = DotsSprite(self, 4)
 
     def resize(self, size):
         # Hide status bar

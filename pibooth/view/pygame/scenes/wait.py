@@ -12,11 +12,11 @@ class WaitScene(BasePygameScene):
 
     def __init__(self):
         super().__init__()
-        self.left_arrow = self.add_sprite(LeftArrowSprite())
-        self.right_arrow = self.add_sprite(RightArrowSprite())
-        self.text = self.add_sprite(TextSprite(get_translated_text('intro')))
-        self.text_print = self.add_sprite(TextSprite(get_translated_text('intro_print')))
-        self.image_check = self.add_sprite(ImageSprite('action_done.png'))
+        self.left_arrow = LeftArrowSprite(self)
+        self.right_arrow = RightArrowSprite(self)
+        self.text = TextSprite(self, get_translated_text('intro'))
+        self.text_print = TextSprite(self, get_translated_text('intro_print'))
+        self.image_check = ImageSprite(self, 'action_done.png')
         self.image_check.hide()
 
         self.printer_ongoing_timer = PollingTimer(1, False)

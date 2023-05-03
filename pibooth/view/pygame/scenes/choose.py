@@ -53,9 +53,9 @@ class ChooseScene(BasePygameScene):
         super().__init__()
         self.choices = ()
         self.slider = ImSlider((200, 100), focus=False, renderer=Renderer(self), stype=STYPE_LOOP)
-        self.text = self.add_sprite(TextSprite(get_translated_text('choose')))
-        self.left_arrow = self.add_sprite(LeftArrowSprite())
-        self.right_arrow = self.add_sprite(RightArrowSprite())
+        self.text = TextSprite(self, get_translated_text('choose'))
+        self.left_arrow = LeftArrowSprite(self)
+        self.right_arrow = RightArrowSprite(self)
 
         self.right_arrow.set_skin('arrow_double.png')
         self.left_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)

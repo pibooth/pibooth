@@ -8,9 +8,9 @@ class FinishScene(BasePygameScene):
 
     def __init__(self):
         super().__init__()
-        self.left_image = self.add_sprite(ImageSprite('finish_left.png'))
-        self.right_image = self.add_sprite(ImageSprite('finish_right.png'))
-        self.text = self.add_sprite(TextSprite(get_translated_text('finished')))
+        self.left_image = ImageSprite(self, 'finish_left.png')
+        self.right_image = ImageSprite(self, 'finish_right.png')
+        self.text = TextSprite(self, get_translated_text('finished'))
 
     def resize(self, size):
         # Show status bar
