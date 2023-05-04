@@ -89,8 +89,6 @@ class BaseSprite(pygame.sprite.DirtySprite):
         """
         if not self.visible:
             self.visible = 1
-            if self.outlines and self.outlines.enabled and not self.outlines.visible:
-                self.outlines.visible = 1
             for sprite in self.sprites:
                 sprite.show()
 
@@ -99,8 +97,6 @@ class BaseSprite(pygame.sprite.DirtySprite):
         """
         if self.visible:
             self.visible = 0
-            if self.outlines and self.outlines.visible:
-                self.outlines.visible = 0
             for sprite in self.sprites:
                 sprite.hide()
 
@@ -186,7 +182,6 @@ class OutlinesSprite(BaseSprite):
         :type color: tuple
         """
         super().__init__(parent, outlines=False, layer=BasePygameScene.LAYER_OUTLINES)
-        self._outlined_sprite = parent
         self.rect = parent.rect
         self.color = color
         self.visible = 0
@@ -202,6 +197,23 @@ class OutlinesSprite(BaseSprite):
         pygame.draw.rect(image, self.color, (0, 0, self.rect.width, self.rect.height), 2)
         return image
 
+    def show(self):
+        """Show sprite.
+        """
+        if not self.visible and self.enabled:
+            self.visible = 1
+
+    def hide(self):
+        """Hide sprite.
+        """
+        if self.visible:
+            self.visible = 0
+
+    def add_sprite(self, sprite):
+        """Add a sub-sprite to compose the sprite.
+        """
+        raise ValueError(f"Adding sub-sprite {sprite} to {self.__class__.__name__} not permited")
+
     def set_pressed(self, state, toggle_timeout=None):
         """Outline can not be pressed.
         """
@@ -210,15 +222,16 @@ class OutlinesSprite(BaseSprite):
     def enable(self):
         """Show outlines (only if reference sprite is visible).
         """
-        self.enabled = True
-        if self._outlined_sprite.visible and not self.visible:
-            self.visible = 1
+        if self.enabled == False:
+            self.enabled = True
+            if self.parent.visible and not self.visible:
+                self.visible = 1
 
     def disable(self):
         """Hide outlines.
         """
-        self.enabled = False
-        if self.visible:
+        if self.enabled == True:
+            self.enabled = False
             self.visible = 0
 
 
@@ -233,6 +246,8 @@ class ImageSprite(BaseSprite):
 
     def __init__(self, parent, skin=None, colorize=True, **kwargs):
         """
+        :param parent: sprite to which current sprite is linked
+        :type parent: object
         :param skin: image file path, RGB color tuple,  PIL image or Pygame surface
         :type skin: str or tuple or object
         :param colorize: recolorize picture if a color is set.
@@ -358,6 +373,8 @@ class TextSprite(BaseSprite):
 
     def __init__(self, parent, text='', font_name=None, **kwargs):
         """
+        :param parent: sprite to which current sprite is linked
+        :type parent: object
         :param text: text to draw
         :type text: str
         :param font_name: font name
