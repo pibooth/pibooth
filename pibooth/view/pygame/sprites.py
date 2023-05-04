@@ -535,12 +535,12 @@ class StatusBarSprite(BaseSprite):
         super().__init__(parent, **kwargs)
         self._failure = False
 
-        self.printer_queue_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf')
-        self.printer_queue_icon = ImageSprite(self, 'printer_progress.png', size=(8, 8))
-        self.printed_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf')
-        self.printer_icon = ImageSprite(self, 'printer.png', size=(8, 8))
-        self.taken_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf')
-        self.captures_icon = ImageSprite(self, 'capture.png', size=(8, 8))
+        self.printer_queue_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf', outlines=False)
+        self.printer_queue_icon = ImageSprite(self, 'printer_progress.png', size=(8, 8), outlines=False)
+        self.printed_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf', outlines=False)
+        self.printer_icon = ImageSprite(self, 'printer.png', size=(8, 8), outlines=False)
+        self.taken_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf', outlines=False)
+        self.captures_icon = ImageSprite(self, 'capture.png', size=(8, 8), outlines=False)
         self.set_rect(0, 0, self.rect.width, self.rect.height)
 
     def draw(self):
@@ -614,6 +614,7 @@ class BasePygameScene(BaseScene):
     The layer LAYER_PICTURE is initialized with an `ImageSprite` hidden
     by default.
     """
+    LAYER_BACKGROUND = 0
     LAYER_IMAGES = 2
     LAYER_TEXTS = 4
     LAYER_PICTURE = 5
@@ -653,11 +654,11 @@ class BasePygameScene(BaseScene):
         :type from_layers: list
         """
         if from_layers is None:
-            from_layers = sorted(BasePygameScene.LAYER_IMAGES,
-                                 BasePygameScene.LAYER_TEXTS,
-                                 BasePygameScene.LAYER_PICTURE,
-                                 BasePygameScene.LAYER_ARROWS,
-                                 BasePygameScene.LAYER_STATUS)
+            from_layers = (BasePygameScene.LAYER_IMAGES,
+                           BasePygameScene.LAYER_TEXTS,
+                           BasePygameScene.LAYER_PICTURE,
+                           BasePygameScene.LAYER_ARROWS,
+                           BasePygameScene.LAYER_STATUS)
         for sp in reversed(self.sprites.get_sprites_at(pos)):
             if sp.visible and sp.layer in from_layers:
                 return sp

@@ -39,9 +39,11 @@ class PygameWindow(BaseWindow):
         pygame.display.set_caption(title)
         self.display_size = (info.current_w, info.current_h)
         self.surface = pygame.display.set_mode(self._size, pygame.RESIZABLE)
-        self.background_sprite = sprites.ImageSprite(None, size=size, layer=0)
+        self.background_sprite = sprites.ImageSprite(None, size=size, outlines=False,
+                                                     layer=sprites.BasePygameScene.LAYER_BACKGROUND)
         self.set_background(self.bg_color_or_path)
-        self.statusbar_sprite = sprites.StatusBarSprite(None, size=(50, 50))
+        self.statusbar_sprite = sprites.StatusBarSprite(None, size=(50, 50),
+                                                        layer=sprites.BasePygameScene.LAYER_STATUS)
 
         self._keyboard = vkb.VKeyboard(self.surface,
                                        self._on_keyboard_event,
