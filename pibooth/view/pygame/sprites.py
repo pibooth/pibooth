@@ -132,6 +132,8 @@ class BaseSprite(pygame.sprite.DirtySprite):
         :param height: background height
         :type height: int
         """
+        assert width > 0, "Sprite width shall be greater than zero"
+        assert height > 0, "Sprite height shall be greater than zero"
         if self.rect.topleft != (int(x), int(y)):
             self.rect.topleft = (x, y)
             self.set_dirty(False)
@@ -521,9 +523,9 @@ class RightArrowSprite(LeftArrowSprite):
                     self.set_pressed(1, 0.2)  # Timeout because not release event for HW buttons
 
 
-class DotsSprite(BaseSprite):
+class CapturesCounterSprite(BaseSprite):
 
-    """Dot Sprite to count current capture.
+    """CapturesCounter Sprite to display current capture number.
     """
 
     def __init__(self, parent, nbr_dots=4, **kwargs):
@@ -584,7 +586,6 @@ class StatusBarSprite(BaseSprite):
                                     outlines=False, layer=self.layer)
         self.captures_icon = ImageSprite(self, 'capture.png', size=(8, 8),
                                          outlines=False, layer=self.layer)
-        self.set_rect(0, 0, self.rect.width, self.rect.height)
 
     def draw(self):
         """Render statusbar.

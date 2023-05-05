@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pibooth.view.pygame.sprites import BasePygameScene, ImageSprite, DotsSprite
+from pibooth.view.pygame.sprites import BasePygameScene, ImageSprite, CapturesCounterSprite
 
 
 class PreviewScene(BasePygameScene):
@@ -9,7 +9,7 @@ class PreviewScene(BasePygameScene):
         super().__init__()
         self.left_image = ImageSprite(self, 'capture_left.png')
         self.right_image = ImageSprite(self, 'capture_right.png')
-        self.dots = DotsSprite(self, 4)
+        self.captures_counter = CapturesCounterSprite(self, 4)
 
     def resize(self, size):
         # Hide status bar
@@ -28,8 +28,8 @@ class PreviewScene(BasePygameScene):
         self.right_image.set_rect(self.rect.right - size[0] - 10, self.rect.bottom - size[1], size[0], size[1])
 
         # Dots
-        self.dots.set_rect(self.rect.width // 6, self.rect.bottom - self.rect.height // 8 + 10,
-                           self.rect.width * 2 // 3, self.rect.height // 8 - 10)
+        self.captures_counter.set_rect(self.rect.width // 6, self.rect.bottom - self.rect.height // 8 + 10,
+                                       self.rect.width * 2 // 3, self.rect.height // 8 - 10)
 
     def set_capture_number(self, current, total):
-        self.dots.set_status(current, total)
+        self.captures_counter.set_status(current, total)

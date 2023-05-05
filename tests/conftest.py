@@ -151,6 +151,7 @@ def scene_builder():
         background_sprite = sprites.ImageSprite(None, (0, 0, 0), size=(400, 400), layer=0)
         background_sprite.set_crop()
         statusbar_sprite = sprites.StatusBarSprite(None)
+        statusbar_sprite.set_rect(0, 250, 30, 160)
 
         scene = get_scene('pygame', name)
         scene.add_sprite(background_sprite)
