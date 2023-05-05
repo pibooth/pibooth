@@ -42,7 +42,7 @@ class PygameWindow(BaseWindow):
         self.background_sprite = sprites.ImageSprite(None, size=size, outlines=False,
                                                      layer=sprites.BasePygameScene.LAYER_BACKGROUND)
         self.set_background(self.bg_color_or_path)
-        self.statusbar_sprite = sprites.StatusBarSprite(None, size=(50, 50),
+        self.statusbar_sprite = sprites.StatusBarSprite(None, size=(50, 100),
                                                         layer=sprites.BasePygameScene.LAYER_STATUS)
 
         self._keyboard = vkb.VKeyboard(self.surface,

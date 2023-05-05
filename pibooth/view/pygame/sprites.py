@@ -15,11 +15,14 @@ class BaseSprite(pygame.sprite.DirtySprite):
 
     """Base sprite for any graphical element. It handles common attributes
     and methods:
-      - display: manage when sprite is displayed
+      - show/hide: manage when sprite is displayed
       - color: manage color rendering
       - resizing: manage pygame.Rect dimension
       - outline: manage a colored rectangle around the sprite
       - event: manage pressed action
+
+    A sprite can be composed it-self with other sprites (called sub-sprites).
+    For instance, the outlines are sub-sprites.
     """
 
     def __init__(self, parent=None, size=(10, 10), outlines=True, layer=None):
@@ -36,21 +39,32 @@ class BaseSprite(pygame.sprite.DirtySprite):
         super().__init__()
         assert parent is None or isinstance(parent, (BasePygameScene, BaseSprite))
         self._image_cache = None
+        self._subsprites = []  # Sub-sprites composing the sprite
         self.parent = parent
         self.rect = pygame.Rect((0, 0), size)
         self.color = None
         self.pressed = 0
         self.on_pressed = None
         self.toggle_timer = PollingTimer(start=False)
-        self.sprites = []  # Sub-elements composing the sprite
         self.layer = layer
         if self.parent:
             self.parent.add_sprite(self)
         if outlines:
-            self.outlines = OutlinesSprite(self)
-            self.add_sprite(self.outlines)
+            self.add_sprite(OutlinesSprite(self))
+
+    def get_sprites(self, include_outlines=True, recursive=False):
+        """Return all sub-sprites.
+        """
+        if recursive:
+            sprites = []
+            sprites.extend(self._subsprites)
+            for sprite in self._subsprites:
+                sprites += sprite.get_sprites(include_outlines, recursive)
+            return sprites
+        elif not include_outlines:
+            return [sprite for sprite in self._subsprites if not isinstance(sprite, OutlinesSprite)]
         else:
-            self.outlines = None
+            return self._subsprites
 
     def draw(self):
         """Render sprite image.
@@ -62,7 +76,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
 
     @property
     def image(self):
-        """Return current image.
+        """Return current sprite image.
         """
         if not self._image_cache:
             self._image_cache = self.draw()
@@ -74,13 +88,19 @@ class BaseSprite(pygame.sprite.DirtySprite):
         self.dirty = 1
         if redraw:
             self._image_cache = None
+        for sprite in self.get_sprites():
+            if isinstance(sprite, OutlinesSprite):
+                sprite.set_dirty(redraw)
 
     def add_sprite(self, sprite):
         """Add a sub-sprite to compose the sprite.
         """
         assert isinstance(sprite, BaseSprite), f"Sub-sprite '{sprite}' shall inherite from 'BaseSprite' class"
-        self.sprites.append(sprite)
+        if sprite.parent == self:
+            # Register direct sprites
+            self._subsprites.append(sprite)
         if self.parent:
+            # Propagate to parent
             self.parent.add_sprite(sprite)
         return sprite
 
@@ -89,7 +109,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
         """
         if not self.visible:
             self.visible = 1
-            for sprite in self.sprites:
+            for sprite in self.get_sprites():
                 sprite.show()
 
     def hide(self):
@@ -97,7 +117,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
         """
         if self.visible:
             self.visible = 0
-            for sprite in self.sprites:
+            for sprite in self.get_sprites():
                 sprite.hide()
 
     def set_rect(self, x, y, width, height):
@@ -185,10 +205,10 @@ class OutlinesSprite(BaseSprite):
         self.rect = parent.rect
         self.color = color
         self.visible = 0
-        self.enabled = True
+        self.enabled = False
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(rect={tuple(self.rect)}"
+        return f"{self.__class__.__name__}({self.parent})"
 
     def draw(self):
         """Render image.
@@ -222,7 +242,7 @@ class OutlinesSprite(BaseSprite):
     def enable(self):
         """Show outlines (only if reference sprite is visible).
         """
-        if self.enabled == False:
+        if not self.enabled:
             self.enabled = True
             if self.parent.visible and not self.visible:
                 self.visible = 1
@@ -230,7 +250,7 @@ class OutlinesSprite(BaseSprite):
     def disable(self):
         """Hide outlines.
         """
-        if self.enabled == True:
+        if self.enabled:
             self.enabled = False
             self.visible = 0
 
@@ -552,12 +572,18 @@ class StatusBarSprite(BaseSprite):
         super().__init__(parent, **kwargs)
         self._failure = False
 
-        self.printer_queue_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf', outlines=False)
-        self.printer_queue_icon = ImageSprite(self, 'printer_progress.png', size=(8, 8), outlines=False)
-        self.printed_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf', outlines=False)
-        self.printer_icon = ImageSprite(self, 'printer.png', size=(8, 8), outlines=False)
-        self.taken_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf', outlines=False)
-        self.captures_icon = ImageSprite(self, 'capture.png', size=(8, 8), outlines=False)
+        self.printer_queue_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf',
+                                            outlines=False, layer=self.layer)
+        self.printer_queue_icon = ImageSprite(self, 'printer_progress.png', size=(8, 8),
+                                              outlines=False, layer=self.layer)
+        self.printed_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf',
+                                      outlines=False, layer=self.layer)
+        self.printer_icon = ImageSprite(self, 'printer.png', size=(8, 8),
+                                        outlines=False, layer=self.layer)
+        self.taken_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf',
+                                    outlines=False, layer=self.layer)
+        self.captures_icon = ImageSprite(self, 'capture.png', size=(8, 8),
+                                         outlines=False, layer=self.layer)
         self.set_rect(0, 0, self.rect.width, self.rect.height)
 
     def draw(self):
@@ -603,12 +629,12 @@ class StatusBarSprite(BaseSprite):
         """
         super().set_rect(x, y, width, height)
         start_padding = width // 2
-        icon_height = (height - 2 * start_padding) // len(self.sprites)
+        icon_height = (height - 2 * start_padding) // len(self.get_sprites(include_outlines=False))
         padding = icon_height // 10
         icon_height -= padding
 
         y += start_padding
-        for sprite in self.sprites:
+        for sprite in self.get_sprites(include_outlines=False):
             sprite.set_rect(x, y, width, icon_height - padding)
             y += (icon_height + padding)
 
@@ -658,15 +684,18 @@ class BasePygameScene(BaseScene):
         :type sprite: object
         """
         self.sprites.add(sprite)
+        if not sprite.parent:
+            # Parent not defined, means that sub-sprites are not registered
+            self.sprites.add(*sprite.get_sprites(recursive=True))
         return sprite
 
     def get_top_sprite_at(self, pos, from_layers=None):
         """Return the top sprite (last of the `from_layers`) which is visible.
-        If the `from_layers` is not defined, only sprite from "clickable" layers
+        If `from_layers` is not defined, only a sprite from "clickable" layers
         will be returned.
 
-        :param sprites: sprites list
-        :type sprites: list
+        :param pos: position (x,y)
+        :type pos: tuple
         :param from_layers: layers to belong to
         :type from_layers: list
         """
@@ -676,15 +705,16 @@ class BasePygameScene(BaseScene):
                            BasePygameScene.LAYER_PICTURE,
                            BasePygameScene.LAYER_ARROWS,
                            BasePygameScene.LAYER_STATUS)
-        for sp in reversed(self.sprites.get_sprites_at(pos)):
-            if sp.visible and sp.layer in from_layers:
-                return sp
+        for sprite in reversed(self.sprites.get_sprites_at(pos)):
+            if sprite.visible and sprite.layer in from_layers:
+                return sprite
         return None
 
     @property
     def background(self):
-        for sprite in self.sprites.get_sprites_from_layer(0):
-            return sprite
+        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_BACKGROUND):
+            if isinstance(sprite, ImageSprite):
+                return sprite
         raise RuntimeError("Background is not initialized")
 
     @property

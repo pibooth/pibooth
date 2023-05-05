@@ -18,3 +18,9 @@ def test_scene(init_lang, pygame_loop, scene_builder, name):
         return scene.draw(screen)
 
     pygame_loop(events_handler)
+
+
+def test_get_sprites(init_lang, scene_builder):
+
+    scene = scene_builder('wait')
+    assert scene.status_bar.get_sprites()
