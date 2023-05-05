@@ -1,0 +1,456 @@
+Pibooth version installed: 2.0.7
+Installed plugins: 
+GPhoto2 version installed: 2.5.27
+  - standard camlib set (ax203 canon digigr8 dimagev directory docupen jl2005a jl2005c kodak_dc240 lumix mars pentax ptp2 ricoh_g3 sierra sonix sq905 st2205 topfield tp6801)
+  - gcc (C compiler used)
+  - ltdl (for portable loading of camlibs)
+  - EXIF (for special handling of EXIF files)
+Listing all connected DSLR camera
+00 : addr-> usb:001,013  name-> Canon SX 620HS
+
+================================================================================
+Stating diagnostic of connected DSLR camera
+* Preview compatible: True
+* Capture compatible: True
+/actions/syncdatetimeutc
+  Label       : Synchronize camera date and time with PC
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 0
+  Choices     : [0, 1]
+/actions/uilock
+  Label       : UI Lock
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 2
+  Choices     : [0, 1]
+/actions/viewfinder
+  Label       : Canon EOS Viewfinder
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 0
+  Choices     : [0, 1]
+/actions/eosremoterelease
+  Label       : Canon EOS Remote Release
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : None
+  Choices     : ['None', 'Press Half', 'Press Full', 'Release Half', 'Release Full', 'Immediate', 'Press 1', 'Press 2', 'Press 3', 'Release 1', 'Release 2', 'Release 3']
+/actions/eosmoviemode
+  Label       : Movie Mode
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 2
+  Choices     : [0, 1]
+/actions/opcode
+  Label       : PTP Opcode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0x1001,0xparam1,0xparam2
+  Choices     : n/a
+/settings/datetimeutc
+  Label       : Camera Date and Time
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Date entering
+  Current     : 1682851061
+  Choices     : n/a
+/settings/datetime
+  Label       : Camera Date and Time
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Date entering
+  Current     : 1682851064
+  Choices     : n/a
+/settings/output
+  Label       : Camera Output
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : MOBILE2
+  Choices     : ['Off', 'MOBILE2']
+/settings/evfmode
+  Label       : EVF Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 1
+  Choices     : ['1']
+/settings/ownername
+  Label       : Owner Name
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 
+  Choices     : n/a
+/settings/ownername
+  Label       : Owner Name
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 
+  Choices     : n/a
+/settings/artist
+  Label       : Artist
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 
+  Choices     : n/a
+/settings/copyright
+  Label       : Copyright
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 
+  Choices     : n/a
+/settings/depthoffield
+  Label       : Depth of Field
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/settings/capturetarget
+  Label       : Capture Target
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Memory card
+  Choices     : ['Internal RAM', 'Memory card']
+/settings/capture
+  Label       : Capture
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 0
+  Choices     : [0, 1]
+/settings/remotemode
+  Label       : Remote Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/settings/eventmode
+  Label       : Event Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/status/serialnumber
+  Label       : Serial Number
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 7590DAA2818947439434ED2F921AA826
+  Choices     : n/a
+/status/manufacturer
+  Label       : Camera Manufacturer
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : Canon Inc.
+  Choices     : n/a
+/status/cameramodel
+  Label       : Camera Model
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : Canon PowerShot SX620 HS
+  Choices     : n/a
+/status/deviceversion
+  Label       : Device Version
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 1-15.0.1.0
+  Choices     : n/a
+/status/vendorextension
+  Label       : Vendor Extension
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 
+  Choices     : n/a
+/status/model
+  Label       : Camera Model
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : Canon PowerShot SX620 HS
+  Choices     : n/a
+/status/model
+  Label       : Camera Model
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 67502080
+  Choices     : n/a
+/status/firmwareversion
+  Label       : Firmware Version
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 1.0.0.0
+  Choices     : n/a
+/status/
+  Label       : Battery Level
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 3%
+  Choices     : n/a
+/status/batterylevel
+  Label       : Battery Level
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 100%
+  Choices     : n/a
+/status/eosserialnumber
+  Label       : Serial Number
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 493062011977
+  Choices     : n/a
+/status/availableshots
+  Label       : Available Shots
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 5869
+  Choices     : n/a
+/imgsettings/imageformat
+  Label       : Image Format
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Unknown value 0500
+  Choices     : ['Unknown value 0500']
+/capturesettings/zoom
+  Label       : Zoom
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 0
+  Choices     : ['103']
+/capturesettings/aspectratio
+  Label       : Aspect Ratio
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : 16:9
+  Choices     : ['16:9']
+/capturesettings/storageid
+  Label       : Storage Device
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 00010001
+  Choices     : n/a
+/capturesettings/autoexposuremodedial
+  Label       : Canon Auto Exposure Mode Dial
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Auto
+  Choices     : ['P', 'TV', 'AV', 'Manual', 'Bulb', 'A_DEP', 'DEP', 'Custom', 'Lock', 'Green', 'Night Portrait', 'Sports', 'Portrait', 'Landscape', 'Closeup', 'Flash Off', 'Auto', 'Handheld Night Scene', 'HDR Backlight Control', 'Food', 'Grainy B/W', 'Soft focus', 'Toy camera effect', 'Fish-eye effect', 'Water painting effect', 'Miniature effect', 'HDR art standard', 'HDR art vivid', 'HDR art bold', 'HDR art embossed', 'Panning', 'Self Portrait', 'Hybrid Auto', 'Smooth skin', 'Fv']
+/capturesettings/drivemode
+  Label       : Drive Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Single
+  Choices     : ['Single', 'Timer 10 sec', 'Timer 2 sec', 'Timer 2 sec']
+/capturesettings/liveviewsize
+  Label       : Live View Size
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Small
+  Choices     : ['Small']
+/other/d045
+  Label       : Event Emulate Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 9
+  Choices     : ['1', '2', '3', '4', '5', '6', '7']
+/other/d04a
+  Label       : PTP Property 0xd04a
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 0
+  Choices     : ['0', '1', '2', '3']
+/other/d02e
+  Label       : Size of Output Data from Camera
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 524288
+  Choices     : n/a
+/other/d02f
+  Label       : Size of Input Data to Camera
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 524288
+  Choices     : n/a
+/other/5001
+  Label       : Battery Level
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 3
+  Choices     : ['0', '1', '2', '3']
+/other/d002
+  Label       : Battery Type
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 0
+  Choices     : ['0', '1', '2', '3', '4', '5']
+/other/d003
+  Label       : Battery Mode
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 1
+  Choices     : ['0', '1', '2', '3']
+/other/d034
+  Label       : UNIX Time
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 1682858264
+  Choices     : n/a
+/other/d047
+  Label       : Type of Slideshow
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/other/d046
+  Label       : DPOF Version
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 257
+  Choices     : n/a
+/other/d030
+  Label       : Remote API Version
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 256
+  Choices     : n/a
+/other/d049
+  Label       : Model ID
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 67502080
+  Choices     : n/a
+/other/d032
+  Label       : Camera Model
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : Canon PowerShot SX620 HS
+  Choices     : n/a
+/other/d033
+  Label       : Camera Owner
+  Readonly    : no
+  Data type   : <class 'NoneType'>
+  Widget type : Text
+  Current     : None
+  Choices     : n/a
+/other/d031
+  Label       : Firmware Version
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 16777216
+  Choices     : n/a
+/other/d050
+  Label       : PTP Property 0xd050
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/other/d052
+  Label       : PTP Property 0xd052
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
+/other/d057
+  Label       : PTP Property 0xd057
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 493062011977
+  Choices     : n/a
+/other/d402
+  Label       : PTP Property 0xd402
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : Canon PowerShot SX620 HS
+  Choices     : n/a
+/other/d406
+  Label       : PTP Property 0xd406
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : Windows
+  Choices     : n/a
+/other/d407
+  Label       : PTP Property 0xd407
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 1
+  Choices     : n/a
+/other/d303
+  Label       : PTP Property 0xd303
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 1
+  Choices     : n/a
+
+================================================================================
+Testing commands used by pibooth
+Setting option imgsettings/iso="100"
+   -> unsupported setting imgsettings/iso=100 (nothing configured on DSLR)
+Setting option settings/capturetarget="Memory card"
+Getting option actions/viewfinder=0
+Setting option actions/viewfinder="1"
+Take capture preview
+Setting option actions/viewfinder="0"
+Take a capture
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9128 receiving resp failed: PTP Device Busy (0x2019)'
+Gphoto2: b'camera_trigger_canon_eos_capture [library.c:5783]': b"'ptp_canon_eos_remotereleaseon (params, 3, 0)' failed: Canon EOS M Full-Press failed (0x2019: PTP Device Busy)"
+Gphoto2: b'gp_context_error': b'Canon EOS M Full-Press failed (0x2019: PTP Device Busy)'
+Gphoto2: b'camera_canon_eos_capture [library.c:4223]': b"'camera_trigger_canon_eos_capture (camera, context)' failed: 'Unknown error' (-110)"
+Gphoto2: b'gp_camera_capture [gphoto2-camera.c:1339]': b"'camera->functions->capture (camera, type, path, context)' failed: -110"
+
+================================================================================
+ABORT   : exception occures: [-110] I/O in progress
+If you are investigating why pibooth does not work with your DSLR camera,
+please paste the content of generated file 'diagnostic.log'
+on https://github.com/pibooth/pibooth/issues

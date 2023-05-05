@@ -1,6 +1,6 @@
 |Pibooth|
 
-|PythonVersions| |PypiPackage| |Downloads|
+|PythonVersions| |PypiPackage| |Downloads| |Tests| |Codecov|
 
 The ``pibooth`` project provides a photobooth application *out-of-the-box* in pure Python
 for Raspberry Pi. Have a look to the `wiki <https://github.com/pibooth/pibooth/wiki>`_
@@ -91,3 +91,11 @@ It means a lot to us!
 .. |Downloads| image:: https://img.shields.io/pypi/dm/pibooth?color=purple
    :target: https://pypi.org/project/pibooth
    :alt: PyPi downloads
+
+.. |Tests| image:: https://github.com/pibooth/pibooth/actions/workflows/tests.yml/badge.svg?branch=3.x
+   :target: https://github.com/pibooth/pibooth/actions/workflows/tests.yml?query=branch%3A3.x
+   :alt: Tests
+   
+.. |Codecov| image:: https://codecov.io/gh/pibooth/pibooth/branch/3.x/graph/badge.svg
+    :target: https://codecov.io/gh/pibooth/pibooth
+    :alt: Codecov

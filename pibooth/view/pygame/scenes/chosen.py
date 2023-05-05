@@ -9,7 +9,7 @@ class ChosenScene(BasePygameScene):
     def __init__(self):
         super().__init__()
         self.choice = 0
-        self.text = self.add_sprite(TextSprite(get_translated_text('chosen')))
+        self.text = TextSprite(self, get_translated_text('chosen'))
 
     def get_text(self):
         texts = []

@@ -10,10 +10,10 @@ class PrintScene(BasePygameScene):
 
     def __init__(self):
         super().__init__()
-        self.left_arrow = self.add_sprite(LeftArrowSprite())
-        self.right_arrow = self.add_sprite(RightArrowSprite())
-        self.text = self.add_sprite(TextSprite(get_translated_text('print')))
-        self.text_print = self.add_sprite(TextSprite(get_translated_text('print_forget')))
+        self.left_arrow = LeftArrowSprite(self)
+        self.right_arrow = RightArrowSprite(self)
+        self.text = TextSprite(self, get_translated_text('print'))
+        self.text_print = TextSprite(self, get_translated_text('print_forget'))
 
         self.text.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
         self.left_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)

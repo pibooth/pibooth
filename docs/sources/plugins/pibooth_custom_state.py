@@ -14,7 +14,7 @@ class MyScene(BasePygameScene):
 
     def __init__(self):
         super().__init__()
-        self.text = self.add_sprite(TextSprite("Get Ready!"))
+        self.text = TextSprite(self, "Get Ready!")
 
     def resize(self, size):
         """Resize text when window is resized.
