@@ -531,34 +531,54 @@ class CapturesCounterSprite(BaseSprite):
     def __init__(self, parent, nbr_dots=4, **kwargs):
         kwargs['layer'] = kwargs.get('layer', BasePygameScene.LAYER_IMAGES)
         super().__init__(parent, **kwargs)
-        self.dots = []
-        self.checked_orig = pictures.load_pygame_image('dot_checked.png')
-        self.empty_orig = pictures.load_pygame_image('dot.png')
+        self.dot_skin = pictures.load_pygame_image('dot.png')
+        self.dot_checked_skin = pictures.load_pygame_image('dot_checked.png')
         self.current = 0
         self.total = nbr_dots
 
-    def draw(self):
-        """Render dot.
+        for i in range(self.total):
+            ImageSprite(self, skin=self.dot_skin, outlines=False)
+
+    def set_color(self, color):
+        """Set dots color.
         """
-        image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+        super().set_color(color)
+        for sprite in self.get_sprites(include_outlines=False):
+            sprite.set_color(color)
+
+    def draw(self):
+        """Render dots.
+        """
+        for i, sprite in enumerate(self.get_sprites(include_outlines=False)):
+            if i < self.current:
+                sprite.set_skin(self.dot_checked_skin)
+            else:
+                sprite.set_skin(self.dot_skin)
+        return pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+
+    def set_rect(self, x, y, width, height):
+        """Update dots position.
+        """
+        super().set_rect(x, y, width, height)
         border = 20
         side = min(self.rect.size) - 10
-        empty_dot = pictures.transform_pygame_image(self.empty_orig, (side, side), color=self.color)
-        filled_dot = pictures.transform_pygame_image(self.checked_orig, (side, side), color=self.color)
         x = (self.rect.width - (side * self.total + border * (self.total - 1))) // 2
         y = (self.rect.height - side) // 2
-        for i in range(self.total):
-            if i < self.current:
-                image.blit(filled_dot, (x, y))
-            else:
-                image.blit(empty_dot, (x, y))
+        for sprite in self.get_sprites(include_outlines=False):
+            sprite.set_rect(self.rect.x + x, self.rect.y + y, side, side)
             x += (side + border)
-        return image
 
     def set_status(self, current, total):
+        """Update counter values
+        """
         if self.total != total:
             self.total = total
-            self.set_dirty()
+            for i, sprite in enumerate(self.get_sprites(include_outlines=False)):
+                if i < self.total:
+                    sprite.show()
+                else:
+                    sprite.hide()
+            self.set_rect(*self.rect)  # Force recalculate dots position
         if self.current != current:
             self.current = current
             self.set_dirty()
