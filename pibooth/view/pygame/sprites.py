@@ -7,90 +7,101 @@ from pygame import gfxdraw
 
 from pibooth import pictures
 from pibooth import evts
-from pibooth.utils import PollingTimer, LOGGER
+from pibooth.utils import PollingTimer
 from pibooth.view.base import BaseScene
-
-
-class OutlinesSprite(pygame.sprite.DirtySprite):
-
-    """Outlines Sprite. Paint a colored rectange around the given
-    sprite.
-    """
-
-    def __init__(self, sprite, color=(255, 0, 0)):
-        """
-        :param sprite: sprite on which outlines are drawn
-        :type sprite: object
-        :param color: RGB color tuple for the outlines
-        :type color: tuple
-        """
-        super().__init__()
-        self.image = pygame.Surface((10, 10), pygame.SRCALPHA, 32)
-        self.rect = sprite.rect
-        self.color = color
-        self.visible = 0
-        self._sp = sprite
-        self._sp.outlines = self
-        self.enabled = True
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}(rect={tuple(self.rect)}"
-
-    def set_pressed(self, state):
-        """Outline can not be pressed.
-        """
-        del state
-
-    def enable(self):
-        """Show outlines (only if reference sprite is visible).
-        """
-        self.enabled = True
-        if self._sp.visible and not self.visible:
-            self.visible = 1
-
-    def disable(self):
-        """Hide outlines.
-        """
-        self.enabled = False
-        if self.visible:
-            self.visible = 0
-
-    def update(self, events):
-        """Draw outlines only if visible.
-        """
-        if self._sp.dirty and self.visible:
-            self.dirty = 1
-            self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
-            pygame.draw.rect(self.image, self.color, (0, 0, self.rect.width, self.rect.height), 2)
 
 
 class BaseSprite(pygame.sprite.DirtySprite):
 
     """Base sprite for any graphical element. It handles common attributes
     and methods:
-      - display: manage when sprite is displayed
+      - show/hide: manage when sprite is displayed
       - color: manage color rendering
       - resizing: manage pygame.Rect dimension
       - outline: manage a colored rectangle around the sprite
       - event: manage pressed action
+
+    A sprite can be composed it-self with other sprites (called sub-sprites).
+    For instance, the outlines are sub-sprites.
     """
 
-    def __init__(self, size=(10, 10)):
+    def __init__(self, parent=None, size=(10, 10), outlines=True, layer=None):
+        """
+        :param parent: sprite on which outlines are drawn
+        :type parent: object
+        :param size: size tuple (width, height) of the image
+        :type size: tuple
+        :param outlines: enable oulines on current rect sprite
+        :type outlines: bool
+        :param layer: layer number used to order draw actions
+        :type layer: int
+        """
         super().__init__()
-        self.image = None
+        assert parent is None or isinstance(parent, (BasePygameScene, BaseSprite))
+        self._image_cache = None
+        self._subsprites = []  # Sub-sprites composing the sprite
+        self.parent = parent
         self.rect = pygame.Rect((0, 0), size)
         self.color = None
-        self.outlines = None  # Dynamically set by outlines sprite class
         self.pressed = 0
         self.on_pressed = None
         self.toggle_timer = PollingTimer(start=False)
-        self.subsprites = []  # Elements composing the sprite
+        self.layer = layer
+        if self.parent:
+            self.parent.add_sprite(self)
+        if outlines:
+            self.add_sprite(OutlinesSprite(self))
 
-    def add_subsprite(self, sprite):
+    def get_sprites(self, include_outlines=True, recursive=False):
+        """Return all sub-sprites.
+        """
+        if recursive:
+            sprites = []
+            sprites.extend(self._subsprites)
+            for sprite in self._subsprites:
+                sprites += sprite.get_sprites(include_outlines, recursive)
+            return sprites
+        elif not include_outlines:
+            return [sprite for sprite in self._subsprites if not isinstance(sprite, OutlinesSprite)]
+        else:
+            return self._subsprites
+
+    def draw(self):
+        """Render sprite image.
+
+        :return: image for the sprite
+        :rtype: Pygame surface
+        """
+        raise NotImplementedError
+
+    @property
+    def image(self):
+        """Return current sprite image.
+        """
+        if not self._image_cache:
+            self._image_cache = self.draw()
+        return self._image_cache
+
+    def set_dirty(self, redraw=True):
+        """Set current image.
+        """
+        self.dirty = 1
+        if redraw:
+            self._image_cache = None
+        for sprite in self.get_sprites():
+            if isinstance(sprite, OutlinesSprite):
+                sprite.set_dirty(redraw)
+
+    def add_sprite(self, sprite):
         """Add a sub-sprite to compose the sprite.
         """
         assert isinstance(sprite, BaseSprite), f"Sub-sprite '{sprite}' shall inherite from 'BaseSprite' class"
-        self.subsprites.append(sprite)
+        if sprite.parent == self:
+            # Register direct sprites
+            self._subsprites.append(sprite)
+        if self.parent:
+            # Propagate to parent
+            self.parent.add_sprite(sprite)
         return sprite
 
     def show(self):
@@ -98,9 +109,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
         """
         if not self.visible:
             self.visible = 1
-            if self.outlines and self.outlines.enabled and not self.outlines.visible:
-                self.outlines.visible = 1
-            for sprite in self.subsprites:
+            for sprite in self.get_sprites():
                 sprite.show()
 
     def hide(self):
@@ -108,9 +117,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
         """
         if self.visible:
             self.visible = 0
-            if self.outlines and self.outlines.visible:
-                self.outlines.visible = 0
-            for sprite in self.subsprites:
+            for sprite in self.get_sprites():
                 sprite.hide()
 
     def set_rect(self, x, y, width, height):
@@ -125,13 +132,14 @@ class BaseSprite(pygame.sprite.DirtySprite):
         :param height: background height
         :type height: int
         """
+        assert width > 0, "Sprite width shall be greater than zero"
+        assert height > 0, "Sprite height shall be greater than zero"
         if self.rect.topleft != (int(x), int(y)):
             self.rect.topleft = (x, y)
-            self.dirty = 1
+            self.set_dirty(False)
         if self.rect.size != (int(width), int(height)):
             self.rect.size = (width, height)
-            self.image = None  # Force rendering
-            self.dirty = 1
+            self.set_dirty()
 
     def set_color(self, color):
         """Re-colorize the skin.
@@ -141,8 +149,7 @@ class BaseSprite(pygame.sprite.DirtySprite):
         """
         if color != self.color:
             self.color = color
-            self.image = None  # Force rendering
-            self.dirty = 1
+            self.set_dirty()
 
     def get_color(self, factor=1):
         """Return image main color.
@@ -183,6 +190,73 @@ class BaseSprite(pygame.sprite.DirtySprite):
             self.set_pressed(not self.pressed)
 
 
+class OutlinesSprite(BaseSprite):
+
+    """Outlines Sprite. Paint a colored rectange around the given
+    sprite.
+    """
+
+    def __init__(self, parent, color=(255, 0, 0)):
+        """
+        :param parent: sprite on which outlines are drawn
+        :type parent: object
+        :param color: RGB color tuple for the outlines
+        :type color: tuple
+        """
+        super().__init__(parent, outlines=False, layer=BasePygameScene.LAYER_OUTLINES)
+        self.rect = parent.rect
+        self.color = color
+        self.visible = 0
+        self.enabled = False
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.parent})"
+
+    def draw(self):
+        """Render image.
+        """
+        image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+        pygame.draw.rect(image, self.color, (0, 0, self.rect.width, self.rect.height), 2)
+        return image
+
+    def show(self):
+        """Show sprite.
+        """
+        if not self.visible and self.enabled:
+            self.visible = 1
+
+    def hide(self):
+        """Hide sprite.
+        """
+        if self.visible:
+            self.visible = 0
+
+    def add_sprite(self, sprite):
+        """Add a sub-sprite to compose the sprite.
+        """
+        raise ValueError(f"Adding sub-sprite {sprite} to {self.__class__.__name__} not permited")
+
+    def set_pressed(self, state, toggle_timeout=None):
+        """Outline can not be pressed.
+        """
+        del state, toggle_timeout
+
+    def enable(self):
+        """Show outlines (only if reference sprite is visible).
+        """
+        if not self.enabled:
+            self.enabled = True
+            if self.parent.visible and not self.visible:
+                self.visible = 1
+
+    def disable(self):
+        """Hide outlines.
+        """
+        if self.enabled:
+            self.enabled = False
+            self.visible = 0
+
+
 class ImageSprite(BaseSprite):
 
     """Image Sprite. Handle transformation on a source image which can be:
@@ -192,17 +266,18 @@ class ImageSprite(BaseSprite):
      - Pygame surface object
     """
 
-    def __init__(self, skin=None, size=(10, 10), colorize=True):
+    def __init__(self, parent, skin=None, colorize=True, **kwargs):
         """
+        :param parent: sprite to which current sprite is linked
+        :type parent: object
         :param skin: image file path, RGB color tuple,  PIL image or Pygame surface
         :type skin: str or tuple or object
-        :param size: size tuple (width, height) of the image.
-        :type size: tuple
         :param colorize: recolorize picture if a color is set.
         :type colorize: tuple
         """
-        super().__init__(size)
-        self.image_orig = None
+        kwargs['layer'] = kwargs.get('layer', BasePygameScene.LAYER_IMAGES)
+        super().__init__(parent, **kwargs)
+        self._image_orig = None
         self.path = None
         self.crop = False
         self.hflip = False
@@ -216,8 +291,32 @@ class ImageSprite(BaseSprite):
         if self.path:
             elem = f"path='{osp.basename(self.path)}'"
         else:
-            elem = f"image={self.image_orig}"
+            elem = f"image={self._image_orig}"
         return f"{self.__class__.__name__}({elem}, rect={tuple(self.rect)})"
+
+    def draw(self):
+        """Render image.
+        """
+        if self._image_orig is None:
+            if self.path:
+                self._image_orig = pictures.load_pygame_image(self.path)
+            else:
+                raise ValueError(f"Path to image is missing for '{self}'")
+
+        if isinstance(self._image_orig, (tuple, list)):
+            image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+            image.fill(self._image_orig)
+            return image
+        elif isinstance(self._image_orig, PIL.Image.Image):
+            surface = pygame.image.frombuffer(self._image_orig.tobytes(),
+                                              self._image_orig.size, self._image_orig.mode)
+            return pictures.transform_pygame_image(surface, self.rect.size, hflip=self.hflip,
+                                                   vflip=self.vflip, angle=self.angle, crop=self.crop,
+                                                   color=self.color if self.colorize else None)
+        else:
+            return pictures.transform_pygame_image(self._image_orig, self.rect.size, hflip=self.hflip,
+                                                   vflip=self.vflip, angle=self.angle, crop=self.crop,
+                                                   color=self.color if self.colorize else None)
 
     def set_skin(self, skin):
         """Set skin used to fill the sprite. Skin can be:
@@ -232,26 +331,26 @@ class ImageSprite(BaseSprite):
         """
         if isinstance(skin, str):
             if skin != self.path:
-                self.path, self.image = skin, None  # Force rendering
-                self.image_orig = None
-                self.dirty = 1
+                self.path = skin
+                self._image_orig = None
+                self.set_dirty()
         elif isinstance(skin, (tuple, list)):
             assert len(skin) == 3, "Length of 3 is required for RGB tuple"
-            if skin != self.image_orig:
-                self.path, self.image = None, None  # Force rendering
-                self.image_orig = skin
-                self.dirty = 1
+            if skin != self._image_orig:
+                self.path = None
+                self._image_orig = skin
+                self.set_dirty()
         else:
             assert isinstance(skin, (PIL.Image.Image, pygame.Surface)), "PIL Image or Pygame Surface is required"
-            if skin != self.image_orig:
-                self.path, self.image = None, None  # Force rendering
-                self.image_orig = skin
-                self.dirty = 1
+            if skin != self._image_orig:
+                self.path = None
+                self._image_orig = skin
+                self.set_dirty()
 
     def get_skin(self):
         """Return the current skin.
         """
-        return self.path or self.image_orig
+        return self.path or self._image_orig
 
     def set_crop(self, crop=True):
         """Crop the skin to fit sprite size.
@@ -261,8 +360,7 @@ class ImageSprite(BaseSprite):
         """
         if crop != self.crop:
             self.crop = crop
-            self.image = None  # Force rendering
-            self.dirty = 1
+            self.set_dirty()
 
     def set_flip(self, hflip=None, vflip=None):
         """Flip the skin vertically or horizontally.
@@ -274,12 +372,10 @@ class ImageSprite(BaseSprite):
         """
         if hflip is not None and hflip != self.hflip:
             self.hflip = hflip
-            self.image = None  # Force rendering
-            self.dirty = 1
+            self.set_dirty()
         if vflip is not None and vflip != self.vflip:
             self.vflip = vflip
-            self.image = None  # Force rendering
-            self.dirty = 1
+            self.set_dirty()
 
     def set_angle(self, angle=0):
         """Rotate the skin.
@@ -289,33 +385,7 @@ class ImageSprite(BaseSprite):
         """
         if angle != self.angle:
             self.angle = angle
-            self.image = None  # Force rendering
-            self.dirty = 1
-
-    def update(self, events):
-        """Draw image if has changed and visible.
-        """
-        super().update(events)
-        if self.image is None and self.visible:
-            if self.image_orig is None:
-                if self.path:
-                    self.image_orig = pictures.load_pygame_image(self.path)
-                else:
-                    raise ValueError(f"Path to image is missing for '{self}'")
-
-            if isinstance(self.image_orig, (tuple, list)):
-                self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
-                self.image.fill(self.image_orig)
-            elif isinstance(self.image_orig, PIL.Image.Image):
-                surface = pygame.image.frombuffer(self.image_orig.tobytes(),
-                                                  self.image_orig.size, self.image_orig.mode)
-                self.image = pictures.transform_pygame_image(surface, self.rect.size, hflip=self.hflip,
-                                                             vflip=self.vflip, angle=self.angle, crop=self.crop,
-                                                             color=self.color if self.colorize else None)
-            else:
-                self.image = pictures.transform_pygame_image(self.image_orig, self.rect.size, hflip=self.hflip,
-                                                             vflip=self.vflip, angle=self.angle, crop=self.crop,
-                                                             color=self.color if self.colorize else None)
+            self.set_dirty()
 
 
 class TextSprite(BaseSprite):
@@ -323,16 +393,17 @@ class TextSprite(BaseSprite):
     """Text Sprite.
     """
 
-    def __init__(self, text='', size=(10, 10), font_name=None):
+    def __init__(self, parent, text='', font_name=None, **kwargs):
         """
-        :param size: size tuple (width, height) of the image.
-        :type size: tuple
-        :param path: image file path
-        :type path: str
+        :param parent: sprite to which current sprite is linked
+        :type parent: object
+        :param text: text to draw
+        :type text: str
         :param font_name: font name
         :type font_name: str
         """
-        super().__init__(size)
+        kwargs['layer'] = kwargs.get('layer', BasePygameScene.LAYER_TEXTS)
+        super().__init__(parent, **kwargs)
         self.text = text
         self.color = (255, 255, 255)
         self.align = pictures.ALIGN_CENTER
@@ -343,6 +414,12 @@ class TextSprite(BaseSprite):
     def __repr__(self):
         return f"{self.__class__.__name__}(text='{self.text}', rect={tuple(self.rect)})"
 
+    def draw(self):
+        """Render text.
+        """
+        return pictures.text_to_pygame_image(
+            self.text, self.rect.size, self.color, self.align, font_name=self.font_name)
+
     def set_text(self, text):
         """Set text.
 
@@ -351,8 +428,7 @@ class TextSprite(BaseSprite):
         """
         if text != self.text:
             self.text = text
-            self.image = None  # Force rendering
-            self.dirty = 1
+            self.set_dirty()
 
     def set_align(self, align):
         """Set text alignment.
@@ -362,16 +438,7 @@ class TextSprite(BaseSprite):
         """
         if align != self.align:
             self.align = align
-            self.image = None  # Force rendering
-            self.dirty = 1
-
-    def update(self, events):
-        """Draw image if has changed and visible.
-        """
-        super().update(events)
-        if self.image is None and self.visible:
-            self.image = pictures.text_to_pygame_image(
-                self.text, self.rect.size, self.color, self.align, font_name=self.font_name)
+            self.set_dirty()
 
 
 class ArrowSprite(ImageSprite):
@@ -381,6 +448,7 @@ class ArrowSprite(ImageSprite):
     """
 
     def __init__(self, *args, **kwargs):
+        kwargs['layer'] = kwargs.get('layer', BasePygameScene.LAYER_ARROWS)
         super().__init__(*args, **kwargs)
         self.location = BaseScene.ARROW_BOTTOM
         self.offset = 0
@@ -388,12 +456,12 @@ class ArrowSprite(ImageSprite):
     def set_location(self, location):
         if location != self.location:
             self.location = location
-            self.dirty = 1
+            self.set_dirty()
 
     def set_offset(self, offset):
         if offset != self.offset:
             self.offset = offset
-            self.dirty = 1
+            self.set_dirty()
 
 
 class LeftArrowSprite(ArrowSprite):
@@ -455,45 +523,65 @@ class RightArrowSprite(LeftArrowSprite):
                     self.set_pressed(1, 0.2)  # Timeout because not release event for HW buttons
 
 
-class DotsSprite(BaseSprite):
+class CapturesCounterSprite(BaseSprite):
 
-    """Dot Sprite to count current capture.
+    """CapturesCounter Sprite to display current capture number.
     """
 
-    def __init__(self, nbr_dots=4):
-        super().__init__((100, 50))
-        self.dots = []
-        self.checked_orig = pictures.load_pygame_image('dot_checked.png')
-        self.empty_orig = pictures.load_pygame_image('dot.png')
+    def __init__(self, parent, nbr_dots=4, **kwargs):
+        kwargs['layer'] = kwargs.get('layer', BasePygameScene.LAYER_IMAGES)
+        super().__init__(parent, **kwargs)
+        self.dot_skin = pictures.load_pygame_image('dot.png')
+        self.dot_checked_skin = pictures.load_pygame_image('dot_checked.png')
         self.current = 0
         self.total = nbr_dots
 
+        for i in range(self.total):
+            ImageSprite(self, skin=self.dot_skin, outlines=False)
+
+    def set_color(self, color):
+        """Set dots color.
+        """
+        super().set_color(color)
+        for sprite in self.get_sprites(include_outlines=False):
+            sprite.set_color(color)
+
+    def draw(self):
+        """Render dots.
+        """
+        for i, sprite in enumerate(self.get_sprites(include_outlines=False)):
+            if i < self.current:
+                sprite.set_skin(self.dot_checked_skin)
+            else:
+                sprite.set_skin(self.dot_skin)
+        return pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+
+    def set_rect(self, x, y, width, height):
+        """Update dots position.
+        """
+        super().set_rect(x, y, width, height)
+        border = 20
+        side = min(self.rect.size) - 10
+        x = (self.rect.width - (side * self.total + border * (self.total - 1))) // 2
+        y = (self.rect.height - side) // 2
+        for sprite in self.get_sprites(include_outlines=False):
+            sprite.set_rect(self.rect.x + x, self.rect.y + y, side, side)
+            x += (side + border)
+
     def set_status(self, current, total):
+        """Update counter values
+        """
         if self.total != total:
             self.total = total
-            self.image = None  # Force rendering
-            self.dirty = 1
+            for i, sprite in enumerate(self.get_sprites(include_outlines=False)):
+                if i < self.total:
+                    sprite.show()
+                else:
+                    sprite.hide()
+            self.set_rect(*self.rect)  # Force recalculate dots position
         if self.current != current:
             self.current = current
-            self.image = None  # Force rendering
-            self.dirty = 1
-
-    def update(self, events):
-        super().update(events)
-        if self.image is None and self.visible:
-            self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
-            border = 20
-            side = min(self.rect.size) - 10
-            empty_dot = pictures.transform_pygame_image(self.empty_orig, (side, side), color=self.color)
-            filled_dot = pictures.transform_pygame_image(self.checked_orig, (side, side), color=self.color)
-            x = (self.rect.width - (side * self.total + border * (self.total - 1))) // 2
-            y = (self.rect.height - side) // 2
-            for i in range(self.total):
-                if i < self.current:
-                    self.image.blit(filled_dot, (x, y))
-                else:
-                    self.image.blit(empty_dot, (x, y))
-                x += (side + border)
+            self.set_dirty()
 
 
 class StatusBarSprite(BaseSprite):
@@ -501,17 +589,35 @@ class StatusBarSprite(BaseSprite):
     """Sprite to display the current system status (printer queue, failure, ...).
     """
 
-    def __init__(self, size=(10, 100)):
-        super().__init__(size)
+    def __init__(self, parent, **kwargs):
+        kwargs['layer'] = kwargs.get('layer', BasePygameScene.LAYER_STATUS)
+        super().__init__(parent, **kwargs)
         self._failure = False
 
-        self.printer_queue_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
-        self.printer_queue_icon = self.add_subsprite(ImageSprite('printer_progress.png', size=(8, 8)))
-        self.printed_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
-        self.printer_icon = self.add_subsprite(ImageSprite('printer.png', size=(8, 8)))
-        self.taken_nbr = self.add_subsprite(TextSprite('0', size=(8, 8), font_name='Monoid-Regular.ttf'))
-        self.captures_icon = self.add_subsprite(ImageSprite('capture.png', size=(8, 8)))
-        self.set_rect(0, 0, self.rect.width, self.rect.height)
+        self.printer_queue_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf',
+                                            outlines=False, layer=self.layer)
+        self.printer_queue_icon = ImageSprite(self, 'printer_progress.png', size=(8, 8),
+                                              outlines=False, layer=self.layer)
+        self.printed_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf',
+                                      outlines=False, layer=self.layer)
+        self.printer_icon = ImageSprite(self, 'printer.png', size=(8, 8),
+                                        outlines=False, layer=self.layer)
+        self.taken_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf',
+                                    outlines=False, layer=self.layer)
+        self.captures_icon = ImageSprite(self, 'capture.png', size=(8, 8),
+                                         outlines=False, layer=self.layer)
+
+    def draw(self):
+        """Render statusbar.
+        """
+        image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
+        width = min(self.rect.width, self.rect.height)
+        gfxdraw.aacircle(image, -1, width, width, (40, 41, 35))
+        gfxdraw.filled_circle(image, -1, width, width, (40, 41, 35))
+        gfxdraw.aacircle(image, -1, self.rect.height - width, width, (40, 41, 35))
+        gfxdraw.filled_circle(image, -1, self.rect.height - width, width, (40, 41, 35))
+        gfxdraw.box(image, (0, width, width, self.rect.height - 2 * width), (40, 41, 35))
+        return image
 
     def set_printer_queue(self, size):
         """Set number of print in progress.
@@ -544,39 +650,46 @@ class StatusBarSprite(BaseSprite):
         """
         super().set_rect(x, y, width, height)
         start_padding = width // 2
-        icon_height = (height - 2 * start_padding) // len(self.subsprites)
+        icon_height = (height - 2 * start_padding) // len(self.get_sprites(include_outlines=False))
         padding = icon_height // 10
         icon_height -= padding
 
         y += start_padding
-        for sprite in self.subsprites:
+        for sprite in self.get_sprites(include_outlines=False):
             sprite.set_rect(x, y, width, icon_height - padding)
             y += (icon_height + padding)
-
-    def update(self, events):
-        super().update(events)
-        if self.image is None and self.visible:
-            # Draw statusbar shape
-            self.image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
-            width = min(self.rect.width, self.rect.height)
-            gfxdraw.aacircle(self.image, -1, width, width, (40, 41, 35))
-            gfxdraw.filled_circle(self.image, -1, width, width, (40, 41, 35))
-            gfxdraw.aacircle(self.image, -1, self.rect.height - width, width, (40, 41, 35))
-            gfxdraw.filled_circle(self.image, -1, self.rect.height - width, width, (40, 41, 35))
-            gfxdraw.box(self.image, (0, width, width, self.rect.height - 2 * width), (40, 41, 35))
 
 
 class BasePygameScene(BaseScene):
 
     """Base class for Pygame scene. It use dirty sprite mechanism to
     save CPU usage.
+
+    Sprites are drawn as ordered. Seven layers are defined:
+
+        - 0: only ONE background sprite
+        - 2: images sprites
+        - 4: texts sprites
+        - 5: only ONE speciale image sprite
+        - 6: arrows sprites
+        - 8: system status sprites
+        - 10: outlines sprites
+
+    The layer LAYER_PICTURE is initialized with an `ImageSprite` hidden
+    by default.
     """
+    LAYER_BACKGROUND = 0
+    LAYER_IMAGES = 2
+    LAYER_TEXTS = 4
+    LAYER_PICTURE = 5
+    LAYER_ARROWS = 6
+    LAYER_STATUS = 8
+    LAYER_OUTLINES = 10
 
     def __init__(self):
         self.sprites = pygame.sprite.LayeredDirty()
-        self.image = ImageSprite()
+        self.image = ImageSprite(self, layer=BasePygameScene.LAYER_PICTURE)
         self.image.visible = 0
-        self.add_sprite(self.image, layer=3)
         self.text_color = (255, 255, 255)
         self.arrow_location = BaseScene.ARROW_BOTTOM
 
@@ -585,61 +698,49 @@ class BasePygameScene(BaseScene):
         # at each draw() call.
         self.sprites.set_timing_threshold(200)
 
-    def add_sprite(self, sprite, outlines=True, layer=None):
-        """Declare a new sprite to draw. If layer is not defined (layer=0),
-        layer is automatically assigned depending on the sprite type.
-
-        Sprites are drawn as ordered. Seven layers are defined:
-
-            - 0: only ONE background sprite
-            - 1: texts sprites
-            - 2: assets sprites
-            - 3: only ONE speciale image sprite
-            - 4: arrows sprites
-            - 5: system status sprites
-            - 6: outlines sprites
+    def add_sprite(self, sprite):
+        """Declare a new sprite to draw.
 
         :param sprite: sprite to add in the draw mechanism
         :type sprite: object
-        :param outlines: enable outlines on sprite
-        :type outlines: bool
-        :param layer: layer indice
-        :type layer: int
         """
-        assert layer != 6, "Layer 6 is reserved for outlines, use outlines=True to enable it"
-        if layer is None and isinstance(sprite, StatusBarSprite):
-            layer = 5
-        elif layer is None and isinstance(sprite, ArrowSprite):
-            layer = 4
-        elif layer is None and isinstance(sprite, (ImageSprite, DotsSprite)):
-            layer = 2
-        elif layer is None and isinstance(sprite, TextSprite):
-            layer = 1
-        if layer in (0, 3, 5):
-            for oldsprite in self.sprites.get_sprites_from_layer(layer):
-                if layer == 0:
-                    LOGGER.debug("Remove background sprite '%s'", oldsprite)
-                if layer == 3:
-                    LOGGER.debug("Remove main image sprite '%s'", oldsprite)
-                else:
-                    LOGGER.debug("Remove system status sprite '%s'", oldsprite)
-                self.sprites.remove(oldsprite)
-
-        self.sprites.add(sprite, layer=layer)
-        self.sprites.add(*sprite.subsprites, layer=layer)
-        if outlines:
-            self.sprites.add(OutlinesSprite(sprite), layer=6)
+        self.sprites.add(sprite)
+        if not sprite.parent:
+            # Parent not defined, means that sub-sprites are not registered
+            self.sprites.add(*sprite.get_sprites(recursive=True))
         return sprite
+
+    def get_top_sprite_at(self, pos, from_layers=None):
+        """Return the top sprite (last of the `from_layers`) which is visible.
+        If `from_layers` is not defined, only a sprite from "clickable" layers
+        will be returned.
+
+        :param pos: position (x,y)
+        :type pos: tuple
+        :param from_layers: layers to belong to
+        :type from_layers: list
+        """
+        if from_layers is None:
+            from_layers = (BasePygameScene.LAYER_IMAGES,
+                           BasePygameScene.LAYER_TEXTS,
+                           BasePygameScene.LAYER_PICTURE,
+                           BasePygameScene.LAYER_ARROWS,
+                           BasePygameScene.LAYER_STATUS)
+        for sprite in reversed(self.sprites.get_sprites_at(pos)):
+            if sprite.visible and sprite.layer in from_layers:
+                return sprite
+        return None
 
     @property
     def background(self):
-        for sprite in self.sprites.get_sprites_from_layer(0):
-            return sprite
+        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_BACKGROUND):
+            if isinstance(sprite, ImageSprite):
+                return sprite
         raise RuntimeError("Background is not initialized")
 
     @property
     def status_bar(self):
-        for sprite in self.sprites.get_sprites_from_layer(5):
+        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_STATUS):
             if isinstance(sprite, StatusBarSprite):
                 return sprite
         raise RuntimeError("Status bar is not initialized")
@@ -655,7 +756,7 @@ class BasePygameScene(BaseScene):
         :param enable: enable / disable outlines
         :type enable: bool
         """
-        for sprite in self.sprites.get_sprites_from_layer(6):
+        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_OUTLINES):
             if enable:
                 sprite.enable()
             else:
@@ -682,7 +783,7 @@ class BasePygameScene(BaseScene):
         :type offset: int
         """
         self.arrow_location = location
-        for sprite in self.sprites.get_sprites_from_layer(4):
+        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_ARROWS):
             sprite.set_location(location)
             sprite.set_offset(offset)
 
@@ -693,16 +794,16 @@ class BasePygameScene(BaseScene):
         :type color: tuple
         """
         self.text_color = color
-        # Texts
-        for sprite in self.sprites.get_sprites_from_layer(1):
+        # Assets
+        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_IMAGES):
             sprite.set_color(color)
 
-        # Assets
-        for sprite in self.sprites.get_sprites_from_layer(2):
+        # Texts
+        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_TEXTS):
             sprite.set_color(color)
 
         # Arrows
-        for sprite in self.sprites.get_sprites_from_layer(4):
+        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_ARROWS):
             sprite.set_color(color)
 
     def update(self, events):
@@ -715,14 +816,14 @@ class BasePygameScene(BaseScene):
             if event.type == pygame.MOUSEBUTTONDOWN\
                     and event.button in (1, 2, 3):
                 # Don't consider the mouse wheel (button 4 & 5):
-                sprite = evts.get_top_visible(self.sprites.get_sprites_at(event.pos))
+                sprite = self.get_top_sprite_at(event.pos)
                 if sprite:
                     sprite.set_pressed(1)
 
             elif event.type == pygame.FINGERDOWN:
                 display_size = pygame.display.get_surface().get_size()
                 finger_pos = (event.x * display_size[0], event.y * display_size[1])
-                sprite = evts.get_top_visible(self.sprites.get_sprites_at(finger_pos))
+                sprite = self.get_top_sprite_at(finger_pos)
                 if sprite:
                     sprite.set_pressed(1)
 
