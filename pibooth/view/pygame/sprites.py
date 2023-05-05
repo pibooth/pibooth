@@ -596,7 +596,7 @@ class StatusBarSprite(BaseSprite):
 
         self.printer_queue_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf',
                                             outlines=False, layer=self.layer)
-        self.printer_queue_icon = ImageSprite(self, 'printer_progress.png', size=(8, 8),
+        self.printer_queue_icon = ImageSprite(self, 'sheet.png', size=(8, 8),
                                               outlines=False, layer=self.layer)
         self.printed_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf',
                                       outlines=False, layer=self.layer)
