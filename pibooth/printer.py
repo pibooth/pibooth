@@ -91,11 +91,19 @@ class Printer:
 
         info = self._conn.getPrinters()[self.name]
         if info.get('printer-state', PRINTER_STATE_IDLE) not in (PRINTER_STATE_IDLE, PRINTER_STATE_PROCESSING):
+
+            if 'paused' in info.get('printer-state-reasons', []):
+                LOGGER.debug("Printer not ready (state '%s'): try to enable it", info.get('printer-state'))
+                self._conn.enablePrinter(self.name)
+                info = self._conn.getPrinters()[self.name]
+
             if self.state != info.get('printer-state'):
                 LOGGER.warning("Printer not ready (state '%s'): message: %s, reasons: %s",
                                info.get('printer-state'), info.get('printer-state-message'), info.get('printer-state-reasons'))
+
             self.state = info.get('printer-state')
             return False
+        self.state = info.get('printer-state', PRINTER_STATE_IDLE)
 
         if self.max_pages < 0 or self.count is None:  # No limit
             return True
