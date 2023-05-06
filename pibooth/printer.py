@@ -23,6 +23,11 @@ PAPER_FORMATS = {
     '6x9': (6, 9),      # 6x9 pouces - 15x23 cm - 152x229 mm
 }
 
+# States defined at: https://www.rfc-editor.org/rfc/rfc8011#section-5.4.11
+PRINTER_STATE_IDLE = 3
+PRINTER_STATE_PROCESSING = 4
+PRINTER_STATE_STOPPED = 5
+
 
 class Printer:
 
@@ -40,6 +45,7 @@ class Printer:
         self.max_pages = max_pages
         self.options = options
         self.count = counters
+        self.state = PRINTER_STATE_IDLE
         if not cups:
             LOGGER.warning("No printer found (pycups or pycups-notify not installed)")
             return  # CUPS is not installed
@@ -82,8 +88,18 @@ class Printer:
         """
         if not self.is_installed():
             return False
+
+        info = self._conn.getPrinters()[self.name]
+        if info.get('printer-state', PRINTER_STATE_IDLE) not in (PRINTER_STATE_IDLE, PRINTER_STATE_PROCESSING):
+            if self.state != info.get('printer-state'):
+                LOGGER.warning("Printer not ready (state '%s'): message: %s, reasons: %s",
+                               info.get('printer-state'), info.get('printer-state-message'), info.get('printer-state-reasons'))
+            self.state = info.get('printer-state')
+            return False
+
         if self.max_pages < 0 or self.count is None:  # No limit
             return True
+
         return self.count.printed < self.max_pages
 
     def print_file(self, filename):
