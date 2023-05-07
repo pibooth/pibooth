@@ -38,7 +38,7 @@ class PygameWindow(BaseWindow):
 
         pygame.display.set_caption(title)
         self.display_size = (info.current_w, info.current_h)
-        self.surface = pygame.display.set_mode(self._size, pygame.RESIZABLE)
+        self.surface = pygame.display.set_mode(self._size, pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
         self.background_sprite = sprites.ImageSprite(None, size=size, outlines=False,
                                                      layer=sprites.BasePygameScene.LAYER_BACKGROUND)
         self.set_background(self.bg_color_or_path)
@@ -148,13 +148,14 @@ class PygameWindow(BaseWindow):
         if self.is_fullscreen:
             self.is_fullscreen = False  # Set before resize
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-            self.surface = pygame.display.set_mode(self._size, pygame.RESIZABLE)
+            self.surface = pygame.display.set_mode(self._size, pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
         else:
             self.is_fullscreen = True  # Set before resize
             # Make an invisible cursor (don't use pygame.mouse.set_visible(False) because
             # the mouse event will always return the window bottom-right coordinate)
             pygame.mouse.set_cursor((8, 8), (0, 0), (0, 0, 0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0, 0, 0))
-            self.surface = pygame.display.set_mode(self.display_size, pygame.FULLSCREEN)
+            self.surface = pygame.display.set_mode(
+                self.display_size, pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.FULLSCREEN)
 
         size = self.get_rect().size
         self.resize(size)
@@ -183,7 +184,8 @@ class PygameWindow(BaseWindow):
         for event in events:
             if event.type == pygame.VIDEORESIZE and not self.is_fullscreen:
                 # Manual resizing
-                self.surface = pygame.display.set_mode(event.size, pygame.RESIZABLE)
+                self.surface = pygame.display.set_mode(
+                    event.size, pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
                 self.resize(event.size)
                 if self._menu:
                     self._menu.resize((min(event.size[0]*0.75, 600), event.size[1]*0.75))
