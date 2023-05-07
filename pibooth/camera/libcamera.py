@@ -98,10 +98,10 @@ class LibCamera(BaseCamera):
         # preview rect keeping same aspect ratio than camera resolution.
         size = sizing.new_size_keep_aspect_ratio(self.resolution, (min(
             rect.width, self._cam.sensor_resolution[0]), min(rect.height, self._cam.sensor_resolution[1])))
-        rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, size[0], size[1])
+        rect = pygame.Rect(rect.centerx - size[0] // 2, rect.centery - size[1] // 2, int(size[0]), int(size[1]))
 
         self._preview_config['main']['size'] = rect.size
-        self._preview_config['transform'] = Transform(hflip=flip)
+        self._preview_config['transform'] = Transform(rotation=self.preview_rotation, hflip=self.preview_flip)
         self._cam.switch_mode(self._preview_config)
         super().preview(rect, flip)
 
