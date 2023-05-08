@@ -91,9 +91,9 @@ Setup ``Pi Presents``
 
    and configure::
 
-      system option menu
-      Boot / Auto login menu
-      Desktop Autologin menu
+      > System Options
+      > Boot / Auto Login
+      > Desktop Autologin
 
 5. Create autostart file:
 
@@ -173,7 +173,7 @@ Create a ``rsync`` script
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. note:: The script will synchronize the ``pibooth`` folder from ``pibooth`` Raspberry Pi
-          to the ``~/pipresents-profile/pp_home/pp_live_tracks`` (only .jpg files, but not
+          to the ``~/pipresents-profiles/pp_home/pp_live_tracks`` (only .jpg files, but not
           file with 0bytes because it crashes the pibooth display)
 
 1. On ``pibooth`` Raspberry Pi, create the file:
@@ -185,7 +185,7 @@ Create a ``rsync`` script
    and add the lines (modify xxx.xxx.xxx.xxx to IP of ``Pi Presents`` Raspberry Pi)::
 
       #!/bin/bash
-      rsync -e ssh -o -avz --min-size=1 /home/pi/Pictures/pibooth/*.jpg pi@xxx.xxx.xxx.xxx:/home/pi/pipresents-profiles/pp_home/pp_live_tracks &
+      rsync -e ssh -o -avz --min-size=1 ~/Pictures/pibooth/*.jpg pi@xxx.xxx.xxx.xxx:pipresents-profiles/pp_home/pp_live_tracks &
 
 2. Change script permissions:
 
@@ -224,7 +224,7 @@ Setup a ``pibooth`` plugin to run ``rsync``
 
       pibooth --config
 
-   and change the following line:
+   and declare the plugin at the following line:
 
    .. code-block:: ini
 
