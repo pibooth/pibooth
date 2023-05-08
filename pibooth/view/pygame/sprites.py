@@ -696,7 +696,7 @@ class BasePygameScene(BaseScene):
         # On Raspberry Pi, the time to update dirty sprites is long (120-180ms
         # tested), increasing the treshold permits to avoid blitting full screen
         # at each draw() call.
-        self.sprites.set_timing_threshold(200)
+        self.sprites.set_timing_threshold(600)
 
     def add_sprite(self, sprite):
         """Declare a new sprite to draw.
