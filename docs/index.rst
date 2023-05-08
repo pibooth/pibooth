@@ -21,7 +21,7 @@ photos of your version.
 .. image:: images/gallery.png
    :align: center
    :alt: Gallery
-   :target: sources/examples.html
+   :target: sources/gallery.html
 
 .. toctree::
    :caption: About
@@ -33,7 +33,8 @@ photos of your version.
    :caption: Install
    :maxdepth: 2
 
-   sources/install.rst
+   sources/install/pibooth.rst
+   sources/install/slideshow.rst
 
 .. toctree::
    :caption: Start

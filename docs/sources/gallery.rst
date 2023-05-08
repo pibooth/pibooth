@@ -1,5 +1,7 @@
 .. _gallery_examples:
 
+:orphan:
+
 Examples of pictures made with pibooth
 --------------------------------------
 

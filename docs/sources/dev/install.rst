@@ -30,3 +30,30 @@ need to work from a clone of this ``git`` repository. Replace the step 8. of the
 4. Start the application exactly in the same way as installed from pypi. All
    modifications performed in the cloned repository are taken into account when
    the application starts.
+
+Build documentation
+-------------------
+
+1. Go in the cloned directory :
+
+.. code-block:: bash
+
+    cd pibooth
+
+2. Install ``pibooth`` in editable mode :
+
+.. code-block:: bash
+
+    sudo pip3 install -e .[doc]
+
+3. Go in the docs directory :
+
+.. code-block:: bash
+
+    cd docs
+
+4. Build HTML documentation. The main page is generated in ``build/html/index.html``:
+
+.. code-block:: bash
+
+    make html

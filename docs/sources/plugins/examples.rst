@@ -1,6 +1,6 @@
 
-Examples Codes
---------------
+Examples
+--------
 
 Hello from plugin
 ^^^^^^^^^^^^^^^^^
@@ -24,14 +24,6 @@ Control a RGB LED
 :download:`pibooth_rgb_led.py<pibooth_rgb_led.py>`
 
 .. literalinclude:: pibooth_rgb_led.py
-    :language: python
-
-Add 'Get Ready' text before captures sequence
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:download:`pibooth_getready_text.py<pibooth_getready_text.py>`
-
-.. literalinclude:: pibooth_getready_text.py
     :language: python
 
 Setup a custom camera
@@ -58,8 +50,8 @@ Setup a custom picture factory
 .. literalinclude:: pibooth_custom_factory.py
     :language: python
 
-Setup a custom custom state
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setup a custom custom ``ready`` state
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :download:`pibooth_custom_state.py<pibooth_custom_state.py>`
 
