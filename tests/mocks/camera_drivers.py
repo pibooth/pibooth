@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import numpy
+from PIL import ImageOps
+
 
 class RpiCameraProxyMock:
 
@@ -7,7 +10,7 @@ class RpiCameraProxyMock:
 
     def __init__(self, fake_captures):
         self.preview = None
-        self.fake_captures = fake_captures
+        self.fake_capture = fake_captures[0]
 
     def add_overlay(self, imagebytes, size, layer=3, window=tuple(), fullscreen=False):
         return object()
@@ -22,47 +25,46 @@ class RpiCameraProxyMock:
         self.preview = None
 
     def capture(self, stream, format='jpeg'):
-        self.fake_captures[0].convert('RGB').save(stream, format=format)
+        self.fake_capture.convert('RGB').save(stream, format=format)
 
     def close(self):
         pass
 
 
-class GpConfigMock:
+class LibcameraCameraProxyMock:
 
-    def __init__(self, name=""):
-        self.name = name
+    def __init__(self, fake_captures):
+        self.fake_capture = fake_captures[0]
+        self.sensor_resolution = self.fake_capture.size
+        self.config = None
 
-    def get_type(self):
-        return int
+    def create_preview_configuration(self):
+        return {'type': 'preview', 'main': {}}
 
-    def get_value(self):
-        return 2
+    def create_still_configuration(self):
+        return {'type': 'still', 'main': {'size': self.sensor_resolution}}
 
-    def get_choices(self):
-        return []
+    def configure(self, config):
+        self.config = config
 
-    def set_value(self, value):
+    def start(self):
         pass
 
-    def get_child_by_name(self, name):
-        return GpConfigMock(name)
+    def stop(self):
+        pass
 
+    def capture_array(self, channel):
+        return numpy.asarray(ImageOps.fit(self.fake_capture, self.config[channel]['size']))
 
-class GpFileMock:
+    def capture_image(self, channel):
+        return ImageOps.fit(self.fake_capture, self.config[channel]['size'])
 
-    def __init__(self, image=None):
-        self.folder = 'fake'
-        self.name = 'cam_01.jpg'
-        self.image = image
-
-    def get_data_and_size(self):
-        return self.image
-
-
-class GpAbilitiesMock:
-
-    operations = 1
+    def switch_mode_and_capture_image(self, config, channel):
+        old_config = self.config
+        self.config = config
+        image = self.capture_image(channel)
+        self.config = old_config
+        return image
 
 
 class GpCameraProxyMock:
@@ -76,8 +78,42 @@ class GpCameraProxyMock:
 
     GPhoto2Error = Exception
 
+    class GpFileMock:
+
+        def __init__(self, image=None):
+            self.folder = 'fake'
+            self.name = 'cam_01.jpg'
+            self.image = image
+
+        def get_data_and_size(self):
+            return self.image
+
+    class GpConfigMock:
+
+        def __init__(self, name=""):
+            self.name = name
+
+        def get_type(self):
+            return int
+
+        def get_value(self):
+            return 2
+
+        def get_choices(self):
+            return []
+
+        def set_value(self, value):
+            pass
+
+        def get_child_by_name(self, name):
+            return GpCameraProxyMock.GpConfigMock(name)
+
+    class GpAbilitiesMock:
+
+        operations = 1
+
     def __init__(self, fake_captures):
-        self.fake_captures = fake_captures
+        self.fake_capture = fake_captures[0]
 
     def check_result(self, thing):
         return object()
@@ -86,10 +122,10 @@ class GpCameraProxyMock:
         pass
 
     def get_abilities(self):
-        return GpAbilitiesMock()
+        return GpCameraProxyMock.GpAbilitiesMock()
 
     def get_config(self):
-        return GpConfigMock()
+        return GpCameraProxyMock.GpConfigMock()
 
     def set_config(self, config):
         pass
@@ -101,10 +137,10 @@ class GpCameraProxyMock:
         return self.capture_preview()
 
     def capture_preview(self):
-        return GpFileMock(self.fake_captures[0].convert('RGB'))
+        return GpCameraProxyMock.GpFileMock(self.fake_capture.convert('RGB'))
 
     def capture(self, flag):
-        return GpFileMock()
+        return GpCameraProxyMock.GpFileMock()
 
     def trigger_capture(self):
         pass
