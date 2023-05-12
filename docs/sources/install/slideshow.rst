@@ -156,7 +156,7 @@ Establish SSH connection between both Raspberry Pi
       ssh-keygen -t rsa
 
 5. Copy your identification key to the ``Pi Presents`` Raspberry Pi (modify xxx.xxx.xxx.xxx to IP from step 1.).
-   You will have to confirm (yes) and login with the password of the ``pibooth`` "pi" user:
+   You will have to confirm (yes) and login with the password of the "pi" user of ``Pi Presents`` Raspberry Pi:
 
    .. code-block:: bash
 
@@ -232,7 +232,7 @@ Setup a ``pibooth`` plugin to run ``rsync``
       plugins = ~/pibooth_copy2pipresents.py
 
 3. Optionnaly, on ``Pi Presents`` Raspberry Pi, erase the pictures at each startup by 
-   creatin a cron script:
+   creating a cron script:
 
    .. code-block:: bash
 
