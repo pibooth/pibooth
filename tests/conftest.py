@@ -243,8 +243,8 @@ def camera_cv_gp(proxy_cv, proxy_gp):
 def proxy_gp(init_pygame, init_tasks, captures_portrait):
     if os.environ.get('CAMERA_GPDRIVER') == "dummy":
         from pibooth.camera import gphoto
-        gphoto.gp = camera_drivers.GpCameraProxyMock([])
-        return camera_drivers.GpCameraProxyMock(captures_portrait)
+        gphoto.gp = camera_drivers.GpCameraProxyMock(captures_portrait)
+        return gphoto.gp
     return get_gp_camera_proxy()
 
 
