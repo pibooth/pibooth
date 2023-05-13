@@ -64,9 +64,9 @@ def test_hybridr_capture(camera_rpi_gp):
     assert camera_rpi_gp.grab_captures()
 
 
-def test_hybridl_capture(camera_lib_gp):
-    camera_lib_gp.capture(wait=True)
-    assert camera_lib_gp.grab_captures()
+def test_hybridl_capture(camera_libcamera_gp):
+    camera_libcamera_gp.capture(wait=True)
+    assert camera_libcamera_gp.grab_captures()
 
 
 def test_hybridc_capture(camera_cv_gp):
