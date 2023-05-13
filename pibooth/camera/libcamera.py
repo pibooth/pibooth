@@ -117,4 +117,4 @@ class LibCamera(BaseCamera):
     def _specific_cleanup(self):
         """Close the camera driver, it's definitive.
         """
-        self._cam.close()
+        self._cam.stop()
