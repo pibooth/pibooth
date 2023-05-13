@@ -196,7 +196,7 @@ def camera_rpi_gp(proxy_rpi, proxy_gp):
 def proxy_libcamera(init_pygame, init_tasks, captures_portrait):
     if os.environ.get('CAMERA_LIBCAMDRIVER') == "dummy":
         from pibooth.camera import libcamera
-        libcamera.Transform = LibcameraCameraProxyMock.Transform  # Monkey patch
+        libcamera.Transform = camera_drivers.LibcameraCameraProxyMock.Transform  # Monkey patch
         return camera_drivers.LibcameraCameraProxyMock(captures_portrait)
     return get_libcamera_camera_proxy()
 
