@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from itertools import cycle
 import numpy
 from PIL import ImageOps
 
@@ -10,7 +11,7 @@ class RpiCameraProxyMock:
 
     def __init__(self, fake_captures):
         self.preview = None
-        self.fake_capture = fake_captures[0]
+        self._take = cycle(fake_captures)
 
     def add_overlay(self, imagebytes, size, layer=3, window=tuple(), fullscreen=False):
         return object()
@@ -25,7 +26,7 @@ class RpiCameraProxyMock:
         self.preview = None
 
     def capture(self, stream, format='jpeg'):
-        self.fake_capture.convert('RGB').save(stream, format=format)
+        next(self._take).convert('RGB').save(stream, format=format)
 
     def close(self):
         pass
@@ -34,8 +35,8 @@ class RpiCameraProxyMock:
 class LibcameraCameraProxyMock:
 
     def __init__(self, fake_captures):
-        self.fake_capture = fake_captures[0]
-        self.sensor_resolution = self.fake_capture.size
+        self._take = cycle(fake_captures)
+        self.sensor_resolution = fake_captures[0].size
         self.config = None
 
     def create_preview_configuration(self):
@@ -54,10 +55,10 @@ class LibcameraCameraProxyMock:
         pass
 
     def capture_array(self, channel):
-        return numpy.asarray(ImageOps.fit(self.fake_capture, self.config[channel]['size']))
+        return numpy.asarray(ImageOps.fit(next(self._take), self.config[channel]['size']))
 
     def capture_image(self, channel):
-        return ImageOps.fit(self.fake_capture, self.config[channel]['size'])
+        return ImageOps.fit(next(self._take), self.config[channel]['size'])
 
     def switch_mode_and_capture_image(self, config, channel):
         old_config = self.config
@@ -113,7 +114,7 @@ class GpCameraProxyMock:
         operations = 1
 
     def __init__(self, fake_captures):
-        self.fake_capture = fake_captures[0]
+        self._take = cycle(fake_captures)
 
     def check_result(self, thing):
         return object()
@@ -137,10 +138,10 @@ class GpCameraProxyMock:
         return self.capture_preview()
 
     def capture_preview(self):
-        return GpCameraProxyMock.GpFileMock(self.fake_capture.convert('RGB'))
+        return GpCameraProxyMock.GpFileMock(next(self._take).convert('RGB'))
 
     def capture(self, flag):
-        return GpCameraProxyMock.GpFileMock()
+        return GpCameraProxyMock.GpFileMock(next(self._take).convert('RGB'))
 
     def trigger_capture(self):
         pass

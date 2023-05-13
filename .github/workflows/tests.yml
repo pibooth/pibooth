@@ -43,6 +43,7 @@ jobs:
       env:
         SDL_VIDEODRIVER: dummy
         CAMERA_RPIDRIVER: dummy
+        CAMERA_LIBCAMDRIVER: dummy
         CAMERA_GPDRIVER: dummy
         CAMERA_CVDRIVER: dummy
       run: |
