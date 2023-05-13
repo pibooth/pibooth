@@ -34,6 +34,12 @@ class RpiCameraProxyMock:
 
 class LibcameraCameraProxyMock:
 
+    class Transform:
+
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+
     def __init__(self, fake_captures):
         self._take = cycle(fake_captures)
         self.sensor_resolution = fake_captures[0].size

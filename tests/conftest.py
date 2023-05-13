@@ -195,6 +195,8 @@ def camera_rpi_gp(proxy_rpi, proxy_gp):
 @pytest.fixture(scope='session')
 def proxy_libcamera(init_pygame, init_tasks, captures_portrait):
     if os.environ.get('CAMERA_LIBCAMDRIVER') == "dummy":
+        from pibooth.camera import libcamera
+        libcamera.Transform = LibcameraCameraProxyMock.Transform  # Monkey patch
         return camera_drivers.LibcameraCameraProxyMock(captures_portrait)
     return get_libcamera_camera_proxy()
 
@@ -243,7 +245,7 @@ def camera_cv_gp(proxy_cv, proxy_gp):
 def proxy_gp(init_pygame, init_tasks, captures_portrait):
     if os.environ.get('CAMERA_GPDRIVER') == "dummy":
         from pibooth.camera import gphoto
-        gphoto.gp = camera_drivers.GpCameraProxyMock(captures_portrait)
+        gphoto.gp = camera_drivers.GpCameraProxyMock(captures_portrait)  # Monkey patch
         return gphoto.gp
     return get_gp_camera_proxy()
 
