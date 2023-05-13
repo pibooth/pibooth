@@ -66,6 +66,9 @@ class LibcameraCameraProxyMock:
     def capture_image(self, channel):
         return ImageOps.fit(next(self._take), self.config[channel]['size'])
 
+    def switch_mode(self, config):
+        self.config = config
+
     def switch_mode_and_capture_image(self, config, channel):
         old_config = self.config
         self.config = config
