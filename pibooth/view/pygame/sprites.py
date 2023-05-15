@@ -83,7 +83,9 @@ class BaseSprite(pygame.sprite.DirtySprite):
         return self._image_cache
 
     def set_dirty(self, redraw=True):
-        """Set current image.
+        """Declare that the sprite has changed (at least its position).
+
+        :param redraw: if True, the sprite image is redrawn
         """
         self.dirty = 1
         if redraw:
