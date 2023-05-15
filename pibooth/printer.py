@@ -97,7 +97,7 @@ class Printer:
                 self._conn.enablePrinter(self.name)
                 info = self._conn.getPrinters()[self.name]
 
-            if self.state != info.get('printer-state'):
+            if info.get('printer-state', PRINTER_STATE_IDLE) not in (PRINTER_STATE_IDLE, PRINTER_STATE_PROCESSING):
                 LOGGER.warning("Printer not ready (state '%s'): message: %s, reasons: %s",
                                info.get('printer-state'), info.get('printer-state-message'), info.get('printer-state-reasons'))
 
