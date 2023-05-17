@@ -52,6 +52,7 @@ Pibooth organisation's plugin
 - `pibooth-sound-effects <https://github.com/pibooth/pibooth-sound-effects>`_
 - `pibooth_dropbox <https://github.com/pibooth/pibooth-dropbox>`_
 - `pibooth-qrcode <https://github.com/pibooth/pibooth-qrcode>`_
+- `pibooth-extra-lights <https://github.com/pibooth/pibooth-extra-lights>`_
 
 Third-party plugins
 ===================
