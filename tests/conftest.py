@@ -7,6 +7,7 @@ from PIL import Image
 from pibooth import language
 from pibooth.tasks import AsyncTasksPool
 from pibooth.counters import Counters
+from pibooth.printer import Printer
 from pibooth.config.parser import PiboothConfigParser
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import get_scene
@@ -112,6 +113,12 @@ def cfg(cfg_path, pm):
 @pytest.fixture
 def counters(tmpdir):
     return Counters(str(tmpdir.join('data.pickle')), nbr_printed=0)
+
+
+@pytest.fixture(scope='session')
+def printer():
+    os.system('lpadmin -p nowhere -E -v file:/dev/null')
+    return Printer('nowhere')
 
 
 # --- Window events loop ------------------------------------------------------

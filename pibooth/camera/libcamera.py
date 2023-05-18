@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import numpy
 import pygame
 try:
     import picamera2
     from picamera2 import Picamera2
     from libcamera import Transform
+    import numpy
 except ImportError:
     picamera2 = None  # picamera2 is optional
 from PIL import ImageFilter

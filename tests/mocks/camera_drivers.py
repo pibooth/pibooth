@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from itertools import cycle
-import numpy
 from PIL import ImageOps
 
 
@@ -59,9 +58,6 @@ class LibcameraCameraProxyMock:
 
     def stop(self):
         pass
-
-    def capture_array(self, channel):
-        return numpy.asarray(ImageOps.fit(next(self._take), self.config[channel]['size']))
 
     def capture_image(self, channel):
         return ImageOps.fit(next(self._take), self.config[channel]['size'])
