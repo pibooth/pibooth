@@ -117,7 +117,7 @@ def counters(tmpdir):
 
 @pytest.fixture(scope='session')
 def printer():
-    os.system('lpadmin -p nowhere -E -v file:/dev/null')
+    os.system('sudo lpadmin -p nowhere -E -v file:/dev/null')
     return Printer('nowhere')
 
 
