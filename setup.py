@@ -71,7 +71,7 @@ def main():
             'pygame>=2.1.2',
             'pygame-menu==4.3.9',
             'pygame-vkeyboard>=2.0.8',
-            'pygame-imslider>=1.0.1',
+            'pygame-imslider>=1.0.2',
             'psutil>=5.9.1',
             'pluggy>=1.0.0',
             'gpiozero>=1.6.2',
