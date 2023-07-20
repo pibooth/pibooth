@@ -7,6 +7,7 @@ from pygame import gfxdraw
 
 from pibooth import pictures
 from pibooth import evts
+from pibooth import fonts
 from pibooth.utils import PollingTimer
 from pibooth.view.base import BaseScene
 
@@ -406,7 +407,7 @@ class TextSprite(BaseSprite):
         super().__init__(parent, **kwargs)
         self.text = text
         self.color = (255, 255, 255)
-        self.align = pictures.ALIGN_CENTER
+        self.align = fonts.ALIGN_CENTER
         self.font_name = font_name
         if text is not None:
             self.set_text(text)

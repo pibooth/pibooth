@@ -17,16 +17,6 @@ AUTO = 'auto'
 PORTRAIT = 'portrait'
 LANDSCAPE = 'landscape'
 
-ALIGN_TOP_LEFT = 'top-left'
-ALIGN_TOP_CENTER = 'top-center'
-ALIGN_TOP_RIGHT = 'top-right'
-ALIGN_CENTER_LEFT = 'center-left'
-ALIGN_CENTER = 'center'
-ALIGN_CENTER_RIGHT = 'center-right'
-ALIGN_BOTTOM_LEFT = 'bottom-left'
-ALIGN_BOTTOM_CENTER = 'bottom-center'
-ALIGN_BOTTOM_RIGHT = 'bottom-right'
-
 
 def get_filename(name):
     """Return absolute path to a picture located in the current package.
