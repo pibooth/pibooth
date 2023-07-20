@@ -50,8 +50,9 @@ Pibooth organisation's plugin
 - `pibooth-picture-template <https://github.com/pibooth/pibooth-picture-template>`_
 - `pibooth-google-photo <https://github.com/pibooth/pibooth-google-photo>`_
 - `pibooth-sound-effects <https://github.com/pibooth/pibooth-sound-effects>`_
-- `pibooth_dropbox <https://github.com/pibooth/pibooth-dropbox>`_
+- `pibooth-dropbox <https://github.com/pibooth/pibooth-dropbox>`_
 - `pibooth-qrcode <https://github.com/pibooth/pibooth-qrcode>`_
+- `pibooth-extra-lights <https://github.com/pibooth/pibooth-extra-lights>`_
 
 Third-party plugins
 ===================

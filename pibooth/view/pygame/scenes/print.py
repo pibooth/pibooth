@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pygame
-from pibooth import pictures, evts
+from pibooth import evts, fonts
 from pibooth.language import get_translated_text
 from pibooth.view.pygame.sprites import BasePygameScene, LeftArrowSprite, RightArrowSprite, TextSprite
 
@@ -29,22 +29,22 @@ class PrintScene(BasePygameScene):
         text_border = 20
         self.text.set_text(get_translated_text('print'))  # In case of text has changed
         if self.arrow_location == self.ARROW_HIDDEN:
-            self.text.set_align(pictures.ALIGN_CENTER)
+            self.text.set_align(fonts.ALIGN_CENTER)
             self.text.set_rect(self.rect.width // 2 + text_border, text_border,
                                self.rect.width // 2 - 2 * text_border,
                                self.rect.height - 2 * text_border)
         elif self.arrow_location == self.ARROW_BOTTOM:
-            self.text.set_align(pictures.ALIGN_BOTTOM_CENTER)
+            self.text.set_align(fonts.ALIGN_BOTTOM_CENTER)
             self.text.set_rect(self.rect.width // 2 + text_border, text_border,
                                self.rect.width // 2 - 2 * text_border,
                                self.rect.height * 0.6 - text_border)
         elif self.arrow_location == self.ARROW_TOUCH:
-            self.text.set_align(pictures.ALIGN_BOTTOM_CENTER)
+            self.text.set_align(fonts.ALIGN_BOTTOM_CENTER)
             self.text.set_rect(self.rect.width // 2 + text_border, text_border,
                                self.rect.width // 2 - 2 * text_border,
                                self.rect.height * 0.4 - text_border)
         else:
-            self.text.set_align(pictures.ALIGN_TOP_CENTER)
+            self.text.set_align(fonts.ALIGN_TOP_CENTER)
             self.text.set_rect(self.rect.width // 2 + text_border, self.rect.height * 0.4,
                                self.rect.width // 2 - 2 * text_border,
                                self.rect.height * 0.6 - text_border)

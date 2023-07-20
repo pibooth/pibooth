@@ -7,7 +7,7 @@ from pibooth.utils import LOGGER
 from pibooth import fonts, evts
 from pibooth.tasks import AsyncTask
 from pibooth.pictures import sizing
-
+from pibooth.fonts import write_on_pil_image
 
 class BaseCamera:
     """Base class for camera.
@@ -85,13 +85,9 @@ class BaseCamera:
         as an overlay for the camera.
         """
         image = Image.new('RGBA', size)
-        draw = ImageDraw.Draw(image)
-
-        font = fonts.get_pil_font(text, fonts.CURRENT, 0.9 * size[0], 0.9 * size[1])
-        txt_width, txt_height = draw.textsize(text, font=font)
-
-        position = ((size[0] - txt_width) // 2, (size[1] - txt_height) // 2 - size[1] // 10)
-        draw.text(position, text, (255, 255, 255, alpha), font=font)
+        width, height = 0.9 * size[0], 0.9 * size[1]
+        posx, posy = (size[0] - width) // 2, (size[1] - height) // 2
+        write_on_pil_image(image, text, posx, posy, width, height, color=(255, 255, 255, alpha))
         return image
 
     def _show_overlay(self):

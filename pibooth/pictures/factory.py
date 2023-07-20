@@ -226,23 +226,12 @@ class PictureFactory:
         :type image: object
         """
         offset_generator = self._iter_texts_rects()
-        draw = ImageDraw.Draw(image)
         for text, font_name, color, align in self._texts:
             text_x, text_y, max_width, max_height = next(offset_generator)
             if not text:  # Empty string: go to next text position
                 continue
             # Use PIL to draw text because better support for fonts than OpenCV
-            font = fonts.get_pil_font(text, font_name, max_width, max_height)
-            _, text_height = font.getsize(text)
-            (text_width, _baseline), (offset_x, offset_y) = font.font.getsize(text)
-            if align == self.CENTER:
-                text_x += (max_width - text_width) // 2
-            elif align == self.RIGHT:
-                text_x += (max_width - text_width)
-
-            draw.text((text_x - offset_x // 2,
-                       text_y + (max_height - text_height) // 2 - offset_y // 2),
-                      text, color, font=font)
+            fonts.write_on_pil_image(image, text, text_x, text_y, max_width, max_height, font_name, color, align)
 
     def _build_outlines(self, image):
         """Build rectangle around each elements. This method is only for
@@ -395,11 +384,11 @@ class PilPictureFactory(PictureFactory):
         """
         if crop:
             width, height = sizing.new_size_keep_aspect_ratio(image.size, (max_w, max_h), 'outer')
-            image = image.resize((width, height), Image.ANTIALIAS)
+            image = image.resize((width, height), Image.LANCZOS)
             image = image.crop(sizing.new_size_by_croping(image.size, (max_w, max_h)))
         else:
             width, height = sizing.new_size_keep_aspect_ratio(image.size, (max_w, max_h), 'inner')
-            image = image.resize((width, height), Image.ANTIALIAS)
+            image = image.resize((width, height), Image.LANCZOS)
         return image, image.size[0], image.size[1]
 
     def _image_paste(self, image, dest_image, pos_x, pos_y):
