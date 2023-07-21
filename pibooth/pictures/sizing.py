@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pibooth import fonts
+
 
 def new_size_keep_aspect_ratio(original_size, target_size, resize_type='inner'):
     """Return a new size included (if resize_type='inner') or excluded (if resize_type='outer')
@@ -31,20 +33,20 @@ def new_size_keep_aspect_ratio(original_size, target_size, resize_type='inner'):
     return (int(tx), int(ty))
 
 
-def new_size_by_croping(original_size, target_size, crop_type='center'):
+def new_size_by_croping(original_size, target_size, crop_type=fonts.ALIGN_CENTER):
     """Return a tuple of top-left and bottom-right points (x1, y1, x2, y2) coresponding
     to a crop of the original size. The position of the rectangle can be defined by the
     crop_type parameter:
 
-       * top-left
-       * top-center
-       * top-right
-       * center-left
-       * center
-       * center-right
-       * bottom-left
-       * bottom-center
-       * bottom-right
+       * fonts.ALIGN_TOP_LEFT
+       * fonts.ALIGN_TOP_CENTER
+       * fonts.ALIGN_TOP_RIGHT
+       * fonts.ALIGN_CENTER_LEFT
+       * fonts.ALIGN_CENTER
+       * fonts.ALIGN_CENTER_RIGHT
+       * fonts.ALIGN_BOTTOM_LEFT
+       * fonts.ALIGN_BOTTOM_CENTER
+       * fonts.ALIGN_BOTTOM_RIGHT
     """
     x, y = 0, 0
 
@@ -65,7 +67,7 @@ def new_size_by_croping(original_size, target_size, crop_type='center'):
     return (x, y, target_size[0] + x, target_size[1] + y)
 
 
-def new_size_by_croping_ratio(original_size, target_size, crop_type='center'):
+def new_size_by_croping_ratio(original_size, target_size, crop_type=fonts.ALIGN_CENTER):
     """Return a tuple of top-left and bottom-right points (x1, y1, x2, y2) coresponding
     to a crop of the original size keeping the same aspect ratio of the target size.
 
@@ -74,15 +76,15 @@ def new_size_by_croping_ratio(original_size, target_size, crop_type='center'):
 
     The position of the rectangle can be defined by the crop_type parameter:
 
-       * top-left
-       * top-center
-       * top-right
-       * center-left
-       * center
-       * center-right
-       * bottom-left
-       * bottom-center
-       * bottom-right
+       * fonts.ALIGN_TOP_LEFT
+       * fonts.ALIGN_TOP_CENTER
+       * fonts.ALIGN_TOP_RIGHT
+       * fonts.ALIGN_CENTER_LEFT
+       * fonts.ALIGN_CENTER
+       * fonts.ALIGN_CENTER_RIGHT
+       * fonts.ALIGN_BOTTOM_LEFT
+       * fonts.ALIGN_BOTTOM_CENTER
+       * fonts.ALIGN_BOTTOM_RIGHT
     """
     # Get current and desired ratio for the images
     img_ratio = original_size[0] / float(original_size[1])

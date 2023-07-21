@@ -4,12 +4,60 @@ import os.path as osp
 import PIL
 import pygame
 from pygame import gfxdraw
+import numpy as np
 
 from pibooth import pictures
 from pibooth import evts
 from pibooth import fonts
 from pibooth.utils import PollingTimer
 from pibooth.view.base import BaseScene
+
+
+class OptimizedLayeredDirty(pygame.sprite.LayeredDirty):
+
+    @staticmethod
+    def _find_dirty_area(_clip, _old_rect, _rect, _sprites, _update, _update_append, init_rect):
+        for spr in _sprites:
+            if spr.dirty > 0:
+                # Check if the sprite is obscured by sprites from higher layers
+                visible = True
+                for other_spr in _sprites:
+                    if (other_spr is not spr
+                        and other_spr.layer > spr.layer
+                        and other_spr.rect.colliderect(spr.rect)):
+                        # Check the visibility and transparency of the sprite
+                        if spr.visible and hasattr(spr, "image") and hasattr(spr.image, "convert_alpha"):
+                            pixel_array = pygame.surfarray.array_alpha(spr.image)
+                            if np.any(pixel_array < 255):  # Check if there are transparent pixels
+                                # Update the lower layers
+                                lower_layers = [
+                                    s for s in _sprites if s.layer < spr.layer
+                                ]
+                                for lower_spr in lower_layers:
+                                    # Check if the sprite in the lower layers is visible before marking it as "dirty"
+                                    if lower_spr.rect.colliderect(spr.rect) and lower_spr.visible:
+                                        lower_spr.dirty = 1
+                                        # You can also perform other actions here
+                                visible = False
+                        break
+
+                if visible:
+                    # Choose the correct rectangle (_union_rect) based on the sprite's source_rect or sprite's rect.
+                    if spr.source_rect:
+                        _union_rect = _rect(spr.rect.topleft, spr.source_rect.size)
+                    else:
+                        _union_rect = _rect(spr.rect)
+
+                    # ... (the rest of the code remains unchanged)
+                    # Add the merged rectangle to _update after applying the clip to respect the screen boundaries.
+                    _update_append(_union_rect.clip(_clip))
+
+                    # Check the old rectangles (if the sprite had an old rectangle).
+                    if _old_rect[spr] is not init_rect:
+                        _union_rect = _rect(_old_rect[spr])
+                        # ... (the rest of the code remains unchanged)
+                        # Add the merged rectangle (from the sprite's old rectangle) to _update after applying the clip.
+                        _update_append(_union_rect.clip(_clip))
 
 
 class BaseSprite(pygame.sprite.DirtySprite):
@@ -690,7 +738,7 @@ class BasePygameScene(BaseScene):
     LAYER_OUTLINES = 10
 
     def __init__(self):
-        self.sprites = pygame.sprite.LayeredDirty()
+        self.sprites = OptimizedLayeredDirty()
         self.image = ImageSprite(self, layer=BasePygameScene.LAYER_PICTURE)
         self.image.visible = 0
         self.text_color = (255, 255, 255)
