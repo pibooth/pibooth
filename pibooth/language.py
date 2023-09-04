@@ -191,6 +191,22 @@ DEFAULT = {
         'finished': "Obrigado!",
         'oops': "Oops, ocorreu um erro.",
     },
+    'se': {
+        'intro': "Ta en bild",
+        'intro_print': 'Eller så kan du\fortfarande\skriva ut den här bilden',
+        'choose': "Välj layout",
+        '1': "1 bild",
+        '2': "2 bilder",
+        '3': "3 bilder",
+        '4': "4 bilder",
+        'chosen': "Kör!",
+        'smile': "Smile!",
+        'processing': "Jobbar...",
+        'print': "Skriv ut bilden!",
+        'print_forget': "Glöm\den här\bilden",
+        'finished': "Tack",
+        'oops': "Oops, nånting blev fel",
+    },    
 }
 
 

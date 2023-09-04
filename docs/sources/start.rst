@@ -199,7 +199,7 @@ GUI translations
 ^^^^^^^^^^^^^^^^
 
 The graphical interface texts are available in 9 languages by default: Danish, Dutch, English,
-French, German, Hungarian, Italian, Norwegian and Spanish. The default translations can be easily edited using the command:
+French, German, Hungarian, Italian, Norwegian, Spanish and Swedish. The default translations can be easily edited using the command:
 
 .. code-block:: bash
 

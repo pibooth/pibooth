@@ -14,7 +14,7 @@ photos of your version.
 Features
 --------
 
-* Interface available in Danish, Dutch, English, French, German, Hungarian, Norwegian, Portuguese (Portugal and Brazil) and Spanish (customizable)
+* Interface available in Danish, Dutch, English, French, German, Hungarian, Norwegian, Portuguese (Portugal and Brazil), Spanish and Swedish (customizable)
 * Capture from 1 to 4 photos and concatenate them in a final picture
 * Support all cameras compatible with gPhoto2, OpenCV and Raspberry Pi
 * Support for hardware buttons and lamps on Raspberry Pi GPIO
