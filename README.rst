@@ -36,7 +36,7 @@ Documentation
 .. image:: https://raw.githubusercontent.com/pibooth/pibooth/master/docs/images/documentation.png
    :align: center
    :alt: Documentation
-   :target: https://pibooth.readthedocs.io/en/latest
+   :target: https://pibooth.readthedocs.io/en/stable
    :height: 200px
 
 Plugins
