@@ -67,7 +67,7 @@ def main():
         python_requires=">=3.6",
         install_requires=[
             'picamera2>=0.3.9 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
-            'Pillow>=9.2.0',
+            'Pillow>=9.3.0',
             'pygame>=2.1.2',
             'pygame-menu==4.3.9',
             'pygame-vkeyboard>=2.0.8',
