@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from pibooth.utils import PollingTimer
-from pibooth.view.pygame.sprites import BasePygameScene
+from pibooth.view.pygame.window import PygameScene
 
 
-class CaptureScene(BasePygameScene):
+class CaptureScene(PygameScene):
 
     def __init__(self):
         super().__init__()

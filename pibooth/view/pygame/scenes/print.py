@@ -3,10 +3,11 @@
 import pygame
 from pibooth import evts, fonts
 from pibooth.language import get_translated_text
-from pibooth.view.pygame.sprites import BasePygameScene, LeftArrowSprite, RightArrowSprite, TextSprite
+from pibooth.view.pygame.window import PygameScene
+from pibooth.view.pygame.sprites import LeftArrowSprite, RightArrowSprite, TextSprite
 
 
-class PrintScene(BasePygameScene):
+class PrintScene(PygameScene):
 
     def __init__(self):
         super().__init__()
