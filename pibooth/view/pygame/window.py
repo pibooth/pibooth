@@ -35,7 +35,8 @@ class PygameScene(BaseScene):
 
     def __init__(self):
         self.sprites = pygame.sprite.LayeredDirty()
-        self.image = sprites.ImageSprite(self, layer=sprites.LAYER_PICTURE)
+        # Don't add image to LayeredDirty group for performance issue when camera preview is running
+        self.image = sprites.ImageSprite(None, layer=sprites.LAYER_PICTURE)
         self.image.visible = 0
         self.text_color = (255, 255, 255)
         self.arrow_location = BaseScene.ARROW_BOTTOM

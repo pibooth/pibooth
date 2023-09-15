@@ -549,7 +549,7 @@ class CapturesCounterSprite(BaseSprite):
         self.current = 0
         self.total = nbr_dots
 
-        for i in range(self.total):
+        for _i in range(self.total):
             ImageSprite(self, skin=self.dot_skin, outlines=False)
 
     def set_color(self, color):

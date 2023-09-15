@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import pygame
-from PIL import Image, ImageDraw
+from PIL import Image
 
 from pibooth.utils import LOGGER
-from pibooth import fonts, evts
+from pibooth import evts
 from pibooth.tasks import AsyncTask
 from pibooth.pictures import sizing
 from pibooth.fonts import write_on_pil_image
+
 
 class BaseCamera:
     """Base class for camera.
