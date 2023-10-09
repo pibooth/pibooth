@@ -109,15 +109,25 @@ class PygameScene(BaseScene):
             else:
                 sprite.disable()
 
-    def set_image(self, image=None):
+    def set_image(self, image=None, stream=False):
         """Set an image to the main place or hide it.
 
         :param image: image to set (path, PIL object or pygame object)
         :type image: str or object
+        :param stream: optimize to process an images sequence
+        :type stream: bool
         """
         if image:
             self.image.show()
             self.image.set_skin(image)
+            if stream and self.image in self.sprites:
+                LOGGER.debug("Removing image sprite from group (remaning sprites: %s).", len(self.sprites))
+                self.sprites.remove(self.image)
+                self.sprites.remove(*self.image.get_sprites(recursive=True))
+            elif not stream and self.image not in self.sprites:
+                LOGGER.debug("Adding image sprite to group (total sprites: %s).", len(self.sprites))
+                self.add_sprite(self.image)
+                self.sprites.add(*self.image.get_sprites(recursive=True))
         else:
             self.image.hide()
 
@@ -205,7 +215,15 @@ class PygameScene(BaseScene):
         """
         if force:
             self.sprites.repaint_rect(self.background.rect)
-        return self.sprites.draw(surface)
+        rects = self.sprites.draw(surface)
+
+        # Stream mode: don't let LayeredDirty group to refresh image to avoid
+        # background cleanup (all dirty rects are clean with background before blit)
+        if self.image not in self.sprites and self.image.visible > 0 and self.image.dirty > 0:
+            surface.blit(self.image.image, self.image.rect)
+            rects += [self.image.rect]
+
+        return rects
 
 
 class PygameWindow(BaseWindow):

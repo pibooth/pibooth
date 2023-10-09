@@ -24,8 +24,8 @@ class FinishScene(PygameScene):
         # Final picture
         self.image.set_rect(*self.rect.inflate(-100, 0))
 
-    def set_image(self, image):
-        super(FinishScene, self).set_image(image)
+    def set_image(self, image, stream=False):
+        super(FinishScene, self).set_image(image, stream)
 
         if not image:
             self.text.show()

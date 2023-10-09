@@ -37,11 +37,13 @@ class BaseScene:
         """
         raise NotImplementedError
 
-    def set_image(self, image=None):
+    def set_image(self, image=None, stream=False):
         """Set an image to the main place or hide it.
 
         :param image: image to set (path, PIL object or pygame object)
         :type image: str or object
+        :param stream: optimize to process an images sequence
+        :type stream: bool
         """
         raise NotImplementedError
 

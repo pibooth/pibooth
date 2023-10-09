@@ -18,7 +18,7 @@ class PrintScene(PygameScene):
 
         self.text_forget.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
         self.left_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
-        self.image.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
+        self.image.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
         self.text_print.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
         self.right_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
 
