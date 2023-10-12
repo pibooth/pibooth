@@ -75,9 +75,9 @@ class CvCamera(BaseCamera):
         self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.preview_resolution[0])
         self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.preview_resolution[1])
         self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.preview_iso)
-        if self.custom_fourcc != None:
+        if self.custom_fourcc != "Default":
             LOGGER.info("Using custon fourcc %s", self.custom_fourcc)
-            self._cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*self.custom_fourcc)) # add this line
+            self._cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*self.custom_fourcc))
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
