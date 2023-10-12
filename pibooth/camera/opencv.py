@@ -31,12 +31,12 @@ def get_cv_camera_proxy(use_v4l2=False, port=None):
     if port is not None:
         if not isinstance(port, int):
             raise TypeError("Invalid OpenCV camera port '{}'".format(type(port)))
-        camera = cv2.VideoCapture(port, cv2.CAP_V4L2 if use_v4l2 == True else None)
+        camera = cv2.VideoCapture(port, cv2.CAP_V4L2 if use_v4l2 else None)
         if camera.isOpened():
             return camera
     else:
         for i in range(3):  # Test 3 first ports
-            camera = cv2.VideoCapture(i, cv2.CAP_V4L2 if use_v4l2 == True else None)
+            camera = cv2.VideoCapture(i, cv2.CAP_V4L2 if use_v4l2 else None)
             if camera.isOpened():
                 return camera
 

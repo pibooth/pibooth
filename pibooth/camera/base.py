@@ -22,10 +22,9 @@ class BaseCamera(object):
         self.preview_rotation, self.capture_rotation = (0, 0)
         self.preview_iso, self.capture_iso = (100, 100)
         self.preview_flip, self.capture_flip = (False, False)
-        self.use_v4l2 = False
         self.custom_fourcc = None
 
-    def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False, preview_resolution=None, use_v4l2=False, custom_fourcc=None):
+    def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False, preview_resolution=None, custom_fourcc=None):
         """Initialize the camera.
         """
         if not isinstance(rotation, (tuple, list)):
@@ -43,9 +42,8 @@ class BaseCamera(object):
             iso = (iso, iso)
         self.preview_iso, self.capture_iso = iso
         self.delete_internal_memory = delete_internal_memory
-        self.use_v4l2 = use_v4l2
         self.custom_fourcc = custom_fourcc
-        
+
         self._specific_initialization()
 
     def _specific_initialization(self):
