@@ -13,8 +13,7 @@ from pibooth.utils import PoolingTimer, LOGGER
 from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
-
-def get_cv_camera_proxy(port=None):
+def get_cv_camera_proxy(use_v4l2=False, port=None):
     """Return camera proxy if an OpenCV compatible camera is found
     else return None.
 
@@ -23,16 +22,21 @@ def get_cv_camera_proxy(port=None):
     """
     if not cv2:
         return None  # OpenCV is not installed
+    
+    if use_v4l2:
+        LOGGER.info("Using V4L2 backend")
+    else:
+        LOGGER.info("Using Default backend")
 
     if port is not None:
         if not isinstance(port, int):
             raise TypeError("Invalid OpenCV camera port '{}'".format(type(port)))
-        camera = cv2.VideoCapture(port)
+        camera = cv2.VideoCapture(port, cv2.CAP_V4L2 if use_v4l2 == True else None)
         if camera.isOpened():
             return camera
     else:
         for i in range(3):  # Test 3 first ports
-            camera = cv2.VideoCapture(i)
+            camera = cv2.VideoCapture(i, cv2.CAP_V4L2 if use_v4l2 == True else None)
             if camera.isOpened():
                 return camera
 
@@ -59,14 +63,21 @@ class CvCamera(BaseCamera):
     def __init__(self, camera_proxy):
         super(CvCamera, self).__init__(camera_proxy)
         self._overlay_alpha = 255
-        self._preview_resolution = None
 
     def _specific_initialization(self):
         """Camera initialization.
         """
-        self._preview_resolution = (self._cam.get(cv2.CAP_PROP_FRAME_WIDTH), self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        LOGGER.debug("Preview resolution is %s", self._preview_resolution)
+        if self.preview_resolution == None:
+            LOGGER.info("Setting preview resolution according to Webcam capabilities")
+            self.preview_resolution = (self._cam.get(cv2.CAP_PROP_FRAME_WIDTH), self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+        LOGGER.info("Preview resolution is %s", self.preview_resolution)
+        self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.preview_resolution[0])
+        self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.preview_resolution[1])
         self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.preview_iso)
+        if self.custom_fourcc != None:
+            LOGGER.info("Using custon fourcc %s", self.custom_fourcc)
+            self._cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*self.custom_fourcc)) # add this line
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
@@ -220,9 +231,9 @@ class CvCamera(BaseCamera):
             raise IOError("Can not capture frame")
         image = self._rotate_image(image, self.capture_rotation)
 
-        LOGGER.debug("Putting preview resolution back to %s", self._preview_resolution)
-        self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self._preview_resolution[0])
-        self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self._preview_resolution[1])
+        LOGGER.debug("Putting preview resolution back to %s", self.preview_resolution)
+        self._cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.preview_resolution[0])
+        self._cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.preview_resolution[1])
 
         if self.capture_iso != self.preview_iso:
             self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.preview_iso)
