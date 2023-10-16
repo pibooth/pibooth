@@ -5,6 +5,7 @@ import pygame
 
 from pibooth import fonts, pictures
 from pibooth.language import get_translated_text
+from pibooth.utils import LOGGER
 
 ARROW_TOP = 'top'
 ARROW_BOTTOM = 'bottom'
@@ -195,22 +196,24 @@ class Background(object):
 
 class IntroBackground(Background):
 
-    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
+    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0, full_width=True):
         Background.__init__(self, "intro")
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
         self.left_arrow = None
         self.left_arrow_pos = None
+        self.full_width = full_width
 
     def resize(self, screen):
         Background.resize(self, screen)
         if self._need_update and self.arrow_location != ARROW_HIDDEN:
             if self.arrow_location == ARROW_TOUCH:
+                # Size is used to resize the image according th this rect
                 size = (self._rect.width * 0.2, self._rect.height * 0.2)
 
                 self.left_arrow = pictures.get_pygame_image("camera.png", size, vflip=False, color=self._text_color)
-
-                x = int(self._rect.width * 0.2)
+                
+                x = int(self._rect.width // 2 - self.left_arrow.get_width() // 2) if self.full_width else int(self._rect.width * 0.2)
                 y = int(self._rect.height // 2)
             else:
                 size = (self._rect.width * 0.3, self._rect.height * 0.3)
@@ -242,7 +245,7 @@ class IntroBackground(Background):
             align = 'bottom-center'
         elif self.arrow_location == ARROW_TOUCH:
             rect = pygame.Rect(self._text_border, self._text_border,
-                               self._rect.width / 2 - 2 * self._text_border,
+                               (self._rect.width if self.full_width else self._rect.width / 2) - 2 * self._text_border,
                                self._rect.height * 0.4 - self._text_border)
             align = 'bottom-center'
         else:
@@ -261,7 +264,7 @@ class IntroBackground(Background):
 class IntroWithPrintBackground(IntroBackground):
 
     def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
-        IntroBackground.__init__(self, arrow_location, arrow_offset)
+        IntroBackground.__init__(self, arrow_location, arrow_offset, False)
         self.right_arrow = None
         self.right_arrow_pos = None
 
@@ -498,7 +501,7 @@ class PrintBackground(Background):
                 # Right arrow
                 self.right_arrow = pictures.get_pygame_image(
                     "printer_touch.png", size, hflip=False, vflip=False, color=self._text_color)
-                x = int(self._rect.left + self._rect.width * 0.70
+                x = int(self._rect.left + self._rect.width * 0.80
                         - self.right_arrow.get_rect().width // 2)
                 y = int(self._rect.top + self._rect.height * 0.45)
             else:
