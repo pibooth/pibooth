@@ -248,7 +248,7 @@ class PiWindow(object):
         else:
             self._update_background(background.IntroBackground(self.arrow_location, self.arrow_offset))
 
-        if pil_image:
+        if with_print and pil_image:
             self._update_foreground(pil_image, self.RIGHT)
         elif self._current_foreground:
             self._buffered_images.pop(id(self._current_foreground[0]), None)
