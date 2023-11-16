@@ -24,9 +24,9 @@ def find_camera(cfg):
     The gPhoto2 camera is first (drivers most restrictive) to avoid connection
     concurence in case of DSLR compatible with OpenCV.
     """
-    rpi_cam_proxy = get_rpi_camera_proxy()
-    gp_cam_proxy = get_gp_camera_proxy()
-    cv_cam_proxy = get_cv_camera_proxy(cfg.getboolean('CAMERA', 'use_v4l2'))
+    rpi_cam_proxy = get_rpi_camera_proxy(cfg)
+    gp_cam_proxy = get_gp_camera_proxy(cfg)
+    cv_cam_proxy = get_cv_camera_proxy(cfg)
 
     if rpi_cam_proxy and gp_cam_proxy:
         LOGGER.info("Configuring hybrid camera (Picamera + gPhoto2) ...")

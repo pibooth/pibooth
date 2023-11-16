@@ -501,8 +501,8 @@ class PrintBackground(Background):
                 # Right arrow
                 self.right_arrow = pictures.get_pygame_image(
                     "printer_touch.png", size, hflip=False, vflip=False, color=self._text_color)
-                x = int(self._rect.left + self._rect.width * 0.80
-                        - self.right_arrow.get_rect().width // 2)
+                x = int(self._rect.left + self._rect.width // 2
+                        + self.right_arrow.get_rect().width // 2)
                 y = int(self._rect.top + self._rect.height * 0.45)
             else:
                 size = (self._rect.width * 0.3, self._rect.height * 0.3)
@@ -571,13 +571,18 @@ class PrintBackground(Background):
 
         text = get_translated_text("print_forget")
         if text:
-            rect = pygame.Rect(self._rect.width // 2, 0,
-                               self._rect.width // 5 - 2 * self._text_border,
-                               self._rect.height * 0.3 - 2 * self._text_border)
-            if self.arrow_location == ARROW_TOP:
-                rect.top = self._rect.height * 0.08
+            if self.arrow_location == ARROW_TOUCH:
+                rect = pygame.Rect(self._rect.width // 3.5, self._rect.height * 0.8,
+                                self._rect.width // 5 - 2 * self._text_border,
+                                self._rect.height * 0.20 - 2 * self._text_border)
             else:
-                rect.bottom = self._rect.height - self._rect.height * 0.08
+                rect = pygame.Rect(self._rect.width // 2, 0,
+                                self._rect.width // 5 - 2 * self._text_border,
+                                self._rect.height * 0.3 - 2 * self._text_border)
+                if self.arrow_location == ARROW_TOP:
+                    rect.top = self._rect.height * 0.08
+                else:
+                    rect.bottom = self._rect.height - self._rect.height * 0.08
 
             self._write_text(text, rect)
 
@@ -650,6 +655,8 @@ class FinishedWithImageBackground(FinishedBackground):
                 self.foreground_size, (self._rect.size[0] * 0.9, self._rect.size[1]*0.9)))
             xmargin = abs(self._rect.width - frgnd_rect.width) // 2
             ymargin = abs(self._rect.height - frgnd_rect.height) // 2
+
+            LOGGER.debug("Margin x:%d, y:%d",xmargin,ymargin)
 
             if xmargin > 50:
                 margin = min(xmargin, self._rect.height // 3)

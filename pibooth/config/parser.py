@@ -196,6 +196,14 @@ DEFAULT = odict((
                 (None,
                  "Preview Resolution for camera captures (Width, Height) or None to get the resolutions from Camera capabilities",
                  None, None)),
+            ("delete_internal_memory",
+                (False,
+                 "Delete captures from camera internal memory (when applicable)",
+                 None, None)),
+        ))
+     ),
+    ("OPENCV",
+        odict((
             ("use_v4l2",
                 (False,
                  "Use V4L2 instead of GSTREAMER",
@@ -204,10 +212,6 @@ DEFAULT = odict((
                 ("Default",
                  "Custom FourCC (can be YUY2 or MJPG or any other fourcc or Default to use the default)",
                  "Custom FourCC", ['Default','YUY2','MJPG','H264'])),
-            ("delete_internal_memory",
-                (False,
-                 "Delete captures from camera internal memory (when applicable)",
-                 None, None)),
         ))
      ),
     ("PRINTER",
