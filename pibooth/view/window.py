@@ -97,9 +97,9 @@ class PiWindow(object):
             LOGGER.debug("FULLSCREEN Image Size")
             image_size_max = (self.surface.get_size()[0] * 0.6, self.surface.get_size()[1] * 0.6)
         else:
-            if portrait and pos == self.LEFT and self.arrow_location == background.ARROW_TOUCH:
+            if portrait and (pos == self.LEFT or pos == self.RIGHT) and self.arrow_location == background.ARROW_TOUCH:
                 # Reduce the vertical size to let enough space to display the text below the image when the pos is LEFT
-                image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1] * 0.8)
+                image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1] * 0.7)
             else: # Default image have full height view
                 image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1])
 
@@ -205,7 +205,6 @@ class PiWindow(object):
         The image is vertically centered except in case of TOUCHSCREEN and portrait image.
         In that case, it is aligned on top
         """
-        LOGGER.debug("image is %s",image)
         tl = pos = None
         if self.arrow_location == background.ARROW_TOUCH and orientation == PORTRAIT and image:
             tl = (self.surface.get_rect().centerx // 2 - image.get_width() // 2 if image else self.surface.get_rect().centerx // 2,
@@ -225,8 +224,24 @@ class PiWindow(object):
         """
         Return the position of the given image to be put on the right of the screen
         """
-        pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
-        return image.get_rect(center=pos) if image else pos
+        tl = pos = None
+        if self.arrow_location == background.ARROW_TOUCH and orientation == PORTRAIT and image:
+            tl = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2 - image.get_width() // 2 if image else self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2,
+                   self.surface.get_rect().top)
+        else:
+            pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
+        
+        LOGGER.debug("orientation %s",orientation)
+        LOGGER.debug("tl %s",tl)
+        LOGGER.debug("pos %s",pos)
+        LOGGER.debug("image %s",image)
+        if image:
+             if tl:
+                return image.get_rect(topleft=tl)
+             else:
+                return image.get_rect(center=pos)
+        else:
+             return pos
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.
