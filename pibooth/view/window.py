@@ -87,15 +87,15 @@ class PiWindow(object):
 
         portrait = pil_image.size[0] <  pil_image.size[1]
         if portrait:
-            LOGGER.info("Image is in PORTRAIT Orientation")
+            LOGGER.debug("Image is in PORTRAIT Orientation")
         else: 
-            LOGGER.info("Image is in LANDSCAPE Orientation")
+            LOGGER.debug("Image is in LANDSCAPE Orientation")
             
         LOGGER.debug("pos %s", pos)
 
         if pos == self.FULLSCREEN:
             LOGGER.debug("FULLSCREEN Image Size")
-            image_size_max = (self.surface.get_size()[0] * 0.6, self.surface.get_size()[1] * 0.6)
+            image_size_max = (self.surface.get_size()[0] * 0.8, self.surface.get_size()[1] * 0.8)
         else:
             if portrait and (pos == self.LEFT or pos == self.RIGHT) and self.arrow_location == background.ARROW_TOUCH:
                 # Reduce the vertical size to let enough space to display the text below the image when the pos is LEFT
@@ -231,10 +231,6 @@ class PiWindow(object):
         else:
             pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
         
-        LOGGER.debug("orientation %s",orientation)
-        LOGGER.debug("tl %s",tl)
-        LOGGER.debug("pos %s",pos)
-        LOGGER.debug("image %s",image)
         if image:
              if tl:
                 return image.get_rect(topleft=tl)
