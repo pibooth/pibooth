@@ -47,15 +47,13 @@ class PictureFactory(object):
         assert len(images) in range(1, 5), "1 to 4 images can be concatenated"
         self._texts = []
         self._texts_height = 0
-        self._final = None
+        
         self._margin = 100
         self._margin_text = self._margin
-        self._crop = False
-        self._outlines = False
+        self._crop = self._outlines = False
         self._images = images
-        self._overlay_image = None
         self._background_color = (255, 255, 255)
-        self._background_image = None
+        self._final = self._overlay_image = self._background_image = None
 
         self.name = self.__class__.__name__
         self.width = width
