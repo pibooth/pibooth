@@ -61,6 +61,7 @@ Third-party plugins can be found on GitHub or on `plugins on PyPI  <https://pypi
 Here is a short list:
 
 - `pibooth-lcd-display <https://pypi.org/project/pibooth-lcd-display>`_
+- `pibooth-oled-display <https://pypi.org/project/pibooth-oled-display>`_
 - `pibooth-neopixel_spi <https://github.com/peteoheat/pibooth-neopixel_spi>`_
 - `pibooth-telegram-upload <https://pypi.org/project/pibooth-telegram-upload>`_
 - `pibooth-s3-upload <https://pypi.org/project/pibooth-s3-upload>`_
@@ -70,11 +71,14 @@ Sponsors
 
 An enormous thanks to our sponsors:
 
--  `@andhey <https://github.com/andhey>`_
-- `@philipbarwi <https://github.com/philipbarwi>`_
+- `@andhey <https://github.com/andhey>`_
+- `@vo55 <https://github.com/vo55>`_
 - `@laurammiller <https://github.com/laurammiller>`_
 - `@neilrenfrey <https://github.com/neilrenfrey>`_
 - `@agrovista <https://github.com/agrovista>`_ 
+- `@mozdi <https://github.com/mozdi>`_
+- `@MikkeBoomBoom <https://github.com/MikkeBoomBoom>`_
+- `@fatgeek <https://github.com/fatgeek>`_
 
 It means a lot to us!
 
