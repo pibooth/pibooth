@@ -4,7 +4,7 @@ Listing all connected DSLR camera
 00 : addr-> usb:001,010  name-> Fuji Fujifilm X-T2
 
 ================================================================================
-Stating diagnostic of connected DSLR camera
+Starting diagnostic of connected DSLR camera
 * Preview compatible: True
 * Capture compatible: True
 /actions/bulb
