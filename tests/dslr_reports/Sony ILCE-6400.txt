@@ -4,7 +4,7 @@ Listing all connected DSLR camera
 00 : addr-> usb:001,030  name-> Sony ILCE-6400 (PC Control)
 
 ================================================================================
-Stating diagnostic of connected DSLR camera
+Starting diagnostic of connected DSLR camera
 * Preview compatible: True
 * Capture compatible: True
 Gphoto2: b'_get_config [config.c:10350]': b"Type of property 'Bulb Mode' expected: 0x0000 got: 0x0004"

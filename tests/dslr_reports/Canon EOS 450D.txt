@@ -3,7 +3,7 @@ Listing all connected DSLR camera
 00 : addr-> usb:001,009  name-> Canon EOS 450D (PTP mode)
 
 ================================================================================
-Stating diagnostic of connected DSLR camera
+Starting diagnostic of connected DSLR camera
 /actions/syncdatetime
   Label       : Synchronize camera date and time with PC
   Readonly    : no

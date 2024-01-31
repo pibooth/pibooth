@@ -3,7 +3,7 @@ Listing all connected DSLR camera
 00 : addr-> usb:001,006  name-> Sony ZV-1 (PC Control)
 
 ================================================================================
-Stating diagnostic of connected DSLR camera
+Starting diagnostic of connected DSLR camera
 * Preview compatible: True
 * Capture compatible: True
 /actions/autofocus

@@ -1,12 +1,21 @@
 
-================================================================================
-Pibooth version installed: 1.1.0
-Camera(s) detected: True
+pygame 1.9.6
+Hello from the pygame community. https://www.pygame.org/contribute.html
+pygame-menu 4.0.7
+Pibooth version installed: 2.0.7
+Installed plugins: extra-lights-1.0.1, picture-template-1.1.0
+GPhoto2 version installed: 2.5.27
+  - standard camlib set (ax203 canon digigr8 dimagev directory docupen jl2005a jl2005c kodak_dc240 lumix mars pentax ptp2 ricoh_g3 sierra sonix sq905 st2205 topfield tp6801)
+  - gcc (C compiler used)
+  - ltdl (for portable loading of camlibs)
+  - EXIF (for special handling of EXIF files)
 Listing all connected DSLR camera
-00 : addr-> usb:001,005  name-> Canon EOS 1300D
+00 : addr-> usb:001,004  name-> Canon EOS 1500D
 
 ================================================================================
 Starting diagnostic of connected DSLR camera
+* Preview compatible: True
+* Capture compatible: True
 /actions/syncdatetimeutc
   Label       : Synchronize camera date and time with PC
   Readonly    : no
@@ -23,6 +32,13 @@ Starting diagnostic of connected DSLR camera
   Choices     : [0, 1]
 /actions/uilock
   Label       : UI Lock
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 2
+  Choices     : [0, 1]
+/actions/popupflash
+  Label       : Popup Flash
   Readonly    : no
   Data type   : <class 'int'>
   Widget type : Toggle button (or check box)
@@ -68,7 +84,7 @@ Starting diagnostic of connected DSLR camera
   Readonly    : no
   Data type   : <class 'int'>
   Widget type : Toggle button (or check box)
-  Current     : 2
+  Current     : 0
   Choices     : [0, 1]
 /actions/eosremoterelease
   Label       : Canon EOS Remote Release
@@ -77,6 +93,13 @@ Starting diagnostic of connected DSLR camera
   Widget type : Radio button
   Current     : None
   Choices     : ['None', 'Press Half', 'Press Full', 'Release Half', 'Release Full', 'Immediate', 'Press 1', 'Press 2', 'Press 3', 'Release 1', 'Release 2', 'Release 3']
+/actions/eosmoviemode
+  Label       : Movie Mode
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 2
+  Choices     : [0, 1]
 /actions/opcode
   Label       : PTP Opcode
   Readonly    : no
@@ -89,21 +112,21 @@ Starting diagnostic of connected DSLR camera
   Readonly    : no
   Data type   : <class 'int'>
   Widget type : Date entering
-  Current     : 1565508327
+  Current     : 1705941532
   Choices     : n/a
 /settings/datetime
   Label       : Camera Date and Time
   Readonly    : no
   Data type   : <class 'int'>
   Widget type : Date entering
-  Current     : 1565504727
+  Current     : 1705941532
   Choices     : n/a
 /settings/reviewtime
   Label       : Quick Review Time
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
-  Current     : 2 seconds
+  Current     : None
   Choices     : ['None', '2 seconds', '4 seconds', '8 seconds', 'Hold']
 /settings/output
   Label       : Camera Output
@@ -111,7 +134,7 @@ Starting diagnostic of connected DSLR camera
   Data type   : <class 'str'>
   Widget type : Radio button
   Current     : Off
-  Choices     : ['TFT', 'PC', 'TFT + PC', 'Setting 4', 'Setting 5', 'Setting 6', 'Setting 7', 'Unknown value 0008', 'Unknown value 0009', 'Unknown value 000a', 'Unknown value 000b', 'Off']
+  Choices     : ['TFT', 'PC', 'TFT + PC', 'MOBILE', 'TFT + MOBILE', 'PC + MOBILE', 'TFT + PC + MOBILE', 'MOBILE2', 'TFT + MOBILE2', 'PC + MOBILE2', 'TFT + PC + MOBILE2', 'Off']
 /settings/movierecordtarget
   Label       : Recording Destination
   Readonly    : no
@@ -159,7 +182,22 @@ Starting diagnostic of connected DSLR camera
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Text
-  Current     : eosversion=0,size=5184x3456,size2=5184x3456,points={{0,743,117,181},{-839,393,172,129},{839,393,172,129},{-1394,0,172,129},{0,0,224,222},{1394,0,172,129},{-839,-393,172,129},{839,-393,172,129},{0,-743,117,181}},select={},unknown={10000000ffff}
+  Current     : eosversion=4,size=6000x4000,size2=6000x4000,points={{0,860,136,210},{-972,456,200,150},{972,456,200,150},{-1614,0,200,150},{0,0,260,258},{1614,0,200,150},{-972,-456,200,150},{972,-456,
+[... -> see log file for full message]
+  Choices     : n/a
+/settings/strobofiring
+  Label       : Strobo Firing
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 2
+  Choices     : n/a
+/settings/flashcharged
+  Label       : Flash Charging State
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
   Choices     : n/a
 /settings/autopoweroff
   Label       : Auto Power Off
@@ -189,12 +227,26 @@ Starting diagnostic of connected DSLR camera
   Widget type : Toggle button (or check box)
   Current     : 0
   Choices     : [0, 1]
+/settings/remotemode
+  Label       : Remote Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 1
+  Choices     : n/a
+/settings/eventmode
+  Label       : Event Mode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
+  Choices     : n/a
 /status/serialnumber
   Label       : Serial Number
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Text
-  Current     : 35fd1a0
+  Current     : 4d0a99df1242425d9f559a5919628913
   Choices     : n/a
 /status/manufacturer
   Label       : Camera Manufacturer
@@ -208,7 +260,7 @@ Starting diagnostic of connected DSLR camera
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Text
-  Current     : Canon EOS 1300D
+  Current     : Canon EOS 2000D
   Choices     : n/a
 /status/deviceversion
   Label       : Device Version
@@ -222,14 +274,14 @@ Starting diagnostic of connected DSLR camera
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Text
-  Current     : None
+  Current     : 
   Choices     : n/a
 /status/model
   Label       : Camera Model
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Text
-  Current     : 2147484676
+  Current     : 2147484722
   Choices     : n/a
 /status/ptpversion
   Label       : PTP Version
@@ -257,71 +309,64 @@ Starting diagnostic of connected DSLR camera
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Text
-  Current     : EF-S18-55mm f/3.5-5.6 IS II
+  Current     : EF-S24mm f/2.8 STM
   Choices     : n/a
 /status/eosserialnumber
   Label       : Serial Number
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Text
-  Current     : 203073067990
+  Current     : 453076036997
   Choices     : n/a
 /status/shuttercounter
   Label       : Shutter Counter
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Text
-  Current     : 5601
+  Current     : 19059
   Choices     : n/a
 /status/availableshots
   Label       : Available Shots
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Text
-  Current     : 2231
+  Current     : 77
+  Choices     : n/a
+/status/eosmovieswitch
+  Label       : Movie Switch
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0
   Choices     : n/a
 /imgsettings/imageformat
   Label       : Image Format
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
-  Current     : Large Fine JPEG
+  Current     : Smaller JPEG
   Choices     : ['Large Fine JPEG', 'Large Normal JPEG', 'Medium Fine JPEG', 'Medium Normal JPEG', 'Small Fine JPEG', 'Small Normal JPEG', 'Smaller JPEG', 'Tiny JPEG', 'RAW + Large Fine JPEG', 'RAW']
 /imgsettings/imageformatsd
   Label       : Image Format SD
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
-  Current     : Large Fine JPEG
+  Current     : Smaller JPEG
   Choices     : ['Large Fine JPEG', 'Large Normal JPEG', 'Medium Fine JPEG', 'Medium Normal JPEG', 'Small Fine JPEG', 'Small Normal JPEG', 'Smaller JPEG', 'Tiny JPEG', 'RAW + Large Fine JPEG', 'RAW']
 /imgsettings/iso
   Label       : ISO Speed
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
-  Current     : 100
-  Choices     : ['Auto', '100', '200', '400', '800', '1600', '3200', '6400']
+  Current     : Auto
+  Choices     : ['Auto']
 /imgsettings/whitebalance
   Label       : WhiteBalance
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
   Current     : Auto
-  Choices     : ['Auto', 'Unknown value 0017', 'Daylight', 'Shadow', 'Cloudy', 'Tungsten', 'Fluorescent', 'Flash', 'Manual']
-/imgsettings/whitebalanceadjusta
-  Label       : WhiteBalance Adjust A
-  Readonly    : no
-  Data type   : <class 'str'>
-  Widget type : Radio button
-  Current     : 0
-  Choices     : ['-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-/imgsettings/whitebalanceadjustb
-  Label       : WhiteBalance Adjust B
-  Readonly    : no
-  Data type   : <class 'str'>
-  Widget type : Radio button
-  Current     : 0
-  Choices     : ['-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  Choices     : ['Auto']
 /imgsettings/whitebalancexa
   Label       : WhiteBalance X A
   Readonly    : no
@@ -342,28 +387,28 @@ Starting diagnostic of connected DSLR camera
   Data type   : <class 'str'>
   Widget type : Radio button
   Current     : sRGB
-  Choices     : ['sRGB', 'AdobeRGB']
+  Choices     : ['sRGB']
 /capturesettings/exposurecompensation
   Label       : Exposure Compensation
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
   Current     : 0
-  Choices     : ['-5', '-4.6', '-4.3', '-4', '-3.6', '-3.3', '-3', '-2.6', '-2.3', '-2', '-1.6', '-1.3', '-1', '-0.6', '-0.3', '0', '0.3', '0.6', '1', '1.3', '1.6', '2', '2.3', '2.6', '3', '3.3', '3.6', '4', '4.3', '4.6', '5']
+  Choices     : ['0']
 /capturesettings/focusmode
   Label       : Focus Mode
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
-  Current     : Manual
-  Choices     : ['One Shot', 'AI Focus', 'AI Servo', 'Manual']
+  Current     : AI Focus
+  Choices     : ['AI Focus']
 /capturesettings/aspectratio
   Label       : Aspect Ratio
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
   Current     : 3:2
-  Choices     : ['3:2', '4:3', '16:9', '1:1']
+  Choices     : ['3:2']
 /capturesettings/storageid
   Label       : Storage Device
   Readonly    : no
@@ -376,22 +421,31 @@ Starting diagnostic of connected DSLR camera
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
-  Current     : P
-  Choices     : ['P', 'TV', 'AV', 'Manual', 'Bulb', 'A_DEP', 'DEP', 'Custom', 'Lock', 'Green', 'Night Portrait', 'Sports', 'Portrait', 'Landscape', 'Closeup', 'Flash Off']
+  Current     : Green
+  Choices     : ['P', 'TV', 'AV', 'Manual', 'Bulb', 'A_DEP', 'DEP', 'Custom', 'Lock', 'Green', 'Night Portrait', 'Sports', 'Portrait', 'Landscape', 'Closeup', 'Flash Off', 'Auto', 'Handheld Night Scen
+[... -> see log file for full message]
+/capturesettings/autoexposuremodedial
+  Label       : Canon Auto Exposure Mode Dial
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Green
+  Choices     : ['P', 'TV', 'AV', 'Manual', 'Bulb', 'A_DEP', 'DEP', 'Custom', 'Lock', 'Green', 'Night Portrait', 'Sports', 'Portrait', 'Landscape', 'Closeup', 'Flash Off', 'Auto', 'Handheld Night Scen
+[... -> see log file for full message]
 /capturesettings/drivemode
   Label       : Drive Mode
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
   Current     : Single
-  Choices     : ['Single', 'Continuous', 'Timer 10 sec', 'Timer 2 sec', 'Unknown value 0007']
+  Choices     : ['Single', 'Timer 10 sec', 'Continuous timer']
 /capturesettings/picturestyle
   Label       : Picture Style
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
   Current     : Auto
-  Choices     : ['Auto', 'Standard', 'Portrait', 'Landscape', 'Neutral', 'Faithful', 'Monochrome', 'User defined 1', 'User defined 2', 'User defined 3']
+  Choices     : ['Auto']
 /capturesettings/aperture
   Label       : Aperture
   Readonly    : no
@@ -412,27 +466,41 @@ Starting diagnostic of connected DSLR camera
   Data type   : <class 'str'>
   Widget type : Radio button
   Current     : Evaluative
-  Choices     : ['Evaluative', 'Partial', 'Center-weighted average']
+  Choices     : ['Evaluative']
+/capturesettings/liveviewsize
+  Label       : Live View Size
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : val 0
+  Choices     : ['Large', 'Medium', 'Small']
 /capturesettings/bracketmode
   Label       : Bracket Mode
   Readonly    : no
   Data type   : <class 'str'>
-  Widget type : Text
-  Current     : 0
-  Choices     : n/a
+  Widget type : Radio button
+  Current     : Unknown value 0000
+  Choices     : ['Unknown value 0000']
 /capturesettings/aeb
   Label       : Auto Exposure Bracketing
   Readonly    : no
   Data type   : <class 'str'>
   Widget type : Radio button
   Current     : off
-  Choices     : ['off', '+/- 1/3', '+/- 2/3', '+/- 1', '+/- 1 1/3', '+/- 1 2/3', '+/- 2']
+  Choices     : ['off']
+/capturesettings/alomode
+  Label       : Auto Lighting Optimization
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Radio button
+  Current     : Standard (disabled in manual exposure)
+  Choices     : ['Standard (disabled in manual exposure)']
 /other/d402
   Label       : PTP Property 0xd402
   Readonly    : yes
   Data type   : <class 'str'>
   Widget type : Text
-  Current     : Canon EOS 1300D
+  Current     : Canon EOS 2000D
   Choices     : n/a
 /other/d407
   Label       : PTP Property 0xd407
@@ -466,17 +534,42 @@ Starting diagnostic of connected DSLR camera
 ================================================================================
 Testing commands used by pibooth
 Setting option imgsettings/iso="100"
+   -> invalid value '100' for option iso (possible choices: ['Auto'])
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9110 receiving resp failed: PTP Device Busy (0x2019)'
+Gphoto2: b'_set_config [config.c:10780]': b"'ptp_canon_eos_setdevicepropvalue (params, cursub->propid, &propval, cursub->type)' failed: PTP Device Busy (0x2019)"
+Gphoto2: b'gp_context_error': b"The property 'ISO Speed' / 0xd103 was not set (0x2019: PTP Device Busy)."
+Gphoto2: b'gp_camera_set_config [gphoto2-camera.c:1114]': b"'camera->functions->set_config (camera, window, context)' failed: -110"
+   -> unsupported setting imgsettings/iso=100 (nothing configured on DSLR)
 Setting option settings/capturetarget="Memory card"
-Getting option actions/viewfinder=2
+Getting option actions/viewfinder=0
 Setting option actions/viewfinder="1"
 Take capture preview
-Setting option actions/viewfinder="2"
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Gphoto2: b'ptp_usb_getresp [usb.c:515]': b'PTP_OC 0x9153 receiving resp failed: Camera Not Ready (0xa102)'
+Setting option actions/viewfinder="0"
 Take a capture
 Download file from DSLR
 Save capture locally from memory buffer
 
 ================================================================================
-SUCCESS: diagnostic completed
+SUCCESS : diagnostic completed
 If you are investigating why pibooth does not work with your DSLR camera,
-please paste the content of generated file 'dslr-diagnostic.log'
-on https://github.com/werdeil/pibooth/issues
+please paste the content of generated file 'diagnostic.log'
+on https://github.com/pibooth/pibooth/issues

@@ -164,7 +164,7 @@ def main():
     for index, (name, addr) in enumerate(cameras_list):
         write_log(f"{index:02d} : addr-> {addr}  name-> {name}")
 
-    write_log("Stating diagnostic of connected DSLR camera", True)
+    write_log("Starting diagnostic of connected DSLR camera", True)
     camera = gp.Camera()
     camera.init()
 
