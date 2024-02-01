@@ -83,22 +83,10 @@ class FakeCamera(BaseCamera):
 
         self._show_overlay(get_translated_text('smile'), alpha)
         self._build_and_display_preview()
-
-
-        """Show a countdown of `timeout` seconds on the preview.
-        Returns when the countdown is finished.
-        """
-        timeout = int(timeout)
-        if timeout < 1:
-            raise ValueError("Start time shall be greater than 0")
-
-        while timeout > 0:
-            self._show_overlay(timeout, alpha)
-            time.sleep(1)
-            timeout -= 1
-            self._hide_overlay()
-
-        self._show_overlay(get_translated_text('smile'), alpha)
+        pygame.event.pump()
+        if updated_rect:
+            pygame.display.update(updated_rect)
+        time.sleep(1)
 
     def stop_preview(self):
         """Stop Preview: do nothing"""
