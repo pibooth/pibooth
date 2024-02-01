@@ -181,6 +181,10 @@ class PiConfigMenu(object):
                 menu.add.button("Manage plugins",
                                 self._build_submenu_plugins("Plugins"),
                                 margin=(self.size[0] // 2 - 105, 0))
+                menu.add.vertical_margin(20)
+            menu.add.button("Manage fonts",
+                        self._build_submenu_fonts("Fonts"),
+                        margin=(self.size[0] // 2 - 95, 0))
 
         menu.add.vertical_margin(20)
         return menu
@@ -220,6 +224,29 @@ class PiConfigMenu(object):
                                    option='plugins_disabled',
                                    plugin=plugin)
         return menu
+
+    def _build_submenu_fonts(self, title):
+        menu = pgm.Menu(title=title.capitalize(),
+                        width=self.size[0],
+                        height=self.size[1],
+                        theme=SUBTHEME2_DARK,
+                        touchscreen=True)
+
+        available_fonts = fonts.get_available_fonts(extend=False)
+        for f in available_fonts:
+            try:
+                b = menu.add.button(f, self._on_font_selected, f)
+                if (self.cfg.get('WINDOW', 'font').strip('"') == f): b.select(True, True)
+                i = b.get_font_info()
+                b.set_font(fonts.get_filename(f), font_size=i['size'], color=i['color'], readonly_color=i['color'], selected_color=i['selected_color'], readonly_selected_color=i['selected_color'], background_color=SUBTHEME2_DARK.background_color)
+            except:
+                menu.remove_widget(b)
+        return menu
+
+    def _on_font_selected(self, value):
+        LOGGER.debug('Assign system font to %s', value)
+        self._changed = True
+        self.cfg.set('WINDOW', 'font', value)
 
     def _on_keyboard_event(self, text):
         """Called after each option changed.
