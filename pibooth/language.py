@@ -30,6 +30,7 @@ DEFAULT = {
         'print_forget': "Por favor\nremova\nesta foto",
         'finished': "Obrigado!",
         'oops': "Opa! Ocorreu um erro.",
+        'camera_not_found': "The camera may not be connected",
     },
     'de': {
         'intro': "Foto aufnehmen",
@@ -46,6 +47,7 @@ DEFAULT = {
         'print_forget': "Dieses Foto\nbitte löschen",
         'finished': "Danke",
         'oops': "Ups! Etwas ist schiefgelaufen",
+        'camera_not_found': "The camera may not be connected",
     },
     'dk': {
         'intro': "Tag et foto",
@@ -62,6 +64,7 @@ DEFAULT = {
         'print_forget': "Venligst\nglem dette\nfoto",
         'finished': "Tak",
         'oops': "Ups! Noget gik galt",
+        'camera_not_found': "The camera may not be connected",
     },
     'en': {
         'intro': "Take a photo",
@@ -78,6 +81,7 @@ DEFAULT = {
         'print_forget': "Please\nforget this\nphoto",
         'finished': "Thanks",
         'oops': "Oops something went wrong",
+        'camera_not_found': "The camera may not be connected",
     },
     'es': {
         'intro': "Sacate Una Foto",
@@ -94,6 +98,7 @@ DEFAULT = {
         'print_forget': "Por favor\nolvida\nesta foto",
         'finished': "Gracias",
         'oops': "Maldición! Algo salió mal",
+        'camera_not_found': "The camera may not be connected",
     },
     'fr': {
         'intro': "Faire une photo",
@@ -110,6 +115,7 @@ DEFAULT = {
         'print_forget': "Oublie\ncette photo\ns'il te plait",
         'finished': "Merci",
         'oops': "Oups quelque chose s'est mal passé",
+        'camera_not_found': "La caméra semble deconnectée",
     },
     'hu': {
         'intro': "Akarsz egy képet",
@@ -126,6 +132,7 @@ DEFAULT = {
         'print_forget': "Kérjük,\nfelejtsd el ezt\na képet",
         'finished': "Köszi",
         'oops': "Sajnos valami hiba történt",
+        'camera_not_found': "The camera may not be connected",
     },
     'it': {
         'intro': "Scatta una foto",
@@ -142,6 +149,7 @@ DEFAULT = {
         'print_forget': "Per favore\nignora questa\nfoto",
         'finished': "Grazie",
         'oops': "Oops qualcosa è andato storto",
+        'camera_not_found': "The camera may not be connected",
     },
     'nl': {
         'intro': "Neem een foto",
@@ -158,6 +166,7 @@ DEFAULT = {
         'print_forget': "Vergeet\ndeze foto\nalstublieft",
         'finished': "Bedankt",
         'oops': "Oeps er ging iets mis",
+        'camera_not_found': "The camera may not be connected",
     },
     'no': {
         'intro': "Ta et bilde",
@@ -174,6 +183,7 @@ DEFAULT = {
         'print_forget': "Glem\ndette\nbildet",
         'finished': "Takk",
         'oops': "Ops, noe gikk galt",
+        'camera_not_found': "The camera may not be connected",
     },
     'pt': {
         'intro': "Tira uma foto",
@@ -190,6 +200,7 @@ DEFAULT = {
         'print_forget': "Por favor\nesqueçe-te\ndesta foto",
         'finished': "Obrigado!",
         'oops': "Oops, ocorreu um erro.",
+        'camera_not_found': "The camera may not be connected",
     },
     'se': {
         'intro': "Ta en bild",
@@ -206,7 +217,8 @@ DEFAULT = {
         'print_forget': "Glöm\den här\bilden",
         'finished': "Tack",
         'oops': "Oops, nånting blev fel",
-    },    
+        'camera_not_found': "The camera may not be connected",
+    },
 }
 
 

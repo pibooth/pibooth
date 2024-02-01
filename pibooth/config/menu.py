@@ -110,6 +110,14 @@ class PiConfigMenu(object):
                                        joystick_navigation=True)
         self._keyboard.disable()
 
+        if self.cfg.getboolean('GENERAL', 'password_enabled'):
+            self._password_input = self._main_menu.add.text_input("Password: ",
+                                onchange=self._on_password,
+                                password=True)
+        else:
+            self._build_menu()
+
+    def _build_menu(self):
         for name in DEFAULT:
             submenu = self._build_submenu(name)
             if len(submenu._widgets) > 2:
@@ -241,6 +249,16 @@ class PiConfigMenu(object):
         if self._main_menu.is_enabled():  # Menu may have been closed
             self.cfg.set(kwargs['section'], kwargs['option'], '"{}"'.format(str(value)))
             self._changed = True
+
+    def _on_password(self, value, **kwargs):
+        """Called when a password is given
+        """
+        # Password is valid
+        if value == self.cfg.get('GENERAL', 'password').strip('"'):
+            # Remove input
+            self._main_menu.remove_widget(self._password_input)
+
+            self._build_menu()
 
     def _on_color_changed(self, value, **kwargs):
         """Called after each text input changed.
