@@ -6,6 +6,8 @@
 import io
 import os
 import os.path as osp
+import json
+import random
 from configparser import ConfigParser
 from pibooth.utils import LOGGER, open_text_editor
 
@@ -119,7 +121,7 @@ DEFAULT = {
         'processing': "Préparation du montage",
         'print': "Imprimer la photo ?",
         'print_forget': "Oublie\ncette photo\ns'il te plait",
-        'finished': "Merci",
+        'finished': ["Merci", "Wahoo !", "Quelle classe !"],
         'oops': "Oups quelque chose s'est mal passé",
         'camera_not_found': "La caméra semble deconnectée",
     },
@@ -254,11 +256,15 @@ def init(filename, clear=False):
             for section, options in DEFAULT.items():
                 fp.write("[{}]\n".format(section))
                 for name, value in options.items():
-                    value = value.splitlines()
-                    fp.write("{} = {}\n".format(name, value[0]))
-                    if len(value) > 1:
-                        for part in value[1:]:
-                            fp.write("    {}\n".format(part))
+                    if isinstance(value, list):
+                        value = json.dumps(value)
+                        fp.write("{} = {}\n".format(name, value))
+                    else:
+                        value = value.splitlines()
+                        fp.write("{} = {}\n".format(name, value[0]))
+                        if len(value) > 1:
+                            for part in value[1:]:
+                                fp.write("    {}\n".format(part))
                 fp.write("\n\n")
 
     PARSER.read(PARSER.filename, encoding='utf-8')
@@ -309,6 +315,12 @@ def get_translated_text(key):
         raise EnvironmentError("Translation system is not initialized")
 
     if PARSER.has_section(CURRENT) and PARSER.has_option(CURRENT, key):
+        v = PARSER.get(CURRENT, key)
+        if v.startswith('['):
+            try:
+                return random.choice(json.loads(v))
+            except:
+                return v
         return PARSER.get(CURRENT, key).strip('"')
     elif PARSER.has_option('en', key):
         LOGGER.warning("Unsupported language '%s', fallback to English", CURRENT)
