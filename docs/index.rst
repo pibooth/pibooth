@@ -41,6 +41,7 @@ photos of your version.
 
    sources/start.rst
    sources/config/config.rst
+   sources/tutorials/dslr_tips.rst
 
 .. toctree::
    :caption: Scripts and tools
