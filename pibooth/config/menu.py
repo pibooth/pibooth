@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 """Pibooth config menu.
@@ -111,11 +112,44 @@ class PiConfigMenu(object):
         self._keyboard.disable()
 
         if self.cfg.getboolean('GENERAL', 'password_enabled'):
-            self._password_input = self._main_menu.add.text_input("Password: ",
-                                onchange=self._on_password,
-                                password=True)
+            self._build_password_menu()
         else:
             self._build_menu()
+
+    def _build_password_menu(self):
+        self._password_widgets = []
+        self._password_hidden = ''
+        self._password_widgets.append(self._main_menu.add.text_input("Password: ",
+                            onchange=self._on_password))
+
+        # From 1 to 9
+        f = self._main_menu.add.frame_h(199, 64, margin=(5, 0))
+        f._pack_margin_warning = False
+        self._password_widgets.append(f.pack(self._main_menu.add.button(1, lambda: self._on_password_key(1), cursor=pgm.locals.CURSOR_HAND)))
+        self._password_widgets.append(f.pack(self._main_menu.add.button(2, lambda: self._on_password_key(2), cursor=pgm.locals.CURSOR_HAND), align=pgm.locals.ALIGN_CENTER))
+        self._password_widgets.append(f.pack(self._main_menu.add.button(3, lambda: self._on_password_key(3), cursor=pgm.locals.CURSOR_HAND), align=pgm.locals.ALIGN_RIGHT))
+        self._password_widgets.append(f)
+        self._password_widgets.append(self._main_menu.add.vertical_margin(5))
+        f = self._main_menu.add.frame_h(199, 64, margin=(5, 0))
+        f._pack_margin_warning = False
+        self._password_widgets.append(f.pack(self._main_menu.add.button(4, lambda: self._on_password_key(4), cursor=pgm.locals.CURSOR_HAND)))
+        self._password_widgets.append(f.pack(self._main_menu.add.button(5, lambda: self._on_password_key(5), cursor=pgm.locals.CURSOR_HAND), align=pgm.locals.ALIGN_CENTER))
+        self._password_widgets.append(f.pack(self._main_menu.add.button(6, lambda: self._on_password_key(6), cursor=pgm.locals.CURSOR_HAND), align=pgm.locals.ALIGN_RIGHT))
+        self._password_widgets.append(f)
+        self._password_widgets.append(self._main_menu.add.vertical_margin(5))
+        f = self._main_menu.add.frame_h(199, 64, margin=(5, 0))
+        f._pack_margin_warning = False
+        self._password_widgets.append(f.pack(self._main_menu.add.button(7, lambda: self._on_password_key(7), cursor=pgm.locals.CURSOR_HAND)))
+        self._password_widgets.append(f.pack(self._main_menu.add.button(8, lambda: self._on_password_key(8), cursor=pgm.locals.CURSOR_HAND), align=pgm.locals.ALIGN_CENTER))
+        self._password_widgets.append(f.pack(self._main_menu.add.button(9, lambda: self._on_password_key(9), cursor=pgm.locals.CURSOR_HAND), align=pgm.locals.ALIGN_RIGHT))
+        self._password_widgets.append(f)
+        self._password_widgets.append(self._main_menu.add.vertical_margin(5))
+
+        # 0
+        f = self._main_menu.add.frame_h(299, 64, margin=(5, 0))
+        f._pack_margin_warning = False
+        self._password_widgets.append(f.pack(self._main_menu.add.button(0, lambda: self._on_password_key(0), cursor=pgm.locals.CURSOR_HAND), align=pgm.locals.ALIGN_CENTER))
+        self._password_widgets.append(f)
 
     def _build_menu(self):
         for name in DEFAULT:
@@ -277,13 +311,31 @@ class PiConfigMenu(object):
             self.cfg.set(kwargs['section'], kwargs['option'], '"{}"'.format(str(value)))
             self._changed = True
 
+    def _on_password_key(self, value):
+        print('Pressed {}'.format(value), flush=True)
+        self._password_hidden += str(value)
+        self._password_widgets[0].set_value('*' * len(self._password_hidden))
+
     def _on_password(self, value, **kwargs):
         """Called when a password is given
         """
+        if len(value) == 0: return
+
+        # New character entered
+        if len(value) > len(self._password_hidden): self._password_hidden += value[-1]
+
+        # Character removed
+        elif len(value) < len(self._password_hidden): self._password_hidden = self._password_hidden[:-1]
+
+        self._password_widgets[0].set_value('*' * len(self._password_hidden))
+
         # Password is valid
-        if value == self.cfg.get('GENERAL', 'password').strip('"'):
+        if self._password_hidden == self.cfg.get('GENERAL', 'password').strip('"'):
             # Remove input
-            self._main_menu.remove_widget(self._password_input)
+            for w in self._password_widgets:
+                self._main_menu.remove_widget(w)
+            self._password_widgets = []
+            self._password_hidden = ''
 
             self._build_menu()
 
