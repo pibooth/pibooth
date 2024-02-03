@@ -9,7 +9,6 @@ import os.path as osp
 from configparser import ConfigParser
 from pibooth.utils import LOGGER, open_text_editor
 
-
 PARSER = ConfigParser()
 
 CURRENT = 'en'  # Dynamically set at startup
@@ -97,7 +96,7 @@ DEFAULT = {
     },
     'fr': {
         'intro': "Faire une photo",
-        'intro_print': "Ou sinon\ntu peux toujours\nimprimer\ncette photo",
+        'intro_print': "Sinon tu peux\ntoujours imprimer\ncette photo",
         'choose': "Choisis ton format",
         '1': "1 photo",
         '2': "2 photos",
