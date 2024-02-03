@@ -10,6 +10,7 @@ from pibooth.plugins.lights_plugin import LightsPlugin
 from pibooth.plugins.picture_plugin import PicturePlugin
 from pibooth.plugins.printer_plugin import PrinterPlugin
 from pibooth.plugins.view_plugin import ViewPlugin
+from pibooth.plugins.getready_plugin import GetReadyPlugin
 
 
 def create_plugin_manager():
@@ -72,7 +73,8 @@ class PiPluginManager(pluggy.PluginManager):
                     ViewPlugin(self),
                     PrinterPlugin(self),
                     PicturePlugin(self),
-                    CameraPlugin(self)]  # First called
+                    CameraPlugin(self),
+                    GetReadyPlugin(self)]  # First called
 
         for plugin in plugins:
             self.register(plugin, name=getattr(plugin, 'name', None))
