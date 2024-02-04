@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import pygame
-from PIL import Image, ImageDraw
+from PIL import Image
 
-from pibooth import fonts, evts
+from pibooth.utils import LOGGER
+from pibooth import evts
 from pibooth.tasks import AsyncTask
 from pibooth.pictures import sizing
 from pibooth.fonts import write_on_pil_image
+
 
 class BaseCamera:
     """Base class for camera.
@@ -79,7 +81,7 @@ class BaseCamera:
             self._overlay_alpha = alpha
             self._show_overlay()
 
-    def build_overlay(self, size, text, alpha):
+    def _build_overlay(self, size, text, alpha):
         """Return a PIL image with the given text that can be used
         as an overlay for the camera.
         """
@@ -92,9 +94,9 @@ class BaseCamera:
     def _show_overlay(self):
         """Add an image as an overlay.
         """
-        self._overlay = self.build_overlay(self._rect.size,
-                                           self._overlay_text,
-                                           self._overlay_alpha)
+        self._overlay = self._build_overlay(self._rect.size,
+                                            self._overlay_text,
+                                            self._overlay_alpha)
 
     def _hide_overlay(self):
         """Remove any existing overlay.
@@ -112,7 +114,7 @@ class BaseCamera:
         """Start the preview fitting the given Rect object.
         """
         if self._worker and self._worker.is_alive():
-            # Already running
+            LOGGER.warning("Can not start preview, capture or preview already running")
             return
 
         # Define Rect() object for resizing preview captures to fit to the defined

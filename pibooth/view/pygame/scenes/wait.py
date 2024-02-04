@@ -4,11 +4,11 @@ import pygame
 from pibooth.utils import PollingTimer
 from pibooth import evts, fonts
 from pibooth.language import get_translated_text
-from pibooth.view.pygame.sprites import (BasePygameScene, LeftArrowSprite, RightArrowSprite,
-                                         ImageSprite, TextSprite)
+from pibooth.view.pygame.window import PygameScene
+from pibooth.view.pygame.sprites import LeftArrowSprite, RightArrowSprite, ImageSprite, TextSprite
 
 
-class WaitScene(BasePygameScene):
+class WaitScene(PygameScene):
 
     def __init__(self):
         super().__init__()

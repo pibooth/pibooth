@@ -63,6 +63,9 @@ def get_filename(name):
     raise ValueError(f"System font '{name}' unknown, maybe you mean '{most_similar}'")
 
 
+CURRENT = get_filename('Amatic-Bold')  # Dynamically re-set at startup
+
+
 def get_pil_font(text, font_name, max_width, max_height):
     """Create the PIL font object which fit the text to the given rectangle.
 
@@ -127,9 +130,6 @@ def get_pygame_font(text, font_name, max_width, max_height):
     return pygame.font.Font(get_filename(font_name), start)
 
 
-CURRENT = get_filename('Amatic-Bold')  # Dynamically set at startup
-
-
 def write_on_pil_image(image, text, posx=0, posy=0, max_width=None, max_height=None, font_name=CURRENT, color='black', align=ALIGN_CENTER):
     """Write a text on a PIL image that fit the given image or optional box.
 
@@ -157,9 +157,9 @@ def write_on_pil_image(image, text, posx=0, posy=0, max_width=None, max_height=N
     """
     draw = ImageDraw.Draw(image)
     if not max_width:
-        max_width= image.size[0]
+        max_width = image.size[0]
     if not max_height:
-        max_height= image.size[1]
+        max_height = image.size[1]
 
     font = get_pil_font(text, font_name, max_width, max_height)
     left, top, right, bottom = font.getbbox(text)

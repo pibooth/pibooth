@@ -56,7 +56,7 @@ class CvCamera(BaseCamera):
     def _show_overlay(self):
         """Add an image as an overlay.
         """
-        pil_image = self.build_overlay((self._rect.width, self._rect.height), self._overlay_text, 255)
+        pil_image = self._build_overlay((self._rect.width, self._rect.height), self._overlay_text, 255)
         # Remove alpha from overlay
         self._overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGBA2RGB)
 

@@ -5,7 +5,8 @@ from pygame_imslider import ImSlider, ImSliderRenderer, STYPE_LOOP
 from pibooth import evts
 from pibooth import pictures
 from pibooth.language import get_translated_text
-from pibooth.view.pygame.sprites import BasePygameScene, LeftArrowSprite, RightArrowSprite, TextSprite
+from pibooth.view.pygame.window import PygameScene
+from pibooth.view.pygame.sprites import LeftArrowSprite, RightArrowSprite, TextSprite
 
 
 class Renderer(ImSliderRenderer):
@@ -47,7 +48,7 @@ class Renderer(ImSliderRenderer):
         surface.blit(self.scene.background.image, (0, 0), self.scene.slider.get_rect())
 
 
-class ChooseScene(BasePygameScene):
+class ChooseScene(PygameScene):
 
     def __init__(self):
         super().__init__()

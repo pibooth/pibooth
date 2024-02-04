@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from pibooth.language import get_translated_text
-from pibooth.view.pygame.sprites import BasePygameScene, TextSprite
+from pibooth.view.pygame.window import PygameScene
+from pibooth.view.pygame.sprites import TextSprite
 
 
-class ProcessingScene(BasePygameScene):
+class ProcessingScene(PygameScene):
 
     def __init__(self):
         super().__init__()

@@ -6,12 +6,6 @@ but other configuration may work fine. **All hardware buttons, lights and printe
 are optional**, the application can be entirely controlled using a keyboard, a
 mouse or a touchscreen.
 
-.. warning:: Using a Pi Camera, the preview is visible only on a screen connected
-             to the HDMI or DSI connectors (the preview is an overlay managed at
-             GPU low level). It also means that ``pibooth`` can not be started
-             throught SSH tuneling. Even with X11 forwarding enabled (``ssh -X ...``)
-             the preview will not be visible.
-
 Hardware
 ^^^^^^^^
 
@@ -40,8 +34,8 @@ Install
 Here is a brief description on how to set-up a Raspberry Pi to use this software.
 
 If you intend to develop on ``pibooth``, an editable/customizable version can be
-installed. Instead of doing step 8. of the below procedure, follow
-:ref:`instructions here<install_developing_version>`.
+installed. Instead of doing :ref:`step 8.<pip-install-pibooth>` of the below manual procedure,
+follow :ref:`instructions here<install_developing_version>`.
 
 Manual procedure
 ^^^^^^^^^^^^^^^^
@@ -93,6 +87,8 @@ Manual procedure
 
         sudo apt-get install python3-opencv
 
+.. _pip-install-pibooth:
+
 8. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
 
    .. code-block:: bash
@@ -117,7 +113,7 @@ Here is the diagram for hardware connections. Please refer to the
 :ref:`default configuration file<Default configuration>`.
 to know the default pins used (`physical pin numbering <https://pinout.xyz>`_).
 
-.. image:: ../images/sketch.png
+.. image:: ../../images/sketch.png
    :align: center
    :alt: Electronic sketch
 

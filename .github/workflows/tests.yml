@@ -26,10 +26,11 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        sudo apt-get install -y cups libcups2-dev
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest pylint pytest-cov
         python -m pip install opencv-python
-        python -m pip install -e .
+        python -m pip install -e .[printer]
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -43,6 +44,7 @@ jobs:
       env:
         SDL_VIDEODRIVER: dummy
         CAMERA_RPIDRIVER: dummy
+        CAMERA_LIBCAMDRIVER: dummy
         CAMERA_GPDRIVER: dummy
         CAMERA_CVDRIVER: dummy
       run: |

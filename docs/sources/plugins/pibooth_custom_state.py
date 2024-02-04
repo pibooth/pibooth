@@ -2,12 +2,13 @@
 
 import pibooth
 from pibooth.utils import PollingTimer
-from pibooth.view.pygame.sprites import BasePygameScene, TextSprite
+from pibooth.view.pygame.window import PygameScene
+from pibooth.view.pygame.sprites import TextSprite
 
 __version__ = "0.0.2"
 
 
-class MyScene(BasePygameScene):
+class GetReadyScene(PygameScene):
 
     """Class to define a new visual scene.
     """
@@ -26,7 +27,7 @@ class MyScene(BasePygameScene):
 def pibooth_setup_states(machine):
     """Declare the new 'ready' state and associated scene.
     """
-    machine.add_state('ready', MyScene())
+    machine.add_state('ready', GetReadyScene())
 
 
 @pibooth.hookimpl(hookwrapper=True)

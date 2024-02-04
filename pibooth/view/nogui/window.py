@@ -21,7 +21,7 @@ class NoGuiScene(BaseScene):
 
     def set_outlines(self, enable=True): pass  # Avoid "NotImplemented" error
 
-    def set_image(self, image=None): pass  # Avoid "NotImplemented" error
+    def set_image(self, image=None, stream=False): pass  # Avoid "NotImplemented" error
 
     def set_text_color(self, color): pass  # Avoid "NotImplemented" error
 

@@ -3,21 +3,22 @@
 import pygame
 from pibooth import evts, fonts
 from pibooth.language import get_translated_text
-from pibooth.view.pygame.sprites import BasePygameScene, LeftArrowSprite, RightArrowSprite, TextSprite
+from pibooth.view.pygame.window import PygameScene
+from pibooth.view.pygame.sprites import LeftArrowSprite, RightArrowSprite, TextSprite
 
 
-class PrintScene(BasePygameScene):
+class PrintScene(PygameScene):
 
     def __init__(self):
         super().__init__()
         self.left_arrow = LeftArrowSprite(self)
         self.right_arrow = RightArrowSprite(self)
-        self.text = TextSprite(self, get_translated_text('print'))
-        self.text_print = TextSprite(self, get_translated_text('print_forget'))
+        self.text_print = TextSprite(self, get_translated_text('print'))
+        self.text_forget = TextSprite(self, get_translated_text('print_forget'))
 
-        self.text.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
+        self.text_forget.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
         self.left_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
-        self.image.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
+        self.image.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_CAPTURE)
         self.text_print.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
         self.right_arrow.on_pressed = lambda: evts.post(evts.EVT_PIBOOTH_PRINT)
 
@@ -27,36 +28,36 @@ class PrintScene(BasePygameScene):
 
         # Take picture text
         text_border = 20
-        self.text.set_text(get_translated_text('print'))  # In case of text has changed
+        self.text_print.set_text(get_translated_text('print'))  # In case of text has changed
         if self.arrow_location == self.ARROW_HIDDEN:
-            self.text.set_align(fonts.ALIGN_CENTER)
-            self.text.set_rect(self.rect.width // 2 + text_border, text_border,
+            self.text_print.set_align(fonts.ALIGN_CENTER)
+            self.text_print.set_rect(self.rect.width // 2 + text_border, text_border,
                                self.rect.width // 2 - 2 * text_border,
                                self.rect.height - 2 * text_border)
         elif self.arrow_location == self.ARROW_BOTTOM:
-            self.text.set_align(fonts.ALIGN_BOTTOM_CENTER)
-            self.text.set_rect(self.rect.width // 2 + text_border, text_border,
+            self.text_print.set_align(fonts.ALIGN_BOTTOM_CENTER)
+            self.text_print.set_rect(self.rect.width // 2 + text_border, text_border,
                                self.rect.width // 2 - 2 * text_border,
                                self.rect.height * 0.6 - text_border)
         elif self.arrow_location == self.ARROW_TOUCH:
-            self.text.set_align(fonts.ALIGN_BOTTOM_CENTER)
-            self.text.set_rect(self.rect.width // 2 + text_border, text_border,
+            self.text_print.set_align(fonts.ALIGN_BOTTOM_CENTER)
+            self.text_print.set_rect(self.rect.width // 2 + text_border, text_border,
                                self.rect.width // 2 - 2 * text_border,
                                self.rect.height * 0.4 - text_border)
         else:
-            self.text.set_align(fonts.ALIGN_TOP_CENTER)
-            self.text.set_rect(self.rect.width // 2 + text_border, self.rect.height * 0.4,
+            self.text_print.set_align(fonts.ALIGN_TOP_CENTER)
+            self.text_print.set_rect(self.rect.width // 2 + text_border, self.rect.height * 0.4,
                                self.rect.width // 2 - 2 * text_border,
                                self.rect.height * 0.6 - text_border)
 
         # Forget text
-        self.text_print.set_text(get_translated_text('print_forget'))  # In case of text has changed
+        self.text_forget.set_text(get_translated_text('print_forget'))  # In case of text has changed
         rect = pygame.Rect(self.rect.centerx, 0, self.rect.width * 0.2, self.rect.height * 0.2)
         if self.arrow_location == self.ARROW_TOP:
             rect.top = self.rect.height * 0.12
         else:
             rect.bottom = self.rect.height - self.rect.height * 0.12
-        self.text_print.set_rect(*rect)
+        self.text_forget.set_rect(*rect)
 
         # Left arrow
         size = (self.rect.width * 0.1, self.rect.height * 0.1)

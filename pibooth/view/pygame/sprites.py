@@ -12,6 +12,15 @@ from pibooth.utils import PollingTimer
 from pibooth.view.base import BaseScene
 
 
+LAYER_BACKGROUND = 0
+LAYER_IMAGES = 2
+LAYER_TEXTS = 4
+LAYER_PICTURE = 5
+LAYER_ARROWS = 6
+LAYER_STATUS = 8
+LAYER_OUTLINES = 10
+
+
 class BaseSprite(pygame.sprite.DirtySprite):
 
     """Base sprite for any graphical element. It handles common attributes
@@ -38,7 +47,6 @@ class BaseSprite(pygame.sprite.DirtySprite):
         :type layer: int
         """
         super().__init__()
-        assert parent is None or isinstance(parent, (BasePygameScene, BaseSprite))
         self._image_cache = None
         self._subsprites = []  # Sub-sprites composing the sprite
         self.parent = parent
@@ -84,7 +92,10 @@ class BaseSprite(pygame.sprite.DirtySprite):
         return self._image_cache
 
     def set_dirty(self, redraw=True):
-        """Set current image.
+        """Declare that the sprite has changed (at least its position).
+        Direct sub-sprites are also set dirty.
+
+        :param redraw: if True, the sprite image is redrawn
         """
         self.dirty = 1
         if redraw:
@@ -101,7 +112,8 @@ class BaseSprite(pygame.sprite.DirtySprite):
             # Register direct sprites
             self._subsprites.append(sprite)
         if self.parent:
-            # Propagate to parent
+            # Propagate sprite to parents until the window to regiter sprites un LayeredDirty group.
+            # Sprites protagated to parents are not added to their sub-sprites list.
             self.parent.add_sprite(sprite)
         return sprite
 
@@ -204,7 +216,7 @@ class OutlinesSprite(BaseSprite):
         :param color: RGB color tuple for the outlines
         :type color: tuple
         """
-        super().__init__(parent, outlines=False, layer=BasePygameScene.LAYER_OUTLINES)
+        super().__init__(parent, outlines=False, layer=LAYER_OUTLINES)
         self.rect = parent.rect
         self.color = color
         self.visible = 0
@@ -276,7 +288,7 @@ class ImageSprite(BaseSprite):
         :param colorize: recolorize picture if a color is set.
         :type colorize: tuple
         """
-        kwargs['layer'] = kwargs.get('layer', BasePygameScene.LAYER_IMAGES)
+        kwargs['layer'] = kwargs.get('layer', LAYER_IMAGES)
         super().__init__(parent, **kwargs)
         self._image_orig = None
         self.path = None
@@ -403,7 +415,7 @@ class TextSprite(BaseSprite):
         :param font_name: font name
         :type font_name: str
         """
-        kwargs['layer'] = kwargs.get('layer', BasePygameScene.LAYER_TEXTS)
+        kwargs['layer'] = kwargs.get('layer', LAYER_TEXTS)
         super().__init__(parent, **kwargs)
         self.text = text
         self.color = (255, 255, 255)
@@ -449,7 +461,7 @@ class ArrowSprite(ImageSprite):
     """
 
     def __init__(self, *args, **kwargs):
-        kwargs['layer'] = kwargs.get('layer', BasePygameScene.LAYER_ARROWS)
+        kwargs['layer'] = kwargs.get('layer', LAYER_ARROWS)
         super().__init__(*args, **kwargs)
         self.location = BaseScene.ARROW_BOTTOM
         self.offset = 0
@@ -530,14 +542,14 @@ class CapturesCounterSprite(BaseSprite):
     """
 
     def __init__(self, parent, nbr_dots=4, **kwargs):
-        kwargs['layer'] = kwargs.get('layer', BasePygameScene.LAYER_IMAGES)
+        kwargs['layer'] = kwargs.get('layer', LAYER_IMAGES)
         super().__init__(parent, **kwargs)
         self.dot_skin = pictures.load_pygame_image('dot.png')
         self.dot_checked_skin = pictures.load_pygame_image('dot_checked.png')
         self.current = 0
         self.total = nbr_dots
 
-        for i in range(self.total):
+        for _i in range(self.total):
             ImageSprite(self, skin=self.dot_skin, outlines=False)
 
     def set_color(self, color):
@@ -591,13 +603,13 @@ class StatusBarSprite(BaseSprite):
     """
 
     def __init__(self, parent, **kwargs):
-        kwargs['layer'] = kwargs.get('layer', BasePygameScene.LAYER_STATUS)
+        kwargs['layer'] = kwargs.get('layer', LAYER_STATUS)
         super().__init__(parent, **kwargs)
         self._failure = False
 
         self.printer_queue_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf',
                                             outlines=False, layer=self.layer)
-        self.printer_queue_icon = ImageSprite(self, 'printer_progress.png', size=(8, 8),
+        self.printer_queue_icon = ImageSprite(self, 'sheet.png', size=(8, 8),
                                               outlines=False, layer=self.layer)
         self.printed_nbr = TextSprite(self, '0', size=(8, 8), font_name='Monoid-Regular.ttf',
                                       outlines=False, layer=self.layer)
@@ -632,9 +644,9 @@ class StatusBarSprite(BaseSprite):
             if self._failure:
                 skin = pictures.load_pygame_image('printer.png')
                 skin.blit(pictures.load_pygame_image('action_failed.png'), (0, 0))
-                self.printer_icon.set_skin(skin)
+                self.printer_queue_icon.set_skin(skin)
             else:
-                self.printer_icon.set_skin('printer.png')
+                self.printer_queue_icon.set_skin('printer.png')
 
     def set_printed_counter(self, count):
         """Set counter.
@@ -659,204 +671,3 @@ class StatusBarSprite(BaseSprite):
         for sprite in self.get_sprites(include_outlines=False):
             sprite.set_rect(x, y, width, icon_height - padding)
             y += (icon_height + padding)
-
-
-class BasePygameScene(BaseScene):
-
-    """Base class for Pygame scene. It use dirty sprite mechanism to
-    save CPU usage.
-
-    Sprites are drawn as ordered. Seven layers are defined:
-
-        - 0: only ONE background sprite
-        - 2: images sprites
-        - 4: texts sprites
-        - 5: only ONE speciale image sprite
-        - 6: arrows sprites
-        - 8: system status sprites
-        - 10: outlines sprites
-
-    The layer LAYER_PICTURE is initialized with an `ImageSprite` hidden
-    by default.
-    """
-    LAYER_BACKGROUND = 0
-    LAYER_IMAGES = 2
-    LAYER_TEXTS = 4
-    LAYER_PICTURE = 5
-    LAYER_ARROWS = 6
-    LAYER_STATUS = 8
-    LAYER_OUTLINES = 10
-
-    def __init__(self):
-        self.sprites = pygame.sprite.LayeredDirty()
-        self.image = ImageSprite(self, layer=BasePygameScene.LAYER_PICTURE)
-        self.image.visible = 0
-        self.text_color = (255, 255, 255)
-        self.arrow_location = BaseScene.ARROW_BOTTOM
-
-        # On Raspberry Pi, the time to update dirty sprites is long (120-180ms
-        # tested), increasing the treshold permits to avoid blitting full screen
-        # at each draw() call.
-        self.sprites.set_timing_threshold(200)
-
-    def add_sprite(self, sprite):
-        """Declare a new sprite to draw.
-
-        :param sprite: sprite to add in the draw mechanism
-        :type sprite: object
-        """
-        self.sprites.add(sprite)
-        if not sprite.parent:
-            # Parent not defined, means that sub-sprites are not registered
-            self.sprites.add(*sprite.get_sprites(recursive=True))
-        return sprite
-
-    def get_top_sprite_at(self, pos, from_layers=None):
-        """Return the top sprite (last of the `from_layers`) which is visible.
-        If `from_layers` is not defined, only a sprite from "clickable" layers
-        will be returned.
-
-        :param pos: position (x,y)
-        :type pos: tuple
-        :param from_layers: layers to belong to
-        :type from_layers: list
-        """
-        if from_layers is None:
-            from_layers = (BasePygameScene.LAYER_IMAGES,
-                           BasePygameScene.LAYER_TEXTS,
-                           BasePygameScene.LAYER_PICTURE,
-                           BasePygameScene.LAYER_ARROWS,
-                           BasePygameScene.LAYER_STATUS)
-        for sprite in reversed(self.sprites.get_sprites_at(pos)):
-            if sprite.visible and sprite.layer in from_layers:
-                return sprite
-        return None
-
-    @property
-    def background(self):
-        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_BACKGROUND):
-            if isinstance(sprite, ImageSprite):
-                return sprite
-        raise RuntimeError("Background is not initialized")
-
-    @property
-    def status_bar(self):
-        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_STATUS):
-            if isinstance(sprite, StatusBarSprite):
-                return sprite
-        raise RuntimeError("Status bar is not initialized")
-
-    @property
-    def rect(self):
-        return self.background.rect
-
-    def set_outlines(self, enable=True):
-        """Draw outlines for each rectangle available for drawing
-        images and texts.
-
-        :param enable: enable / disable outlines
-        :type enable: bool
-        """
-        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_OUTLINES):
-            if enable:
-                sprite.enable()
-            else:
-                sprite.disable()
-
-    def set_image(self, image=None):
-        """Set an image to the main place or hide it.
-
-        :param image: image to set (path, PIL object or pygame object)
-        :type image: str or object
-        """
-        if image:
-            self.image.show()
-            self.image.set_skin(image)
-        else:
-            self.image.hide()
-
-    def set_arrows(self, location, offset):
-        """Set arrows attributes.
-
-        :param location: arrow location: ARROW_HIDDEN, ARROW_BOTTOM, ARROW_TOP, ARROW_TOUCH
-        :type location: str
-        :param offset: x offset from current position to screen outer
-        :type offset: int
-        """
-        self.arrow_location = location
-        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_ARROWS):
-            sprite.set_location(location)
-            sprite.set_offset(offset)
-
-    def set_text_color(self, color):
-        """Set text font color.
-
-        :param color: RGB color tuple for the texts
-        :type color: tuple
-        """
-        self.text_color = color
-        # Assets
-        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_IMAGES):
-            sprite.set_color(color)
-
-        # Texts
-        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_TEXTS):
-            sprite.set_color(color)
-
-        # Arrows
-        for sprite in self.sprites.get_sprites_from_layer(BasePygameScene.LAYER_ARROWS):
-            sprite.set_color(color)
-
-    def update(self, events):
-        """Pygame events processing callback method.
-
-        :param events: list of events to process.
-        :type events: list
-        """
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN\
-                    and event.button in (1, 2, 3):
-                # Don't consider the mouse wheel (button 4 & 5):
-                sprite = self.get_top_sprite_at(event.pos)
-                if sprite:
-                    sprite.set_pressed(1)
-
-            elif event.type == pygame.FINGERDOWN:
-                display_size = pygame.display.get_surface().get_size()
-                finger_pos = (event.x * display_size[0], event.y * display_size[1])
-                sprite = self.get_top_sprite_at(finger_pos)
-                if sprite:
-                    sprite.set_pressed(1)
-
-            elif (event.type == pygame.MOUSEBUTTONUP and event.button in (1, 2, 3))\
-                    or event.type == pygame.FINGERUP:
-                # Don't consider the mouse wheel (button 4 & 5):
-                for sprite in self.sprites.sprites():
-                    sprite.set_pressed(0)
-
-        self.sprites.update(events)
-
-    def draw(self, surface, force=False):
-        """Draw the elements on scene.
-
-        This method is optimized to be called at each loop of the
-        main application. It uses DirtySprite to update only parts
-        of the screen that need to be refreshed.
-
-        The first call to this method will setup the "eraser" surface that
-        will be used to redraw dirty parts of the screen.
-
-        The `force` parameter shall be used if the surface has been redrawn:
-        it reset the eraser and redraw all view elements.
-
-        :param surface: surface the scene will be displayed at
-        :type surface: object
-        :param force: force the drawing of the entire surface (time consuming)
-        :type force: bool
-
-        :return: list of updated area
-        :rtype: list
-        """
-        if force:
-            self.sprites.repaint_rect(self.background.rect)
-        return self.sprites.draw(surface)

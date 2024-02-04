@@ -7,12 +7,13 @@ from PIL import Image
 from pibooth import language
 from pibooth.tasks import AsyncTasksPool
 from pibooth.counters import Counters
+from pibooth.printer import Printer
 from pibooth.config.parser import PiboothConfigParser
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import get_scene
 from pibooth.view.pygame import sprites
-from pibooth.camera import get_rpi_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
-from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
+from pibooth.camera import get_rpi_camera_proxy, get_libcamera_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
+from pibooth.camera import RpiCamera, LibCamera, GpCamera, CvCamera, HybridRpiCamera, HybridLibCamera, HybridCvCamera
 
 # Modules for tests purpose
 import pytest
@@ -114,6 +115,12 @@ def counters(tmpdir):
     return Counters(str(tmpdir.join('data.pickle')), nbr_printed=0)
 
 
+@pytest.fixture(scope='session')
+def printer():
+    os.system('sudo lpadmin -p nowhere -E -v file:/dev/null')
+    return Printer('nowhere')
+
+
 # --- Window events loop ------------------------------------------------------
 
 
@@ -193,6 +200,31 @@ def camera_rpi_gp(proxy_rpi, proxy_gp):
 
 
 @pytest.fixture(scope='session')
+def proxy_libcamera(init_pygame, init_tasks, captures_portrait):
+    if os.environ.get('CAMERA_LIBCAMDRIVER') == "dummy":
+        from pibooth.camera import libcamera
+        libcamera.Transform = camera_drivers.LibcameraCameraProxyMock.Transform  # Monkey patch
+        return camera_drivers.LibcameraCameraProxyMock(captures_portrait)
+    return get_libcamera_camera_proxy()
+
+
+@pytest.fixture(scope='session')
+def camera_libcamera(proxy_libcamera):
+    cam = LibCamera(proxy_libcamera)
+    cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
+    yield cam
+    cam.quit()
+
+
+@pytest.fixture(scope='session')
+def camera_libcamera_gp(proxy_libcamera, proxy_gp):
+    cam = HybridLibCamera(proxy_libcamera, proxy_gp)
+    cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
+    yield cam
+    cam.quit()
+
+
+@pytest.fixture(scope='session')
 def proxy_cv(init_pygame, init_tasks):
     if os.environ.get('CAMERA_CVDRIVER') == "dummy":
         import cv2
@@ -220,8 +252,8 @@ def camera_cv_gp(proxy_cv, proxy_gp):
 def proxy_gp(init_pygame, init_tasks, captures_portrait):
     if os.environ.get('CAMERA_GPDRIVER') == "dummy":
         from pibooth.camera import gphoto
-        gphoto.gp = camera_drivers.GpCameraProxyMock([])
-        return camera_drivers.GpCameraProxyMock(captures_portrait)
+        gphoto.gp = camera_drivers.GpCameraProxyMock(captures_portrait)  # Monkey patch
+        return gphoto.gp
     return get_gp_camera_proxy()
 
 

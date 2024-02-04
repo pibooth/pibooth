@@ -20,7 +20,7 @@ from pibooth.counters import Counters
 from pibooth.states import StateMachine
 from pibooth.tasks import AsyncTasksPool
 from pibooth.view import get_scene
-from pibooth.utils import LOGGER, PollingTimer, get_crash_message, set_logging_level
+from pibooth.utils import LOGGER, PollingTimer, get_logging_filename, get_crash_message, set_logging_level
 
 
 def load_last_saved_picture(path):
@@ -280,9 +280,14 @@ class PiboothApplication:
         finally:
 
             if enable_profiler:
+                profiler.disable()
+
                 stats = pstats.Stats(profiler).sort_stats('cumtime')
                 stats.print_stats()
-                profiler.disable()
+                if get_logging_filename():
+                    filename = osp.join(osp.dirname(get_logging_filename()), 'profile.dump')
+                    LOGGER.info("Save profile data in %s", filename)
+                    profiler.dump_stats(filename)
 
             self._pm.hook.pibooth_cleanup(app=self)
             self._tasks.quit()

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from pibooth.view.pygame.sprites import BasePygameScene, ImageSprite, CapturesCounterSprite
+from pibooth.view.pygame.window import PygameScene
+from pibooth.view.pygame.sprites import ImageSprite, CapturesCounterSprite
 
 
-class PreviewScene(BasePygameScene):
+class PreviewScene(PygameScene):
 
     def __init__(self):
         super().__init__()
