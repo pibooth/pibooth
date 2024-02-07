@@ -106,6 +106,13 @@ class LibCamera(BaseCamera):
         self._cam.switch_mode(self._preview_config)
         super().preview(rect, flip)
 
+    def stop_preview(self):
+        """Stop the preview.
+        """
+        self._hide_overlay()
+        # self._cam.stop_preview()
+        self._window = None
+
     def get_capture_image(self, effect=None):
         """Capture a new picture in a file.
         """
