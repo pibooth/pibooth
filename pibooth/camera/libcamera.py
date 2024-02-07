@@ -3,7 +3,7 @@
 import pygame
 try:
     import picamera2
-    from picamera2 import Picamera2
+    from picamera2 import Picamera2, Preview
     from libcamera import Transform
     import numpy
 except ImportError:
@@ -47,7 +47,6 @@ class LibCamera(BaseCamera):
         super().__init__(libcamera_camera_proxy)
         self._preview_config = self._cam.create_preview_configuration()
         self._capture_config = self._cam.create_still_configuration()
-        self._specific_initialization()
 
     def _specific_initialization(self):
         """Camera initialization.
@@ -93,9 +92,11 @@ class LibCamera(BaseCamera):
         """
         return self._cam.capture_image('main')
 
-    def preview(self, rect, flip=True):
-        """Display a preview on the given Rect (flip if necessary).
+    def preview(self, window, flip=True):
+        """Display a preview on the window (flip if necessary).
         """
+        self._window = window
+        rect = self.get_rect()
         # Define Rect() object for resizing preview captures to fit to the defined
         # preview rect keeping same aspect ratio than camera resolution.
         size = sizing.new_size_keep_aspect_ratio(self.resolution, (min(
@@ -106,7 +107,12 @@ class LibCamera(BaseCamera):
         self._preview_config['main']['size'] = rect.size
         self._preview_config['transform'] = Transform(rotation=self.preview_rotation, hflip=self.preview_flip)
         self._cam.switch_mode(self._preview_config)
-        super().preview(rect, flip)
+
+        self._cam.stop()
+        self._cam.configure(self._preview_config)
+        self._cam.start_preview(Preview.DRM, x=rect.x, y=rect.y,
+                                width=rect.width, height=rect.height)
+        # self._cam.start()
 
     def stop_preview(self):
         """Stop the preview.
