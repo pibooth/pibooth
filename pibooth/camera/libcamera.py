@@ -47,6 +47,7 @@ class LibCamera(BaseCamera):
         super().__init__(libcamera_camera_proxy)
         self._preview_config = self._cam.create_preview_configuration()
         self._capture_config = self._cam.create_still_configuration()
+        self._specific_initialization()
 
     def _specific_initialization(self):
         """Camera initialization.
@@ -65,8 +66,8 @@ class LibCamera(BaseCamera):
         """Add an image as an overlay.
         """
         if self._window:  # No window means no preview displayed
-            self.get_rect()
-            self._overlay = self._build_overlay(self._rect.size, text, alpha)
+            rect = self.get_rect()
+            self._overlay = self._build_overlay((rect.width, rect.height), str(text), alpha)
 
     def _hide_overlay(self):
         """Remove any existing overlay.
