@@ -121,7 +121,7 @@ class LibCamera(BaseCamera):
         self._captures.append((image, effect))
         return image
 
-    def _specific_cleanup(self):
+    def quit(self):
         """Close the camera driver, it's definitive.
         """
         self._cam.stop()
