@@ -61,11 +61,12 @@ class LibCamera(BaseCamera):
         self._cam.configure(self._preview_config)
         self._cam.start()
 
-    def _show_overlay(self):
+    def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
         """
-        self._overlay = self._build_overlay(self._rect.size, self._overlay_text, self._overlay_alpha)
-        self._cam.set_overlay(numpy.array(self._overlay))
+        if self._window:  # No window means no preview displayed
+            self.get_rect()
+            self._overlay = self._build_overlay(self._rect.size, text, alpha)
 
     def _hide_overlay(self):
         """Remove any existing overlay.
