@@ -315,6 +315,7 @@ class PiConfigMenu(object):
         print('Pressed {}'.format(value), flush=True)
         self._password_hidden += str(value)
         self._password_widgets[0].set_value('*' * len(self._password_hidden))
+        self._on_password(self._password_widgets[0].get_value())
 
     def _on_password(self, value, **kwargs):
         """Called when a password is given
