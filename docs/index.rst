@@ -73,6 +73,7 @@ Indices and tables
 * :ref:`search`
 
 .. |Pibooth| image:: pibooth.png
+   :target: https://www.pibooth.org
    :align: middle
 
 .. |PythonVersions| image:: https://img.shields.io/badge/python-3.6+-red.svg
