@@ -32,6 +32,12 @@ To regenerate the final pictures afterwards, from the originals captures present
 It permits to adjust the configuration to enhance the previous pictures with better
 parameters (title, more effects, etc...)
 
+Like with the ``pibooth`` application a configuration directory can be chosen.
+
+.. code-block:: bash
+
+    pibooth-regen myconfig1/
+
 Manage counters
 ---------------
 
