@@ -1,0 +1,171 @@
+Pibooth version installed: 2.0.8
+Installed plugins: 
+GPhoto2 version installed: 2.5.22
+  - all camlibs
+  - gcc (C compiler used)
+  - ltdl (for portable loading of camlibs)
+  - EXIF (for special handling of EXIF files)
+Listing all connected DSLR camera
+00 : addr-> usb:002,002  name-> Panasonic DC-GH5
+
+================================================================================
+Stating diagnostic of connected DSLR camera
+Gphoto2: ptp_usb_getresp [usb.c:514]: PTP_OC 0x1002 receiving resp failed: PTP Session Already Opened (0x201e)
+Gphoto2: camera_init [library.c:8314]: 'ptp_opensession (params, sessionid)' failed: PTP Session Already Opened (0x201e)
+* Preview compatible: True
+* Capture compatible: True
+Gphoto2: _get_Panasonic_ImageFormat [config.c:7331]: 'ptp_panasonic_getdevicepropertydesc(params, 0x20000A2, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_ISO [config.c:7073]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000020, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Exposure [config.c:7221]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_Exposure, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Whitebalance [config.c:7163]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_WhiteBalance, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_FNumber [config.c:7269]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000040, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Shutter [config.c:6980]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000030, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+/actions/viewfinder
+  Label       : Panasonic Viewfinder
+  Readonly    : no
+  Data type   : <class 'int'>
+  Widget type : Toggle button (or check box)
+  Current     : 2
+  Choices     : [0, 1]
+/actions/opcode
+  Label       : PTP Opcode
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 0x1001,0xparam1,0xparam2
+  Choices     : n/a
+/status/serialnumber
+  Label       : Serial Number
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 000000000000000000XHL1703190045
+  Choices     : n/a
+/status/manufacturer
+  Label       : Camera Manufacturer
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : Panasonic
+  Choices     : n/a
+/status/cameramodel
+  Label       : Camera Model
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : DC-GH5
+  Choices     : n/a
+/status/deviceversion
+  Label       : Device Version
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 2.7
+  Choices     : n/a
+/status/vendorextension
+  Label       : Vendor Extension
+  Readonly    : no
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : None
+  Choices     : n/a
+/status/batterylevel
+  Label       : Battery Level
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Text
+  Current     : 50%
+  Choices     : n/a
+/other/5001
+  Label       : Battery Level
+  Readonly    : yes
+  Data type   : <class 'str'>
+  Widget type : Menu widget (same as Radio)
+  Current     : 50
+  Choices     : ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76', '77', '78', '79', '80', '81', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '94', '95', '96', '97', '98', '99', '100']
+
+================================================================================
+Testing commands used by pibooth
+Setting option imgsettings/iso="100"
+Gphoto2: _get_Panasonic_ImageFormat [config.c:7331]: 'ptp_panasonic_getdevicepropertydesc(params, 0x20000A2, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_ISO [config.c:7073]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000020, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Exposure [config.c:7221]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_Exposure, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Whitebalance [config.c:7163]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_WhiteBalance, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_FNumber [config.c:7269]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000040, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Shutter [config.c:6980]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000030, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+   -> unsupported setting imgsettings/iso=100 (nothing configured on DSLR)
+Setting option settings/capturetarget="Memory card"
+Gphoto2: _get_Panasonic_ImageFormat [config.c:7331]: 'ptp_panasonic_getdevicepropertydesc(params, 0x20000A2, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_ISO [config.c:7073]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000020, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Exposure [config.c:7221]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_Exposure, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Whitebalance [config.c:7163]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_WhiteBalance, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_FNumber [config.c:7269]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000040, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Shutter [config.c:6980]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000030, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+   -> unsupported setting settings/capturetarget=Memory card (nothing configured on DSLR)
+Gphoto2: _get_Panasonic_ImageFormat [config.c:7331]: 'ptp_panasonic_getdevicepropertydesc(params, 0x20000A2, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_ISO [config.c:7073]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000020, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Exposure [config.c:7221]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_Exposure, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Whitebalance [config.c:7163]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_WhiteBalance, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_FNumber [config.c:7269]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000040, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Shutter [config.c:6980]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000030, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Getting option actions/viewfinder=2
+Setting option actions/viewfinder="1"
+Gphoto2: _get_Panasonic_ImageFormat [config.c:7331]: 'ptp_panasonic_getdevicepropertydesc(params, 0x20000A2, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_ISO [config.c:7073]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000020, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Exposure [config.c:7221]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_Exposure, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Whitebalance [config.c:7163]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_WhiteBalance, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_FNumber [config.c:7269]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000040, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Shutter [config.c:6980]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000030, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Take capture preview
+Setting option actions/viewfinder="0"
+Gphoto2: _get_Panasonic_ImageFormat [config.c:7331]: 'ptp_panasonic_getdevicepropertydesc(params, 0x20000A2, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_ISO [config.c:7073]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000020, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Exposure [config.c:7221]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_Exposure, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Whitebalance [config.c:7163]: 'ptp_panasonic_getdevicepropertydesc(params, PTP_DPC_PANASONIC_WhiteBalance, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_FNumber [config.c:7269]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000040, 2, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Gphoto2: _get_Panasonic_Shutter [config.c:6980]: 'ptp_panasonic_getdevicepropertydesc(params, 0x2000030, 4, &currentVal, &list, &listCount)' failed: '(null)' (0x0000)
+Gphoto2: gp_context_error: (null)
+Take a capture
+Download file from DSLR
+Save capture locally from memory buffer
+
+================================================================================
+SUCCESS : diagnostic completed
+If you are investigating why pibooth does not work with your DSLR camera,
+please paste the content of generated file 'diagnostic.log'
+on https://github.com/pibooth/pibooth/issues
