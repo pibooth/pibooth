@@ -4,9 +4,9 @@
 """
 
 import os
+import argparse
 from os import path as osp
 from datetime import datetime
-import argparse
 
 from PIL import Image
 
