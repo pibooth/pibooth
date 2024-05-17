@@ -27,7 +27,7 @@ Hardware
 Software
 ^^^^^^^^
 
-* `Raspberry Pi OS **Buster** (32 bit) with desktop <https://downloads.raspberrypi.org/raspios_oldstable_armhf/images/>`_
+* Raspberry Pi OS **Buster** (32 bit) with desktop (could be downloaded `here <https://downloads.raspberrypi.org/raspios_oldstable_armhf/images/>`_)
 * Python ``3.7.3``
 * libsdl2 ``2.0``
 * libgphoto2 ``2.5.27``
@@ -107,7 +107,7 @@ Manual procedure
           ``sudo pip3 install pibooth[dslr]`` 
           
           Or if you only want to use the printer (step 5 skipped):
-          
+
           ``sudo pip3 install pibooth[printer]``
 
           The classic command ``sudo pip3 install pibooth`` will install ``pibooth`` without these two dependencies (step 5 and 6 skipped).
