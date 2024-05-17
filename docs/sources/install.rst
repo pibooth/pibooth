@@ -100,7 +100,14 @@ Manual procedure
         sudo pip3 install pibooth[dslr,printer]
 
    .. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/
-          or 6. skipped), remove **printer** and/or **dslr** under the ``[]``
+          or 6. skipped), remove **printer** and/or **dslr** under the ``[]``.
+
+   .. code-block:: bash
+
+        sudo pip3 install pibooth[dslr] # if you only want to use gphoto2
+        sudo pip3 install pibooth[printer] # if you only want to use the printer
+
+   .. note:: The classic command ``sudo pip3 install pibooth`` command will install ``pibooth`` without these two dependencies.
 
 Automated procedure
 ^^^^^^^^^^^^^^^^^^^
