@@ -144,6 +144,10 @@ class GpCamera(BaseCamera):
         return image
 
     def _post_process_capture(self, capture_data):
+        """No post processing is required for gPhoto cameras, since the images are processed right after capture."""
+        pass
+
+    def _process_capture(self, capture_data):
         """Rework capture data.
 
         :param capture_data: couple (GPhotoPath, effect)
@@ -295,8 +299,9 @@ class GpCamera(BaseCamera):
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.capture_iso)
 
-        self._captures.append((self._cam.capture(gp.GP_CAPTURE_IMAGE), effect))
+        data = (self._cam.capture(gp.GP_CAPTURE_IMAGE), effect)
         time.sleep(0.3)  # Necessary to let the time for the camera to save the image
+        self._captures.append(self._process_capture(data))
 
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.preview_iso)
