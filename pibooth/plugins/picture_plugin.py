@@ -141,7 +141,7 @@ class PicturePlugin(object):
 
     @pibooth.hookimpl
     def state_print_do(self, cfg, app, events):
-        if app.find_capture_event(events):
+        if app.find_capture_event(events) and app.can_forget:
 
             LOGGER.info("Moving the picture in the forget folder")
             for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
