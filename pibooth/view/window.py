@@ -52,6 +52,9 @@ class PiWindow(object):
             os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
 
+        # Release the soundcard as we are not using sounds
+        pygame.mixer.quit()
+
         # Save the desktop mode, shall be done before `setmode` (SDL 1.2.10, and pygame 1.8.0)
         info = pygame.display.Info()
 
