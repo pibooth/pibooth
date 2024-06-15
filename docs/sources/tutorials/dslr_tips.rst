@@ -4,6 +4,7 @@ DSLR first configuration
 - Disable "auto-sleep" or "auto-off" to prevent errors while running pibooth.
 - Disable Wifi feature to solve gphoto2 troubles to detect hardware.
 - Disable the autofocus to avoid gphoto2 troubles to take a picture.
+- Put a SD card on the camera (the captures will be kept also on the camera side)
 
 DSLR settings
 ^^^^^^^^^^^^^
@@ -27,3 +28,4 @@ If the DLSR don't manage to take the photo Pibooth will show the "Oops something
 
 - Not enough light (or no light at all when the lens cap has not been removed)
 - Camera didn't manage to focus (that's why we advise to disable the autofocus and manually set it at the beginning)
+- No SD card in the camera (as all the captures are downloaded in the processing stage)
