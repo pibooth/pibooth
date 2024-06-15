@@ -39,6 +39,7 @@ class PiWindow(object):
                  text_color=(255, 255, 255),
                  arrow_location=background.ARROW_BOTTOM,
                  arrow_offset=0,
+                 can_forget=True,
                  debug=False):
         self.__size = size
         self.debug = debug
@@ -46,6 +47,7 @@ class PiWindow(object):
         self.text_color = text_color
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
+        self.can_forget = can_forget
 
         # Prepare the pygame module for use
         if 'SDL_VIDEO_WINDOW_POS' not in os.environ:
@@ -291,9 +293,10 @@ class PiWindow(object):
         """
         self._capture_number = (0, self._capture_number[1])
         self._update_background(background.PrintBackground(self.arrow_location,
-                                                           self.arrow_offset))
+                                                           self.arrow_offset,
+                                                           self.can_forget))
         if pil_image:
-            self._update_foreground(pil_image, self.LEFT)
+            self._update_foreground(pil_image, self.CENTER)
 
     def show_finished(self, pil_image=None):
         """Show finished view (image resized fullscreen).
