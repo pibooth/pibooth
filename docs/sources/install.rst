@@ -27,7 +27,7 @@ Hardware
 Software
 ^^^^^^^^
 
-* Raspberry Pi OS **Buster** (32 bit) with desktop (could be downloaded `here <https://downloads.raspberrypi.org/raspios_oldstable_armhf/images/>`_)
+* Raspberry Pi OS **Buster** (32 bit) with desktop (`could be downloaded here <https://downloads.raspberrypi.org/raspios_oldstable_armhf/images/>`_)
 * Python ``3.7.3``
 * libsdl2 ``2.0``
 * libgphoto2 ``2.5.27``

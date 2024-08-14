@@ -1,3 +1,6 @@
 sphinx
 sphinx-rtd-theme
 sphinx-copybutton
+pluggy
+pygame
+psutil

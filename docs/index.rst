@@ -28,6 +28,7 @@ photos of your version.
    :maxdepth: 2
 
    sources/about.rst
+   sources/examples.rst
 
 .. toctree::
    :caption: Install
