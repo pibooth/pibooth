@@ -7,4 +7,4 @@ pygame-menu
 pygame-vkeyboard
 psutil
 gpiozero
-Pillow==9.2.0
+Pillow==10.3.0
