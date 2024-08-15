@@ -3,4 +3,8 @@ sphinx-rtd-theme
 sphinx-copybutton
 pluggy
 pygame
+pygame-menu
+pygame-vkeyboard
 psutil
+gpiozero
+Pillow==9.2.0
