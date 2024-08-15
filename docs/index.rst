@@ -28,6 +28,7 @@ photos of your version.
    :maxdepth: 2
 
    sources/about.rst
+   sources/examples.rst
 
 .. toctree::
    :caption: Install
@@ -41,6 +42,7 @@ photos of your version.
 
    sources/start.rst
    sources/config/config.rst
+   sources/tutorials/dslr_tips.rst
 
 .. toctree::
    :caption: Scripts and tools
@@ -72,6 +74,7 @@ Indices and tables
 * :ref:`search`
 
 .. |Pibooth| image:: pibooth.png
+   :target: https://www.pibooth.org
    :align: middle
 
 .. |PythonVersions| image:: https://img.shields.io/badge/python-3.6+-red.svg

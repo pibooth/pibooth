@@ -85,7 +85,7 @@ class PiboothPluginManager(pluggy.PluginManager):
                     CameraPlugin(self)]  # First called
 
         for plugin in plugins:
-            self.register(plugin)
+            self.register(plugin, name=getattr(plugin, 'name', None))
 
         # Disable unwanted plugins
         if disabled and disabled != 'all':

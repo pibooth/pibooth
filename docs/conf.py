@@ -19,7 +19,7 @@ import pibooth
 # -- Project information -----------------------------------------------------
 
 project = 'Pibooth'
-copyright = '2021, Vincent Verdeil, Antoine Rousseaux'
+copyright = '2024, Vincent Verdeil, Antoine Rousseaux'
 author = 'Vincent Verdeil, Antoine Rousseaux'
 
 # The full version, including alpha/beta/rc tags

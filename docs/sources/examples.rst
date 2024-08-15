@@ -1,7 +1,7 @@
 .. _gallery_examples:
 
-Examples of pictures made with pibooth
---------------------------------------
+Output pictures examples
+------------------------
 
 Here some examples of pictures generated with ``pibooth``.
 Note that images size have been reduced for display purpose.

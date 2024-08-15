@@ -238,5 +238,23 @@ Resolution       Automatic
 Shrink page ...  Shrink (print the whole page)
 ================ =============================
 
-
 Specific printer options can be passed to the `CUPS` printer through ``[PRINTER][printer_options]`` option.
+
+Plugins
+^^^^^^^
+
+Plugins installed via pip are enabled automatically at startup but two options are available in the config to handle specific cases.
+
+.. code-block:: ini
+
+    # Path to custom plugin(s) not installed with pip (list of quoted paths accepted)
+    plugins = 
+
+    # Plugin names to be disabled after startup (list of quoted names accepted)
+    plugins_disabled = 
+
+The first option allows to add a plugin which is not a pip package (could be useful for development). In this case, put the path to the plugin Python file.
+
+The second option allows to disable a plugin without needing to uninstall it. The plugin name to be used is the Python module name (e.g. ``pibooth_qrcode`` for ``pibooth-qrcode`` plugin)
+
+.. note:: Even if the plugin is disabled it will be listed in the ``Installed plugin`` section in the logs
