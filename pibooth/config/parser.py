@@ -172,6 +172,10 @@ DEFAULT = odict((
                 ((255, 255, 255),
                  "Background RGB color or image path (list of tuples or quoted paths accepted)",
                  None, None)),
+            ("can_forget",
+                (True,
+                 "Allow the user to forget the last taken capture on the printer page step",
+                 "Can forget",  ['True', 'False'])),
         ))
      ),
     ("CAMERA",

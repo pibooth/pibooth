@@ -70,11 +70,13 @@ class PiApplication(object):
     :attr leds: :py:class:`gpiozero.LEDBoard`
     :attr printer: printer used
     :type printer: :py:class:`pibooth.printer.Printer`
+    :attr can_forget: can user forget last capture
     """
 
     def __init__(self, config, plugin_manager):
         self._pm = plugin_manager
         self._config = config
+        self.can_forget = self._config.getboolean('PICTURE', 'can_forget')
 
         # Create directories where pictures are saved
         for savedir in config.gettuple('GENERAL', 'directory', 'path'):
@@ -94,10 +96,10 @@ class PiApplication(object):
         title = 'Pibooth v{}'.format(pibooth.__version__)
         if not isinstance(init_size, str):
             self._window = PiWindow(title, init_size, color=init_color,
-                                    text_color=init_text_color, debug=init_debug)
+                                    text_color=init_text_color, can_forget=self.can_forget, debug=init_debug)
         else:
             self._window = PiWindow(title, color=init_color,
-                                    text_color=init_text_color, debug=init_debug)
+                                    text_color=init_text_color, can_forget=self.can_forget, debug=init_debug)
 
         self._menu = None
         self._multipress_timer = PoolingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
