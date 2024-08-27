@@ -292,6 +292,10 @@ class GpCamera(BaseCamera):
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
 
+        # Enable AutoFocus
+        if self.autofocus:
+            self.set_config_value('actions', 'autofocusdrive', 1)
+
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.capture_iso)
 
@@ -300,6 +304,10 @@ class GpCamera(BaseCamera):
 
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.preview_iso)
+
+        # Reset AutoFocus
+        if self.autofocus:
+            self.set_config_value('actions', 'autofocusdrive', 0)
 
         self._hide_overlay()  # If stop_preview() has not been called
 
