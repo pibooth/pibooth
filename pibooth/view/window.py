@@ -12,7 +12,7 @@ from PIL import Image
 from pibooth import pictures, fonts
 from pibooth.view import background
 from pibooth.utils import LOGGER
-from pibooth.pictures import sizing
+from pibooth.pictures import sizing, PORTRAIT, LANDSCAPE
 
 
 class PiWindow(object):
@@ -88,10 +88,26 @@ class PiWindow(object):
         """
         image_name = id(pil_image)
 
+        portrait = pil_image.size[0] <  pil_image.size[1]
+        if portrait:
+            LOGGER.debug("Image is in PORTRAIT Orientation")
+        else: 
+            LOGGER.debug("Image is in LANDSCAPE Orientation")
+            
+        LOGGER.debug("pos %s", pos)
+
         if pos == self.FULLSCREEN:
-            image_size_max = (self.surface.get_size()[0] * 0.9, self.surface.get_size()[1] * 0.9)
+            LOGGER.debug("FULLSCREEN Image Size")
+            image_size_max = (self.surface.get_size()[0] * 0.8, self.surface.get_size()[1] * 0.8)
         else:
-            image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1])
+            if portrait and (pos == self.LEFT or pos == self.RIGHT) and self.arrow_location == background.ARROW_TOUCH:
+                # Reduce the vertical size to let enough space to display the text below the image when the pos is LEFT
+                image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1] * 0.7)
+            else: # Default image have full height view
+                image_size_max = (self.surface.get_size()[0] * 0.48, self.surface.get_size()[1])
+
+        LOGGER.debug("Image size max is %s RES %d %d",pos, image_size_max[0], image_size_max[1])
+        LOGGER.debug("Surface size is is %s RES %d %d",pos, self.surface.get_size()[0], self.surface.get_size()[1])
 
         buff_size, buff_image = self._buffered_images.get(image_name, (None, None))
         if buff_image and image_size_max == buff_size:
@@ -114,9 +130,9 @@ class PiWindow(object):
             # Build rectangle around picture area for debuging purpose
             outlines = pygame.Surface(image_size_max, pygame.SRCALPHA, 32)
             pygame.draw.rect(outlines, pygame.Color(255, 0, 0), outlines.get_rect(), 2)
-            self.surface.blit(outlines, self._pos_map[pos](outlines))
+            self.surface.blit(outlines, self._pos_map[pos](outlines, PORTRAIT if portrait else LANDSCAPE))
 
-        return self.surface.blit(image, self._pos_map[pos](image))
+        return self.surface.blit(image, self._pos_map[pos](image, PORTRAIT if portrait else LANDSCAPE))
 
     def _update_background(self, bkgd):
         """Show image on the background.
@@ -179,26 +195,52 @@ class PiWindow(object):
             self.surface.blit(image, rect_image.topleft)
             self.surface.blit(label, rect_label.topleft)
 
-    def _center_pos(self, image):
+    def _center_pos(self, image, orientation = None):
         """
         Return the position of the given image to be centered on window.
         """
         pos = self.surface.get_rect().center
         return image.get_rect(center=pos) if image else pos
 
-    def _left_pos(self, image):
+    def _left_pos(self, image, orientation = None):
         """
-        Return the position of the given image to be put on the left of the screen
+        Return the position of the given image to be put on the left of the screen.
+        The image is vertically centered except in case of TOUCHSCREEN and portrait image.
+        In that case, it is aligned on top
         """
-        pos = (self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
-        return image.get_rect(center=pos) if image else pos
+        tl = pos = None
+        if self.arrow_location == background.ARROW_TOUCH and orientation == PORTRAIT and image:
+            tl = (self.surface.get_rect().centerx // 2 - image.get_width() // 2 if image else self.surface.get_rect().centerx // 2,
+                   self.surface.get_rect().top)
+        else:
+            pos = (self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
+        
+        if image:
+             if tl:
+                return image.get_rect(topleft=tl)
+             else:
+                return image.get_rect(center=pos)
+        else:
+             return pos
 
-    def _right_pos(self, image):
+    def _right_pos(self, image, orientation = None):
         """
         Return the position of the given image to be put on the right of the screen
         """
-        pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
-        return image.get_rect(center=pos) if image else pos
+        tl = pos = None
+        if self.arrow_location == background.ARROW_TOUCH and orientation == PORTRAIT and image:
+            tl = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2 - image.get_width() // 2 if image else self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2,
+                   self.surface.get_rect().top)
+        else:
+            pos = (self.surface.get_rect().centerx + self.surface.get_rect().centerx // 2, self.surface.get_rect().centery)
+        
+        if image:
+             if tl:
+                return image.get_rect(topleft=tl)
+             else:
+                return image.get_rect(center=pos)
+        else:
+             return pos
 
     def get_rect(self, absolute=False):
         """Return a Rect object (as defined in pygame) for this window.
@@ -245,13 +287,15 @@ class PiWindow(object):
     def show_intro(self, pil_image=None, with_print=True):
         """Show introduction view.
         """
+        LOGGER.debug("show_intro %s %d",pil_image, with_print)
+
         self._capture_number = (0, self._capture_number[1])
         if with_print and pil_image:
             self._update_background(background.IntroWithPrintBackground(self.arrow_location, self.arrow_offset))
         else:
             self._update_background(background.IntroBackground(self.arrow_location, self.arrow_offset))
 
-        if pil_image:
+        if with_print and pil_image:
             self._update_foreground(pil_image, self.RIGHT)
         elif self._current_foreground:
             self._buffered_images.pop(id(self._current_foreground[0]), None)

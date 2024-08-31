@@ -25,13 +25,9 @@ class CameraPlugin(object):
 
         if not cam:
             LOGGER.debug("Fallback to pibooth default camera management system")
-            cam = camera.find_camera()
+            cam = camera.find_camera(cfg)
 
-        cam.initialize(cfg.gettuple('CAMERA', 'iso', (int, str), 2),
-                       cfg.gettyped('CAMERA', 'resolution'),
-                       cfg.gettuple('CAMERA', 'rotation', int, 2),
-                       cfg.getboolean('CAMERA', 'flip'),
-                       cfg.getboolean('CAMERA', 'delete_internal_memory'))
+        cam.initialize(cfg)
         outcome.force_result(cam)
 
     @pibooth.hookimpl
