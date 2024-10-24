@@ -294,3 +294,25 @@ def get_event_pos(display_size, event):
         finger_pos = (event.x * display_size[0], event.y * display_size[1])
         return finger_pos
     return event.pos
+
+
+def get_default_cfg_folder():
+    """Return the default configuration folder depending on the OS."""
+
+    # Get the home directory for the user
+    home_dir = os.path.expanduser("~")
+
+    # Detect the platform
+    current_os = platform.system()
+
+    if current_os == "Windows":
+        # On Windows, use AppData\Local or AppData\Roaming
+        config_folder = os.path.join(os.getenv('APPDATA'), 'pibooth')  # Roaming folder
+    elif current_os == "Darwin":
+        # On macOS, use ~/Library/Application Support/pibooth
+        config_folder = os.path.join(home_dir, 'Library', 'Application Support', 'pibooth')
+    else:
+        # On Linux/Unix, use ~/.config/pibooth
+        config_folder = os.path.join(home_dir, '.config', 'pibooth')
+
+    return config_folder

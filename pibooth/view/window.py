@@ -266,7 +266,9 @@ class PiWindow(object):
         else:
             self._update_background(background.ChosenBackground(choices, selected))
 
-    def show_image(self, pil_image=None, pos=CENTER):
+    def show_image(self,
+                   pil_image=None,
+                   pos=CENTER):
         """Show PIL image as it (no resize).
         """
         if not pil_image:

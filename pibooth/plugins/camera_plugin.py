@@ -7,8 +7,16 @@ from pibooth import camera
 from pibooth.utils import LOGGER
 
 
-class CameraPlugin(object):
+from typing import TYPE_CHECKING
 
+
+if TYPE_CHECKING:
+    from pibooth.config import PiConfigParser
+    from pibooth.booth import PiApplication
+    from pibooth.view import PiWindow
+
+
+class CameraPlugin(object):
     """Plugin to manage the camera captures.
     """
 
@@ -19,7 +27,8 @@ class CameraPlugin(object):
         self.count = 0
 
     @pibooth.hookimpl(hookwrapper=True)
-    def pibooth_setup_camera(self, cfg):
+    def pibooth_setup_camera(self,
+                             cfg: 'PiConfigParser'):
         outcome = yield  # all corresponding hookimpls are invoked here
         cam = outcome.get_result()
 
@@ -35,11 +44,13 @@ class CameraPlugin(object):
         outcome.force_result(cam)
 
     @pibooth.hookimpl
-    def pibooth_cleanup(self, app):
+    def pibooth_cleanup(self,
+                        app: 'PiApplication'):
         app.camera.quit()
 
     @pibooth.hookimpl
-    def state_failsafe_enter(self, app):
+    def state_failsafe_enter(self,
+                             app: 'PiApplication'):
         """Reset variables set in this plugin.
         """
         app.capture_date = None
@@ -47,7 +58,8 @@ class CameraPlugin(object):
         app.camera.drop_captures()  # Flush previous captures
 
     @pibooth.hookimpl
-    def state_wait_enter(self, app):
+    def state_wait_enter(self,
+                         app: 'PiApplication'):
         app.capture_date = None
         if len(app.capture_choices) > 1:
             app.capture_nbr = None
@@ -55,7 +67,9 @@ class CameraPlugin(object):
             app.capture_nbr = app.capture_choices[0]
 
     @pibooth.hookimpl
-    def state_choose_do(self, app, events):
+    def state_choose_do(self,
+                        app: 'PiApplication',
+                        events):
         event = app.find_choice_event(events)
         if event:
             if event.key == pygame.K_LEFT:
@@ -64,14 +78,19 @@ class CameraPlugin(object):
                 app.capture_nbr = app.capture_choices[1]
 
     @pibooth.hookimpl
-    def state_preview_enter(self, cfg, app, win):
+    def state_preview_enter(self,
+                            cfg: 'PiConfigParser',
+                            app: 'PiApplication',
+                            win: 'PiWindow'):
         LOGGER.info("Show preview before next capture")
         if not app.capture_date:
             app.capture_date = time.strftime("%Y-%m-%d-%H-%M-%S")
         app.camera.preview(win)
 
     @pibooth.hookimpl
-    def state_preview_do(self, cfg, app):
+    def state_preview_do(self,
+                         cfg: 'PiConfigParser',
+                         app: 'PiApplication'):
         pygame.event.pump()  # Before blocking actions
         if cfg.getboolean('WINDOW', 'preview_countdown'):
             app.camera.preview_countdown(cfg.getint('WINDOW', 'preview_delay'))
@@ -79,12 +98,17 @@ class CameraPlugin(object):
             app.camera.preview_wait(cfg.getint('WINDOW', 'preview_delay'))
 
     @pibooth.hookimpl
-    def state_preview_exit(self, cfg, app):
+    def state_preview_exit(self,
+                           cfg: 'PiConfigParser',
+                           app: 'PiApplication'):
         if cfg.getboolean('WINDOW', 'preview_stop_on_capture'):
             app.camera.stop_preview()
 
     @pibooth.hookimpl
-    def state_capture_do(self, cfg, app, win):
+    def state_capture_do(self,
+                         cfg: 'PiConfigParser',
+                         app: 'PiApplication',
+                         win: 'PiWindow'):
         effects = cfg.gettyped('PICTURE', 'captures_effects')
         if not isinstance(effects, (list, tuple)):
             # Same effect for all captures
@@ -107,10 +131,13 @@ class CameraPlugin(object):
         self.count += 1
 
     @pibooth.hookimpl
-    def state_capture_exit(self, cfg, app):
+    def state_capture_exit(self,
+                           cfg: 'PiConfigParser',
+                           app: 'PiApplication'):
         if not cfg.getboolean('WINDOW', 'preview_stop_on_capture'):
             app.camera.stop_preview()
 
     @pibooth.hookimpl
-    def state_processing_enter(self, app):
+    def state_processing_enter(self,
+                               app: 'PiApplication'):
         self.count = 0
