@@ -5,11 +5,14 @@ from PIL import Image, ImageDraw
 
 from pibooth import fonts
 from pibooth.pictures import sizing
+from cv2 import VideoCapture
 
 
 class BaseCamera(object):
 
-    def __init__(self, camera_proxy):
+
+    def __init__(self,
+                 camera_proxy: VideoCapture):
         self._cam = camera_proxy
         self._border = 50
         self._window = None
@@ -22,7 +25,12 @@ class BaseCamera(object):
         self.preview_iso, self.capture_iso = (100, 100)
         self.preview_flip, self.capture_flip = (False, False)
 
-    def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False):
+    def initialize(self,
+                   iso: tuple[int],
+                   resolution: tuple[int],
+                   rotation=0,
+                   flip: bool = False ,
+                   delete_internal_memory: bool = False):
         """Initialize the camera.
         """
         if not isinstance(rotation, (tuple, list)):
@@ -73,14 +81,19 @@ class BaseCamera(object):
         res = sizing.new_size_keep_aspect_ratio(self.resolution, size)
         return pygame.Rect(rect.centerx - res[0] // 2, rect.centery - res[1] // 2, res[0], res[1])
 
-    def build_overlay(self, size, text, alpha):
+    def build_overlay(self,
+                      size: tuple[int],
+                      text: str,
+                      alpha: int):
         """Return a PIL image with the given text that can be used
         as an overlay for the camera.
         """
         image = Image.new('RGBA', size)
         draw = ImageDraw.Draw(image)
 
-        font = fonts.get_pil_font(text, fonts.CURRENT, 0.9 * size[0], 0.9 * size[1])
+        font = fonts.get_pil_font(text, fonts.CURRENT,
+                                  0.9 * size[0],
+                                  0.9 * size[1])
         txt_width, txt_height = draw.textsize(text, font=font)
 
         position = ((size[0] - txt_width) // 2, (size[1] - txt_height) // 2 - size[1] // 10)

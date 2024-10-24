@@ -22,12 +22,14 @@ from pibooth import fonts
 from pibooth import language
 from pibooth.counters import Counters
 from pibooth.utils import (LOGGER, PoolingTimer, configure_logging, get_crash_message,
-                           set_logging_level, get_event_pos)
+                           set_logging_level, get_event_pos, get_default_cfg_folder)
 from pibooth.states import StateMachine
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import PiWindow
 from pibooth.config import PiConfigParser, PiConfigMenu
 from pibooth.printer import PRINTER_TASKS_UPDATED, Printer
+
+
 
 
 # Set the default pin factory to a mock factory if pibooth is not started a Raspberry Pi
@@ -421,22 +423,33 @@ def main():
 
     parser = argparse.ArgumentParser(usage="%(prog)s [options]", description=pibooth.__doc__)
 
-    parser.add_argument("config_directory", nargs='?', default="~/.config/pibooth",
+    default_config_folder = get_default_cfg_folder()
+
+    parser.add_argument("config_directory",
+                        nargs='?',
+                        default=default_config_folder,
                         help=u"path to configuration directory (default: %(default)s)")
 
-    parser.add_argument('--version', action='version', version=pibooth.__version__,
+    parser.add_argument('--version',
+                        action='version',
+                        version=pibooth.__version__,
                         help=u"show program's version number and exit")
 
-    parser.add_argument("--config", action='store_true',
+    parser.add_argument("--config",
+                        action='store_true',
                         help=u"edit the current configuration and exit")
 
-    parser.add_argument("--translate", action='store_true',
+    parser.add_argument("--translate",
+                        action='store_true',
                         help=u"edit the GUI translations and exit")
 
-    parser.add_argument("--reset", action='store_true',
+    parser.add_argument("--reset",
+                        action='store_true',
                         help=u"restore the default configuration/translations and exit")
 
-    parser.add_argument("--nolog", action='store_true', default=False,
+    parser.add_argument("--nolog",
+                        action='store_true',
+                        default=False,
                         help=u"don't save console output in a file (avoid filling the /tmp directory)")
 
     group = parser.add_mutually_exclusive_group()
@@ -451,12 +464,19 @@ def main():
         filename = osp.join(tempfile.gettempdir(), 'pibooth.log')
     else:
         filename = None
-    configure_logging(options.logging, '[ %(levelname)-8s] %(name)-18s: %(message)s', filename=filename)
+    configure_logging(options.logging,
+                      '[ %(levelname)-8s] %(name)-18s: %(message)s',
+                      filename=filename)
 
     plugin_manager = create_plugin_manager()
 
     # Load the configuration
-    config = PiConfigParser(osp.join(options.config_directory, "pibooth.cfg"), plugin_manager, not options.reset)
+    config = PiConfigParser(osp.join(options.config_directory, "pibooth.cfg"),
+                            plugin_manager,
+                            not options.reset)
+
+
+    LOGGER.info("Config location is '%s", default_config_folder)
 
     # Register plugins
     plugin_manager.load_all_plugins(config.gettuple('GENERAL', 'plugins', 'path'),
