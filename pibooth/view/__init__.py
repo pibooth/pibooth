@@ -45,7 +45,7 @@ def get_window(window_type, title, size, background, text_color, debug=False):
     :type background: tuple or str
     :param text_color: text RGB color tuple
     :type text_color: tuple
-    :param debug: display red indictions for debugging purpose
+    :param debug: display red indications for debugging purpose
     :type debug: bool
     """
     if window_type not in WINDOWS:

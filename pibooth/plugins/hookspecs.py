@@ -84,7 +84,7 @@ def pibooth_setup_printer(cfg):
     """Hook used to setup the ``printer`` interface.
 
     A new printer instance (inheriting from :py:class:`pibooth.printer.Printer`)
-    shall be returned by this hook, it will be used indead of the default one.
+    shall be returned by this hook, it will be used instead of the default one.
 
     :param cfg: application configuration
     """
