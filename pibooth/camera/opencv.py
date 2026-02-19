@@ -145,7 +145,9 @@ class CvCamera(BaseCamera):
         if effect != 'none':
             LOGGER.warning("Effect with OpenCV camera is not implemented")
 
-        return Image.fromarray(image)
+        # Ensure contiguous uint8 array and explicit RGB for PIL (avoids black image on some setups)
+        image = np.ascontiguousarray(image, dtype=np.uint8)
+        return Image.fromarray(image, mode='RGB')
 
     def preview(self, window, flip=True):
         """Setup the preview.
@@ -214,6 +216,11 @@ class CvCamera(BaseCamera):
         if self.capture_iso != self.preview_iso:
             self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.capture_iso)
 
+        # Minimal delay + flush so first frame is valid (avoids black frame, keeps latency low)
+        time.sleep(0.15)
+        for _ in range(4):
+            self._cam.read()
+
         LOGGER.debug("Taking capture at resolution %s", self.resolution)
         ret, image = self._cam.read()
         if not ret:
@@ -228,7 +235,7 @@ class CvCamera(BaseCamera):
             self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.preview_iso)
 
         self._captures.append((image, effect))
-        time.sleep(0.5)  # To let time to see "Smile"
+        time.sleep(0.2)  # Brief pause so "Smile" is visible
 
         self._hide_overlay()  # If stop_preview() has not been called
 

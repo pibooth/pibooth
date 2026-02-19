@@ -174,6 +174,9 @@ def configure_logging(level=logging.INFO, msgfmt=logging.BASIC_FORMAT, datefmt=N
             BlockConsoleHandler.default_level = level
         root.addHandler(hdlr)
 
+        # Reduce Pillow/PIL debug noise (STREAM b'IHDR' etc.) when pibooth is run with -v
+        logging.getLogger('PIL').setLevel(logging.WARNING)
+
 
 def set_logging_level(level=None):
     """Set/restore the log level of the concole.

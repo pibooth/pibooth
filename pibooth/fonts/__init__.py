@@ -72,7 +72,8 @@ def get_pil_font(text, font_name, max_width, max_height):
     while start < end:
         k = (start + end) // 2
         font = ImageFont.truetype(font_name, k)
-        font_size = font.getsize(text)
+        bbox = font.getbbox(text)
+        font_size = (bbox[2] - bbox[0], bbox[3] - bbox[1])
         if font_size[0] > max_width or font_size[1] > max_height:
             end = k
         else:

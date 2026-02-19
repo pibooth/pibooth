@@ -2,6 +2,7 @@
 
 import os.path as osp
 from PIL import Image, ImageOps
+from PIL.Image import Resampling
 import pygame
 from pibooth import language
 from pibooth import fonts
@@ -94,7 +95,7 @@ def get_pygame_image(name, size=None, antialiasing=True, hflip=False, vflip=Fals
         if crop:
             pil_image = pil_image.crop(sizing.new_size_by_croping_ratio(pil_image.size, size))
         pil_image = pil_image.resize(sizing.new_size_keep_aspect_ratio(pil_image.size, size),
-                                     Image.ANTIALIAS if antialiasing else Image.NEAREST)
+                                     Resampling.LANCZOS if antialiasing else Resampling.NEAREST)
 
         image = pygame.image.frombuffer(pil_image.tobytes(), pil_image.size, pil_image.mode)
 
