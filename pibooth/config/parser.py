@@ -7,6 +7,7 @@ import io
 import ast
 import os
 import os.path as osp
+import sys
 import itertools
 import inspect
 from configparser import RawConfigParser
@@ -325,17 +326,27 @@ class PiConfigParser(RawConfigParser):
 
     def handle_autostart(self):
         """Handle desktop file to start pibooth at the Raspberry Pi startup.
+
+        Uses the current Python executable (e.g. from a virtualenv) with
+        ``-m pibooth`` so that autostart works when pibooth is installed
+        inside a virtual environment.
         """
         filename = osp.expanduser('~/.config/autostart/pibooth.desktop')
         dirname = osp.dirname(filename)
         enable = self.getboolean('GENERAL', 'autostart')
         delay = self.getint('GENERAL', 'autostart_delay')
+        # Command to run pibooth in the same environment as the current process.
+        # Quote the path for .desktop Exec (double quotes per freedesktop spec).
+        _quoted = sys.executable.replace('\\', '\\\\').replace('"', '\\"')
+        pibooth_cmd = f'"{_quoted}" -m pibooth'
         if enable:
             regenerate = True
             if osp.isfile(filename):
                 with open(filename, 'r') as fp:
                     txt = fp.read()
-                    if delay > 0 and f"sleep {delay}" in txt or delay <= 0 and "sleep" not in txt:
+                    delay_ok = (delay > 0 and f"sleep {delay}" in txt) or (delay <= 0 and "sleep" not in txt)
+                    # Regenerate if delay changed or if Exec doesn't use current Python (e.g. venv)
+                    if delay_ok and " -m pibooth" in txt and sys.executable in txt:
                         regenerate = False
 
             if regenerate:
@@ -347,9 +358,10 @@ class PiConfigParser(RawConfigParser):
                     fp.write("[Desktop Entry]\n")
                     fp.write("Name=pibooth\n")
                     if delay > 0:
-                        fp.write(f"Exec=bash -c \"sleep {delay} && pibooth\"\n")
+                        exec_inner = f"sleep {delay} && {pibooth_cmd}"
+                        fp.write('Exec=bash -c "' + exec_inner.replace('"', '\\"') + '"\n')
                     else:
-                        fp.write("Exec=pibooth\n")
+                        fp.write(f"Exec={pibooth_cmd}\n")
                     fp.write("Type=application\n")
 
         elif not enable and osp.isfile(filename):

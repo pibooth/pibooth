@@ -95,6 +95,46 @@ Manual procedure
 
 8. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
 
+   .. note:: Since **PEP 668** (pip 23.1+), pip no longer allows installing packages
+             outside of a virtual environment on many systems (e.g. Debian 12+, Ubuntu 23.04+,
+             Raspberry Pi OS based on Bookworm). Choose the method that best fits your use case.
+
+   **Method A — Virtual environment (recommended)**
+
+   Use this method for a clean, isolated installation. It is the recommended approach
+   and avoids conflicts with system Python packages. Suitable for both development
+   and production (e.g. a dedicated photobooth Pi).
+
+   .. code-block:: bash
+
+        python3 -m venv ~/pibooth-venv
+        source ~/pibooth-venv/bin/activate
+        pip install --upgrade pip
+        pip install pibooth[dslr,printer]
+
+   To run pibooth, activate the environment first (``source ~/pibooth-venv/bin/activate``)
+   then run ``pibooth``. The **auto-start at boot** option (in the pibooth configuration
+   menu) automatically uses the current Python executable, so if you enable it while
+   running pibooth from this venv, the generated desktop file will launch pibooth
+   in the same virtual environment at startup—no extra configuration needed.
+
+   **Method B — System-wide installation (dedicated photobooth Pi)**
+
+   Use this method only on a Raspberry Pi dedicated to the photobooth, when you prefer
+   a single system-wide installation (e.g. to run ``pibooth`` from any terminal without
+   activating a venv). This requires the ``--break-system-packages`` flag on systems
+   that enforce PEP 668.
+
+   .. warning:: Installing with ``--break-system-packages`` can potentially conflict
+               with packages managed by the system (apt). Prefer **Method A** when in doubt.
+
+   .. code-block:: bash
+
+        sudo pip3 install --break-system-packages pibooth[dslr,printer]
+
+   On older systems where pip does not enforce PEP 668 (e.g. Raspberry Pi OS Buster),
+   you can omit the flag:
+
    .. code-block:: bash
 
         sudo pip3 install pibooth[dslr,printer]
@@ -104,13 +144,17 @@ Manual procedure
 
           As a consequence if you only want to use gphoto2 (step 6 skipped):
 
-          ``sudo pip3 install pibooth[dslr]`` 
-          
+          ``pip install pibooth[dslr]`` (Method A) or
+          ``sudo pip3 install --break-system-packages pibooth[dslr]`` (Method B)
+
           Or if you only want to use the printer (step 5 skipped):
 
-          ``sudo pip3 install pibooth[printer]``
+          ``pip install pibooth[printer]`` (Method A) or
+          ``sudo pip3 install --break-system-packages pibooth[printer]`` (Method B)
 
-          The classic command ``sudo pip3 install pibooth`` will install ``pibooth`` without these two dependencies (step 5 and 6 skipped).
+          The classic command ``pip install pibooth`` (Method A) or
+          ``sudo pip3 install --break-system-packages pibooth`` (Method B) will install
+          ``pibooth`` without these two dependencies (step 5 and 6 skipped).
 
 Automated procedure
 ^^^^^^^^^^^^^^^^^^^

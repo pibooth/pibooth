@@ -23,10 +23,30 @@ need to work from a clone of this ``git`` repository. Replace the step 8. of the
 
 3. Install ``pibooth`` in editable mode :
 
-.. code-block:: bash
+   **Recommended: use a virtual environment** (see :ref:`install` for the PEP 668
+   context). From the ``pibooth`` clone directory:
 
-    sudo pip3 install -e .[dslr,printer]
+   .. code-block:: bash
+
+        python3 -m venv .venv
+        source .venv/bin/activate
+        pip install --upgrade pip
+        pip install -e .[dslr,printer]
+
+   **Alternative: system-wide** (only on systems where pip allows it, or with
+   ``--break-system-packages``):
+
+   .. code-block:: bash
+
+        sudo pip3 install -e .[dslr,printer]
+
+   On PEP 668–enforced systems, use:
+
+   .. code-block:: bash
+
+        sudo pip3 install --break-system-packages -e .[dslr,printer]
 
 4. Start the application exactly in the same way as installed from pypi. All
    modifications performed in the cloned repository are taken into account when
-   the application starts.
+   the application starts. If you used a virtual environment, activate it first
+   (``source .venv/bin/activate``) before running ``pibooth``.
