@@ -64,7 +64,6 @@ def main():
         include_package_data=True,
         python_requires=">=3.8",
         install_requires=[
-            'picamera>=1.13 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
             'picamera2>=0.3.0 ; platform_machine in ("armv6l","armv7l","aarch64")',
             'Pillow>=10.4.0',
             'pygame>=1.9.6',

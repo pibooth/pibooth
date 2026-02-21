@@ -14,9 +14,9 @@ created to store the single raw captures.
 
 .. note:: if you have both ``Pi`` and ``DSLR`` cameras connected to the Raspberry
           Pi, **both are used**, this is called the **Hybrid** mode. The preview
-          is taken using the ``Pi`` one (Picamera2 or Picamera) for a better video
-          rendering and the capture is taken using the ``DSLR`` one for better
-          picture rendering.
+          is taken using the ``Pi`` one (Picamera2) for a better video rendering
+          and the capture is taken using the ``DSLR`` one for better picture
+          rendering.
 
 You can display a basic help on application options by using the command:
 
@@ -107,10 +107,8 @@ variables defined in the configuration (see :ref:`Configure` below):
   the orientation is automatically chosen depending on the resolution.
 
 .. note:: The resolution is an important parameter, it is responsible for the quality of the final
-          picture. On Raspberry Pi OS Bullseye and later, the camera is used via **Picamera2**
-          (libcamera); supported resolutions depend on the sensor. On older systems, the legacy
-          `picamera <http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes>`_ resolutions
-          apply.
+          picture. On Raspberry Pi, the camera is used via **Picamera2** (libcamera); supported
+          resolutions depend on the sensor.
 
           For ``gphoto2`` camera, the possible resolutions can be listed by executing
           the following command (adapt device path as needed)::
@@ -144,7 +142,6 @@ Have a look to the predefined effects available depending on the camera used:
 
 * **Picamera2** and **gPhoto2**: PIL-based effects (e.g. blur, contour, sharpen), see
   `PIL ImageFilter <https://pillow.readthedocs.io/en/latest/reference/ImageFilter.html>`_
-* **Picamera** (legacy): `picamera image effects <https://picamera.readthedocs.io/en/latest/api_camera.html#picamera.PiCamera.image_effect>`_
 
 Texts and fonts
 ^^^^^^^^^^^^^^^
