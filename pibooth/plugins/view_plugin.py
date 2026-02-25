@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import time
 import pibooth
 from pibooth.utils import LOGGER, get_crash_message, PoolingTimer
 
@@ -23,9 +24,11 @@ class ViewPlugin(object):
         self.choose_timer = PoolingTimer(30)
         # Seconds to display the selected layout
         self.layout_timer = PoolingTimer(4)
-        # Seconds to display the selected layout
+        # Seconds to display the processing layout
+        self.processing_timer = PoolingTimer(1)
+        # Seconds to display the print layout
         self.print_view_timer = PoolingTimer(0)
-        # Seconds to display the selected layout
+        # Seconds to display the finish layout
         self.finish_timer = PoolingTimer(1)
 
     @pibooth.hookimpl
@@ -139,8 +142,10 @@ class ViewPlugin(object):
         return 'preview'
 
     @pibooth.hookimpl
-    def state_processing_enter(self, win):
+    def state_processing_enter(self, cfg, app, win):
         win.show_work_in_progress()
+        self.processing_timer.timeout = cfg.getfloat('WINDOW', 'processing_min_delay')
+        self.processing_timer.start()
 
     @pibooth.hookimpl
     def state_processing_validate(self, cfg, app):
@@ -148,6 +153,10 @@ class ViewPlugin(object):
                 and app.count.remaining_duplicates > 0:
             return 'print'
         return 'finish'  # Can not print
+
+    @pibooth.hookimpl
+    def state_processing_exit(self, cfg, app):
+        if not(self.processing_timer.is_timeout()): time.sleep(self.processing_timer.remaining() + 1)
 
     @pibooth.hookimpl
     def state_print_enter(self, cfg, app, win):
@@ -175,7 +184,7 @@ class ViewPlugin(object):
             timeout = cfg.getfloat('WINDOW', 'finish_picture_delay')
         else:
             win.show_finished()
-            timeout = 1
+            timeout = cfg.getfloat('WINDOW', 'finish_thanks_delay')
 
         # Reset timeout in case of settings changed
         self.finish_timer.timeout = timeout
