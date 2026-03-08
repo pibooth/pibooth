@@ -13,16 +13,21 @@ class LightsPlugin(object):
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.blink_time = 0.3
+        self._last_blink_time = 0
+        self._blink_state = False
 
 
     @pibooth.hookimpl
     def state_wait_enter(self, app):
+        self._last_blink_time = time.time()
+        self._blink_state = False
+        
         if app.previous_picture_file and app.printer.is_ready()\
                 and app.count.remaining_duplicates > 0:
             app.leds.blink(on_time=self.blink_time, off_time=self.blink_time)
             try:
-                app.mcp2221_picture_led.value = True
-                app.mcp2221_print_led.value = True
+                app.mcp2221_picture_led.value = False
+                app.mcp2221_print_led.value = False
             except AttributeError:
                 pass
 
@@ -30,13 +35,32 @@ class LightsPlugin(object):
             app.leds.capture.blink(on_time=self.blink_time, off_time=self.blink_time)
             app.leds.printer.off()
             try:
-                app.mcp2221_picture_led.value = True
+                app.mcp2221_picture_led.value = False
                 app.mcp2221_print_led.value = False
             except AttributeError:
                 pass
 
     @pibooth.hookimpl
     def state_wait_do(self, app, events):
+        # Handle MCP2221 blinking
+        current_time = time.time()
+        if current_time - self._last_blink_time >= self.blink_time:
+            self._blink_state = not self._blink_state
+            self._last_blink_time = current_time
+            
+            try:
+                if app.previous_picture_file and app.printer.is_ready()\
+                        and app.count.remaining_duplicates > 0:
+                    # Both LEDs should blink
+                    app.mcp2221_picture_led.value = self._blink_state
+                    app.mcp2221_print_led.value = self._blink_state
+                else:
+                    # Only capture LED should blink
+                    app.mcp2221_picture_led.value = self._blink_state
+                    app.mcp2221_print_led.value = False
+            except AttributeError:
+                pass
+        
         if app.find_print_event(events) and app.previous_picture_file and app.printer.is_ready():
             if app.count.remaining_duplicates <= 0:
                 app.leds.printer.off()
@@ -67,12 +91,29 @@ class LightsPlugin(object):
 
     @pibooth.hookimpl
     def state_choose_enter(self, app):
+        self._last_blink_time = time.time()
+        self._blink_state = False
+        
         app.leds.blink(on_time=self.blink_time, off_time=self.blink_time)
         try:
-            app.mcp2221_picture_led.value = True
-            app.mcp2221_print_led.value = True
+            app.mcp2221_picture_led.value = False
+            app.mcp2221_print_led.value = False
         except AttributeError:
             pass
+
+    @pibooth.hookimpl
+    def state_choose_do(self, app, events):
+        # Handle MCP2221 blinking for both LEDs
+        current_time = time.time()
+        if current_time - self._last_blink_time >= self.blink_time:
+            self._blink_state = not self._blink_state
+            self._last_blink_time = current_time
+            
+            try:
+                app.mcp2221_picture_led.value = self._blink_state
+                app.mcp2221_print_led.value = self._blink_state
+            except AttributeError:
+                pass
 
     @pibooth.hookimpl
     def state_choose_exit(self, app):
@@ -104,15 +145,30 @@ class LightsPlugin(object):
 
     @pibooth.hookimpl
     def state_print_enter(self, app):
+        self._last_blink_time = time.time()
+        self._blink_state = False
+        
         app.leds.blink(on_time=self.blink_time, off_time=self.blink_time)
         try:
-            app.mcp2221_picture_led.value = True
-            app.mcp2221_print_led.value = True
+            app.mcp2221_picture_led.value = False
+            app.mcp2221_print_led.value = False
         except AttributeError:
             pass
 
     @pibooth.hookimpl
     def state_print_do(self, app, events):
+        # Handle MCP2221 blinking for both LEDs
+        current_time = time.time()
+        if current_time - self._last_blink_time >= self.blink_time:
+            self._blink_state = not self._blink_state
+            self._last_blink_time = current_time
+            
+            try:
+                app.mcp2221_picture_led.value = self._blink_state
+                app.mcp2221_print_led.value = self._blink_state
+            except AttributeError:
+                pass
+        
         if app.find_print_event(events):
             app.leds.printer.on()
             app.leds.capture.off()
