@@ -90,7 +90,7 @@ class LibCamera(BaseCamera):
     def preview(self, rect, flip=True):
         """Display a preview on the given Rect (flip if necessary).
         """
-        if self._cam._preview is not None:
+        if self._cam.started:
             # Already running
             return
 
@@ -113,7 +113,7 @@ class LibCamera(BaseCamera):
         """
         self._rect = None
         self._hide_overlay()
-        if self._cam._preview is not None:
+        if self._cam.started:
             self._cam.stop_preview()
 
     def get_capture_image(self, effect=None):

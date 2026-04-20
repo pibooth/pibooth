@@ -60,7 +60,12 @@ def get_gp_camera_proxy(port=None):
 def gp_log_callback(level, domain, string, data=None):
     """Logging callback for gphoto2.
     """
-    LOGGER.getChild('gphoto2').debug(domain.decode("utf-8") + u': ' + string.decode("utf-8"))
+    # python-gphoto2 >= 2.5 passes str, older versions pass bytes
+    if isinstance(domain, bytes):
+        domain = domain.decode("utf-8")
+    if isinstance(string, bytes):
+        string = string.decode("utf-8")
+    LOGGER.getChild('gphoto2').debug(domain + ': ' + string)
 
 
 class GpCamera(BaseCamera):
@@ -71,7 +76,7 @@ class GpCamera(BaseCamera):
     def __init__(self, camera_proxy):
         super().__init__(camera_proxy)
         self._gp_logcb = None
-        self._gp_capture_timer = PollingTimer(10)
+        self._gp_capture_timer = PollingTimer(4)
         self._preview_compatible = True
         self._preview_viewfinder = False
 
@@ -117,8 +122,10 @@ class GpCamera(BaseCamera):
                                    value, option, choices)
             child.set_value(value)
             self._cam.set_config(config)
+            return True
         except gp.GPhoto2Error as ex:
             LOGGER.error('Unsupported option %s/%s=%s (%s), configure your DSLR manually', section, option, value, ex)
+            return False
 
     def get_config_value(self, section, option):
         """Get camera configuration option.
@@ -136,11 +143,11 @@ class GpCamera(BaseCamera):
         """Rotate a PIL image, same direction than RpiCamera.
         """
         if rotation == 90:
-            return image.transpose(Image.ROTATE_90)
+            return image.transpose(Image.Transpose.ROTATE_90)
         elif rotation == 180:
-            return image.transpose(Image.ROTATE_180)
+            return image.transpose(Image.Transpose.ROTATE_180)
         elif rotation == 270:
-            return image.transpose(Image.ROTATE_270)
+            return image.transpose(Image.Transpose.ROTATE_270)
         return image
 
     def get_preview_image(self):
@@ -157,7 +164,7 @@ class GpCamera(BaseCamera):
                                  (self._rect.width, self._rect.height), 'outer'))
 
             if self.preview_flip:
-                image = image.transpose(Image.FLIP_LEFT_RIGHT)
+                image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
         else:
             image = Image.new('RGB', (self._rect.width, self._rect.height), color=(0, 0, 0))
             time.sleep(0.1)
@@ -188,7 +195,7 @@ class GpCamera(BaseCamera):
         image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
 
         if self.capture_flip:
-            image = image.transpose(Image.FLIP_LEFT_RIGHT)
+            image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
 
         if effect != 'none':
             image = image.filter(getattr(ImageFilter, effect.upper()))
@@ -203,8 +210,30 @@ class GpCamera(BaseCamera):
                 self.set_config_value('actions', 'viewfinder', 1)
         super().preview(rect, flip)
 
+    def _trigger_and_wait_capture(self, effect):
+        """Trigger a capture and wait for the file to be saved on the camera.
+        Returns True on success, False on timeout.
+        """
+        try:
+            self._cam.trigger_capture()
+        except gp.GPhoto2Error as ex:
+            LOGGER.warning("trigger_capture failed: %s", ex)
+            return False
+
+        self._gp_capture_timer.start()
+        while not self._gp_capture_timer.is_timeout():
+            try:
+                event_type, event_data = self._cam.wait_for_event(100)
+            except gp.GPhoto2Error as ex:
+                LOGGER.warning("wait_for_event failed: %s", ex)
+                return False
+            if event_type == gp.GP_EVENT_FILE_ADDED:
+                self._captures.append((event_data, effect))
+                return True
+        return False
+
     def get_capture_image(self, effect=None):
-        """Capture a new picture.
+        """Capture a new picture with retry on failure.
         """
         if self._preview_viewfinder:
             self.set_config_value('actions', 'viewfinder', 0)
@@ -212,20 +241,23 @@ class GpCamera(BaseCamera):
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.capture_iso)
 
-        self._cam.trigger_capture()
-        self._gp_capture_timer.start()
-        while not self._gp_capture_timer.is_timeout():
-            event_type, event_data = self._cam.wait_for_event(100)  # Check event every 100ms
-            if event_type == gp.GP_EVENT_FILE_ADDED:
-                self._captures.append((event_data, effect))
+        max_retries = 2
+        for attempt in range(max_retries + 1):
+            if self._trigger_and_wait_capture(effect):
                 break
+            if attempt < max_retries:
+                LOGGER.warning("Capture failed (attempt %d/%d), retrying after 1s...",
+                               attempt + 1, max_retries + 1)
+                time.sleep(1)
+            else:
+                if self.capture_iso != self.preview_iso:
+                    self.set_config_value('imgsettings', 'iso', self.preview_iso)
+                raise TimeoutError(
+                    f"gPhoto2 capture failed after {max_retries + 1} attempts "
+                    f"(timeout={self._gp_capture_timer.timeout}s)")
 
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.preview_iso)
-
-        if self._gp_capture_timer.is_timeout():
-            raise TimeoutError(
-                f"gPhoto2 capture failed or too long, abort (timeout={self._gp_capture_timer.timeout})")
 
         return self._captures[-1][0]
 

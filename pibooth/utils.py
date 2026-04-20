@@ -313,20 +313,15 @@ def load_module(path):
     if not osp.isfile(path):
         raise ValueError(f"Invalid Python module path '{path}'")
 
+    import importlib.util
     dirname, filename = osp.split(path)
     modname = osp.splitext(filename)[0]
 
-    if dirname not in sys.path:
-        sys.path.append(dirname)
+    spec = importlib.util.spec_from_file_location(modname, path)
+    if spec and spec.loader:
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[modname] = module
+        spec.loader.exec_module(module)
+        return module
 
-    for hook in sys.meta_path:
-        if hasattr(hook, 'find_spec'):
-            spec = hook.find_spec(modname, [dirname])
-            if spec:
-                return spec.loader.load_module(modname)
-        else:
-            # Deprecated since Python 3.4
-            loader = hook.find_module(modname, [dirname])
-            if loader:
-                return loader.load_module(modname)
     LOGGER.warning("Can not load Python module '%s' from '%s'", modname, path)
