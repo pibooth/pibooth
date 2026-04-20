@@ -30,10 +30,10 @@ def main():
             'Intended Audience :: End Users/Desktop',
             'License :: OSI Approved :: MIT License',
             'Operating System :: POSIX :: Linux',
-            'Programming Language :: Python :: 3.6',
-            'Programming Language :: Python :: 3.7',
-            'Programming Language :: Python :: 3.8',
-            'Programming Language :: Python :: 3.9',
+            'Programming Language :: Python :: 3.10',
+            'Programming Language :: Python :: 3.11',
+            'Programming Language :: Python :: 3.12',
+            'Programming Language :: Python :: 3.13',
             'Natural Language :: Danish',
             'Natural Language :: Dutch',
             'Natural Language :: English',
@@ -64,11 +64,11 @@ def main():
             'pibooth.pictures': ['*/*.png'],
         },
         include_package_data=True,
-        python_requires=">=3.6",
+        python_requires=">=3.10",
         install_requires=[
-            'picamera2>=0.3.9 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
-            'Pillow>=9.2.0',
-            'pygame>=2.1.2',
+            'picamera2>=0.3.9 ; platform_machine>="aarch64" or (platform_machine>="armv0l" and platform_machine<="armv9l")',
+            'Pillow>=10.4.0',
+            'pygame>=2.5.0',
             'pygame-menu==4.3.9',
             'pygame-vkeyboard>=2.0.8',
             'pygame-imslider>=1.0.1',
@@ -76,10 +76,10 @@ def main():
             'pluggy>=1.0.0',
             'gpiozero>=1.6.2',
             # RPi.GPIO backend for gpiozero (not always installed by default)
-            'RPi.GPIO>=0.7.1 ; platform_machine>="armv0l" and platform_machine<="armv9l"'
+            'RPi.GPIO>=0.7.1 ; platform_machine>="aarch64" or (platform_machine>="armv0l" and platform_machine<="armv9l")'
         ],
         extras_require={
-            'dslr': ['gphoto2>=2.3.4'],
+            'dslr': ['gphoto2>=2.5.0'],
             'printer': ['pycups>=2.0.1', 'pycups-notify>=0.0.6'],
             'doc': docs_require
         },
