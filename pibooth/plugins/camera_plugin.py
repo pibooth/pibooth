@@ -50,6 +50,20 @@ class CameraPlugin:
         app.capture_nbr = None
         app.camera.drop_captures()  # Flush previous captures
 
+        # Try to reinitialize gPhoto2 camera connection after error
+        from pibooth.camera.gphoto import GpCamera
+        cam = app.camera
+        # Handle hybrid cameras that wrap a gPhoto2 camera
+        if hasattr(cam, '_gp_cam'):
+            cam = cam._gp_cam
+        if isinstance(cam, GpCamera):
+            try:
+                cam._cam.exit()
+                cam._cam.init()
+                LOGGER.info("Camera connection reinitialized after error")
+            except Exception as ex:
+                LOGGER.error("Failed to reinitialize camera: %s", ex)
+
     @pibooth.hookimpl
     def state_wait_enter(self, app):
         app.capture_date = None
