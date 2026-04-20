@@ -34,8 +34,13 @@ class Printer:
     """
 
     def __init__(self, name='default', max_pages=-1, options=None, counters=None):
-        self._conn = cups.Connection() if cups else None
-        self._notifier = Subscriber(self._conn) if cups else None
+        try:
+            self._conn = cups.Connection() if cups else None
+            self._notifier = Subscriber(self._conn) if cups and self._conn else None
+        except Exception as ex:
+            LOGGER.error("Failed to connect to CUPS: %s", ex)
+            self._conn = None
+            self._notifier = None
         self.name = None
         self.max_pages = max_pages
         self.options = options
@@ -69,8 +74,11 @@ class Printer:
         """
         Call for each new printer event.
         """
-        LOGGER.info(notification.title)
-        evts.post(evts.EVT_PIBOOTH_PRINTER_UPDATE, notification=notification)
+        try:
+            LOGGER.info(notification.title)
+            evts.post(evts.EVT_PIBOOTH_PRINTER_UPDATE, notification=notification)
+        except Exception as ex:
+            LOGGER.warning("Error handling printer event: %s", ex)
 
     def is_installed(self):
         """Return True if the CUPS server is available for printing.
