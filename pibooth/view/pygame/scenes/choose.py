@@ -52,6 +52,7 @@ class ChooseScene(BasePygameScene):
     def __init__(self):
         super().__init__()
         self.choices = ()
+        self._orientation = pictures.AUTO
         self.slider = ImSlider((200, 100), focus=False, renderer=Renderer(self), stype=STYPE_LOOP)
         self.text = TextSprite(self, get_translated_text('choose'))
         self.left_arrow = LeftArrowSprite(self)
@@ -119,14 +120,21 @@ class ChooseScene(BasePygameScene):
         """
         self.slider.on_next()
 
-    def set_choices(self, choices):
+    def set_choices(self, choices, orientation=pictures.AUTO, backgrounds=None):
         """Set the list of possible number of captures.
         """
-        if choices != self.choices:
+        if choices != self.choices or orientation != self._orientation:
             # Reload pictures
             self.choices = choices
-            self.slider.load_images([pictures.get_layout_asset(
-                c, self.background.get_color(), self.text_color) for c in choices])
+            self._orientation = orientation
+            if backgrounds and len(backgrounds) >= len(choices):
+                self.slider.load_images([pictures.get_layout_asset(
+                    c, self.background.get_color(), self.text_color, orientation, backgrounds[i])
+                    for i, c in enumerate(choices)])
+            else:
+                self.slider.load_images([pictures.get_layout_asset(
+                    c, self.background.get_color(), self.text_color, orientation)
+                    for c in choices])
 
     def get_selection(self):
         """Return curretly selected number of captures.
