@@ -15,10 +15,11 @@ class AsyncTasksPool:
     """
 
     FUTURES = {}
+    _lock = threading.Lock()
 
     def __init__(self):
         if not AsyncTask.POOL:
-            self._pool = futures.ThreadPoolExecutor()
+            self._pool = futures.ThreadPoolExecutor(max_workers=4)
             AsyncTask.POOL = self
         else:
             self._pool = AsyncTask.POOL._pool
@@ -31,22 +32,25 @@ class AsyncTasksPool:
             raise RuntimeError("AsyncTasksPool is shutting down")
         assert isinstance(task, AsyncTask)
         future = self._pool.submit(task)
-        self.FUTURES[future] = task
+        with self._lock:
+            self.FUTURES[future] = task
         future.add_done_callback(self.finish_task)
         return future
 
     def finish_task(self, future):
         """Remove future from tracking list.
         """
-        self.FUTURES.pop(future)
+        with self._lock:
+            self.FUTURES.pop(future, None)
 
     def quit(self):
         """Stop all tasks and don't accept new one.
         """
         self._pool.stop_event.set()
-        for task in self.FUTURES.copy().values():
-            task.kill()
-        self.FUTURES.clear()
+        with self._lock:
+            for task in list(self.FUTURES.values()):
+                task.kill()
+            self.FUTURES.clear()
         self._pool.shutdown(wait=True)
 
 

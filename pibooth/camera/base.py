@@ -171,9 +171,16 @@ class BaseCamera:
     def quit(self):
         """Close the camera driver, it's definitive.
         """
-        if self._worker:
-            self._worker.kill()
-        self._specific_cleanup()
+        from pibooth.utils import LOGGER
+        try:
+            if self._worker:
+                self._worker.kill()
+        except Exception as ex:
+            LOGGER.warning("Failed to stop camera worker: %s", ex)
+        try:
+            self._specific_cleanup()
+        except Exception as ex:
+            LOGGER.warning("Failed to cleanup camera driver: %s", ex)
 
     def _specific_cleanup(self):
         """Specific camera cleanup.

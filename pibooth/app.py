@@ -32,7 +32,9 @@ def load_last_saved_picture(path):
     for name in sorted(os.listdir(path), reverse=True):
         filename = osp.join(path, name)
         if osp.isfile(filename) and osp.splitext(name)[-1] == '.jpg':
-            return (Image.open(filename), filename)
+            image = Image.open(filename)
+            image.load()  # Force read into memory so file handle is released
+            return (image, filename)
     return (None, None)
 
 
