@@ -111,7 +111,7 @@ def cfg(cfg_path, pm):
 
 @pytest.fixture
 def counters(tmpdir):
-    return Counters(str(tmpdir.join('data.pickle')), nbr_printed=0)
+    return Counters(str(tmpdir.join('data.json')), nbr_printed=0)
 
 
 # --- Window events loop ------------------------------------------------------
