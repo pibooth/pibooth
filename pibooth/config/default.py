@@ -111,6 +111,10 @@ add_default_option("PICTURE", "orientation", 'auto',
                    "Orientation of the final picture: 'auto', 'portrait' or 'landscape'",
                    "Orientation", ['auto', 'portrait', 'landscape'])
 
+add_default_option("PICTURE", "captures_preview_backgrounds", False,
+                   "Show backgrounds in layout choice thumbnails",
+                   "Preview backgrounds", ['True', 'False'])
+
 add_default_option("PICTURE", "captures", (1, 2, 3, 4),
                    "Possible choice(s) of captures numbers (numbers between 1 to 4)",
                    "Number of captures", ['(1, 2, 3, 4)', '1', '2', '3', '4'] + [str(val) for val in itertools.permutations(range(1, 5), 2)])
