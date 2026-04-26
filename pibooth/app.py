@@ -29,12 +29,18 @@ def load_last_saved_picture(path):
     :return: PIL.Image instance and path
     :rtype: tuple
     """
+    if not osp.isdir(path):
+        return (None, None)
     for name in sorted(os.listdir(path), reverse=True):
         filename = osp.join(path, name)
         if osp.isfile(filename) and osp.splitext(name)[-1] == '.jpg':
-            image = Image.open(filename)
-            image.load()  # Force read into memory so file handle is released
-            return (image, filename)
+            try:
+                image = Image.open(filename)
+                image.load()
+                return (image, filename)
+            except Exception as ex:
+                LOGGER.warning("Skipping corrupted image '%s': %s", filename, ex)
+                continue
     return (None, None)
 
 
@@ -100,8 +106,8 @@ class PiboothApplication:
         self.capture_choices = (4, 1)
 
         self.previous_animated = None
-        self.previous_picture, self.previous_picture_file = load_last_saved_picture(
-            config.gettuple('GENERAL', 'directory', 'path')[0])
+        self.previous_picture = None
+        self.previous_picture_file = None
 
         self.count = Counters(self._config.join_path("counters.pickle"),
                               taken=0, printed=0, forgotten=0,
