@@ -27,11 +27,19 @@ Hardware
 Software
 ^^^^^^^^
 
-* Raspberry Pi OS **Buster** (32 bit) with desktop (`could be downloaded here <https://downloads.raspberrypi.org/raspios_oldstable_armhf/images/>`_)
-* Python ``3.7.3``
+* Raspberry Pi OS **Bookworm** (64 bit) with desktop (`could be downloaded here <https://www.raspberrypi.com/software/operating-systems/>`_)
+* Python ``3.10`` or higher
 * libsdl2 ``2.0``
 * libgphoto2 ``2.5.27``
 * libcups ``2.2.10``
+
+.. note:: Raspberry Pi OS **Trixie** has not been validated yet. Users have
+          reported that ``sudo apt-get install libsdl2-*`` (step 4. below)
+          behaves differently on it.
+
+.. note:: Since Bookworm, the system Python is *externally managed*
+          (:pep:`668`): ``pip`` refuses to install into it. The procedure below
+          therefore installs ``pibooth`` in its own isolated environment.
 
 
 Install
@@ -40,7 +48,7 @@ Install
 Here is a brief description on how to set-up a Raspberry Pi to use this software.
 
 If you intend to develop on ``pibooth``, an editable/customizable version can be
-installed. Instead of doing step 8. of the below procedure, follow
+installed. Instead of doing step 9. of the below procedure, follow
 :ref:`instructions here<install_developing_version>`.
 
 Manual procedure
@@ -93,24 +101,76 @@ Manual procedure
 
         sudo apt-get install python3-opencv
 
-8. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
+8. Install ``pipx``, which installs a Python application in its own isolated
+   environment while keeping its commands available system-wide:
 
    .. code-block:: bash
 
-        sudo pip3 install pibooth[dslr,printer]
+        sudo apt-get install pipx
+        pipx ensurepath
+
+   .. note:: ``pipx ensurepath`` adds ``~/.local/bin`` to your ``PATH``. Open a
+             new terminal afterwards, otherwise the ``pibooth`` command will not
+             be found.
+
+9. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
+
+   .. code-block:: bash
+
+        pipx install --system-site-packages pibooth[dslr,printer]
+
+   .. warning:: ``--system-site-packages`` is required if you installed
+                ``OpenCV`` with ``apt`` at step 7. Without it, the isolated
+                environment cannot see ``python3-opencv`` and the webcam
+                will not be detected.
 
    .. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/
           or 6. skipped), remove **printer** and/or **dslr** under the ``[]``.
 
           As a consequence if you only want to use gphoto2 (step 6 skipped):
 
-          ``sudo pip3 install pibooth[dslr]`` 
-          
+          ``pipx install --system-site-packages pibooth[dslr]``
+
           Or if you only want to use the printer (step 5 skipped):
 
-          ``sudo pip3 install pibooth[printer]``
+          ``pipx install --system-site-packages pibooth[printer]``
 
-          The classic command ``sudo pip3 install pibooth`` will install ``pibooth`` without these two dependencies (step 5 and 6 skipped).
+          The classic command ``pipx install --system-site-packages pibooth`` will install ``pibooth`` without these two dependencies (step 5 and 6 skipped).
+
+10. Install the plugins you want, **into the same environment**:
+
+    .. code-block:: bash
+
+         pipx inject pibooth pibooth-qrcode
+
+    .. warning:: Do not use ``pip install`` for plugins. ``pibooth`` discovers
+                 them through its own environment, so a plugin installed
+                 elsewhere is simply ignored. ``pipx inject`` puts it in the
+                 right place. Check the startup log, which lists what was
+                 actually loaded::
+
+                     [ INFO    ] pibooth: Installed plugins: qrcode-1.0.2
+
+Using a virtual environment instead
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you prefer not to use ``pipx``, an explicit virtual environment works the
+same way. Note the ``--system-site-packages`` flag, needed for the same reason
+as above:
+
+.. code-block:: bash
+
+     python3 -m venv --system-site-packages ~/pibooth-venv
+     ~/pibooth-venv/bin/pip install pibooth[dslr,printer]
+     ~/pibooth-venv/bin/pip install pibooth-qrcode
+
+Start the application with ``~/pibooth-venv/bin/pibooth``.
+
+.. warning:: You may find ``sudo pip3 install --break-system-packages pibooth``
+             suggested as a workaround. It installs ``pibooth`` and its
+             dependencies straight into the system Python, where they can
+             conflict with packages managed by ``apt`` and break unrelated
+             system tools. Prefer one of the two methods above.
 
 Automated procedure
 ^^^^^^^^^^^^^^^^^^^
