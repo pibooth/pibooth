@@ -151,6 +151,33 @@ Manual procedure
 
                      [ INFO    ] pibooth: Installed plugins: qrcode-1.0.2
 
+11. If you use the hardware buttons and LEDs, check that ``pibooth`` can reach
+    the GPIO. Start it once and read the first log line:
+
+    .. code-block:: bash
+
+         pibooth --verbose
+
+    ``pibooth`` reports which GPIO backend it obtained::
+
+         [ INFO    ] pibooth: Starting the photo booth application on Raspberry pi 4B
+
+    If it reports this instead, no GPIO backend could be loaded and the buttons
+    and LEDs will do nothing::
+
+         [ INFO    ] pibooth: Starting the photo booth application without physical GPIO, fallback to GPIO mock
+
+    ``pibooth`` drives the GPIO through `gpiozero
+    <https://gpiozero.readthedocs.io>`_, which looks for a backend at startup
+    and tries ``lgpio``, ``RPi.GPIO``, ``pigpio``, then a pure Python fallback.
+    Raspberry Pi OS ships those libraries in the **system** Python, which is
+    precisely why step 9. passes ``--system-site-packages``: without it, the
+    isolated environment cannot see them and falls back to the mock.
+
+    .. note:: This line only tells you that a backend was loaded. It does not
+              prove the wiring works — press both buttons and check that both
+              LEDs light up.
+
 Using a virtual environment instead
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
