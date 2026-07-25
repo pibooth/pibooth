@@ -66,7 +66,10 @@ def main():
         include_package_data=True,
         python_requires=">=3.10",
         install_requires=[
-            'picamera2>=0.3.0 ; platform_machine in ("armv6l","armv7l","aarch64")',
+            # picamera2 is not declared here on purpose: it is provided by the
+            # 'python3-picamera2' system package. Installing it with pip would
+            # require compiling python-prctl and PiDNG, which ship no wheel, and
+            # it depends on libcamera which is not published on PyPI at all.
             'Pillow>=10.4.0',
             'pygame>=1.9.6',
             'pygame-menu==4.0.7',
