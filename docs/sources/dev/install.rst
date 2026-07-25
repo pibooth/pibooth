@@ -30,8 +30,9 @@ need to work from a clone of this ``git`` repository. Replace the step 8. of the
 
 .. note:: Installing with ``sudo pip3 install -e .`` no longer works: since
           Bookworm the system Python is *externally managed* (:pep:`668`) and
-          ``pip`` refuses to write into it. ``--system-site-packages`` keeps
-          ``python3-opencv`` installed with ``apt`` visible from the virtual
+          ``pip`` refuses to write into it. ``--system-site-packages`` keeps the
+          libraries installed with ``apt`` — ``python3-opencv``,
+          ``python3-picamera2``, the GPIO ones — visible from the virtual
           environment.
 
 4. Start the application with ``.venv/bin/pibooth``, exactly in the same way as

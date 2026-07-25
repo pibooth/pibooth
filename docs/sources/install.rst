@@ -94,12 +94,19 @@ Manual procedure
 
         sudo apt-get install cups libcups2-dev
 
-7. Optionally install ``OpenCV`` to improve images generation efficiency or if a
-   Webcam is used:
+7. Install the camera libraries you need. ``OpenCV`` also improves images
+   generation efficiency, whichever camera is used:
 
    .. code-block:: bash
 
-        sudo apt-get install python3-opencv
+        sudo apt-get install python3-opencv      # webcam, and faster images generation
+        sudo apt-get install python3-picamera2   # Raspberry Pi camera
+
+   .. note:: ``python3-picamera2`` is already present on the Raspberry Pi OS
+             desktop images. Install it with ``apt`` and not with ``pip``: two
+             of its dependencies ship no pre-built package, so ``pip`` would
+             have to compile them, and the ``libcamera`` binding it needs is not
+             published on PyPI at all.
 
 8. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_.
    Pick the method matching how the Raspberry Pi is used — see
@@ -123,9 +130,8 @@ Manual procedure
 
    .. warning:: ``--system-site-packages`` is not optional. Without it the
                 virtual environment cannot see the libraries installed with
-                ``apt`` — ``python3-opencv`` from step 7., and the GPIO
-                libraries — so the webcam is not detected and the buttons and
-                LEDs stay inert.
+                ``apt`` — those of step 7. and the GPIO ones — so no camera is
+                detected and the buttons and LEDs stay inert.
 
    .. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/
           or 6. skipped), remove **printer** and/or **dslr** under the ``[]``.
