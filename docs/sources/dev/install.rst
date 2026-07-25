@@ -6,7 +6,7 @@ Install developing version
 .. warning:: Be aware that the code on the `master` branch may be unstable.
 
 If you want to use an **unofficial version** of the ``pibooth`` application, you
-need to work from a clone of this ``git`` repository. Replace the step 9. of the
+need to work from a clone of this ``git`` repository. Replace the step 8. of the
 :ref:`install` procedure by the following actions:
 
 1. Clone from github :

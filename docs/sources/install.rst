@@ -38,8 +38,8 @@ Software
           behaves differently on it.
 
 .. note:: Since Bookworm, the system Python is *externally managed*
-          (:pep:`668`): ``pip`` refuses to install into it. The procedure below
-          therefore installs ``pibooth`` in its own isolated environment.
+          (:pep:`668`), which changes how ``pibooth`` has to be installed. Two
+          methods are given at step 8., see :ref:`which_install_method`.
 
 
 Install
@@ -48,7 +48,7 @@ Install
 Here is a brief description on how to set-up a Raspberry Pi to use this software.
 
 If you intend to develop on ``pibooth``, an editable/customizable version can be
-installed. Instead of doing step 9. of the below procedure, follow
+installed. Instead of doing step 8. of the below procedure, follow
 :ref:`instructions here<install_developing_version>`.
 
 Manual procedure
@@ -101,57 +101,58 @@ Manual procedure
 
         sudo apt-get install python3-opencv
 
-8. Install ``pipx``, which installs a Python application in its own isolated
-   environment while keeping its commands available system-wide:
+8. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_.
+   Pick the method matching how the Raspberry Pi is used — see
+   :ref:`which_install_method` if you are unsure:
+
+   **a. The Raspberry Pi is dedicated to the photobooth**
 
    .. code-block:: bash
 
-        sudo apt-get install pipx
-        pipx ensurepath
+        sudo pip3 install --break-system-packages pibooth[dslr,printer]
 
-   .. note:: ``pipx ensurepath`` adds ``~/.local/bin`` to your ``PATH``. Open a
-             new terminal afterwards, otherwise the ``pibooth`` command will not
-             be found.
-
-9. Install ``pibooth`` from the `pypi repository <https://pypi.org/project/pibooth/>`_:
+   **b. The Raspberry Pi is also used for something else**
 
    .. code-block:: bash
 
-        pipx install --system-site-packages pibooth[dslr,printer]
+        python3 -m venv --system-site-packages ~/pibooth-venv
+        ~/pibooth-venv/bin/pip install pibooth[dslr,printer]
 
-   .. warning:: ``--system-site-packages`` is required if you installed
-                ``OpenCV`` with ``apt`` at step 7. Without it, the isolated
-                environment cannot see ``python3-opencv`` and the webcam
-                will not be detected.
+   The application then starts with ``~/pibooth-venv/bin/pibooth`` instead of
+   ``pibooth``.
+
+   .. warning:: ``--system-site-packages`` is not optional. Without it the
+                virtual environment cannot see the libraries installed with
+                ``apt`` — ``python3-opencv`` from step 7., and the GPIO
+                libraries — so the webcam is not detected and the buttons and
+                LEDs stay inert.
 
    .. hint:: If you don't have ``gPhoto2`` and/or ``CUPS`` installed (steps 5. and/
           or 6. skipped), remove **printer** and/or **dslr** under the ``[]``.
 
           As a consequence if you only want to use gphoto2 (step 6 skipped):
 
-          ``pipx install --system-site-packages pibooth[dslr]``
+          ``sudo pip3 install --break-system-packages pibooth[dslr]``
 
           Or if you only want to use the printer (step 5 skipped):
 
-          ``pipx install --system-site-packages pibooth[printer]``
+          ``sudo pip3 install --break-system-packages pibooth[printer]``
 
-          The classic command ``pipx install --system-site-packages pibooth`` will install ``pibooth`` without these two dependencies (step 5 and 6 skipped).
+          The classic command ``sudo pip3 install --break-system-packages pibooth`` will install ``pibooth`` without these two dependencies (step 5 and 6 skipped).
 
-10. Install the plugins you want, **into the same environment**:
+9. Install the plugins you want, with the ``pip`` of the method chosen above:
 
-    .. code-block:: bash
+   .. code-block:: bash
 
-         pipx inject pibooth pibooth-qrcode
+        sudo pip3 install --break-system-packages pibooth-qrcode
+        # or, with a virtual environment
+        ~/pibooth-venv/bin/pip install pibooth-qrcode
 
-    .. warning:: Do not use ``pip install`` for plugins. ``pibooth`` discovers
-                 them through its own environment, so a plugin installed
-                 elsewhere is simply ignored. ``pipx inject`` puts it in the
-                 right place. Check the startup log, which lists what was
-                 actually loaded::
+   The startup log lists what was actually loaded::
 
-                     [ INFO    ] pibooth: Installed plugins: qrcode-1.0.2
+        [ INFO    ] pibooth: Installed plugins: qrcode-1.0.2
 
-11. If you use the hardware buttons and LEDs, check that ``pibooth`` can reach
+10. If you use the hardware buttons and LEDs, check that ``pibooth`` can reach
     the GPIO. Start it once and read the first log line:
 
     .. code-block:: bash
@@ -170,34 +171,40 @@ Manual procedure
     ``pibooth`` drives the GPIO through `gpiozero
     <https://gpiozero.readthedocs.io>`_, which looks for a backend at startup
     and tries ``lgpio``, ``RPi.GPIO``, ``pigpio``, then a pure Python fallback.
-    Raspberry Pi OS ships those libraries in the **system** Python, which is
-    precisely why step 9. passes ``--system-site-packages``: without it, the
-    isolated environment cannot see them and falls back to the mock.
+    Raspberry Pi OS ships those libraries in the **system** Python, so they are
+    always reachable with method **a**, and only reachable with method **b**
+    thanks to ``--system-site-packages``.
 
     .. note:: This line only tells you that a backend was loaded. It does not
               prove the wiring works — press both buttons and check that both
               LEDs light up.
 
-Using a virtual environment instead
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _which_install_method:
 
-If you prefer not to use ``pipx``, an explicit virtual environment works the
-same way. Note the ``--system-site-packages`` flag, needed for the same reason
-as above:
+Which installation method?
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: bash
+Since Bookworm, the system Python is *externally managed* (:pep:`668`):
+``pip`` refuses to install into it unless ``--break-system-packages`` is
+passed. That flag is not as brutal as its name suggests, but it is not free
+either.
 
-     python3 -m venv --system-site-packages ~/pibooth-venv
-     ~/pibooth-venv/bin/pip install pibooth[dslr,printer]
-     ~/pibooth-venv/bin/pip install pibooth-qrcode
+``pip`` installs into ``/usr/local/lib/python3.X/dist-packages``, which comes
+**before** the ``/usr/lib/python3/dist-packages`` used by ``apt`` in the
+search path. So the libraries pulled by ``pibooth`` take precedence over the
+ones packaged by Debian, for every program using the system Python. Nothing is
+deleted and ``apt`` itself stays consistent — the effect is reversible by
+uninstalling — but another Python application on the same machine may silently
+end up running a version it was not tested against.
 
-Start the application with ``~/pibooth-venv/bin/pibooth``.
+On a Raspberry Pi dedicated to the photobooth there is nothing else to
+disturb, and method **a** keeps everything simple: ``apt`` libraries are
+natively visible, plugins install with a plain ``pip install``, and the
+``pibooth`` command is available system-wide.
 
-.. warning:: You may find ``sudo pip3 install --break-system-packages pibooth``
-             suggested as a workaround. It installs ``pibooth`` and its
-             dependencies straight into the system Python, where they can
-             conflict with packages managed by ``apt`` and break unrelated
-             system tools. Prefer one of the two methods above.
+On a Raspberry Pi doing other things, method **b** confines ``pibooth`` and
+its dependencies to a single directory, at the cost of typing the full path to
+the application.
 
 Automated procedure
 ^^^^^^^^^^^^^^^^^^^
