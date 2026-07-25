@@ -6,11 +6,11 @@ but other configuration may work fine. **All hardware buttons, lights and printe
 are optional**, the application can be entirely controlled using a keyboard, a
 mouse or a touchscreen.
 
-.. warning:: Using a Pi Camera, the preview is visible only on a screen connected
-             to the HDMI or DSI connectors (the preview is an overlay managed at
-             GPU low level). It also means that ``pibooth`` can not be started
-             throught SSH tuneling. Even with X11 forwarding enabled (``ssh -X ...``)
-             the preview will not be visible.
+.. note:: The Pi Camera preview used to be a GPU overlay, and was therefore
+          only visible on a screen connected to the HDMI or DSI connector. It is
+          now drawn inside the application window like the other cameras, so
+          that restriction no longer applies. The counterpart is that each frame
+          is composed by the CPU rather than by the GPU.
 
 Hardware
 ^^^^^^^^
