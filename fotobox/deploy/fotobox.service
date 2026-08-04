@@ -1,0 +1,17 @@
+[Unit]
+Description=Fotobox Kiosk-Anwendung
+After=graphical.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+WorkingDirectory=/home/pi/fotobox
+ExecStart=/home/pi/fotobox/deploy/kiosk.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

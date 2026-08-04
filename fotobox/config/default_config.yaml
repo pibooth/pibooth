@@ -1,0 +1,65 @@
+# Fotobox Konfiguration
+# Diese Datei kann manuell oder über den PIN-geschützten Admin-Bereich am
+# Gerät bearbeitet werden. Nach manuellen Änderungen die Anwendung neu starten.
+
+general:
+  # true = Kamera/Drucker/SumUp werden simuliert (Entwicklung ohne Hardware)
+  mock_hardware: false
+  # Nach so vielen Sekunden Inaktivität nach der Bezahlung wird die Sitzung
+  # automatisch abgebrochen und zum Startbildschirm zurückgekehrt.
+  session_timeout_seconds: 180
+  log_level: "INFO"
+
+gui:
+  fullscreen: true
+  language: "de"
+  idle_media_dir: "assets/idle"
+  logo_path: "assets/logo.png"
+
+camera:
+  backend: "gphoto2"
+  model_hint: "Fujifilm X-T"
+  capture_dir: "captures"
+  live_preview: true
+
+printer:
+  # Name der CUPS-Warteschlange, ermittelbar per `lpstat -p`
+  cups_printer_name: ""
+  paper_size: "10x15"
+
+packages:
+  - id: "single"
+    name: "1 Foto"
+    price_cents: 500
+    currency: "EUR"
+    copies: 1
+    active: true
+  - id: "triple"
+    name: "3 Fotos"
+    price_cents: 1200
+    currency: "EUR"
+    copies: 3
+    active: true
+  - id: "flat"
+    name: "Flatrate"
+    price_cents: 2000
+    currency: "EUR"
+    copies: 1
+    active: true
+
+sumup:
+  # true = SumUp-Sandbox-Umgebung verwenden (keine echten Buchungen)
+  sandbox: false
+  # Bearer-Token aus dem SumUp-Konto: Settings > For Developers > API Keys
+  api_key: ""
+  # SumUp Merchant Code (im SumUp-Konto sichtbar)
+  merchant_code: ""
+  # Wird einmalig über den Admin-Bereich per Pairing-Code ermittelt
+  reader_id: ""
+  checkout_reference_prefix: "FOTOBOX"
+  poll_interval_seconds: 2
+  poll_timeout_seconds: 90
+
+admin:
+  # gehashte PIN (nie im Klartext), wird über den Admin-Bereich gesetzt
+  pin_hash: ""

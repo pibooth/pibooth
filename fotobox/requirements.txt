@@ -1,0 +1,11 @@
+PyYAML>=6.0
+requests>=2.31
+kivy>=2.3
+
+# Nur auf dem Raspberry Pi mit angeschlossener Hardware nötig
+# (benötigen System-Bibliotheken: libgphoto2-dev bzw. libcups2-dev):
+gphoto2>=2.5; sys_platform == "linux"
+pycups>=2.0; sys_platform == "linux"
+
+# Tests
+pytest>=7.4
