@@ -6,8 +6,16 @@ from io import BytesIO
 from PIL import Image
 try:
     import picamera
-except ImportError:
-    picamera = None  # picamera is optional
+except Exception as ex:
+    # 'picamera' is optional, it is only available on Raspberry Pi. Note that the
+    # import may fail with an 'OSError' (and not only an 'ImportError') when the
+    # legacy camera stack is not enabled: the shared library 'libbcm_host.so' can
+    # not be loaded (default since Raspberry Pi OS Bullseye).
+    picamera = None
+    PICAMERA_ERROR = ex
+else:
+    PICAMERA_ERROR = None
+from pibooth.utils import LOGGER
 from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
@@ -20,7 +28,9 @@ def get_rpi_camera_proxy(port=None):
     :type port: int
     """
     if not picamera:
-        return None  # picamera is not installed
+        # picamera is not installed or can not be loaded
+        LOGGER.debug("Picamera not available: %s", PICAMERA_ERROR)
+        return None
     try:
         process = subprocess.Popen(['vcgencmd', 'get_camera'],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
