@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw
 
 from pibooth import fonts
 from pibooth.pictures import sizing
+from pibooth.utils import LOGGER
 
 
 class BaseCamera(object):
@@ -17,15 +18,24 @@ class BaseCamera(object):
         self._captures = []
 
         self.resolution = None
+        self.preview_resolution = None
         self.delete_internal_memory = False
         self.preview_rotation, self.capture_rotation = (0, 0)
         self.preview_iso, self.capture_iso = (100, 100)
         self.preview_flip, self.capture_flip = (False, False)
 
-    def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False):
+    def initialize(self, cfg):
         """Initialize the camera.
         """
+        iso = cfg.gettuple('CAMERA', 'iso', (int, str), 2)
+        resolution = cfg.gettyped('CAMERA', 'resolution')
+        rotation = cfg.gettuple('CAMERA', 'rotation', int, 2)
+        flip = cfg.getboolean('CAMERA', 'flip')
+        delete_internal_memory = cfg.getboolean('CAMERA', 'delete_internal_memory')
+        preview_resolution = cfg.gettyped('CAMERA', 'preview_resolution')
+        
         if not isinstance(rotation, (tuple, list)):
+            LOGGER.info("Not instance %s", rotation)
             rotation = (rotation, rotation)
         self.preview_rotation, self.capture_rotation = rotation
         for name in ('preview', 'capture'):
@@ -34,14 +44,16 @@ class BaseCamera(object):
                 raise ValueError(
                     "Invalid {} camera rotation value '{}' (should be 0, 90, 180 or 270)".format(name, rotation))
         self.resolution = resolution
+        self.preview_resolution = preview_resolution
         self.capture_flip = flip
         if not isinstance(iso, (tuple, list)):
             iso = (iso, iso)
         self.preview_iso, self.capture_iso = iso
         self.delete_internal_memory = delete_internal_memory
-        self._specific_initialization()
 
-    def _specific_initialization(self):
+        self._specific_initialization(cfg)
+
+    def _specific_initialization(self, cfg):
         """Specific camera initialization.
         """
         pass
