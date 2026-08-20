@@ -24,25 +24,25 @@ class GpCameraRetry(camera.GpCamera):
         raise EnvironmentError("Gphoto2 fails to capture {} times".format(max_retry))
 
 
-class HybridRpiCameraRetry(camera.HybridRpiCamera):
+class HybridRpi2CameraRetry(camera.HybridRpi2Camera):
 
-    def __init__(self, rpi_camera_proxy, gp_camera_proxy):
-        super(HybridRpiCamera, self).__init__(rpi_camera_proxy)
+    def __init__(self, rpi2_camera_proxy, gp_camera_proxy):
+        super(HybridRpi2CameraRetry, self).__init__(rpi2_camera_proxy, gp_camera_proxy)
         self._gp_cam = GpCameraRetry(gp_camera_proxy)
-        self._gp_cam._captures = self._captures  # Same dict for both cameras
+        self._gp_cam._captures = self._captures  # Same list for both cameras
 
 
 @pibooth.hookimpl
 def pibooth_setup_camera(cfg):
-    rpi_cam_proxy = camera.get_rpi_camera_proxy()
+    rpi2_cam_proxy = camera.get_rpi2_camera_proxy()
     gp_cam_proxy = camera.get_gp_camera_proxy()
 
-    if rpi_cam_proxy and gp_cam_proxy:
-        LOGGER.info("Configuring hybrid camera with retry (Picamera + gPhoto2) ...")
-        return HybridRpiCameraRetry(rpi_cam_proxy, gp_cam_proxy)
+    if rpi2_cam_proxy and gp_cam_proxy:
+        LOGGER.info("Configuring hybrid camera with retry (Picamera2 + gPhoto2) ...")
+        return HybridRpi2CameraRetry(rpi2_cam_proxy, gp_cam_proxy)
     elif gp_cam_proxy:
         LOGGER.info("Configuring gPhoto2 camera with retry ...")
         return GpCameraRetry(gp_cam_proxy)
-    elif rpi_cam_proxy:
-        LOGGER.info("Configuring Picamera camera ...")
-        return camera.RpiCamera(rpi_cam_proxy)
+    elif rpi2_cam_proxy:
+        LOGGER.info("Configuring Picamera2 camera ...")
+        return camera.Rpi2Camera(rpi2_cam_proxy)
