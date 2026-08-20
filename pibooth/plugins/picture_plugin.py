@@ -107,7 +107,7 @@ class PicturePlugin(object):
 
         for savedir in cfg.gettuple('GENERAL', 'directory', 'path'):
             rawdir = osp.join(savedir, "raw", app.capture_date)
-            os.makedirs(rawdir)
+            if not(os.path.exists(rawdir) and os.path.isdir(rawdir)): os.makedirs(rawdir)
 
             for capture in captures:
                 count = captures.index(capture)

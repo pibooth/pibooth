@@ -6,6 +6,8 @@
 import io
 import os
 import os.path as osp
+import json
+import random
 from configparser import ConfigParser
 from pibooth.utils import LOGGER, open_text_editor
 
@@ -24,12 +26,14 @@ DEFAULT = {
         '3': "3 fotos",
         '4': "4 fotos",
         'chosen': "Vamos!",
+        'get_ready': "Prepare-se !",
         'smile': "Sorria!",
         'processing': "Processando...",
         'print': "Imprimir foto?",
         'print_forget': "Por favor\nremova\nesta foto",
         'finished': "Obrigado!",
         'oops': "Opa! Ocorreu um erro.",
+        'camera_not_found': "A câmera pode não estar conectada",
     },
     'de': {
         'intro': "Foto aufnehmen",
@@ -40,12 +44,14 @@ DEFAULT = {
         '3': "3 Fotos",
         '4': "4 Fotos",
         'chosen': "Los geht's!",
+        'get_ready': "Bereit machen !",
         'smile': "Bitte lächeln!",
         'processing': "Bearbeitung...",
         'print': "Foto drucken?",
         'print_forget': "Dieses Foto\nbitte löschen",
         'finished': "Danke",
         'oops': "Ups! Etwas ist schiefgelaufen",
+        'camera_not_found': "Möglicherweise ist die Kamera nicht angeschlossen",
     },
     'dk': {
         'intro': "Tag et foto",
@@ -56,12 +62,14 @@ DEFAULT = {
         '3': "3 Fotos",
         '4': "4 Fotos",
         'chosen': "Gør dig klar!",
+        'get_ready': "Gør dig klar !",
         'smile': "Smil !",
         'processing': "Fremkalder Foto...",
         'print': "Print foto?",
         'print_forget': "Venligst\nglem dette\nfoto",
         'finished': "Tak",
         'oops': "Ups! Noget gik galt",
+        'camera_not_found': "Kameraet er muligvis ikke tilsluttet",
     },
     'en': {
         'intro': "Take a photo",
@@ -72,12 +80,14 @@ DEFAULT = {
         '3': "3 photos",
         '4': "4 photos",
         'chosen': "Let's go!",
+        'get_ready': "Get ready !",
         'smile': "Smile !",
         'processing': "Processing...",
         'print': "Print the photo?",
         'print_forget': "Please\nforget this\nphoto",
         'finished': "Thanks",
         'oops': "Oops something went wrong",
+        'camera_not_found': "The camera may not be connected",
     },
     'es': {
         'intro': "Sacate Una Foto",
@@ -88,12 +98,14 @@ DEFAULT = {
         '3': "3 Fotos",
         '4': "4 Fotos",
         'chosen': "Adelante!!",
+        'get_ready': "Prepárate!",
         'smile': "Sonríe!!",
         'processing': "Procesando...",
         'print': "¿Imprimir esta foto?",
         'print_forget': "Por favor\nolvida\nesta foto",
         'finished': "Gracias",
         'oops': "Maldición! Algo salió mal",
+        'camera_not_found': "Es posible que la cámara no esté conectada",
     },
     'fr': {
         'intro': "Faire une photo",
@@ -104,12 +116,14 @@ DEFAULT = {
         '3': "3 photos",
         '4': "4 photos",
         'chosen': "C'est parti !",
+        'get_ready': "Prêt ?",
         'smile': "Souriez !",
         'processing': "Préparation du montage",
         'print': "Imprimer la photo ?",
         'print_forget': "Oublie\ncette photo\ns'il te plait",
-        'finished': "Merci",
+        'finished': ["Merci", "Wahoo !", "Quelle classe !"],
         'oops': "Oups quelque chose s'est mal passé",
+        'camera_not_found': "La caméra semble deconnectée",
     },
     'hu': {
         'intro': "Akarsz egy képet",
@@ -120,12 +134,14 @@ DEFAULT = {
         '3': "3 kép",
         '4': "4 kép",
         'chosen': "Készülj!",
+        'get_ready': "Készülj fel!",
         'smile': "Csiizzz!",
         'processing': "Feldolgozás...",
         'print': "Nyomtatod a képet?",
         'print_forget': "Kérjük,\nfelejtsd el ezt\na képet",
         'finished': "Köszi",
         'oops': "Sajnos valami hiba történt",
+        'camera_not_found': "Lehetséges, hogy a kamera nincs csatlakoztatva",
     },
     'it': {
         'intro': "Scatta una foto",
@@ -136,12 +152,14 @@ DEFAULT = {
         '3': "3 foto",
         '4': "4 foto",
         'chosen': "Andiamo!",
+        'get_ready': "Preparati !",
         'smile': "Sorridi!",
         'processing': "Elaborazione...",
         'print': "Stampo la foto?",
         'print_forget': "Per favore\nignora questa\nfoto",
         'finished': "Grazie",
         'oops': "Oops qualcosa è andato storto",
+        'camera_not_found': "La fotocamera potrebbe non essere collegata",
     },
     'nl': {
         'intro': "Neem een foto",
@@ -152,12 +170,14 @@ DEFAULT = {
         '3': "3 foto’s",
         '4': "4 foto’s",
         'chosen': "We gaan ervoor!",
+        'get_ready': "Maak je klaar !",
         'smile': "Lachen!",
         'processing': "Verwerken...",
         'print': "Print de foto?",
         'print_forget': "Vergeet\ndeze foto\nalstublieft",
         'finished': "Bedankt",
         'oops': "Oeps er ging iets mis",
+        'camera_not_found': "De camera is mogelijk niet aangesloten",
     },
     'no': {
         'intro': "Ta et bilde",
@@ -168,12 +188,14 @@ DEFAULT = {
         '3': "3 bilder",
         '4': "4 bilder",
         'chosen': "Start!",
+        'get_ready': "Gjør deg klar !",
         'smile': "Smil !",
         'processing': "Behandler...",
         'print': "Printe bildet?",
         'print_forget': "Glem\ndette\nbildet",
         'finished': "Takk",
         'oops': "Ops, noe gikk galt",
+        'camera_not_found': "Kameraet er kanskje ikke tilkoblet",
     },
     'pt': {
         'intro': "Tira uma foto",
@@ -184,12 +206,14 @@ DEFAULT = {
         '3': "3 fotos",
         '4': "4 fotos",
         'chosen': "Vamos!",
+        'get_ready': "Prepare-se !",
         'smile': "Sorri!",
         'processing': "A processar...",
         'print': "Imprimir foto?",
         'print_forget': "Por favor\nesqueçe-te\ndesta foto",
         'finished': "Obrigado!",
         'oops': "Oops, ocorreu um erro.",
+        'camera_not_found': "A câmera pode não estar conectada",
     },
     'se': {
         'intro': "Ta en bild",
@@ -200,13 +224,15 @@ DEFAULT = {
         '3': "3 bilder",
         '4': "4 bilder",
         'chosen': "Kör!",
+        'get_ready': "Gör dig redo!",
         'smile': "Smile!",
         'processing': "Jobbar...",
         'print': "Skriv ut bilden!",
         'print_forget': "Glöm\den här\bilden",
         'finished': "Tack",
         'oops': "Oops, nånting blev fel",
-    },    
+        'camera_not_found': "Kameran kanske inte är ansluten",
+    },
 }
 
 
@@ -230,11 +256,15 @@ def init(filename, clear=False):
             for section, options in DEFAULT.items():
                 fp.write("[{}]\n".format(section))
                 for name, value in options.items():
-                    value = value.splitlines()
-                    fp.write("{} = {}\n".format(name, value[0]))
-                    if len(value) > 1:
-                        for part in value[1:]:
-                            fp.write("    {}\n".format(part))
+                    if isinstance(value, list):
+                        value = json.dumps(value)
+                        fp.write("{} = {}\n".format(name, value))
+                    else:
+                        value = value.splitlines()
+                        fp.write("{} = {}\n".format(name, value[0]))
+                        if len(value) > 1:
+                            for part in value[1:]:
+                                fp.write("    {}\n".format(part))
                 fp.write("\n\n")
 
     PARSER.read(PARSER.filename, encoding='utf-8')
@@ -285,6 +315,12 @@ def get_translated_text(key):
         raise EnvironmentError("Translation system is not initialized")
 
     if PARSER.has_section(CURRENT) and PARSER.has_option(CURRENT, key):
+        v = PARSER.get(CURRENT, key)
+        if v.startswith('['):
+            try:
+                return random.choice(json.loads(v))
+            except:
+                return v
         return PARSER.get(CURRENT, key).strip('"')
     elif PARSER.has_option('en', key):
         LOGGER.warning("Unsupported language '%s', fallback to English", CURRENT)
