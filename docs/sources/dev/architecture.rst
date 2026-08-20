@@ -20,7 +20,7 @@ Modules
      │   ├─ view_plugin.py     screens and transitions
      │   └─ lights_plugin.py   GPIO LEDs
      ├─ config/         parser.py (DEFAULT) + menu.py (graphical settings)
-     ├─ camera/         base.py + rpi/gphoto/opencv/hybrid backends, auto-detected
+     ├─ camera/         base.py + rpi2/gphoto/opencv/hybrid backends, auto-detected
      ├─ pictures/       factory.py (build the final picture), sizing.py, pool.py
      ├─ view/           window.py (PiWindow) + background.py (one class per screen)
      ├─ language.py     translations, one section per language
@@ -142,8 +142,9 @@ Most of the hardware-facing code cannot be exercised on a development machine:
 * **GPIO** — ``booth.py`` catches ``BadPinFactory`` and falls back to
   ``gpiozero``'s mock factory, logging *without physical GPIO*. Button and LED
   code runs but has no effect.
-* **Pi Camera** — ``picamera`` is only installed on 32-bit ARM, so ``RpiCamera``
-  and both hybrid cameras are unreachable elsewhere.
+* **Pi Camera** — ``picamera2`` and its ``libcamera`` binding come from ``apt``
+  on Raspberry Pi OS and are not installable on a development machine, so
+  ``Rpi2Camera`` and ``HybridRpi2Camera`` are unreachable elsewhere.
 * **DSLR and printing** — need real hardware, plus ``gphoto2`` and a CUPS
   server. Both are optional extras, and the corresponding modules guard their
   imports.

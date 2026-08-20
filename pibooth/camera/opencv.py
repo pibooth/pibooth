@@ -86,7 +86,7 @@ class CvCamera(BaseCamera):
             self._overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGBA2RGB)
 
     def _rotate_image(self, image, rotation):
-        """Rotate an OpenCV image, same direction than RpiCamera.
+        """Rotate an OpenCV image, same direction than Rpi2Camera.
         """
         if rotation == 90:
             image = cv2.transpose(image)

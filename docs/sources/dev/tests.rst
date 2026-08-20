@@ -28,9 +28,13 @@ machine without any photobooth hardware, so a failure is a real one. The usual
 cause of a mass failure is a missing ``opencv-python``, which takes out all of
 ``tests/test_factory.py``.
 
-Fixtures live in ``tests/conftest.py``. The camera ones — ``camera_rpi``,
+Fixtures live in ``tests/conftest.py``. The camera ones — ``camera_rpi2``,
 ``camera_gp``, ``camera_cv`` and the hybrid variants — are those needing real
 hardware.
+
+``tests/test_camera_rpi2.py`` is the exception: it stubs the ``picamera2``
+library, so the preview and capture processing of ``Rpi2Camera`` is covered on
+any machine.
 
 ``tests/dslr_diag/`` holds ``pibooth-diag`` outputs contributed by users for
 specific DSLR models. They are data files, not tests.

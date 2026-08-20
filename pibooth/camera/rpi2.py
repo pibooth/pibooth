@@ -4,42 +4,51 @@ import time
 import pygame
 from io import BytesIO
 try:
-    import numpy as np
-except ImportError:
-    np = None
-try:
     from picamera2 import Picamera2
-except ImportError:
+except Exception as ex:
+    # 'picamera2' is optional, it is only available on Raspberry Pi. Note that the
+    # import may fail with something else than an 'ImportError' when the package
+    # is installed but the 'libcamera' bindings are not usable.
     Picamera2 = None
+    PICAMERA2_ERROR = ex
+else:
+    PICAMERA2_ERROR = None
 from PIL import Image, ImageFilter
 from pibooth.pictures import sizing
 from pibooth.utils import PoolingTimer, LOGGER
 from pibooth.language import get_translated_text
 from pibooth.camera.base import BaseCamera
 
+MAX_PREVIEW_SIZE = (1280, 720)
+
 
 def get_rpi2_camera_proxy(port=None):
     """Return camera proxy if a Raspberry Pi camera (libcamera/picamera2) is found
     else return None.
 
-    :param port: optional camera index (currently unused, for API consistency)
+    :param port: look on given camera number
     :type port: int
     """
-    if Picamera2 is None or np is None:
+    if not Picamera2:
+        # picamera2 is not installed or can not be loaded
+        LOGGER.debug("Picamera2 not available: %s", PICAMERA2_ERROR)
         return None
     try:
-        cam = Picamera2()
+        if port is not None:
+            cam = Picamera2(port)
+        else:
+            cam = Picamera2()
         cam.configure(cam.create_preview_configuration())
         cam.start()
         return cam
     except Exception as ex:
-        LOGGER.debug("Picamera2 not available: %s", ex)
+        LOGGER.debug("No Raspberry Pi camera detected: %s", ex)
         return None
 
 
 class Rpi2Camera(BaseCamera):
 
-    """Camera management using picamera2 (libcamera).
+    """Raspberry Pi camera management, using picamera2 (libcamera).
     """
 
     IMAGE_EFFECTS = [u'none',
@@ -56,45 +65,38 @@ class Rpi2Camera(BaseCamera):
 
     def __init__(self, camera_proxy):
         super(Rpi2Camera, self).__init__(camera_proxy)
-        self._overlay_alpha = 255
-        self._still_config = None
         self._preview_config = None
+        self._still_config = None
 
     def _specific_initialization(self):
         """Camera initialization.
         """
         self._cam.stop()
+        # Keep the aspect ratio of the capture resolution for the preview, else the
+        # preview would not show what is going to be captured
+        preview_size = sizing.new_size_keep_aspect_ratio(self.resolution, MAX_PREVIEW_SIZE)
         self._preview_config = self._cam.create_preview_configuration(
-            {"size": (min(1280, self.resolution[0]), min(720, self.resolution[1]))}
-        )
-        self._still_config = self._cam.create_still_configuration(
-            {"size": self.resolution}
-        )
+            main={"size": preview_size, "format": "XBGR8888"})
+        self._still_config = self._cam.create_still_configuration(main={"size": self.resolution})
         self._cam.configure(self._preview_config)
         self._cam.start()
-        LOGGER.debug("Picamera2 configured: preview and still %s", self.resolution)
+        LOGGER.debug("Picamera2 configured: preview %s, capture %s", preview_size, self.resolution)
 
     def _show_overlay(self, text, alpha):
-        """Add an image as an overlay (software overlay).
+        """Add an image as an overlay.
         """
-        if self._window:
+        if self._window:  # No window means no preview displayed
             rect = self.get_rect()
-            self._overlay_alpha = alpha
-            self._overlay = self.build_overlay((rect.width, rect.height), str(text), 255)
+            self._overlay = self.build_overlay((rect.width, rect.height), str(text), alpha)
 
-    def _hide_overlay(self):
-        """Remove any existing overlay.
-        """
-        self._overlay = None
-
-    def _rotate_image_pil(self, image, rotation):
-        """Rotate a PIL image, same direction as RpiCamera.
+    def _rotate_image(self, image, rotation):
+        """Rotate a PIL image, same direction than the Raspberry Pi camera.
         """
         if rotation == 90:
             return image.transpose(Image.ROTATE_270)
-        if rotation == 180:
+        elif rotation == 180:
             return image.transpose(Image.ROTATE_180)
-        if rotation == 270:
+        elif rotation == 270:
             return image.transpose(Image.ROTATE_90)
         return image
 
@@ -102,42 +104,49 @@ class Rpi2Camera(BaseCamera):
         """Capture a new preview image.
         """
         rect = self.get_rect()
-        arr = self._cam.capture_array("main")
-        if arr is None:
+
+        array = self._cam.capture_array("main")
+        if array is None:
             raise IOError("Can not get camera preview image")
-        if arr.ndim == 3 and arr.shape[2] == 4:
-            arr = arr[:, :, :3]
-        height, width = arr.shape[:2]
-        cropped = sizing.new_size_by_croping_ratio((width, height), self.resolution)
-        arr = arr[cropped[1]:cropped[3], cropped[0]:cropped[2], :]
-        height, width = arr.shape[:2]
-        size = sizing.new_size_keep_aspect_ratio((width, height), (rect.width, rect.height), 'outer')
-        pil = Image.fromarray(arr)
-        pil = pil.resize((size[0], size[1]), Image.Resampling.LANCZOS)
-        pil = self._rotate_image_pil(pil, self.preview_rotation)
+        # Drop the 4th channel (XBGR8888 gives a RGBX array)
+        image = Image.fromarray(array[:, :, :3])
+        image = self._rotate_image(image, self.preview_rotation)
+
+        # Crop to keep aspect ratio of the resolution
+        image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
+        # Resize to fit the available space in the window
+        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, (rect.width, rect.height), 'outer'))
+
         if self.preview_flip:
-            pil = pil.transpose(Image.FLIP_LEFT_RIGHT)
-        if self._overlay is not None:
-            overlay_resized = self._overlay.resize((pil.width, pil.height))
-            overlay_resized.putalpha(Image.new('L', overlay_resized.size, self._overlay_alpha))
-            pil = pil.convert("RGBA")
-            pil = Image.alpha_composite(pil, overlay_resized)
-            pil = pil.convert("RGB")
-        return pil
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
+        if self._overlay:
+            image.paste(self._overlay, (0, 0), self._overlay)
+        return image
 
     def _post_process_capture(self, capture_data):
-        """Rework capture data (BytesIO buffer, effect name) into a PIL Image.
+        """Rework capture data.
+
+        :param capture_data: couple (binary data as stream, effect)
+        :type capture_data: tuple
         """
-        buffer_stream, effect = capture_data
-        buffer_stream.seek(0)
-        image = Image.open(buffer_stream).convert("RGB")
-        image = self._rotate_image_pil(image, self.capture_rotation)
+        stream, effect = capture_data
+        # "Rewind" the stream to the beginning so we can read its content
+        stream.seek(0)
+        image = Image.open(stream)
+        image = self._rotate_image(image, self.capture_rotation)
+
+        # Crop to keep aspect ratio of the resolution
         image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
+        # Resize to fit the resolution
         image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
+
         if self.capture_flip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
         if effect != 'none':
             image = image.filter(getattr(ImageFilter, effect.upper()))
+
         return image
 
     def preview(self, window, flip=True):
@@ -154,16 +163,20 @@ class Rpi2Camera(BaseCamera):
         timeout = int(timeout)
         if timeout < 1:
             raise ValueError("Start time shall be greater than 0")
+
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
             remaining = int(timer.remaining() + 1)
             if self._overlay is None or remaining != timeout:
+                # Rebuild overlay only if remaining number has changed
                 self._show_overlay(str(remaining), alpha)
                 timeout = remaining
+
             updated_rect = self._window.show_image(self._get_preview_image())
             pygame.event.pump()
             if updated_rect:
                 pygame.display.update(updated_rect)
+
         self._show_overlay(get_translated_text('smile'), alpha)
         self._window.show_image(self._get_preview_image())
 
@@ -173,12 +186,14 @@ class Rpi2Camera(BaseCamera):
         timeout = int(timeout)
         if timeout < 1:
             raise ValueError("Start time shall be greater than 0")
+
         timer = PoolingTimer(timeout)
         while not timer.is_timeout():
             updated_rect = self._window.show_image(self._get_preview_image())
             pygame.event.pump()
             if updated_rect:
                 pygame.display.update(updated_rect)
+
         self._show_overlay(get_translated_text('smile'), alpha)
         self._window.show_image(self._get_preview_image())
 
@@ -194,18 +209,18 @@ class Rpi2Camera(BaseCamera):
         effect = str(effect).lower()
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
-        buffer = BytesIO()
-        self._cam.switch_mode_and_capture_file(self._still_config, buffer, format="jpeg")
-        self._captures.append((buffer, effect))
-        time.sleep(0.2)
-        self._hide_overlay()
+
+        stream = BytesIO()
+        self._cam.switch_mode_and_capture_file(self._still_config, stream, format='jpeg')
+        self._captures.append((stream, effect))
+        time.sleep(0.2)  # Necessary to let the camera restart the preview mode
+
+        self._hide_overlay()  # If stop_preview() has not been called
 
     def quit(self):
         """Close the camera driver, it's definitive.
         """
         if self._cam:
-            try:
-                self._cam.stop()
-            except Exception:
-                pass
+            self._cam.stop()
+            self._cam.close()
             self._cam = None

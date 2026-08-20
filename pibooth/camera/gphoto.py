@@ -118,7 +118,7 @@ class GpCamera(BaseCamera):
             self._overlay = self.build_overlay((rect.width, rect.height), str(text), alpha)
 
     def _rotate_image(self, image, rotation):
-        """Rotate a PIL image, same direction than RpiCamera.
+        """Rotate a PIL image.
         """
         if rotation == 90:
             return image.transpose(Image.ROTATE_90)
