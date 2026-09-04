@@ -66,21 +66,65 @@ class Rpi2Camera(BaseCamera):
     def __init__(self, camera_proxy):
         super(Rpi2Camera, self).__init__(camera_proxy)
         self._preview_config = None
+        self._preview_size = None
         self._still_config = None
+        self._preview_mode = None
+        self._capture_mode = None
+
+    def _select_sensor_modes(self):
+        """Return the two sensor modes having the widest (thus the same) field of
+        view: the smallest one for the preview (the fastest) and the biggest one for
+        the capture (the most detailed). Sharing the same field of view is what makes
+        the preview show exactly what is going to be captured.
+        """
+        try:
+            modes = [mode for mode in self._cam.sensor_modes if mode.get('size') and mode.get('crop_limits')]
+            widest = max(mode['crop_limits'][2] * mode['crop_limits'][3] for mode in modes)
+            modes = [mode for mode in modes if mode['crop_limits'][2] * mode['crop_limits'][3] == widest]
+            preview_mode = min(modes, key=lambda mode: mode['size'][0] * mode['size'][1])
+            capture_mode = max(modes, key=lambda mode: mode['size'][0] * mode['size'][1])
+        except Exception as ex:
+            LOGGER.warning("Can not choose the camera sensor modes (%s): the preview may not "
+                           "show the same field of view than the capture", ex)
+            return None, None
+        LOGGER.debug("Sensor modes with the widest field of view: %s for preview, %s for capture",
+                     preview_mode['size'], capture_mode['size'])
+        return preview_mode, capture_mode
+
+    def _create_config(self, factory, size, sensor_mode, **kwargs):
+        """Return a camera configuration for the given main stream size, forcing the
+        given sensor mode (if any).
+        """
+        main = {"size": (int(size[0]), int(size[1]))}
+        main.update(kwargs)
+        if sensor_mode:
+            return factory(main=main, raw={"size": sensor_mode['size'], "format": str(sensor_mode['format'])})
+        return factory(main=main)
+
+    def _configure_preview(self, size):
+        """(Re)configure the preview stream at the given size. The frames are resized
+        by the camera ISP, which is far faster than resizing them in Python for each
+        displayed frame.
+        """
+        self._cam.stop()
+        self._preview_config = self._create_config(self._cam.create_preview_configuration,
+                                                   size, self._preview_mode, format="XBGR8888")
+        self._cam.configure(self._preview_config)
+        self._cam.start()
+        self._preview_size = size
+        LOGGER.debug("Picamera2 preview stream configured at %s (asked %s)",
+                     self._preview_config['main']['size'], size)
 
     def _specific_initialization(self):
         """Camera initialization.
         """
         self._cam.stop()
-        # Keep the aspect ratio of the capture resolution for the preview, else the
-        # preview would not show what is going to be captured
-        preview_size = sizing.new_size_keep_aspect_ratio(self.resolution, MAX_PREVIEW_SIZE)
-        self._preview_config = self._cam.create_preview_configuration(
-            main={"size": preview_size, "format": "XBGR8888"})
-        self._still_config = self._cam.create_still_configuration(main={"size": self.resolution})
-        self._cam.configure(self._preview_config)
-        self._cam.start()
-        LOGGER.debug("Picamera2 configured: preview %s, capture %s", preview_size, self.resolution)
+        self._preview_mode, self._capture_mode = self._select_sensor_modes()
+        self._still_config = self._create_config(self._cam.create_still_configuration,
+                                                 self.resolution, self._capture_mode)
+        # Keep the aspect ratio of the capture resolution, else the preview would not
+        # show what is going to be captured. Resized at the window size when known.
+        self._configure_preview(sizing.new_size_keep_aspect_ratio(self.resolution, MAX_PREVIEW_SIZE))
 
     def _show_overlay(self, text, alpha):
         """Add an image as an overlay.
@@ -112,10 +156,13 @@ class Rpi2Camera(BaseCamera):
         image = Image.fromarray(array[:, :, :3])
         image = self._rotate_image(image, self.preview_rotation)
 
-        # Crop to keep aspect ratio of the resolution
-        image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
-        # Resize to fit the available space in the window
-        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, (rect.width, rect.height), 'outer'))
+        # Crop to keep aspect ratio of the resolution and resize to fit the available
+        # space in the window, in a single pass (nearly a no-op if the camera already
+        # delivers the displayed size)
+        box = sizing.new_size_by_croping_ratio(image.size, self.resolution)
+        size = sizing.new_size_keep_aspect_ratio((box[2] - box[0], box[3] - box[1]),
+                                                 (rect.width, rect.height), 'outer')
+        image = image.resize(size, Image.Resampling.BILINEAR, box)
 
         if self.preview_flip:
             image = image.transpose(Image.FLIP_LEFT_RIGHT)
@@ -154,6 +201,17 @@ class Rpi2Camera(BaseCamera):
         """
         self._window = window
         self.preview_flip = flip
+
+        # Ask the camera for frames at the displayed size (swapped when the preview is
+        # rotated by a quarter turn), the ISP resize is free compared to a Python one
+        rect = self.get_rect()
+        if self.preview_rotation in (90, 270):
+            size = (rect.height, rect.width)
+        else:
+            size = (rect.width, rect.height)
+        if size != self._preview_size:
+            self._configure_preview(size)
+
         self._window.show_image(self._get_preview_image())
 
     def preview_countdown(self, timeout, alpha=80):

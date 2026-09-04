@@ -19,11 +19,22 @@ class FakePicamera2(object):
 
     """Minimal stub of ``picamera2.Picamera2``: it delivers a gradient image
     in the XBGR8888 format (as the real preview configuration does).
+
+    The sensor modes are those of an IMX219, where the small and the 1080p ones
+    have a reduced field of view.
     """
+
+    SENSOR_MODES = [
+        {'size': (640, 480), 'format': 'SRGGB10_CSI2P', 'crop_limits': (1000, 752, 1280, 960)},
+        {'size': (1640, 1232), 'format': 'SRGGB10_CSI2P', 'crop_limits': (0, 0, 3280, 2464)},
+        {'size': (1920, 1080), 'format': 'SRGGB10_CSI2P', 'crop_limits': (680, 692, 1920, 1080)},
+        {'size': (3280, 2464), 'format': 'SRGGB10_CSI2P', 'crop_limits': (0, 0, 3280, 2464)},
+    ]
 
     def __init__(self, camera_num=0):
         self.started = False
         self.config = None
+        self.sensor_modes = self.SENSOR_MODES
 
     def _new_array(self, size):
         width, height = size
@@ -34,11 +45,14 @@ class FakePicamera2(object):
         array[:, :, 3] = 255
         return array
 
-    def create_preview_configuration(self, main=None, **kwargs):
-        return {'main': dict(main or {'size': SENSOR_SIZE})}
+    def _new_config(self, main=None, raw=None, **kwargs):
+        config = {'main': dict(main or {'size': SENSOR_SIZE})}
+        if raw is not None:
+            config['raw'] = dict(raw)
+        return config
 
-    def create_still_configuration(self, main=None, **kwargs):
-        return {'main': dict(main or {'size': SENSOR_SIZE})}
+    create_preview_configuration = _new_config
+    create_still_configuration = _new_config
 
     def configure(self, config):
         self.config = config
@@ -148,3 +162,51 @@ def test_quit(camera):
     camera.initialize(100, RESOLUTION)
     camera.quit()
     assert camera._cam is None
+
+
+def test_sensor_modes_share_the_same_field_of_view(camera):
+    camera.initialize(100, RESOLUTION)
+    # The modes with a reduced field of view are not eligible, the smallest of the
+    # remaining ones is used for the preview and the biggest one for the capture
+    assert camera._preview_mode['size'] == (1640, 1232)
+    assert camera._capture_mode['size'] == (3280, 2464)
+    assert camera._preview_mode['crop_limits'] == camera._capture_mode['crop_limits']
+    assert camera._still_config['raw']['size'] == (3280, 2464)
+    assert camera._preview_config['raw']['size'] == (1640, 1232)
+
+
+def test_sensor_modes_not_readable(camera):
+    camera._cam.sensor_modes = None  # As picamera2 would do if it can not report them
+    camera.initialize(100, RESOLUTION)
+    # No sensor mode is forced, but the camera stays usable
+    assert camera._preview_mode is None
+    assert 'raw' not in camera._still_config
+    camera.capture('none')
+    assert camera.get_captures()[0].size == RESOLUTION
+
+
+@pytest.mark.parametrize('rotation, expected', [(0, False), (90, True), (180, False), (270, True)])
+def test_preview_asks_the_camera_for_the_displayed_size(camera, rotation, expected):
+    camera.initialize(100, RESOLUTION, rotation=rotation)
+    window = FakeWindow()
+    camera.preview(window, flip=False)
+    rect = camera.get_rect()
+    # The ISP delivers the displayed size, no software resize is needed. The size is
+    # swapped when the preview is rotated by a quarter turn.
+    size = (rect.height, rect.width) if expected else (rect.width, rect.height)
+    assert camera._cam.config['main']['size'] == size
+
+    # A second preview on the same window does not reconfigure the camera
+    config = camera._cam.config
+    camera.preview(window, flip=False)
+    assert camera._cam.config is config
+
+
+def test_overlay_is_centered(camera):
+    camera.initialize(100, RESOLUTION)
+    camera._window = FakeWindow()
+    rect = camera.get_rect()
+    overlay = camera.build_overlay((rect.width, rect.height), '3', 255)
+    left, top, right, bottom = overlay.getbbox()
+    assert abs((left + right) / 2 - rect.width / 2) < 0.05 * rect.width
+    assert abs((top + bottom) / 2 - rect.height / 2) < 0.05 * rect.height
