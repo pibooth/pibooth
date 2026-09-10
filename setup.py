@@ -45,6 +45,7 @@ def main():
             'Natural Language :: Portuguese',
             'Natural Language :: Portuguese (Brazilian)',
             'Natural Language :: Spanish',
+            'Natural Language :: Swedish',
             'Topic :: Multimedia :: Graphics :: Capture :: Digital Camera',
         ],
         author="Vincent Verdeil, Antoine Rousseaux",
