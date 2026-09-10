@@ -8,8 +8,8 @@ import sys
 from PIL import Image
 try:
     import gphoto2 as gp
-except ImportError:
-    gp = None  # gphoto2 is optional
+except Exception:
+    gp = None  # gphoto2 is optional (or its shared libraries are missing)
 import pibooth
 from pibooth.config import PiConfigParser
 from pibooth.utils import configure_logging

@@ -66,7 +66,8 @@ def main():
         include_package_data=True,
         python_requires=">=3.10",
         install_requires=[
-            'picamera>=1.13 ; platform_machine>="armv0l" and platform_machine<="armv9l"',
+            # 'picamera2' is not declared here: its 'libcamera' binding is not published
+            # on PyPI, it has to be installed with apt (see the installation page)
             'Pillow>=10.4.0',
             'pygame>=1.9.6',
             'pygame-menu==4.0.7',

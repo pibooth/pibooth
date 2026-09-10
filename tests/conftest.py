@@ -7,8 +7,8 @@ from PIL import Image
 from pibooth import language
 from pibooth.counters import Counters
 from pibooth.config.parser import PiConfigParser
-from pibooth.camera import get_rpi_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
-from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
+from pibooth.camera import get_rpi2_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
+from pibooth.camera import Rpi2Camera, GpCamera, CvCamera, HybridRpi2Camera, HybridCvCamera
 
 
 ISO = 100
@@ -71,21 +71,25 @@ def counters(tmpdir):
 
 
 @pytest.fixture(scope='session')
-def proxy_rpi():
-    return get_rpi_camera_proxy()
+def proxy_rpi2():
+    return get_rpi2_camera_proxy()
 
 
 @pytest.fixture(scope='session')
-def camera_rpi(proxy_rpi):
-    cam = RpiCamera(proxy_rpi)
+def camera_rpi2(proxy_rpi2):
+    if proxy_rpi2 is None:
+        pytest.skip("Picamera2 not available")
+    cam = Rpi2Camera(proxy_rpi2)
     cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
     yield cam
     cam.quit()
 
 
 @pytest.fixture(scope='session')
-def camera_rpi_gp(proxy_rpi, proxy_gp):
-    cam = HybridRpiCamera(proxy_rpi, proxy_gp)
+def camera_rpi2_gp(proxy_rpi2, proxy_gp):
+    if proxy_rpi2 is None or proxy_gp is None:
+        pytest.skip("Picamera2 and/or gPhoto2 not available")
+    cam = HybridRpi2Camera(proxy_rpi2, proxy_gp)
     cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
     yield cam
     cam.quit()

@@ -5,8 +5,13 @@ import pygame
 try:
     import cv2
     import numpy as np
-except ImportError:
-    cv2 = None  # OpenCV is optional
+except Exception as ex:
+    # 'cv2' is optional, the import may also fail with an 'OSError' when the
+    # Python package is installed but one of its shared libraries is missing.
+    cv2 = None
+    OPENCV_ERROR = ex
+else:
+    OPENCV_ERROR = None
 from PIL import Image
 from pibooth.pictures import sizing
 from pibooth.utils import PoolingTimer, LOGGER
@@ -22,7 +27,9 @@ def get_cv_camera_proxy(port=None):
     :type port: int
     """
     if not cv2:
-        return None  # OpenCV is not installed
+        # OpenCV is not installed or can not be loaded
+        LOGGER.debug("OpenCV not available: %s", OPENCV_ERROR)
+        return None
 
     if port is not None:
         if not isinstance(port, int):
@@ -79,7 +86,7 @@ class CvCamera(BaseCamera):
             self._overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGBA2RGB)
 
     def _rotate_image(self, image, rotation):
-        """Rotate an OpenCV image, same direction than RpiCamera.
+        """Rotate an OpenCV image, same direction than Rpi2Camera.
         """
         if rotation == 90:
             image = cv2.transpose(image)

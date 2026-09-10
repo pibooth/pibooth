@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
 
-from pibooth.camera.rpi import RpiCamera
+from pibooth.camera.rpi2 import Rpi2Camera
 from pibooth.camera.opencv import CvCamera
 from pibooth.camera.gphoto import GpCamera
 
 
-class HybridRpiCamera(RpiCamera):
+class HybridRpi2Camera(Rpi2Camera):
 
-    """Camera management using the Raspberry Pi camera for the preview (better
-    video rendering) and a gPhoto2 compatible camera for the capture (higher
-    resolution)
+    """Camera management using the Raspberry Pi camera (picamera2) for the preview
+    and a gPhoto2 compatible camera for the capture (higher resolution).
     """
 
     IMAGE_EFFECTS = GpCamera.IMAGE_EFFECTS
 
-    def __init__(self, rpi_camera_proxy, gp_camera_proxy):
-        super(HybridRpiCamera, self).__init__(rpi_camera_proxy)
+    def __init__(self, rpi2_camera_proxy, gp_camera_proxy):
+        super(HybridRpi2Camera, self).__init__(rpi2_camera_proxy)
         self._gp_cam = GpCamera(gp_camera_proxy)
-        self._gp_cam._captures = self._captures  # Same dict for both cameras
+        self._gp_cam._captures = self._captures  # Same list for both cameras
 
     def initialize(self, *args, **kwargs):
         """Ensure that both cameras are initialized.
         """
-        super(HybridRpiCamera, self).initialize(*args, **kwargs)
+        super(HybridRpi2Camera, self).initialize(*args, **kwargs)
         self._gp_cam.initialize(*args, **kwargs)
 
     def _post_process_capture(self, capture_data):
@@ -43,7 +42,7 @@ class HybridRpiCamera(RpiCamera):
     def quit(self):
         """Close the camera driver, it's definitive.
         """
-        super(HybridRpiCamera, self).quit()
+        super(HybridRpi2Camera, self).quit()
         self._gp_cam.quit()
 
 

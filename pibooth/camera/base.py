@@ -81,11 +81,11 @@ class BaseCamera(object):
         draw = ImageDraw.Draw(image)
 
         font = fonts.get_pil_font(text, fonts.CURRENT, 0.9 * size[0], 0.9 * size[1])
-        bbox = draw.textbbox((0, 0), text, font=font)
-        txt_width = bbox[2] - bbox[0]
-        txt_height = bbox[3] - bbox[1]
+        # The bounding box gives the offsets of the glyphs (left and top bearings),
+        # they shall be removed from the position else the text is not centered
+        left, top, right, bottom = draw.textbbox((0, 0), text, font=font)
 
-        position = ((size[0] - txt_width) // 2, (size[1] - txt_height) // 2 - size[1] // 10)
+        position = ((size[0] - (right - left)) // 2 - left, (size[1] - (bottom - top)) // 2 - top)
         draw.text(position, text, (255, 255, 255, alpha), font=font)
         return image
 

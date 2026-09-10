@@ -5,8 +5,13 @@ import time
 import pygame
 try:
     import gphoto2 as gp
-except ImportError:
-    gp = None  # gphoto2 is optional
+except Exception as ex:
+    # 'gphoto2' is optional, the import may also fail with an 'OSError' when the
+    # Python package is installed but the 'libgphoto2' library is missing.
+    gp = None
+    GPHOTO2_ERROR = ex
+else:
+    GPHOTO2_ERROR = None
 from PIL import Image, ImageFilter
 from pibooth.pictures import sizing
 from pibooth.utils import LOGGER, PoolingTimer, pkill
@@ -24,7 +29,9 @@ def get_gp_camera_proxy(port=None):
     :type port: str
     """
     if not gp:
-        return None  # gPhoto2 is not installed
+        # gPhoto2 is not installed or can not be loaded
+        LOGGER.debug("gPhoto2 not available: %s", GPHOTO2_ERROR)
+        return None
 
     pkill('*gphoto2*')
     if hasattr(gp, 'gp_camera_autodetect'):
@@ -111,7 +118,7 @@ class GpCamera(BaseCamera):
             self._overlay = self.build_overlay((rect.width, rect.height), str(text), alpha)
 
     def _rotate_image(self, image, rotation):
-        """Rotate a PIL image, same direction than RpiCamera.
+        """Rotate a PIL image.
         """
         if rotation == 90:
             return image.transpose(Image.ROTATE_90)

@@ -11,8 +11,8 @@ from PIL.Image import Resampling
 try:
     import cv2
     import numpy as np
-except ImportError:
-    cv2 = None
+except Exception:
+    cv2 = None  # OpenCV is optional (or its shared libraries are missing)
 
 
 class PictureFactory(object):
