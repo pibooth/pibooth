@@ -11,8 +11,8 @@ from pibooth.config.parser import PiboothConfigParser
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import get_scene
 from pibooth.view.pygame import sprites
-from pibooth.camera import get_rpi_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
-from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
+from pibooth.camera import get_gp_camera_proxy, get_cv_camera_proxy
+from pibooth.camera import GpCamera, CvCamera, HybridCvCamera
 
 # Modules for tests purpose
 import pytest
@@ -166,30 +166,6 @@ def scene_builder():
 
 
 # --- Camera drivers ----------------------------------------------------------
-
-
-@pytest.fixture(scope='session')
-def proxy_rpi(init_pygame, init_tasks, captures_portrait):
-    if os.environ.get('CAMERA_RPIDRIVER') == "dummy":
-        RpiCamera.IMAGE_EFFECTS = ['none']
-        return camera_drivers.RpiCameraProxyMock(captures_portrait)
-    return get_rpi_camera_proxy()
-
-
-@pytest.fixture(scope='session')
-def camera_rpi(proxy_rpi):
-    cam = RpiCamera(proxy_rpi)
-    cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
-    yield cam
-    cam.quit()
-
-
-@pytest.fixture(scope='session')
-def camera_rpi_gp(proxy_rpi, proxy_gp):
-    cam = HybridRpiCamera(proxy_rpi, proxy_gp)
-    cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
-    yield cam
-    cam.quit()
 
 
 @pytest.fixture(scope='session')

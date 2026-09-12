@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 
+import time
 try:
     import cv2
     import numpy as np
-except ImportError:
-    cv2 = None  # OpenCV is optional
+except Exception as ex:
+    # 'cv2' is optional, the import may also fail with an 'OSError' when the
+    # Python package is installed but one of its shared libraries is missing.
+    cv2 = None
+    OPENCV_ERROR = ex
+else:
+    OPENCV_ERROR = None
 from PIL import Image
 from pibooth.pictures import sizing
 from pibooth.utils import LOGGER
@@ -19,7 +25,9 @@ def get_cv_camera_proxy(port=None):
     :type port: int
     """
     if not cv2:
-        return None  # OpenCV is not installed
+        # OpenCV is not installed or can not be loaded
+        LOGGER.debug("OpenCV not available: %s", OPENCV_ERROR)
+        return None
 
     if port is not None:
         if not isinstance(port, int):
@@ -61,7 +69,7 @@ class CvCamera(BaseCamera):
         self._overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGBA2RGB)
 
     def _rotate_image(self, image, rotation):
-        """Rotate an OpenCV image, same direction than RpiCamera.
+        """Rotate an OpenCV image.
         """
         if rotation == 90:
             image = cv2.transpose(image)
@@ -125,7 +133,9 @@ class CvCamera(BaseCamera):
         if effect != 'none':
             LOGGER.warning("Effect with OpenCV camera is not implemented")
 
-        return Image.fromarray(image)
+        # Ensure contiguous uint8 array and explicit RGB for PIL (avoids black image on some setups)
+        image = np.ascontiguousarray(image, dtype=np.uint8)
+        return Image.fromarray(image, mode='RGB')
 
     def get_capture_image(self, effect=None):
         """Capture a new picture.
@@ -135,6 +145,11 @@ class CvCamera(BaseCamera):
 
         if self.capture_iso != self.preview_iso:
             self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.capture_iso)
+
+        # Minimal delay + flush so first frame is valid (avoids black frame, keeps latency low)
+        time.sleep(0.15)
+        for _ in range(4):
+            self._cam.read()
 
         LOGGER.debug("Taking capture at resolution %s", self.resolution)
         ret, image = self._cam.read()
