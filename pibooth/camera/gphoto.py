@@ -268,6 +268,16 @@ class GpCamera(BaseCamera):
 
         return self._captures[-1][0]
 
+    def reset(self):
+        """Close and reopen the gPhoto2 session to release the USB port
+        after an error.
+        """
+        if self._worker:
+            self.stop_preview()
+        self._cam.exit()
+        self._cam.init()
+        LOGGER.info("gPhoto2 camera connection reinitialized")
+
     def _specific_cleanup(self):
         """Close the camera driver, it's definitive.
         """

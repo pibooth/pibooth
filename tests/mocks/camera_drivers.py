@@ -85,5 +85,8 @@ class GpCameraProxyMock:
     def wait_for_event(self, timeout):
         return (self.GP_EVENT_FILE_ADDED, self.capture(None))
 
+    def init(self):
+        pass
+
     def exit(self):
         pass

@@ -31,6 +31,20 @@ def test_gp_capture(camera_gp):
     assert camera_gp.grab_captures()
 
 
+def test_gp_reset(camera_gp):
+    camera_gp.preview(pygame.Rect(0, 0, 800, 480))
+    camera_gp.reset()
+    assert camera_gp._worker is None
+    camera_gp.capture(wait=True)
+    assert camera_gp.grab_captures()
+
+
+def test_cv_reset(camera_cv):
+    camera_cv.reset()  # Nothing to do for OpenCV
+    camera_cv.capture(wait=True)
+    assert camera_cv.grab_captures()
+
+
 def test_hybridc_capture(camera_cv_gp):
     camera_cv_gp.capture(wait=True)
     assert camera_cv_gp.grab_captures()
