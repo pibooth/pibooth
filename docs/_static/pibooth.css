@@ -1,0 +1,299 @@
+/*
+ * Pibooth documentation — typography, spacing and the "paper card" treatment
+ * of the pibooth.org website, layered on top of Furo.
+ *
+ * The palette itself lives in docs/conf.py (light_css_variables /
+ * dark_css_variables); this file only covers what CSS variables cannot
+ * express. Both come from pibooth_pages/src/styles (tokens.css, base.css,
+ * components.css) — keep them in sync when the website changes.
+ */
+
+/* ---------- fonts (self-hosted, same files as the website) ---------- */
+
+@font-face {
+  font-family: 'Amatic SC';
+  src: url('fonts/AmaticSC-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Baloo 2';
+  src: url('fonts/Baloo2-Variable.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  --font-stack: 'Baloo 2', system-ui, -apple-system, sans-serif;
+  --font-stack--headings: 'Baloo 2', system-ui, -apple-system, sans-serif;
+  --font-stack--monospace: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* The website caps its content at 1180px including both gutters; the docs
+     sidebars take their share of that, the text column keeps the rest. */
+  --admonition-font-size: 0.95rem;
+  --admonition-title-font-size: 0.95rem;
+  --sidebar-caption-font-size: 0.8rem;
+
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- headings ---------- */
+
+/* Amatic SC is a narrow display face: it carries the big headings (the
+   website uses it for the hero and the section titles) and hands over to
+   Baloo 2 below, where documentation gets dense. */
+h1,
+h2 {
+  font-family: 'Amatic SC', cursive;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: 3.4rem;
+  margin-bottom: 0.4em;
+}
+
+h2 {
+  font-size: 2.6rem;
+  margin-top: 1.4em;
+  margin-bottom: 0.35em;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.35rem;
+}
+
+h4 {
+  font-size: 1.1rem;
+}
+
+/* The red rule under the page title echoes the accent the website puts on its
+   buttons and section heads. */
+article h1:first-of-type {
+  padding-bottom: 0.25em;
+  border-bottom: 3px solid var(--color-brand-primary);
+}
+
+/* ---------- sidebar brand (mirrors the website header) ---------- */
+
+.sidebar-brand.pibooth-brand {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 0.25rem;
+}
+
+.pibooth-brand-icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+
+.pibooth-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  min-width: 0;
+}
+
+.pibooth-brand-name {
+  font-family: 'Amatic SC', cursive;
+  font-weight: 700;
+  font-size: 1.9rem;
+  color: var(--color-sidebar-brand-text);
+}
+
+.pibooth-brand-version {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-sidebar-caption-text);
+}
+
+.pibooth-site-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 var(--sidebar-item-spacing-horizontal) 0.5rem;
+  padding: 7px 14px;
+  border: 1.5px solid var(--color-sidebar-background-border);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-sidebar-link-text);
+  text-decoration: none;
+  align-self: flex-start;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.pibooth-site-link:hover {
+  color: var(--color-sidebar-caption-text);
+  border-color: var(--color-sidebar-caption-text);
+}
+
+.pibooth-site-link svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ---------- sidebar navigation ---------- */
+
+/* Same treatment as the website's `.eyebrow`: small, uppercase, gold. */
+.sidebar-tree .caption,
+.toc-title {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+}
+
+.sidebar-tree .current-page > .reference {
+  font-weight: 800;
+  color: var(--color-brand-primary);
+}
+
+.sidebar-search {
+  border-radius: 12px;
+  border-width: 1.5px;
+}
+
+/* ---------- links ---------- */
+
+a.reference,
+a.footnote-reference {
+  font-weight: 600;
+}
+
+/* ---------- cards: admonitions, code, tables, figures ---------- */
+
+/* The website builds everything out of the same panel: soft radius, hairline
+   border, shadow that only shows on the light theme. */
+.admonition,
+div.topic,
+div.literal-block-wrapper,
+div.highlight,
+.table-wrapper > table,
+figure img,
+article img {
+  border-radius: 16px;
+}
+
+.admonition,
+div.topic {
+  border: 1px solid var(--color-background-border);
+  border-left-width: 4px;
+  box-shadow: 0 18px 34px -18px rgba(10, 7, 5, 0.25);
+  overflow: hidden;
+}
+
+.admonition > .admonition-title,
+div.topic > .topic-title {
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.admonition > .admonition-title::before,
+div.topic > .topic-title::before {
+  border-radius: 4px;
+}
+
+div.highlight {
+  border: 1px solid var(--color-background-border);
+}
+
+div.highlight pre,
+pre {
+  border-radius: 16px;
+}
+
+code.literal {
+  border-radius: 6px;
+  border: 1px solid var(--color-background-border);
+  font-size: 0.86em;
+}
+
+/* Screenshots, diagrams and photo samples read as prints pinned on the page.
+   Most of them are transparent PNGs drawn in black ink, so on the dark theme
+   they get their paper back (see `pibooth-artwork-backing` in conf.py). */
+article img {
+  box-shadow: 0 18px 34px -18px rgba(10, 7, 5, 0.35);
+  background-color: var(--pibooth-artwork-backing);
+}
+
+/* ...except the wordmark and the badges at the top of the index page, which
+   are flat artwork already drawn for the theme they show up in. */
+article img[src*='pibooth.png'],
+article img[src*='pibooth-dark.png'],
+article img[src*='img.shields.io'],
+article img[src*='badge.fury.io'] {
+  border-radius: 0;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+.table-wrapper > table {
+  overflow: hidden;
+}
+
+table.docutils th {
+  font-weight: 800;
+}
+
+/* ---------- copy button ---------- */
+
+button.copybtn {
+  border-radius: 8px;
+}
+
+/* ---------- footer ---------- */
+
+footer .bottom-of-page {
+  border-top: 1px solid var(--color-background-border);
+  font-size: 0.88rem;
+}
+
+footer .bottom-of-page .left-details {
+  font-weight: 400;
+}
+
+.related-pages a .title {
+  font-weight: 700;
+}
+
+/* ---------- mobile header ---------- */
+
+.mobile-header .header-center a {
+  font-family: 'Amatic SC', cursive;
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 46em) {
+  h1 {
+    font-size: 2.8rem;
+  }
+
+  h2 {
+    font-size: 2.2rem;
+  }
+}
