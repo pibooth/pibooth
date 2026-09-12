@@ -263,7 +263,7 @@ html_static_path = ['_static']
 html_css_files = ['pibooth.css']
 
 # No `html_logo`: _templates/sidebar/brand.html draws the brand instead. The
-# `pibooth.png` / `pibooth-dark.png` wordmarks are used by index.rst.
+# `pibooth.png` wordmark is used by index.rst and by the GitHub README.
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32

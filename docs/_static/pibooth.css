@@ -234,10 +234,9 @@ article img {
   background-color: var(--pibooth-artwork-backing);
 }
 
-/* ...except the wordmark and the badges at the top of the index page, which
-   are flat artwork already drawn for the theme they show up in. */
+/* ...except the wordmark and the badges at the top of the index page: flat
+   artwork, and the wordmark is already coloured to read on either theme. */
 article img[src*='pibooth.png'],
-article img[src*='pibooth-dark.png'],
 article img[src*='img.shields.io'],
 article img[src*='badge.fury.io'] {
   border-radius: 0;

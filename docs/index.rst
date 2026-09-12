@@ -2,7 +2,7 @@
 Welcome to Pibooth's documentation!
 ===================================
 
-|Pibooth| |PiboothDark|
+|Pibooth|
 
 |PythonVersions| |PypiPackage| |Downloads|
 
@@ -79,12 +79,6 @@ Indices and tables
 .. |Pibooth| image:: pibooth.png
    :target: https://www.pibooth.org
    :align: middle
-   :class: only-light
-
-.. |PiboothDark| image:: pibooth-dark.png
-   :target: https://www.pibooth.org
-   :align: middle
-   :class: only-dark
 
 .. |PythonVersions| image:: https://img.shields.io/badge/python-3.10+-red.svg
    :target: https://www.python.org/downloads
