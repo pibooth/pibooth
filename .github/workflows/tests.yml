@@ -48,10 +48,7 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
-        # Without the token the upload is refused ('Token required because
-        # branch is protected') and silently dropped. Forks have no access to
-        # the secret: their pull requests fall back to a tokenless upload.
-        token: ${{ secrets.CODECOV_TOKEN }}
+        token: ${{ secrets.CODECOV_TOKEN }}  # unset on forks: tokenless upload
 
   package:
     runs-on: ubuntu-latest

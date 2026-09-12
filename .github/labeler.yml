@@ -1,5 +1,4 @@
-# Labels applied to pull requests from the files they change, by the
-# "Pull Request Labeler" workflow (.github/workflows/labeler.yml).
+# Labels applied to a pull request from the files it changes.
 # Syntax: https://github.com/actions/labeler#match-object
 
 documentation:

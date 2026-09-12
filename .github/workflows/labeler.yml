@@ -1,14 +1,8 @@
-# Apply labels to pull requests from the files they change, as configured in
-# .github/labeler.yml. The labels that do not exist yet are created by the
-# action (that is what the 'issues: write' permission is for).
-#
-# 'pull_request_target' rather than 'pull_request' so that the token has the
-# write access needed to label a pull request opened from a fork. The
-# workflow does not check out nor run anything from the pull request, so
-# the elevated context is safe.
-
 name: Pull Request Labeler
 
+# 'pull_request_target' gives the token the write access needed to label a
+# pull request opened from a fork. Nothing from the pull request is checked
+# out nor run here.
 on:
   pull_request_target:
     types: [opened, synchronize, reopened]
@@ -16,7 +10,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
-  issues: write
+  issues: write  # to create the labels that do not exist yet
 
 jobs:
   labeler:
