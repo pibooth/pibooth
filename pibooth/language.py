@@ -193,7 +193,7 @@ DEFAULT = {
     },
     'se': {
         'intro': "Ta en bild",
-        'intro_print': 'Eller så kan du\fortfarande\skriva ut den här bilden',
+        'intro_print': 'Eller så kan du\nfortfarande\nskriva ut den här bilden',
         'choose': "Välj layout",
         '1': "1 bild",
         '2': "2 bilder",
@@ -203,7 +203,7 @@ DEFAULT = {
         'smile': "Smile!",
         'processing': "Jobbar...",
         'print': "Skriv ut bilden!",
-        'print_forget': "Glöm\den här\bilden",
+        'print_forget': "Glöm\nden här\nbilden",
         'finished': "Tack",
         'oops': "Oops, nånting blev fel",
     },    
