@@ -2,10 +2,12 @@
 
 
 import os
+import sys
 import pytest
 from PIL import Image
 from pibooth import language
 from pibooth.counters import Counters
+from pibooth.printer import Printer
 from pibooth.config.parser import PiConfigParser
 from pibooth.camera import get_rpi2_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
 from pibooth.camera import Rpi2Camera, GpCamera, CvCamera, HybridRpi2Camera, HybridCvCamera
@@ -14,6 +16,8 @@ from pibooth.camera import Rpi2Camera, GpCamera, CvCamera, HybridRpi2Camera, Hyb
 ISO = 100
 RESOLUTION = (1934, 2464)
 MOCKS_DIR = os.path.join(os.path.dirname(__file__), 'mocks')
+sys.path.insert(0, MOCKS_DIR)
+import printer_drivers  # noqa: E402 - import shall be done after adding mocks to paths
 CAPTURES_DIR = os.path.join(os.path.dirname(__file__), 'captures')
 
 
@@ -67,7 +71,27 @@ def cfg(cfg_path):
 
 @pytest.fixture
 def counters(tmpdir):
-    return Counters(str(tmpdir.join('data.pickle')), nbr_printed=0)
+    return Counters(str(tmpdir.join('data.json')), nbr_printed=0)
+
+
+@pytest.fixture
+def cups_conn(monkeypatch):
+    conn = printer_drivers.CupsConnectionMock(
+        printers={'fake-printer': {'printer-state': printer_drivers.PRINTER_STATE_IDLE,
+                                   'printer-state-reasons': [],
+                                   'printer-state-message': ''}},
+        default='fake-printer')
+    monkeypatch.setattr('pibooth.printer.cups', printer_drivers.CupsModuleMock(conn))
+    monkeypatch.setattr('pibooth.printer.Subscriber', printer_drivers.CupsSubscriberMock, raising=False)
+    monkeypatch.setattr('pibooth.printer.event', printer_drivers.CupsEventMock, raising=False)
+    return conn
+
+
+@pytest.fixture
+def printer(cups_conn):
+    printer = Printer()
+    yield printer
+    printer.quit()
 
 
 @pytest.fixture(scope='session')
