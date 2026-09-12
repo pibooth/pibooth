@@ -47,16 +47,13 @@ exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
 
-# The documentation uses the same "darkroom" look as the pibooth.org website:
-# the palette, the fonts and the card/hairline treatment are taken from
-# https://github.com/werdeil/pibooth_pages (src/styles/tokens.css). Furo is
-# used because it exposes that whole palette as CSS variables, and ships the
-# light/dark switch the website also has.
+# Furo, rather than the classic Read the Docs theme, because it exposes its
+# whole palette as CSS variables and ships the light/dark switch the
+# pibooth.org website also has.
 html_theme = 'furo'
 
-# Palette from pibooth_pages/src/styles/tokens.css. The website is dark-first,
-# the light variant is the one below: Furo picks the right one from the
-# visitor's system preference and from the theme switch in the sidebar.
+# Palette from pibooth_pages/src/styles/tokens.css. Furo picks between the two
+# sets below from the visitor's system preference and from the theme switch.
 _LIGHT_VARIABLES = {
     # --surface-*
     'color-background-primary': '#fbf6ec',
@@ -107,8 +104,8 @@ _LIGHT_VARIABLES = {
     'color-header-background': '#f2ead9',
     'color-header-border': 'rgba(36, 29, 24, 0.12)',
     'color-header-text': '#241d18',
-    # Most diagrams here are transparent PNGs drawn with black ink; on the
-    # light theme the page itself is the paper they need.
+    # The diagrams are transparent PNGs drawn with black ink, and here the
+    # page is already the paper they need.
     'pibooth-artwork-backing': 'transparent',
 }
 
@@ -157,7 +154,7 @@ _DARK_VARIABLES = {
     'color-header-background': '#241d18',
     'color-header-border': 'rgba(239, 230, 211, 0.12)',
     'color-header-text': '#efe6d3',
-    # ...on the dark theme they have to bring their own paper.
+    # The black-ink diagrams have to bring their own paper on this theme.
     'pibooth-artwork-backing': '#fbf6ec',
 }
 
@@ -240,7 +237,7 @@ html_theme_options = {
             'class': '',
         },
     ],
-    # "Edit this page" links, the website links to GitHub everywhere too.
+    # Source of the "Edit this page" links.
     'source_repository': 'https://github.com/pibooth/pibooth/',
     'source_branch': 'master',
     'source_directory': 'docs/',
@@ -265,8 +262,7 @@ html_static_path = ['_static']
 # the colors declared above.
 html_css_files = ['pibooth.css']
 
-# No `html_logo`: the sidebar brand is rendered by _templates/sidebar/brand.html
-# so that it matches the website header (icon + name in the display font). The
+# No `html_logo`: _templates/sidebar/brand.html draws the brand instead. The
 # `pibooth.png` / `pibooth-dark.png` wordmarks are used by index.rst.
 
 # The name of an image file (within the static path) to use as favicon of the

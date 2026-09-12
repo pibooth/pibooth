@@ -31,8 +31,6 @@ body {
   --font-stack--headings: 'Baloo 2', system-ui, -apple-system, sans-serif;
   --font-stack--monospace: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 
-  /* The website caps its content at 1180px including both gutters; the docs
-     sidebars take their share of that, the text column keeps the rest. */
   --admonition-font-size: 0.95rem;
   --admonition-title-font-size: 0.95rem;
   --sidebar-caption-font-size: 0.8rem;
@@ -82,8 +80,7 @@ h4 {
   font-size: 1.1rem;
 }
 
-/* The red rule under the page title echoes the accent the website puts on its
-   buttons and section heads. */
+/* The red rule under the page title carries the website's button accent. */
 article h1:first-of-type {
   padding-bottom: 0.25em;
   border-bottom: 3px solid var(--color-brand-primary);
@@ -185,7 +182,7 @@ a.footnote-reference {
 /* ---------- cards: admonitions, code, tables, figures ---------- */
 
 /* The website builds everything out of the same panel: soft radius, hairline
-   border, shadow that only shows on the light theme. */
+   border, and a shadow that only the light theme is light enough to show. */
 .admonition,
 div.topic,
 div.literal-block-wrapper,
