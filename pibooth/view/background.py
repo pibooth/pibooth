@@ -480,109 +480,84 @@ class ProcessingBackground(Background):
 
 class PrintBackground(Background):
 
-    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0):
+    def __init__(self, arrow_location=ARROW_BOTTOM, arrow_offset=0, can_forget=True):
         Background.__init__(self, "print")
         self.arrow_location = arrow_location
         self.arrow_offset = arrow_offset
+        self.can_forget = can_forget
         self.right_arrow = None
         self.right_arrow_pos = None
         self.left_arrow = None
         self.left_arrow_pos = None
+        self.left_image = None
+        self.left_image_pos = None
+        self.right_image = None
+        self.right_image_pos = None
 
     def resize(self, screen):
         Background.resize(self, screen)
-        if self._need_update and self.arrow_location != ARROW_HIDDEN:
+        if self._need_update:
 
-            if self.arrow_location == ARROW_TOUCH:
-                size = (self._rect.width // 4, self._rect.height // 4)
-                # Right arrow
-                self.right_arrow = pictures.get_pygame_image(
-                    "printer_touch.png", size, hflip=False, vflip=False, color=self._text_color)
-                x = int(self._rect.left + self._rect.width * 0.70
-                        - self.right_arrow.get_rect().width // 2)
-                y = int(self._rect.top + self._rect.height * 0.45)
+            images_size = (self._rect.width // 5, self._rect.height // 5)
+
+            # Left image forget/no print
+            if self.can_forget:
+                drop_image = "drop_touch.png" if self.arrow_location == ARROW_TOUCH else "drop.png"
+                self.left_image = pictures.get_pygame_image(drop_image
+                    , images_size, hflip=False, vflip=False, color=self._text_color)
             else:
-                size = (self._rect.width * 0.3, self._rect.height * 0.3)
+                no_print_image = "no_print_touch.png" if self.arrow_location == ARROW_TOUCH else "printer_failure.png"
+                self.left_image = pictures.get_pygame_image(
+                    no_print_image, images_size, hflip=False, vflip=False, color=self._text_color)
+            x = int(self._rect.left + self._rect.width * 0.05)
+            y = int(self._rect.top + self._rect.height // 2 - self.left_image.get_rect().height // 2)
+            self.left_image_pos = (x, y)
 
-                vflip = True if self.arrow_location == ARROW_TOP else False
+            # Right image print
+            print_image = "printer_touch.png" if self.arrow_location == ARROW_TOUCH else "printer.png"
+            self.right_image = pictures.get_pygame_image(
+                print_image, images_size, hflip=False, vflip=False, color=self._text_color)
+            x = int(self._rect.left + self._rect.width * 0.95 - self.right_image.get_rect().width)
+            y = int(self._rect.top + self._rect.height // 2 - self.right_image.get_rect().height // 2)
+            self.right_image_pos = (x, y)
 
-                # Right arrow
-                self.right_arrow = pictures.get_pygame_image(
-                    "arrow.png", size, hflip=True, vflip=vflip, color=self._text_color)
+            # No arrows to draw
+            if self.arrow_location == ARROW_HIDDEN or self.arrow_location == ARROW_TOUCH:
+                self.left_arrow = None
+                self.right_arrow = None
+                return
 
-                x = int(self._rect.left + self._rect.width * 0.75
-                        - self.right_arrow.get_rect().width // 2)
-                if self.arrow_location == ARROW_TOP:
-                    y = self._rect.top + 10
-                else:
-                    y = int(self._rect.top + 2 * self._rect.height // 3)
-
-            self.right_arrow_pos = (x + self.arrow_offset, y)
+            arrows_size = (self._rect.width * 0.3, self._rect.height * 0.3)
+            vflip = True if self.arrow_location == ARROW_TOP else False
 
             # Left arrow
-            size = (self._rect.width * 0.1, self._rect.height * 0.1)
-
-            if self.arrow_location == ARROW_TOUCH:
-                self.left_arrow = pictures.get_pygame_image(
-                    "hand.png", size, hflip=False, vflip=False, angle=70, color=self._text_color)
-            else:
-                vflip = True if self.arrow_location == ARROW_TOP else False
-                angle = 70 if self.arrow_location == ARROW_TOP else -70
-                self.left_arrow = pictures.get_pygame_image(
-                    "arrow.png", size, hflip=False, vflip=vflip, angle=angle, color=self._text_color)
-
-            x = int(self._rect.left + self._rect.width // 2
-                    - self.left_arrow.get_rect().width // 2)
-
+            self.left_arrow = pictures.get_pygame_image(
+                "arrow.png", arrows_size, hflip=self.arrow_location == ARROW_TOP, vflip=vflip, color=self._text_color)
+            x = int(self.left_image_pos[0] + self.left_image.get_rect().width // 2 - self.left_arrow.get_rect().width // 2)
             if self.arrow_location == ARROW_TOP:
                 y = self._rect.top + 10
             else:
-                y = int(self._rect.bottom - self.left_arrow.get_rect().height * 1.1)
-
+                y = int(self._rect.top + self._rect.height - self.left_arrow.get_rect().height - 10)
             self.left_arrow_pos = (x - self.arrow_offset, y)
 
-    def resize_texts(self):
-        """Update text surfaces.
-        """
-        if self.arrow_location == ARROW_HIDDEN:
-            rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._text_border,
-                               self._rect.width / 2 - 2 * self._text_border,
-                               self._rect.height - 2 * self._text_border)
-            align = 'center'
-        elif self.arrow_location == ARROW_BOTTOM:
-            rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._text_border,
-                               self._rect.width / 2 - 2 * self._text_border,
-                               self._rect.height * 0.6 - self._text_border)
-            align = 'bottom-center'
-        elif self.arrow_location == ARROW_TOUCH:
-            rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._text_border,
-                               self._rect.width / 2 - 2 * self._text_border,
-                               self._rect.height * 0.4 - self._text_border)
-            align = 'bottom-center'
-        else:
-            rect = pygame.Rect(self._rect.width / 2 + self._text_border, self._rect.height * 0.4,
-                               self._rect.width / 2 - 2 * self._text_border,
-                               self._rect.height * 0.6 - self._text_border)
-            align = 'top-center'
-        Background.resize_texts(self, rect, align)
-
-        text = get_translated_text("print_forget")
-        if text:
-            rect = pygame.Rect(self._rect.width // 2, 0,
-                               self._rect.width // 5 - 2 * self._text_border,
-                               self._rect.height * 0.3 - 2 * self._text_border)
+            # Right arrow
+            self.right_arrow = pictures.get_pygame_image(
+                "arrow.png", arrows_size, hflip=self.arrow_location == ARROW_BOTTOM, vflip=vflip, color=self._text_color)
+            x = int(self.right_image_pos[0] + self.right_image.get_rect().width // 2 - self.right_arrow.get_rect().width // 2)
             if self.arrow_location == ARROW_TOP:
-                rect.top = self._rect.height * 0.08
+                y = self._rect.top + 10
             else:
-                rect.bottom = self._rect.height - self._rect.height * 0.08
-
-            self._write_text(text, rect)
+                y = int(self._rect.top + self._rect.height - self.right_arrow.get_rect().height - 10)
+            self.right_arrow_pos = (x - self.arrow_offset, y)
 
     def paint(self, screen):
         Background.paint(self, screen)
-        if self.arrow_location != ARROW_HIDDEN:
-            screen.blit(self.right_arrow, self.right_arrow_pos)
+        screen.blit(self.left_image, self.left_image_pos)
+        screen.blit(self.right_image, self.right_image_pos)
+        if self.left_arrow:
             screen.blit(self.left_arrow, self.left_arrow_pos)
+        if self.right_arrow:
+            screen.blit(self.right_arrow, self.right_arrow_pos)
 
 
 class FinishedBackground(Background):
