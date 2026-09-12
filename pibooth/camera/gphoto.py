@@ -65,7 +65,12 @@ def get_gp_camera_proxy(port=None):
 def gp_log_callback(level, domain, string, data=None):
     """Logging callback for gphoto2.
     """
-    LOGGER.getChild('gphoto2').debug(domain.decode("utf-8") + u': ' + string.decode("utf-8"))
+    # python-gphoto2 >= 2.5 passes str, older versions pass bytes
+    if isinstance(domain, bytes):
+        domain = domain.decode("utf-8")
+    if isinstance(string, bytes):
+        string = string.decode("utf-8")
+    LOGGER.getChild('gphoto2').debug(domain + ': ' + string)
 
 
 class GpCamera(BaseCamera):
