@@ -1,0 +1,131 @@
+/* Pibooth colours for the Read the Docs theme.
+   Palette sampled from the logo: deep red, light red and cream on black. */
+
+:root {
+    --pibooth-red: #a51c22;
+    --pibooth-red-dark: #731216;
+    --pibooth-red-light: #b01d23;
+    --pibooth-cream: #e8dcc0;
+    --pibooth-ink: #221b1c;
+    --pibooth-ink-dark: #14100f;
+}
+
+/* -- Side bar ------------------------------------------------------------- */
+
+.wy-nav-side {
+    background: var(--pibooth-ink);
+}
+
+/* The logo is drawn in black on a transparent background, so this area is
+   given the cream of the palette rather than a dark or saturated colour. */
+.wy-side-nav-search {
+    background: var(--pibooth-cream);
+    border-bottom: 3px solid var(--pibooth-red);
+}
+
+.wy-side-nav-search input[type=text] {
+    border: 1px solid var(--pibooth-red);
+}
+
+.wy-side-nav-search > div.version,
+.wy-side-nav-search > a,
+.wy-side-nav-search > a:hover {
+    color: var(--pibooth-red-dark);
+}
+
+.wy-menu-vertical a:hover {
+    background: var(--pibooth-ink-dark);
+    color: var(--pibooth-cream);
+}
+
+.wy-menu-vertical li.current > a,
+.wy-menu-vertical li.on a {
+    background: #f7f3ea;
+    border-left: 4px solid var(--pibooth-red);
+}
+
+.wy-menu-vertical li.current a:hover {
+    background: #efe7d7;
+}
+
+/* Lightened brand red: the logo red is too dark to be read on the side bar. */
+.wy-menu-vertical p.caption {
+    color: #e2565a;
+}
+
+/* Mobile header */
+.wy-nav-top {
+    background: var(--pibooth-red-dark);
+}
+
+/* -- Body ----------------------------------------------------------------- */
+
+a,
+a:visited {
+    color: var(--pibooth-red);
+}
+
+a:hover,
+a:active {
+    color: var(--pibooth-red-light);
+}
+
+.rst-content .toctree-wrapper > p.caption,
+.rst-content h1,
+.rst-content h2,
+.rst-content h3 {
+    color: var(--pibooth-ink);
+}
+
+.rst-content code.literal,
+.rst-content tt.literal {
+    color: var(--pibooth-red-dark);
+    background: #fbf7ef;
+    border-color: #e6dcc8;
+}
+
+/* -- Admonitions ---------------------------------------------------------- */
+
+.rst-content .warning .admonition-title,
+.rst-content .caution .admonition-title,
+.rst-content .attention .admonition-title {
+    background: var(--pibooth-red);
+}
+
+.rst-content .danger .admonition-title,
+.rst-content .error .admonition-title {
+    background: var(--pibooth-red-dark);
+}
+
+.rst-content .note .admonition-title,
+.rst-content .hint .admonition-title,
+.rst-content .tip .admonition-title,
+.rst-content .seealso .admonition-title {
+    background: var(--pibooth-ink);
+}
+
+.rst-content .note,
+.rst-content .hint,
+.rst-content .tip,
+.rst-content .seealso {
+    background: #f7f3ea;
+}
+
+/* -- Buttons and version flyout ------------------------------------------- */
+
+.btn-neutral {
+    background: #f7f3ea !important;
+}
+
+.btn-neutral:hover {
+    background: #efe7d7 !important;
+}
+
+.rst-versions .rst-current-version {
+    background: var(--pibooth-ink-dark);
+    color: var(--pibooth-cream);
+}
+
+.rst-versions.shift-up .rst-other-versions {
+    background: var(--pibooth-ink);
+}

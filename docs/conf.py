@@ -67,6 +67,9 @@ add_module_names = False
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# Style sheets applied on top of the theme, loaded from 'html_static_path'.
+html_css_files = ['custom.css']
+
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 # NOTE: can not put it in the _static folder, else it will not be displayed
