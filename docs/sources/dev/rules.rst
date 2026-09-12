@@ -17,7 +17,7 @@ its surroundings rather than modernise them in passing:
   arguments — ``LOGGER.info("Loaded %s", name)`` and not a pre-formatted
   string
 - paths use ``import os.path as osp``
-- strings are formatted with ``"{}".format(...)``
+- strings are formatted with f-strings
 
 2. **Capture / Picture / Image**
 
