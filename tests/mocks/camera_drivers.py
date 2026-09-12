@@ -1,33 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-class RpiCameraProxyMock:
-
-    MAX_RESOLUTION = (3280, 2464)
-
-    def __init__(self, fake_captures):
-        self.preview = None
-        self.fake_captures = fake_captures
-
-    def add_overlay(self, imagebytes, size, layer=3, window=tuple(), fullscreen=False):
-        return object()
-
-    def remove_overlay(self, overlay):
-        pass
-
-    def start_preview(self, resolution=tuple(), hflip=False, fullscreen=False, window=tuple()):
-        self.preview = object()
-
-    def stop_preview(self):
-        self.preview = None
-
-    def capture(self, stream, format='jpeg'):
-        self.fake_captures[0].convert('RGB').save(stream, format=format)
-
-    def close(self):
-        pass
-
-
 class GpConfigMock:
 
     def __init__(self, name=""):

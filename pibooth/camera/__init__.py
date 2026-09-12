@@ -3,19 +3,16 @@
 from pibooth.utils import LOGGER
 from pibooth.camera.gphoto import GpCamera, get_gp_camera_proxy
 from pibooth.camera.opencv import CvCamera, get_cv_camera_proxy
-from pibooth.camera.libcamera import LibCamera, get_libcamera_camera_proxy
-from pibooth.camera.hybrid import HybridLibCamera, HybridCvCamera
+from pibooth.camera.hybrid import HybridCvCamera
 
 
-def close_proxy(gp_cam_proxy, cv_cam_proxy, lib_cam_proxy):
+def close_proxy(gp_cam_proxy, cv_cam_proxy):
     """Close proxy drivers.
     """
     if gp_cam_proxy:
         GpCamera(gp_cam_proxy).quit()
     if cv_cam_proxy:
         CvCamera(cv_cam_proxy).quit()
-    if lib_cam_proxy:
-        LibCamera(lib_cam_proxy).quit()
 
 
 def find_camera():
@@ -26,27 +23,17 @@ def find_camera():
     """
     gp_cam_proxy = get_gp_camera_proxy()
     cv_cam_proxy = get_cv_camera_proxy()
-    lib_cam_proxy = get_libcamera_camera_proxy()
 
-    if lib_cam_proxy and gp_cam_proxy:
-        LOGGER.info("Configuring hybrid camera (Libcamera + gPhoto2) ...")
-        close_proxy(None, cv_cam_proxy, None)
-        return HybridLibCamera(lib_cam_proxy, gp_cam_proxy)
     if cv_cam_proxy and gp_cam_proxy:
         LOGGER.info("Configuring hybrid camera (OpenCV + gPhoto2) ...")
-        close_proxy(None, None, lib_cam_proxy)
         return HybridCvCamera(cv_cam_proxy, gp_cam_proxy)
     if gp_cam_proxy:
         LOGGER.info("Configuring gPhoto2 camera ...")
-        close_proxy(None, cv_cam_proxy, lib_cam_proxy)
+        close_proxy(None, cv_cam_proxy)
         return GpCamera(gp_cam_proxy)
-    if lib_cam_proxy:
-        LOGGER.info("Configuring Libcamera camera ...")
-        close_proxy(gp_cam_proxy, cv_cam_proxy, None)
-        return LibCamera(lib_cam_proxy)
     if cv_cam_proxy:
         LOGGER.info("Configuring OpenCV camera ...")
-        close_proxy(gp_cam_proxy, None, lib_cam_proxy)
+        close_proxy(gp_cam_proxy, None)
         return CvCamera(cv_cam_proxy)
 
-    raise EnvironmentError("Neither GPhoto2 nor Libcamera nor OpenCV camera detected")
+    raise EnvironmentError("Neither gPhoto2 nor OpenCV camera detected")
