@@ -198,9 +198,12 @@ def scene_builder():
 @pytest.fixture(scope='session')
 def proxy_cv(init_pygame, init_tasks):
     if os.environ.get('CAMERA_CVDRIVER') == "dummy":
-        import cv2
-        return cv2.VideoCapture(os.path.join(CAPTURES_DIR, 'portrait', 'capture0.png'))
-    return get_cv_camera_proxy()
+        pytest.importorskip('cv2', reason="OpenCV is not installed")
+        return camera_drivers.CvCameraProxyMock(os.path.join(CAPTURES_DIR, 'portrait', 'capture0.png'))
+    proxy = get_cv_camera_proxy()
+    if proxy is None:
+        pytest.skip("No OpenCV camera connected (set CAMERA_CVDRIVER=dummy to use a fake one)")
+    return proxy
 
 
 @pytest.fixture(scope='session')
@@ -225,7 +228,10 @@ def proxy_gp(init_pygame, init_tasks, captures_portrait):
         from pibooth.camera import gphoto
         gphoto.gp = camera_drivers.GpCameraProxyMock([])
         return camera_drivers.GpCameraProxyMock(captures_portrait)
-    return get_gp_camera_proxy()
+    proxy = get_gp_camera_proxy()
+    if proxy is None:
+        pytest.skip("No gPhoto2 camera connected (set CAMERA_GPDRIVER=dummy to use a fake one)")
+    return proxy
 
 
 @pytest.fixture(scope='session')

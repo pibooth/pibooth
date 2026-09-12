@@ -1,5 +1,43 @@
 # -*- coding: utf-8 -*-
 
+try:
+    import cv2
+except ImportError:
+    cv2 = None
+
+
+class CvCameraProxyMock:
+
+    """Fake ``cv2.VideoCapture`` returning always the same frame, read from
+    an image file. Reading a still image with ``cv2.VideoCapture`` gives a
+    single frame, which is not enough for the preview loop and the capture.
+    """
+
+    def __init__(self, filename):
+        self.frame = cv2.imread(filename)
+        self.props = {}
+        self.released = False
+
+    def isOpened(self):
+        return not self.released
+
+    def get(self, prop):
+        if prop == cv2.CAP_PROP_FRAME_WIDTH:
+            return self.frame.shape[1]
+        if prop == cv2.CAP_PROP_FRAME_HEIGHT:
+            return self.frame.shape[0]
+        return self.props.get(prop, 0)
+
+    def set(self, prop, value):
+        self.props[prop] = value
+        return True
+
+    def read(self):
+        return True, self.frame.copy()
+
+    def release(self):
+        self.released = True
+
 
 class GpConfigMock:
 
