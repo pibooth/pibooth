@@ -9,13 +9,19 @@ from pibooth.utils import LOGGER
 
 class Counters:
 
+    """Persistent counters stored in a JSON file. A ``.pickle`` file written by
+    a previous version, next to the JSON one, is migrated on first load.
+    """
+
     def __init__(self, filename='', **kwargs):
         self.data = kwargs.copy()
         self.default = kwargs
-        self.filename = osp.abspath(osp.expanduser(filename))
-        # Check both pickle and json files for backward compatibility
-        json_file = self.filename.replace('.pickle', '.json')
-        if osp.isfile(json_file) or osp.isfile(self.filename):
+        filename = osp.abspath(osp.expanduser(filename))
+        if filename.endswith('.pickle'):
+            filename = filename[:-len('.pickle')] + '.json'
+        self.filename = filename
+        self.legacy_filename = osp.splitext(filename)[0] + '.pickle'
+        if osp.isfile(self.filename) or osp.isfile(self.legacy_filename):
             self.load()
 
     def __str__(self):
@@ -56,36 +62,26 @@ class Counters:
         """Migrate legacy pickle counters file to JSON format.
         """
         try:
-            with open(self.filename, 'rb') as fp:
+            with open(self.legacy_filename, 'rb') as fp:
                 self.data.update(pickle.load(fp))
-            LOGGER.info("Migrated counters from pickle to JSON format")
-            self.save()
-        except (pickle.UnpicklingError, EOFError, Exception) as ex:
+            LOGGER.info("Migrated counters from '%s' to JSON format", self.legacy_filename)
+        except Exception as ex:
             LOGGER.warning("Could not migrate pickle counters: %s", ex)
+        self.save()
 
     def load(self):
         """Load the saved counters.
         """
-        json_file = self.filename.replace('.pickle', '.json')
-
-        if osp.isfile(json_file):
-            self.filename = json_file
+        if osp.isfile(self.filename):
             try:
                 with open(self.filename, 'r') as fp:
                     self.data.update(json.load(fp))
-                return
             except (json.JSONDecodeError, ValueError):
                 LOGGER.warning("File '%s' corrupted, resetting counters", self.filename)
                 self.data = self.default.copy()
                 self.save()
-                return
-
-        # Legacy pickle file: migrate to JSON
-        if osp.isfile(self.filename) and self.filename.endswith('.pickle'):
+        elif osp.isfile(self.legacy_filename):
             self._migrate_pickle()
-            self.filename = json_file
-            self.save()
-            return
 
     def reset(self):
         """Reset all counters.
@@ -96,9 +92,6 @@ class Counters:
     def save(self):
         """Save the current counters in a JSON file (atomic write).
         """
-        if self.filename.endswith('.pickle'):
-            self.filename = self.filename.replace('.pickle', '.json')
-
         tmp_file = self.filename + '.tmp'
         try:
             with open(tmp_file, 'w') as fp:
