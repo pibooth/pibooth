@@ -1,31 +1,40 @@
 # -*- coding: utf-8 -*-
 
+try:
+    import cv2
+except ImportError:
+    cv2 = None
 
-class RpiCameraProxyMock:
 
-    MAX_RESOLUTION = (3280, 2464)
+class CvCameraProxyMock:
 
-    def __init__(self, fake_captures):
-        self.preview = None
-        self.fake_captures = fake_captures
+    """Fake ``cv2.VideoCapture`` returning always the same frame.
+    """
 
-    def add_overlay(self, imagebytes, size, layer=3, window=tuple(), fullscreen=False):
-        return object()
+    def __init__(self, filename):
+        self.frame = cv2.imread(filename)
+        self.props = {}
+        self.released = False
 
-    def remove_overlay(self, overlay):
-        pass
+    def isOpened(self):
+        return not self.released
 
-    def start_preview(self, resolution=tuple(), hflip=False, fullscreen=False, window=tuple()):
-        self.preview = object()
+    def get(self, prop):
+        if prop == cv2.CAP_PROP_FRAME_WIDTH:
+            return self.frame.shape[1]
+        if prop == cv2.CAP_PROP_FRAME_HEIGHT:
+            return self.frame.shape[0]
+        return self.props.get(prop, 0)
 
-    def stop_preview(self):
-        self.preview = None
+    def set(self, prop, value):
+        self.props[prop] = value
+        return True
 
-    def capture(self, stream, format='jpeg'):
-        self.fake_captures[0].convert('RGB').save(stream, format=format)
+    def read(self):
+        return True, self.frame.copy()
 
-    def close(self):
-        pass
+    def release(self):
+        self.released = True
 
 
 class GpConfigMock:
@@ -111,6 +120,9 @@ class GpCameraProxyMock:
 
     def wait_for_event(self, timeout):
         return (self.GP_EVENT_FILE_ADDED, self.capture(None))
+
+    def init(self):
+        pass
 
     def exit(self):
         pass

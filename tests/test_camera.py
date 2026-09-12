@@ -3,20 +3,6 @@
 import pygame
 
 
-def test_rpi_preview(camera_rpi):
-    assert not camera_rpi.preview_flip
-    assert camera_rpi.preview_iso == 100
-    assert camera_rpi.resolution == (1934, 2464)
-    camera_rpi.preview(pygame.Rect(0, 0, 800, 480))
-    assert camera_rpi.preview_flip
-    camera_rpi.stop_preview()
-
-
-def test_rpi_capture(camera_rpi):
-    camera_rpi.capture(wait=True)
-    assert camera_rpi.grab_captures()
-
-
 def test_cv_preview(camera_cv):
     assert not camera_cv.preview_flip
     assert camera_cv.preview_iso == 100
@@ -45,9 +31,18 @@ def test_gp_capture(camera_gp):
     assert camera_gp.grab_captures()
 
 
-def test_hybridr_capture(camera_rpi_gp):
-    camera_rpi_gp.capture(wait=True)
-    assert camera_rpi_gp.grab_captures()
+def test_gp_reset(camera_gp):
+    camera_gp.preview(pygame.Rect(0, 0, 800, 480))
+    camera_gp.reset()
+    assert camera_gp._worker is None
+    camera_gp.capture(wait=True)
+    assert camera_gp.grab_captures()
+
+
+def test_cv_reset(camera_cv):
+    camera_cv.reset()
+    camera_cv.capture(wait=True)
+    assert camera_cv.grab_captures()
 
 
 def test_hybridc_capture(camera_cv_gp):

@@ -82,6 +82,10 @@ add_default_option("WINDOW", "wait_picture_delay", -1,
                    "On 'wait' state: how long is displayed the final picture in seconds before being hidden (-1 if never hidden)",
                    "Wait picture display time", ['-1'] + [str(i) for i in range(0, 121, 5)])
 
+add_default_option("WINDOW", "wait_picture_reload", False,
+                   "On 'wait' state: display the last picture saved on disk when the application starts",
+                   "Reload last picture at startup", ['True', 'False'])
+
 add_default_option("WINDOW", "chosen_delay", 4,
                    "How long is displayed the 'chosen' state:  (0 if never shown)",
                    "Chosen layout display time", [str(i) for i in range(0, 10)])

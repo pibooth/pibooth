@@ -79,3 +79,18 @@ def test_atomic_save(counters):
     """Verify no .tmp file is left after save."""
     counters.nbr_printed = 7
     assert not os.path.isfile(counters.filename + '.tmp')
+
+
+def test_migrate_pickle_from_json_path(tmpdir):
+    """Verify a legacy pickle file next to the JSON path is migrated."""
+    pickle_file = str(tmpdir.join('counters.pickle'))
+    json_file = str(tmpdir.join('counters.json'))
+    with open(pickle_file, 'wb') as fp:
+        pickle.dump({'nbr_printed': 42}, fp)
+
+    c = Counters(json_file, nbr_printed=0)
+    assert c.nbr_printed == 42
+    assert os.path.isfile(json_file)
+
+    c.nbr_printed = 3
+    assert Counters(json_file, nbr_printed=0).nbr_printed == 3

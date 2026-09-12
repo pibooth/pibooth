@@ -45,6 +45,7 @@ def main():
             'Natural Language :: Portuguese',
             'Natural Language :: Portuguese (Brazilian)',
             'Natural Language :: Spanish',
+            'Natural Language :: Swedish',
             'Topic :: Multimedia :: Graphics :: Capture :: Digital Camera',
         ],
         author="Vincent Verdeil, Antoine Rousseaux",
@@ -66,17 +67,18 @@ def main():
         include_package_data=True,
         python_requires=">=3.10",
         install_requires=[
-            'picamera2>=0.3.9 ; platform_machine>="aarch64" or (platform_machine>="armv0l" and platform_machine<="armv9l")',
+            # 'picamera2' is not declared here: its 'libcamera' binding is not published
+            # on PyPI, it has to be installed with apt (see the installation page)
             'Pillow>=10.4.0',
             'pygame>=2.5.0',
-            'pygame-menu==4.3.9',
+            'pygame-menu>=4.3,<5',
             'pygame-vkeyboard>=2.0.8',
             'pygame-imslider>=1.0.1',
-            'psutil>=5.9.1',
-            'pluggy>=1.0.0',
-            'gpiozero>=1.6.2',
+            'psutil>=5.5.1',
+            'pluggy>=1.1',
+            'gpiozero>=1.5.1',
             # RPi.GPIO backend for gpiozero (not always installed by default)
-            'RPi.GPIO>=0.7.1 ; platform_machine>="aarch64" or (platform_machine>="armv0l" and platform_machine<="armv9l")'
+            'RPi.GPIO>=0.7.0 ; platform_machine>="armv0l" and platform_machine<="armv9l"'
         ],
         extras_require={
             'dslr': ['gphoto2>=2.5.0'],
@@ -89,7 +91,8 @@ def main():
                                           "pibooth-diag = pibooth.scripts.diagnostic:main",
                                           "pibooth-fonts = pibooth.scripts.fonts:main",
                                           "pibooth-regen = pibooth.scripts.regenerate:main",
-                                          "pibooth-printer = pibooth.scripts.printer:main"]},
+                                          "pibooth-printer = pibooth.scripts.printer:main",
+                                          "pibooth-printcfg = pibooth.scripts.printer:main"]},
     )
 
 

@@ -87,7 +87,7 @@ def main():
     # Initialize text variables (normally done by the app)
     picture_plugin = plugin_manager.get_plugin('pibooth-core:picture')
     picture_plugin.texts_vars['date'] = datetime.now()
-    picture_plugin.texts_vars['count'] = Counters(config.join_path("counters.pickle"),
+    picture_plugin.texts_vars['count'] = Counters(config.join_path("counters.json"),
                                                   taken=0, printed=0, forgotten=0,
                                                   remaining_duplicates=config.getint('PRINTER', 'max_duplicates'))
 

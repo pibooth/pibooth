@@ -101,6 +101,9 @@ in the configuration:
 
     pibooth-printer
 
+.. note:: ``pibooth-printcfg`` is an alias of this command, kept for the users
+          of the 2.x versions.
+
 *Output example*::
 
     INFO:pibooth:Connected to printer 'EPSON_XP_6100_Series'

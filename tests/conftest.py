@@ -7,16 +7,17 @@ from PIL import Image
 from pibooth import language
 from pibooth.tasks import AsyncTasksPool
 from pibooth.counters import Counters
+from pibooth.printer import Printer
 from pibooth.config.parser import PiboothConfigParser
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import get_scene
 from pibooth.view.pygame import sprites
-from pibooth.camera import get_rpi_camera_proxy, get_gp_camera_proxy, get_cv_camera_proxy
-from pibooth.camera import RpiCamera, GpCamera, CvCamera, HybridRpiCamera, HybridCvCamera
+from pibooth.camera import get_gp_camera_proxy, get_cv_camera_proxy
+from pibooth.camera import GpCamera, CvCamera, HybridCvCamera
 
 # Modules for tests purpose
 import pytest
-from mocks import camera_drivers
+from mocks import camera_drivers, printer_drivers
 
 
 ISO = 100
@@ -114,6 +115,31 @@ def counters(tmpdir):
     return Counters(str(tmpdir.join('data.json')), nbr_printed=0)
 
 
+# --- Printer -----------------------------------------------------------------
+
+
+@pytest.fixture
+def cups_conn(monkeypatch):
+    """Fake CUPS connection with one idle printer.
+    """
+    conn = printer_drivers.CupsConnectionMock(
+        printers={'fake-printer': {'printer-state': printer_drivers.PRINTER_STATE_IDLE,
+                                   'printer-state-reasons': [],
+                                   'printer-state-message': ''}},
+        default='fake-printer')
+    monkeypatch.setattr('pibooth.printer.cups', printer_drivers.CupsModuleMock(conn))
+    monkeypatch.setattr('pibooth.printer.Subscriber', printer_drivers.CupsSubscriberMock, raising=False)
+    monkeypatch.setattr('pibooth.printer.event', printer_drivers.CupsEventMock, raising=False)
+    return conn
+
+
+@pytest.fixture
+def printer(cups_conn):
+    printer = Printer()
+    yield printer
+    printer.quit()
+
+
 # --- Window events loop ------------------------------------------------------
 
 
@@ -169,35 +195,14 @@ def scene_builder():
 
 
 @pytest.fixture(scope='session')
-def proxy_rpi(init_pygame, init_tasks, captures_portrait):
-    if os.environ.get('CAMERA_RPIDRIVER') == "dummy":
-        RpiCamera.IMAGE_EFFECTS = ['none']
-        return camera_drivers.RpiCameraProxyMock(captures_portrait)
-    return get_rpi_camera_proxy()
-
-
-@pytest.fixture(scope='session')
-def camera_rpi(proxy_rpi):
-    cam = RpiCamera(proxy_rpi)
-    cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
-    yield cam
-    cam.quit()
-
-
-@pytest.fixture(scope='session')
-def camera_rpi_gp(proxy_rpi, proxy_gp):
-    cam = HybridRpiCamera(proxy_rpi, proxy_gp)
-    cam.initialize(ISO, RESOLUTION, delete_internal_memory=True)
-    yield cam
-    cam.quit()
-
-
-@pytest.fixture(scope='session')
 def proxy_cv(init_pygame, init_tasks):
     if os.environ.get('CAMERA_CVDRIVER') == "dummy":
-        import cv2
-        return cv2.VideoCapture(os.path.join(CAPTURES_DIR, 'portrait', 'capture0.png'))
-    return get_cv_camera_proxy()
+        pytest.importorskip('cv2', reason="OpenCV is not installed")
+        return camera_drivers.CvCameraProxyMock(os.path.join(CAPTURES_DIR, 'portrait', 'capture0.png'))
+    proxy = get_cv_camera_proxy()
+    if proxy is None:
+        pytest.skip("No OpenCV camera connected (set CAMERA_CVDRIVER=dummy to use a fake one)")
+    return proxy
 
 
 @pytest.fixture(scope='session')
@@ -222,7 +227,10 @@ def proxy_gp(init_pygame, init_tasks, captures_portrait):
         from pibooth.camera import gphoto
         gphoto.gp = camera_drivers.GpCameraProxyMock([])
         return camera_drivers.GpCameraProxyMock(captures_portrait)
-    return get_gp_camera_proxy()
+    proxy = get_gp_camera_proxy()
+    if proxy is None:
+        pytest.skip("No gPhoto2 camera connected (set CAMERA_GPDRIVER=dummy to use a fake one)")
+    return proxy
 
 
 @pytest.fixture(scope='session')

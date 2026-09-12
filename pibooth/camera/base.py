@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import pygame
-from PIL import Image, ImageDraw
+from PIL import Image
 
-from pibooth import fonts, evts
+from pibooth import evts
+from pibooth.utils import LOGGER
 from pibooth.tasks import AsyncTask
 from pibooth.pictures import sizing
 from pibooth.fonts import write_on_pil_image
+
 
 class BaseCamera:
     """Base class for camera.
@@ -168,10 +170,13 @@ class BaseCamera:
         """
         self._captures.clear()
 
+    def reset(self):
+        """Reset the camera driver after an error, nothing to do by default.
+        """
+
     def quit(self):
         """Close the camera driver, it's definitive.
         """
-        from pibooth.utils import LOGGER
         try:
             if self._worker:
                 self._worker.kill()

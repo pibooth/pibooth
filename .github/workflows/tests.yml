@@ -42,10 +42,52 @@ jobs:
     - name: Test with pytest
       env:
         SDL_VIDEODRIVER: dummy
-        CAMERA_RPIDRIVER: dummy
         CAMERA_GPDRIVER: dummy
         CAMERA_CVDRIVER: dummy
       run: |
         pytest --cov pibooth
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
+
+  package:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Build the source distribution and the wheel
+      run: |
+        python -m pip install --upgrade pip build twine
+        python -m build .
+        twine check --strict dist/*
+    - name: Install the wheel in a clean environment
+      run: |
+        python -m venv "$RUNNER_TEMP/install-check"
+        "$RUNNER_TEMP/install-check/bin/pip" install dist/*.whl
+    - name: Smoke-test the installed application
+      env:
+        SDL_VIDEODRIVER: dummy
+      run: |
+        "$RUNNER_TEMP/install-check/bin/pibooth" --reset "$RUNNER_TEMP/cfg-check"
+        test -f "$RUNNER_TEMP/cfg-check/pibooth.cfg"
+        test -f "$RUNNER_TEMP/cfg-check/translations.cfg"
+    - name: Check the data files shipped with the wheel
+      run: |
+        SITE=$("$RUNNER_TEMP/install-check/bin/python" -c \
+               "import pibooth, os.path as osp; print(osp.dirname(pibooth.__file__))")
+        ls "$SITE"/fonts/*.ttf > /dev/null
+        ls "$SITE"/pictures/*/*.png > /dev/null
+    - name: Check the other console scripts
+      env:
+        SDL_VIDEODRIVER: dummy
+      run: |
+        for script in pibooth-count pibooth-fonts pibooth-regen pibooth-printer pibooth-printcfg; do
+          "$RUNNER_TEMP/install-check/bin/$script" --help > /dev/null
+        done

@@ -2,7 +2,6 @@
 
 import inspect
 import pluggy
-from pluggy._hooks import _HookCaller
 
 from pibooth.utils import LOGGER, load_module
 from pibooth.plugins import hookspecs
@@ -151,7 +150,7 @@ class PiboothPluginManager(pluggy.PluginManager):
         return []
 
     def subset_hook_caller(self, name, remove_plugins=(), optional=False):
-        """Return a new :py:class:`._hooks._HookCaller` instance for the named method
+        """Return a new :py:class:`pluggy.HookCaller` instance for the named method
         which manages calls to all registered plugins except the ones from
         remove_plugins.
 
@@ -165,12 +164,12 @@ class PiboothPluginManager(pluggy.PluginManager):
         if optional:
             # Accept undefined hookspec (avoid AttributeError)
             if getattr(self.hook, name, None) is None:
-                hook = _HookCaller(name, self._hookexec)
+                hook = pluggy.HookCaller(name, self._hookexec)
                 setattr(self.hook, name, hook)
         return super().subset_hook_caller(name, remove_plugins)
 
     def subset_hook_caller_for_plugin(self, name, plugin):
-        """Return a new :py:class:`.hooks._HookCaller` instance for the named method
+        """Return a new :py:class:`pluggy.HookCaller` instance for the named method
         which manages calls to the given registered plugin.
 
         :param name: name of the hook to call
