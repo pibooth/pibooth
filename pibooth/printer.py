@@ -54,6 +54,8 @@ class Printer:
         if not cups:
             LOGGER.warning("No printer found (pycups or pycups-notify not installed)")
             return  # CUPS is not installed
+        if not self._conn:
+            return  # CUPS server not reachable
 
         if not name or name.lower() == 'default':
             self.name = self._conn.getDefault()

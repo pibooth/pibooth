@@ -7,6 +7,7 @@ from PIL import Image
 from pibooth import language
 from pibooth.tasks import AsyncTasksPool
 from pibooth.counters import Counters
+from pibooth.printer import Printer
 from pibooth.config.parser import PiboothConfigParser
 from pibooth.plugins import create_plugin_manager
 from pibooth.view import get_scene
@@ -16,7 +17,7 @@ from pibooth.camera import GpCamera, CvCamera, HybridCvCamera
 
 # Modules for tests purpose
 import pytest
-from mocks import camera_drivers
+from mocks import camera_drivers, printer_drivers
 
 
 ISO = 100
@@ -112,6 +113,32 @@ def cfg(cfg_path, pm):
 @pytest.fixture
 def counters(tmpdir):
     return Counters(str(tmpdir.join('data.json')), nbr_printed=0)
+
+
+# --- Printer -----------------------------------------------------------------
+
+
+@pytest.fixture
+def cups_conn(monkeypatch):
+    """Replace the CUPS binding of the printer module by a fake connection
+    with one idle printer. No CUPS server is needed.
+    """
+    conn = printer_drivers.CupsConnectionMock(
+        printers={'fake-printer': {'printer-state': printer_drivers.PRINTER_STATE_IDLE,
+                                   'printer-state-reasons': [],
+                                   'printer-state-message': ''}},
+        default='fake-printer')
+    monkeypatch.setattr('pibooth.printer.cups', printer_drivers.CupsModuleMock(conn))
+    monkeypatch.setattr('pibooth.printer.Subscriber', printer_drivers.CupsSubscriberMock, raising=False)
+    monkeypatch.setattr('pibooth.printer.event', printer_drivers.CupsEventMock, raising=False)
+    return conn
+
+
+@pytest.fixture
+def printer(cups_conn):
+    printer = Printer()
+    yield printer
+    printer.quit()
 
 
 # --- Window events loop ------------------------------------------------------
