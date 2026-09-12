@@ -83,7 +83,7 @@ class GpCamera(BaseCamera):
     def __init__(self, camera_proxy):
         super().__init__(camera_proxy)
         self._gp_logcb = None
-        self._gp_capture_timer = PollingTimer(4)
+        self._gp_capture_timer = PollingTimer(10)
         self._preview_compatible = True
         self._preview_viewfinder = False
 
@@ -248,7 +248,7 @@ class GpCamera(BaseCamera):
         if self.capture_iso != self.preview_iso:
             self.set_config_value('imgsettings', 'iso', self.capture_iso)
 
-        max_retries = 2
+        max_retries = 1
         for attempt in range(max_retries + 1):
             if self._trigger_and_wait_capture(effect):
                 break
