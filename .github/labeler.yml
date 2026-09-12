@@ -1,0 +1,59 @@
+# Labels applied to pull requests from the files they change, by the
+# "Pull Request Labeler" workflow (.github/workflows/labeler.yml).
+# Syntax: https://github.com/actions/labeler#match-object
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**'
+          - 'README.rst'
+
+camera:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'pibooth/camera/**'
+          - 'pibooth/plugins/camera_plugin.py'
+          - 'tests/test_camera*.py'
+          - 'tests/dslr_diag/**'
+
+printer:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'pibooth/printer.py'
+          - 'pibooth/plugins/printer_plugin.py'
+          - 'pibooth/scripts/printer.py'
+          - 'tests/test_printer.py'
+
+view:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'pibooth/view/**'
+          - 'pibooth/pictures/**'
+          - 'pibooth/fonts/**'
+          - 'pibooth/config/menu.py'
+
+plugins:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'pibooth/plugins/**'
+
+translations:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'pibooth/language.py'
+
+packaging:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'setup.py'
+          - 'MANIFEST.in'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'tests/**'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'

@@ -47,6 +47,11 @@ jobs:
         pytest --cov pibooth
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
+      with:
+        # Without the token the upload is refused ('Token required because
+        # branch is protected') and silently dropped. Forks have no access to
+        # the secret: their pull requests fall back to a tokenless upload.
+        token: ${{ secrets.CODECOV_TOKEN }}
 
   package:
     runs-on: ubuntu-latest

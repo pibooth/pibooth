@@ -1,0 +1,27 @@
+# Codecov configuration: https://docs.codecov.com/docs/codecov-yaml
+#
+# The coverage reports are uploaded by the 'build' job of the 'tests'
+# workflow. This file decides what Codecov does with them on a pull request:
+# a comment showing the coverage of the changed lines, and two statuses.
+# The statuses do not block anything unless they are made required in the
+# branch protection rules.
+
+coverage:
+  status:
+    # Coverage of the whole package, compared with the base branch: fails if
+    # the pull request lowers it by more than 1 point
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    # Coverage of the lines added or modified by the pull request: this is
+    # what tells the reviewer that a change comes without tests
+    patch:
+      default:
+        target: 80%
+
+comment:
+  layout: "condensed_header, diff, files"
+  # Only comment when the coverage moves: a documentation-only pull request
+  # gets no comment
+  require_changes: true
