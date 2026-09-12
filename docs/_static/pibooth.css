@@ -29,7 +29,6 @@
 body {
   --font-stack: 'Baloo 2', system-ui, -apple-system, sans-serif;
   --font-stack--headings: 'Baloo 2', system-ui, -apple-system, sans-serif;
-  --font-stack--monospace: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 
   --admonition-font-size: 0.95rem;
   --admonition-title-font-size: 0.95rem;
