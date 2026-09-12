@@ -33,8 +33,8 @@ PAPER_FORMATS = {
 class Printer(object):
 
     def __init__(self, name='default', max_pages=-1, options=None, counters=None):
-        self._conn = cups.Connection() if cups else None
-        self._notifier = Subscriber(self._conn) if cups else None
+        self._conn = None
+        self._notifier = None
         self.name = None
         self.max_pages = max_pages
         self.options = options
@@ -42,6 +42,15 @@ class Printer(object):
         if not cups:
             LOGGER.warning("No printer found (pycups or pycups-notify not installed)")
             return  # CUPS is not installed
+
+        try:
+            self._conn = cups.Connection()
+            self._notifier = Subscriber(self._conn)
+        except Exception as ex:
+            LOGGER.warning("No printer found (can not connect to the CUPS server: %s)", ex)
+            self._conn = None
+            self._notifier = None
+            return
 
         if not name or name.lower() == 'default':
             self.name = self._conn.getDefault()
@@ -68,8 +77,12 @@ class Printer(object):
         """
         Call for each new printer event.
         """
-        LOGGER.info(evt.title)
-        pygame.event.post(pygame.event.Event(PRINTER_TASKS_UPDATED, evt=evt))
+        try:
+            LOGGER.info(evt.title)
+            pygame.event.post(pygame.event.Event(PRINTER_TASKS_UPDATED, evt=evt))
+        except Exception as ex:
+            # Called from the notifier thread, an exception would kill it silently
+            LOGGER.warning("Error while handling printer event: %s", ex)
 
     def is_installed(self):
         """Return True if the CUPS server is available for printing.
