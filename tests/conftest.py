@@ -120,8 +120,7 @@ def counters(tmpdir):
 
 @pytest.fixture
 def cups_conn(monkeypatch):
-    """Replace the CUPS binding of the printer module by a fake connection
-    with one idle printer. No CUPS server is needed.
+    """Fake CUPS connection with one idle printer.
     """
     conn = printer_drivers.CupsConnectionMock(
         printers={'fake-printer': {'printer-state': printer_drivers.PRINTER_STATE_IDLE,

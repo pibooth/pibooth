@@ -8,9 +8,7 @@ except ImportError:
 
 class CvCameraProxyMock:
 
-    """Fake ``cv2.VideoCapture`` returning always the same frame, read from
-    an image file. Reading a still image with ``cv2.VideoCapture`` gives a
-    single frame, which is not enough for the preview loop and the capture.
+    """Fake ``cv2.VideoCapture`` returning always the same frame.
     """
 
     def __init__(self, filename):

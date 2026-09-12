@@ -269,8 +269,7 @@ class GpCamera(BaseCamera):
         return self._captures[-1][0]
 
     def reset(self):
-        """Close and reopen the gPhoto2 session to release the USB port
-        after an error.
+        """Close and reopen the gPhoto2 session.
         """
         if self._worker:
             self.stop_preview()

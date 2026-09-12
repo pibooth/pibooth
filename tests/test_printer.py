@@ -73,7 +73,6 @@ def test_ipp_state_stopped(printer, cups_conn):
 def test_reenable_paused_printer(printer, cups_conn):
     cups_conn.printers['fake-printer']['printer-state'] = PRINTER_STATE_STOPPED
     cups_conn.printers['fake-printer']['printer-state-reasons'] = ['paused']
-    # First call re-enables the printer but reports it as not ready
     assert not printer.is_ready()
     assert cups_conn.printers['fake-printer']['printer-state'] == PRINTER_STATE_IDLE
     assert printer.is_ready()

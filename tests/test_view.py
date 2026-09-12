@@ -39,8 +39,7 @@ def _press(scene, sprite):
 
 
 def test_print_scene_actions(init_lang, init_pygame, scene_builder):
-    """Both texts of the print scene are clickable (issue #463), the picture
-    is a print action.
+    """Both texts of the print scene are clickable (issue #463).
     """
     scene = scene_builder('print')
 
@@ -69,14 +68,12 @@ def test_settings_menu(init_lang, init_pygame, cfg, pm, counters):
     assert win._menu.is_top_level()
     assert evts.EVT_PIBOOTH_SETTINGS in [event.type for event in pygame.event.get()]
 
-    # Enter the first sub-menu (first selected widget is the 'General' button)
     win._menu.click()
     win.update(pygame.event.get())
     win.draw()
     assert not win._menu.is_top_level()
     assert win._menu._main_menu.get_current().get_title() == 'General'
 
-    # Go back to the main menu
     win._menu.back()
     win.update(pygame.event.get())
     win.draw()

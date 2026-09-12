@@ -171,8 +171,7 @@ class BaseCamera:
         self._captures.clear()
 
     def reset(self):
-        """Reset the camera driver after an error, the driver stays usable.
-        Nothing to do by default.
+        """Reset the camera driver after an error, nothing to do by default.
         """
 
     def quit(self):

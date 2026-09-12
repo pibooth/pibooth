@@ -40,7 +40,7 @@ def test_gp_reset(camera_gp):
 
 
 def test_cv_reset(camera_cv):
-    camera_cv.reset()  # Nothing to do for OpenCV
+    camera_cv.reset()
     camera_cv.capture(wait=True)
     assert camera_cv.grab_captures()
 

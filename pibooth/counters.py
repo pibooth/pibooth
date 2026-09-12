@@ -9,8 +9,8 @@ from pibooth.utils import LOGGER
 
 class Counters:
 
-    """Persistent counters stored in a JSON file. A ``.pickle`` file written by
-    a previous version, next to the JSON one, is migrated on first load.
+    """Persistent counters stored in a JSON file (a legacy ``.pickle`` file
+    is migrated on first load).
     """
 
     def __init__(self, filename='', **kwargs):

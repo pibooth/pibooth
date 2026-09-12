@@ -50,7 +50,6 @@ class CameraPlugin:
         app.capture_nbr = None
         app.camera.drop_captures()  # Flush previous captures
 
-        # Try to reinitialize the camera connection after error
         try:
             app.camera.reset()
         except Exception as ex:

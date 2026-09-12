@@ -38,7 +38,7 @@ class HybridCvCamera(CvCamera):
         return self._gp_cam.get_capture_image(effect)
 
     def reset(self):
-        """Reset the gPhoto2 camera, the one which may fail on capture.
+        """Reset the gPhoto2 camera.
         """
         self._gp_cam.reset()
 

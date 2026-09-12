@@ -112,8 +112,6 @@ class PiboothApplication:
         else:
             self.previous_picture, self.previous_picture_file = (None, None)
 
-        # Counters are stored in JSON, a 'counters.pickle' file from a previous
-        # version is migrated on first load
         self.count = Counters(self._config.join_path("counters.json"),
                               taken=0, printed=0, forgotten=0,
                               remaining_duplicates=self._config.getint('PRINTER', 'max_duplicates'))

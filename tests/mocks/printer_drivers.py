@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Fake CUPS objects, they replace ``cups.Connection`` and
-``cups_notify.Subscriber`` in the ``pibooth.printer`` module so that the
-printer can be tested without a CUPS server.
+"""Fake CUPS objects to test the printer without a CUPS server.
 """
 
 from pibooth.printer import PRINTER_STATE_IDLE
@@ -10,7 +8,7 @@ from pibooth.printer import PRINTER_STATE_IDLE
 
 class CupsConnectionMock:
 
-    """Fake ``cups.Connection`` managing a dict of printers.
+    """Fake ``cups.Connection``.
     """
 
     def __init__(self, printers=None, default=None):
@@ -76,8 +74,7 @@ class CupsEventMock:
 
 class CupsModuleMock:
 
-    """Fake ``cups`` module, the ``Connection`` class returns the given
-    connection instance.
+    """Fake ``cups`` module.
     """
 
     def __init__(self, conn):

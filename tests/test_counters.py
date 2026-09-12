@@ -92,6 +92,5 @@ def test_migrate_pickle_from_json_path(tmpdir):
     assert c.nbr_printed == 42
     assert os.path.isfile(json_file)
 
-    # JSON file is preferred once it exists
     c.nbr_printed = 3
     assert Counters(json_file, nbr_printed=0).nbr_printed == 3
