@@ -1,6 +1,5 @@
 """Plugin to handle retry in case of exception with DSLR/gPhoto2 camera."""
 
-import time
 import pibooth
 from pibooth.utils import LOGGER
 from pibooth import camera

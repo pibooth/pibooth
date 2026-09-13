@@ -32,20 +32,15 @@ jobs:
         python -m pip install opencv-python
         python -m pip install -e .
     - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 pibooth --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings.
-        flake8 pibooth --count --exit-zero --max-complexity=10 --max-line-length=160 --statistics
+      run: flake8 --count --show-source --statistics
     - name: Lint with pylint
-      run: |
-        pylint $(git ls-files '*.py') || echo "pylint exited with $?"
+      run: pylint pibooth
     - name: Test with pytest
       env:
         SDL_VIDEODRIVER: dummy
         CAM_VIDEODRIVER: dummy
       run: |
-        pytest --cov pibooth --cov-report=term-missing --cov-fail-under=37
+        pytest --cov pibooth --cov-report=term-missing --cov-fail-under=50
 
   package:
     runs-on: ubuntu-latest
