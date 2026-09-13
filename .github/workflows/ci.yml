@@ -20,9 +20,9 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -55,9 +55,9 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
     - name: Build the source distribution and the wheel
@@ -92,7 +92,7 @@ jobs:
     - name: Keep the distribution files for the 'publish' job
       # The wheel is pure Python, one build is enough
       if: matrix.python-version == '3.10'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: dist
         path: dist/
@@ -110,7 +110,7 @@ jobs:
 
     steps:
     - name: Download the distribution files built by the 'package' job
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: dist
         path: dist/
