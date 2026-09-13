@@ -44,9 +44,7 @@ jobs:
         SDL_VIDEODRIVER: dummy
         CAM_VIDEODRIVER: dummy
       run: |
-        pytest --cov pibooth
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v5
+        pytest --cov pibooth --cov-report=term-missing --cov-fail-under=37
 
   package:
     runs-on: ubuntu-latest

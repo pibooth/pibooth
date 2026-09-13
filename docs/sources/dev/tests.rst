@@ -39,6 +39,10 @@ any machine.
 ``tests/dslr_diag/`` holds ``pibooth-diag`` outputs contributed by users for
 specific DSLR models. They are data files, not tests.
 
+The continuous integration runs the suite with ``--cov-fail-under``: the job
+fails when the total coverage drops under the floor set in
+``.github/workflows/tests.yml``. Raise the floor when the coverage improves.
+
 Linters
 ^^^^^^^
 
