@@ -183,6 +183,16 @@ Manual procedure
     always reachable with method **a**, and only reachable with method **b**
     thanks to ``--system-site-packages``.
 
+    .. warning:: On a **Raspberry Pi 5**, ``lgpio`` is the only backend that
+                 works: ``RPi.GPIO``, ``pigpio`` and the pure Python fallback
+                 do not support it. ``pip`` does not install any GPIO backend
+                 on a 64-bit system, so if the log reports the fallback to the
+                 GPIO mock, install the backend with ``apt``:
+
+                 .. code-block:: bash
+
+                      sudo apt-get install python3-lgpio
+
     .. note:: This line only tells you that a backend was loaded. It does not
               prove the wiring works — press both buttons and check that both
               LEDs light up.
