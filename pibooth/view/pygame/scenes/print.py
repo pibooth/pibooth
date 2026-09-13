@@ -31,23 +31,23 @@ class PrintScene(BasePygameScene):
         if self.arrow_location == self.ARROW_HIDDEN:
             self.text_print.set_align(fonts.ALIGN_CENTER)
             self.text_print.set_rect(self.rect.width // 2 + text_border, text_border,
-                               self.rect.width // 2 - 2 * text_border,
-                               self.rect.height - 2 * text_border)
+                                     self.rect.width // 2 - 2 * text_border,
+                                     self.rect.height - 2 * text_border)
         elif self.arrow_location == self.ARROW_BOTTOM:
             self.text_print.set_align(fonts.ALIGN_BOTTOM_CENTER)
             self.text_print.set_rect(self.rect.width // 2 + text_border, text_border,
-                               self.rect.width // 2 - 2 * text_border,
-                               self.rect.height * 0.6 - text_border)
+                                     self.rect.width // 2 - 2 * text_border,
+                                     self.rect.height * 0.6 - text_border)
         elif self.arrow_location == self.ARROW_TOUCH:
             self.text_print.set_align(fonts.ALIGN_BOTTOM_CENTER)
             self.text_print.set_rect(self.rect.width // 2 + text_border, text_border,
-                               self.rect.width // 2 - 2 * text_border,
-                               self.rect.height * 0.4 - text_border)
+                                     self.rect.width // 2 - 2 * text_border,
+                                     self.rect.height * 0.4 - text_border)
         else:
             self.text_print.set_align(fonts.ALIGN_TOP_CENTER)
             self.text_print.set_rect(self.rect.width // 2 + text_border, self.rect.height * 0.4,
-                               self.rect.width // 2 - 2 * text_border,
-                               self.rect.height * 0.6 - text_border)
+                                     self.rect.width // 2 - 2 * text_border,
+                                     self.rect.height * 0.6 - text_border)
 
         # Forget text
         self.text_forget.set_text(get_translated_text('print_forget'))  # In case of text has changed

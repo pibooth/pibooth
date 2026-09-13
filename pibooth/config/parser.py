@@ -117,7 +117,6 @@ class PiboothConfigParser(RawConfigParser):
                             fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
                                                            name=name, value=value))
 
-
         self.handle_autostart()
 
     def load(self, clean=False):
