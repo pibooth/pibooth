@@ -270,8 +270,8 @@ Plugins declare their own options from the ``pibooth_configure`` hook with
 without the section.
 
 .. note:: When ``DEFAULT`` changes, update ``docs/sources/config/default.cfg``
-          as well: it is maintained by hand. It should stay identical to a
-          freshly generated file, apart from its missing trailing newline::
+          as well: it is maintained by hand and ``tests/test_consistency.py``
+          compares it with a freshly generated file::
 
               pibooth --reset /tmp/piboothcfg
               diff /tmp/piboothcfg/pibooth.cfg docs/sources/config/default.cfg
