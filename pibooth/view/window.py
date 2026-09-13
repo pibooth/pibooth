@@ -8,7 +8,6 @@ import time
 import contextlib
 import pygame
 from pygame import gfxdraw
-from PIL import Image
 from PIL.Image import Resampling
 from pibooth import pictures, fonts
 from pibooth.view import background

@@ -66,7 +66,9 @@ def regenerate_all_images(plugin_manager, config, basepath):
 def main():
     """Application entry point.
     """
-    parser = argparse.ArgumentParser(usage="%(prog)s [options]", description="This script lets you regenerate the final pictures from the original captures present in the raw directory.")
+    parser = argparse.ArgumentParser(usage="%(prog)s [options]",
+                                     description="This script lets you regenerate the final pictures "
+                                                 "from the original captures present in the raw directory.")
 
     parser.add_argument("config_directory", nargs='?', default="~/.config/pibooth",
                         help=u"path to configuration directory (default: %(default)s)")

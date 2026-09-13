@@ -46,15 +46,15 @@ fails when the total coverage drops under the floor set in
 Linters
 ^^^^^^^
 
-The continuous integration runs both, but only the first one can fail the
-build::
+The continuous integration runs both, and both can fail the build::
 
-    flake8 pibooth --count --select=E9,F63,F7,F82 --show-source --statistics
-    flake8 pibooth --count --exit-zero --max-complexity=10 --max-line-length=160 --statistics
-    pylint $(git ls-files '*.py')
+    flake8
+    pylint pibooth
 
-The second ``flake8`` invocation and ``pylint`` are informational: the code base
-does not satisfy them today.
+``flake8`` reads ``.flake8`` and must report nothing. ``pylint`` reads
+``.pylintrc``, which disables the messages contradicting the coding rules and
+sets ``fail-under``: the score may not drop under it. Raise it when the score
+improves, as for the coverage floor.
 
 Starting the application
 ^^^^^^^^^^^^^^^^^^^^^^^^

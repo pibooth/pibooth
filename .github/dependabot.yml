@@ -24,3 +24,5 @@ updates:
       - /docs
     schedule:
       interval: monthly
+    # Only when a new release falls outside the declared range
+    versioning-strategy: increase-if-necessary

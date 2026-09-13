@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+# The hook specifications only declare the signatures
+# pylint: disable=unused-argument
+
 import pluggy
 
 hookspec = pluggy.HookspecMarker('pibooth')

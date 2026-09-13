@@ -1,0 +1,24 @@
+[MAIN]
+py-version = 3.10
+fail-under = 9.0
+# C extensions whose members pylint can not infer
+extension-pkg-allow-list = pygame,cv2,gphoto2
+
+[TYPECHECK]
+# OpenCV exposes its API from a binary module pylint can not inspect
+generated-members = cv2.*
+
+[FORMAT]
+max-line-length = 160
+
+[MESSAGES CONTROL]
+# Docstrings are not required, and the coding rules (docs/sources/dev/rules.rst)
+# ask new code to match the surroundings: "{}".format(), class Foo(object),
+# super(Foo, self)
+disable =
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    consider-using-f-string,
+    useless-object-inheritance,
+    super-with-arguments
