@@ -10,7 +10,6 @@ on:
   pull_request:
     branches: [ "master", "3.x" ]
 
-# A new push to a branch or a pull request cancels the run in progress
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
