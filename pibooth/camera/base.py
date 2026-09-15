@@ -9,6 +9,8 @@ from pibooth.pictures import sizing
 
 class BaseCamera(object):
 
+    AUTOFOCUS_MODES = ('continuous', 'capture', 'off')
+
     def __init__(self, camera_proxy):
         self._cam = camera_proxy
         self._border = 50
@@ -21,9 +23,13 @@ class BaseCamera(object):
         self.preview_rotation, self.capture_rotation = (0, 0)
         self.preview_iso, self.capture_iso = (100, 100)
         self.preview_flip, self.capture_flip = (False, False)
+        self.autofocus = 'continuous'
+        self.lens_position = 0.0
 
-    def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False):
-        """Initialize the camera.
+    def initialize(self, iso, resolution, rotation=0, flip=False, delete_internal_memory=False,
+                   autofocus='continuous', lens_position=0.0):
+        """Initialize the camera. The autofocus parameters are only used by the
+        cameras having a motorized lens (else they are ignored).
         """
         if not isinstance(rotation, (tuple, list)):
             rotation = (rotation, rotation)
@@ -39,6 +45,11 @@ class BaseCamera(object):
             iso = (iso, iso)
         self.preview_iso, self.capture_iso = iso
         self.delete_internal_memory = delete_internal_memory
+        if autofocus not in self.AUTOFOCUS_MODES:
+            raise ValueError(
+                "Invalid camera autofocus value '{}' (choose among {})".format(autofocus, self.AUTOFOCUS_MODES))
+        self.autofocus = autofocus
+        self.lens_position = lens_position
         self._specific_initialization()
 
     def _specific_initialization(self):
