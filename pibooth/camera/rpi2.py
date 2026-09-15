@@ -5,11 +5,13 @@ import pygame
 from io import BytesIO
 try:
     from picamera2 import Picamera2
+    from libcamera import controls as libcamera_controls
 except Exception as ex:
     # 'picamera2' is optional, it is only available on Raspberry Pi. Note that the
     # import may fail with something else than an 'ImportError' when the package
     # is installed but the 'libcamera' bindings are not usable.
     Picamera2 = None
+    libcamera_controls = None
     PICAMERA2_ERROR = ex
 else:
     PICAMERA2_ERROR = None
@@ -70,6 +72,7 @@ class Rpi2Camera(BaseCamera):
         self._still_config = None
         self._preview_mode = None
         self._capture_mode = None
+        self._af_controls = {}
 
     def _select_sensor_modes(self):
         """Return the two sensor modes having the widest (thus the same) field of
@@ -91,15 +94,53 @@ class Rpi2Camera(BaseCamera):
                      preview_mode['size'], capture_mode['size'])
         return preview_mode, capture_mode
 
+    def _get_autofocus_controls(self):
+        """Return the camera controls to apply the autofocus mode defined in the
+        configuration. Return an empty dict if the camera has no motorized lens
+        (Camera Module 1 and 2, HQ camera, ...), there is then nothing to drive.
+        """
+        if 'AfMode' not in self._cam.camera_controls:
+            if self.autofocus != 'off':
+                LOGGER.warning("Camera has no motorized lens, autofocus '%s' is ignored", self.autofocus)
+            return {}
+        LOGGER.debug("Camera autofocus mode set to '%s'", self.autofocus)
+        if self.autofocus == 'continuous':
+            return {'AfMode': libcamera_controls.AfModeEnum.Continuous}
+        if self.autofocus == 'capture':
+            # The focus is done by an autofocus cycle at each capture, see 'capture()'
+            return {'AfMode': libcamera_controls.AfModeEnum.Auto}
+        return {'AfMode': libcamera_controls.AfModeEnum.Manual, 'LensPosition': self.lens_position}
+
+    def _lock_autofocus(self):
+        """Run an autofocus cycle and lock the lens at the reached position for the
+        capture. The lens is locked because capturing switches the camera to the still
+        configuration, and picamera2 re-applies the controls of the new configuration
+        at each switch (which would start a new focus scan).
+        """
+        try:
+            if not self._cam.autofocus_cycle(wait=True):
+                LOGGER.warning("Camera can not focus, the capture may be blurred")
+            position = self._cam.capture_metadata().get('LensPosition')
+        except Exception as ex:
+            # Never lose a capture because of the focus
+            LOGGER.warning("Camera autofocus cycle failed (%s): the capture may be blurred", ex)
+            return
+        if position is not None:
+            self._still_config['controls'].update({'AfMode': libcamera_controls.AfModeEnum.Manual,
+                                                   'LensPosition': position})
+            LOGGER.debug("Camera focused at the lens position %s", position)
+
     def _create_config(self, factory, size, sensor_mode, **kwargs):
         """Return a camera configuration for the given main stream size, forcing the
-        given sensor mode (if any).
+        given sensor mode (if any). The autofocus controls belong to the configuration
+        because picamera2 overwrites the camera controls at each (re)configuration.
         """
         main = {"size": (int(size[0]), int(size[1]))}
         main.update(kwargs)
+        config = {'main': main, 'controls': dict(self._af_controls)}
         if sensor_mode:
-            return factory(main=main, raw={"size": sensor_mode['size'], "format": str(sensor_mode['format'])})
-        return factory(main=main)
+            config['raw'] = {"size": sensor_mode['size'], "format": str(sensor_mode['format'])}
+        return factory(**config)
 
     def _configure_preview(self, size):
         """(Re)configure the preview stream at the given size. The frames are resized
@@ -119,6 +160,7 @@ class Rpi2Camera(BaseCamera):
         """Camera initialization.
         """
         self._cam.stop()
+        self._af_controls = self._get_autofocus_controls()
         self._preview_mode, self._capture_mode = self._select_sensor_modes()
         self._still_config = self._create_config(self._cam.create_still_configuration,
                                                  self.resolution, self._capture_mode)
@@ -267,6 +309,9 @@ class Rpi2Camera(BaseCamera):
         effect = str(effect).lower()
         if effect not in self.IMAGE_EFFECTS:
             raise ValueError("Invalid capture effect '{}' (choose among {})".format(effect, self.IMAGE_EFFECTS))
+
+        if self._af_controls and self.autofocus == 'capture':
+            self._lock_autofocus()
 
         stream = BytesIO()
         self._cam.switch_mode_and_capture_file(self._still_config, stream, format='jpeg')

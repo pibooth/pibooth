@@ -35,6 +35,11 @@ class FakePicamera2(object):
         self.started = False
         self.config = None
         self.sensor_modes = self.SENSOR_MODES
+        # No motorized lens by default, as an IMX219
+        self.camera_controls = {}
+        self.autofocus_cycles = 0
+        self.autofocus_success = True
+        self.lens_position = 4.5
 
     def _new_array(self, size):
         width, height = size
@@ -45,8 +50,8 @@ class FakePicamera2(object):
         array[:, :, 3] = 255
         return array
 
-    def _new_config(self, main=None, raw=None, **kwargs):
-        config = {'main': dict(main or {'size': SENSOR_SIZE})}
+    def _new_config(self, main=None, raw=None, controls=None, **kwargs):
+        config = {'main': dict(main or {'size': SENSOR_SIZE}), 'controls': dict(controls or {})}
         if raw is not None:
             config['raw'] = dict(raw)
         return config
@@ -72,8 +77,32 @@ class FakePicamera2(object):
 
     def switch_mode_and_capture_file(self, config, buffer, format="jpeg"):
         assert self.started, "Camera is not started"
+        # Switching the mode overwrites the controls with those of the new configuration
+        self.config = config
         array = self._new_array(config['main']['size'])
         Image.fromarray(array[:, :, :3]).save(buffer, format=format.upper())
+
+    def autofocus_cycle(self, wait=True):
+        assert self.started, "Camera is not started"
+        assert 'AfMode' in self.camera_controls, "Camera has no motorized lens"
+        self.autofocus_cycles += 1
+        return self.autofocus_success
+
+    def capture_metadata(self):
+        assert self.started, "Camera is not started"
+        if 'AfMode' not in self.camera_controls:
+            return {}
+        return {'LensPosition': self.lens_position}
+
+
+class FakeLibcameraControls(object):
+
+    """Minimal stub of the ``libcamera.controls`` module."""
+
+    class AfModeEnum(object):
+        Manual = 0
+        Auto = 1
+        Continuous = 2
 
 
 class FakeWindow(object):
@@ -96,9 +125,17 @@ class FakeWindow(object):
 def camera(monkeypatch):
     monkeypatch.setattr(rpi2, 'Picamera2', FakePicamera2)
     monkeypatch.setattr(rpi2, 'PICAMERA2_ERROR', None)
+    monkeypatch.setattr(rpi2, 'libcamera_controls', FakeLibcameraControls)
     cam = rpi2.Rpi2Camera(rpi2.get_rpi2_camera_proxy())
     yield cam
     cam.quit()
+
+
+@pytest.fixture
+def af_camera(camera):
+    """Camera with a motorized lens, as the Camera Module 3."""
+    camera._cam.camera_controls = {'AfMode': (0, 2, 0), 'LensPosition': (0.0, 32.0, 1.0)}
+    return camera
 
 
 def test_no_picamera2_no_proxy(monkeypatch):
@@ -210,3 +247,72 @@ def test_overlay_is_centered(camera):
     left, top, right, bottom = overlay.getbbox()
     assert abs((left + right) / 2 - rect.width / 2) < 0.05 * rect.width
     assert abs((top + bottom) / 2 - rect.height / 2) < 0.05 * rect.height
+
+
+def test_autofocus_invalid_mode(camera):
+    with pytest.raises(ValueError):
+        camera.initialize(100, RESOLUTION, autofocus='auto')
+
+
+def test_autofocus_ignored_without_motorized_lens(camera):
+    camera.initialize(100, RESOLUTION, autofocus='continuous')
+    # Nothing to drive on a camera with a fixed lens: no control is forced
+    assert camera._preview_config['controls'] == {}
+    assert camera._still_config['controls'] == {}
+    camera.capture('none')
+    assert camera._cam.autofocus_cycles == 0
+
+
+@pytest.mark.parametrize('mode, expected', [
+    ('continuous', {'AfMode': FakeLibcameraControls.AfModeEnum.Continuous}),
+    ('capture', {'AfMode': FakeLibcameraControls.AfModeEnum.Auto}),
+    ('off', {'AfMode': FakeLibcameraControls.AfModeEnum.Manual, 'LensPosition': 2.5}),
+])
+def test_autofocus_controls_are_part_of_the_configurations(af_camera, mode, expected):
+    af_camera.initialize(100, RESOLUTION, autofocus=mode, lens_position=2.5)
+    # Picamera2 overwrites the controls at each (re)configuration, they shall be
+    # carried by both configurations to survive a preview resize and a capture
+    assert af_camera._preview_config['controls'] == expected
+    assert af_camera._still_config['controls'] == expected
+
+    af_camera.preview(FakeWindow(), flip=False)
+    assert af_camera._cam.config['controls'] == expected
+
+
+def test_autofocus_capture_locks_the_lens(af_camera):
+    af_camera.initialize(100, RESOLUTION, autofocus='capture')
+    af_camera.capture('none')
+
+    # A focus is done on the subject, then the lens is locked so that switching to
+    # the still configuration does not start a new focus scan
+    assert af_camera._cam.autofocus_cycles == 1
+    assert af_camera._still_config['controls'] == {'AfMode': FakeLibcameraControls.AfModeEnum.Manual,
+                                                   'LensPosition': af_camera._cam.lens_position}
+    assert af_camera._cam.config['controls'] == af_camera._still_config['controls']
+    assert af_camera.get_captures()[0].size == RESOLUTION
+
+
+def test_autofocus_capture_failure_still_captures(af_camera):
+    af_camera._cam.autofocus_success = False  # As a scan in front of a blank wall
+    af_camera.initialize(100, RESOLUTION, autofocus='capture')
+    af_camera.capture('none')
+    assert af_camera._cam.autofocus_cycles == 1
+    assert af_camera.get_captures()[0].size == RESOLUTION
+
+
+@pytest.mark.parametrize('mode', ['continuous', 'off'])
+def test_autofocus_no_cycle_out_of_the_capture_mode(af_camera, mode):
+    af_camera.initialize(100, RESOLUTION, autofocus=mode)
+    af_camera.capture('none')
+    assert af_camera._cam.autofocus_cycles == 0
+
+
+def test_autofocus_capture_error_does_not_lose_the_capture(af_camera):
+    af_camera.initialize(100, RESOLUTION, autofocus='capture')
+
+    def broken_cycle(wait=True):
+        raise RuntimeError("Lens is stuck")
+
+    af_camera._cam.autofocus_cycle = broken_cycle
+    af_camera.capture('none')
+    assert af_camera.get_captures()[0].size == RESOLUTION
