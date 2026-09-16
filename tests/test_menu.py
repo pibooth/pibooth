@@ -181,3 +181,58 @@ def test_menu_surface_has_the_format_of_the_window(menu):
     menu.process([])
     assert menu._surface.get_masks() == menu.win.surface.get_masks()
     assert menu._surface.get_bitsize() == menu.win.surface.get_bitsize()
+
+
+def _finger(surface, pos, pressed=True):
+    """Build the finger event SDL reports for a touch at the given position."""
+    width, height = surface.get_size()
+    return pygame.event.Event(pygame.FINGERDOWN if pressed else pygame.FINGERUP,
+                              touch_id=6, finger_id=73, x=pos[0] / width, y=pos[1] / height,
+                              dx=0.0, dy=0.0, pressure=0.0)
+
+
+def _synthetic_mouse(pos, pressed=True):
+    """Build the mouse event SDL synthesises on top of a touch."""
+    return pygame.event.Event(pygame.MOUSEBUTTONDOWN if pressed else pygame.MOUSEBUTTONUP,
+                              pos=pos, button=1, touch=True, window=None)
+
+
+def test_a_touch_is_not_handled_twice(menu):
+    """SDL reports a touch as a finger event and as a mouse event. Both are
+    handled by the virtual keyboard, which used to insert the character twice.
+    """
+    menu.cfg.set('GENERAL', 'vkeyboard', 'True')
+    surface = menu.win.surface
+    # Finger positions are relative to the window, and the booth runs fullscreen
+    menu.win.display_size = surface.get_size()
+    main = menu._main_menu
+    process(menu)
+
+    # Reach a text input and open the virtual keyboard by touching it
+    for button in [w for w in main.get_widgets() if isinstance(w, pgm.widgets.Button)]:
+        main.select_widget(button)
+        process(menu, [menu.create_click_event()])
+        inputs = [w for w in main.get_current().get_widgets()
+                  if isinstance(w, pgm.widgets.TextInput) and not isinstance(w, pgm.widgets.ColorInput)]
+        if inputs:
+            break
+        process(menu, [menu.create_back_event()])
+    assert inputs, "No text input found in the menu"
+
+    text_input = inputs[0]
+    main.get_current().select_widget(text_input)
+    text_input.set_value('')
+    process(menu)
+
+    pos = text_input.get_rect(to_real_position=True).center
+    process(menu, [_finger(surface, pos), _synthetic_mouse(pos)])
+    assert menu._keyboard is not None and menu._keyboard.is_enabled()
+    process(menu)
+
+    key = menu._keyboard.layout.get_key('a')
+    assert key is not None, "No 'a' key on the virtual keyboard"
+    pos = key.rect.center
+    process(menu, [_finger(surface, pos), _synthetic_mouse(pos)])
+
+    assert menu._keyboard.input.text == 'a', \
+        "One touch inserted {!r}".format(menu._keyboard.input.text)
