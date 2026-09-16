@@ -9,7 +9,7 @@ from pibooth.counters import Counters
 from pibooth.printer import Printer
 from pibooth.plugins import create_plugin_manager
 from pibooth.config.parser import PiConfigParser
-from pibooth.config.menu import PiConfigMenu
+from pibooth.config.menu import PiConfigMenu, _MenuSurface
 from pibooth.view.window import PiWindow
 
 
@@ -124,3 +124,60 @@ def test_printer_queue_cancel_failure(menu, printer, fond_path):
     printer._conn.cancelAllJobs = boom
     menu._on_printer_cancel(label)  # Shall not raise
     assert len(printer.get_all_tasks()) == 1
+
+
+def test_keyboard_is_built_on_demand(menu):
+    """The virtual keyboard shall not be built when it is not used.
+    """
+    assert menu._keyboard is None
+    for _ in range(3):
+        process(menu)
+    assert menu._keyboard is None
+
+
+def test_menu_is_painted_inside_its_own_area(menu):
+    """Only the area of the menu is copied back on the window.
+    """
+    surface = menu.win.surface
+    surface.fill((17, 90, 140))
+    before = surface.copy()
+
+    process(menu)
+
+    rect = menu.get_rect()
+    assert pygame.image.tostring(surface.subsurface(rect), 'RGB') != \
+        pygame.image.tostring(before.subsurface(rect), 'RGB'), "The menu was not painted"
+
+    above = pygame.Rect(0, 0, surface.get_width(), rect.top)
+    below = pygame.Rect(0, rect.bottom, surface.get_width(), surface.get_height() - rect.bottom)
+    for outside in (above, below):
+        if outside.height > 0:
+            assert pygame.image.tostring(surface.subsurface(outside), 'RGB') == \
+                pygame.image.tostring(before.subsurface(outside), 'RGB'), "Painted outside the menu"
+
+
+def test_menu_surface_blends_like_pygame():
+    """Both blitters shall give the same picture, up to a rounding unit.
+    """
+    source = pygame.Surface((20, 20), pygame.SRCALPHA, 32)
+    source.fill((200, 100, 50, 128))
+
+    reference = pygame.Surface((20, 20))
+    reference.fill((10, 20, 30))
+    reference.blit(source, (0, 0))  # Blended by pygame
+
+    fast = _MenuSurface((20, 20))
+    fast.fill((10, 20, 30))
+    fast.blit(source, (0, 0))  # Blended by SDL
+
+    for pos in ((0, 0), (10, 10), (19, 19)):
+        for got, expected in zip(fast.get_at(pos), reference.get_at(pos)):
+            assert abs(got - expected) <= 2, "{} != {}".format(fast.get_at(pos), reference.get_at(pos))
+
+
+def test_menu_surface_has_the_format_of_the_window(menu):
+    """A blit between two different pixel formats is much slower.
+    """
+    menu.process([])
+    assert menu._surface.get_masks() == menu.win.surface.get_masks()
+    assert menu._surface.get_bitsize() == menu.win.surface.get_bitsize()

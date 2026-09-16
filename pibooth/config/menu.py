@@ -62,6 +62,19 @@ SUBTHEME2_DARK.cursor_color = (255, 255, 255)
 SUBTHEME2_DARK.widget_font_color = (255, 255, 255)
 
 
+class _MenuSurface(pygame.Surface):
+
+    """Surface on which the settings menu is rendered. The alpha blitter of
+    pygame is ten times slower than the one of SDL on ARM boards, blits are
+    handed over to the latter.
+    """
+
+    def blit(self, source, dest, area=None, special_flags=0):
+        if not special_flags and source.get_flags() & pygame.SRCALPHA:
+            special_flags = pygame.BLEND_ALPHA_SDL2
+        return super(_MenuSurface, self).blit(source, dest, area, special_flags)
+
+
 def _find(choices, value):
     """Find index for the given value in choices.
     """
@@ -108,13 +121,9 @@ class PiConfigMenu(object):
         self._main_menu.disable()
         self._main_menu.add.vertical_margin(20)
 
-        self._keyboard = vkb.VKeyboard(self.win.surface,
-                                       self._on_keyboard_event,
-                                       vkb.VKeyboardLayout(vkb.VKeyboardLayout.QWERTY),
-                                       renderer=vkb.VKeyboardRenderer.DARK,
-                                       show_text=True,
-                                       joystick_navigation=True)
-        self._keyboard.disable()
+        # Slow to build, and useless when the 'vkeyboard' option is off
+        self._keyboard = None
+        self._surface = None
 
         for name in DEFAULT:
             submenu = self._build_submenu(name)
@@ -145,6 +154,7 @@ class PiConfigMenu(object):
                     menu.add.text_input(title,
                                         onchange=self._on_text_changed,
                                         default=self.cfg.get(section, name).strip('"'),
+                                        repeat_keys=False,  # Auto-repeat done by pygame
                                         # Parameters passed to callback:
                                         section=section,
                                         option=name)
@@ -156,6 +166,7 @@ class PiConfigMenu(object):
                                          input_separator=',',
                                          onchange=self._on_color_changed,
                                          previsualization_width=1,
+                                         repeat_keys=False,  # Auto-repeat done by pygame
                                          # Parameters passed to callback:
                                          section=section,
                                          option=name)
@@ -235,6 +246,19 @@ class PiConfigMenu(object):
                                    option='plugins_disabled',
                                    plugin=plugin)
         return menu
+
+    def _get_keyboard(self):
+        """Return the virtual keyboard, built at the first call.
+        """
+        if self._keyboard is None:
+            self._keyboard = vkb.VKeyboard(self.win.surface,
+                                           self._on_keyboard_event,
+                                           vkb.VKeyboardLayout(vkb.VKeyboardLayout.QWERTY),
+                                           renderer=vkb.VKeyboardRenderer.DARK,
+                                           show_text=True,
+                                           joystick_navigation=True)
+            self._keyboard.disable()
+        return self._keyboard
 
     def _on_keyboard_event(self, text):
         """Called after each option changed.
@@ -324,6 +348,7 @@ class PiConfigMenu(object):
     def _on_close(self):
         """Called when the menu is closed.
         """
+        pygame.key.set_repeat()  # Back to the default: no auto-repeat
         self._main_menu.disable()
         if self._changed:
             self.cfg.save()
@@ -340,6 +365,8 @@ class PiConfigMenu(object):
     def show(self):
         """Show the menu.
         """
+        # Without auto-repeat, a long press has no effect on the values
+        pygame.key.set_repeat(400, 60)
         self._main_menu.enable()
 
     def is_shown(self):
@@ -376,23 +403,42 @@ class PiConfigMenu(object):
                                   unicode=u'\x1b', mod=0, scancode=53,
                                   window=None, test=True)
 
+    def get_rect(self):
+        """Return the rectangle of the window occupied by the menu.
+        """
+        rect = self._main_menu.get_rect().union(self._main_menu.get_current().get_rect())
+        return rect.clip(self.win.surface.get_rect())
+
+    def _draw_menu(self):
+        """Paint the menu on the window.
+        """
+        size = self.win.surface.get_size()
+        if self._surface is None or self._surface.get_size() != size:
+            self._surface = _MenuSurface(size)
+            # The menu does not paint every pixel of its own area
+            self._surface.blit(self.win.surface, (0, 0))
+        self._main_menu.draw(self._surface)
+        rect = self.get_rect()
+        self.win.surface.blit(self._surface, rect, rect)
+
     def process(self, events):
         """Process the events related to the menu.
         """
-        if not self._keyboard.is_enabled():
+        if self._keyboard is None or not self._keyboard.is_enabled():
             self._main_menu.update(events)
             if self._main_menu.is_enabled():  # Menu may have been closed
-                self._main_menu.draw(self.win.surface)
+                self._draw_menu()
                 selected = self._main_menu.get_current().get_selected_widget()
                 if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
                     for event in events:
                         if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN)\
                                 and selected.get_scrollarea().collide(selected, event):
-                            self._keyboard.enable()
+                            keyboard = self._get_keyboard()
+                            keyboard.enable()
                             if isinstance(selected, pgm.widgets.ColorInput):
-                                self._keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
+                                keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
                             else:
-                                self._keyboard.set_text(selected.get_value())
+                                keyboard.set_text(selected.get_value())
                             return
         else:
             for event in events:
