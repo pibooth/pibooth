@@ -448,7 +448,7 @@ class PiConfigMenu(object):
             for event in events:
                 if (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3)
                         or event.type == pygame.FINGERDOWN)\
-                        and not self._keyboard.get_rect().collidepoint(get_event_pos(self.win.display_size, event)):
+                        and not self._keyboard.get_rect().collidepoint(get_event_pos(self.win.get_rect().size, event)):
                     self._keyboard.disable()
                     self._keyboard.draw()
                     return

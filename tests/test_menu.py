@@ -203,8 +203,6 @@ def test_a_touch_is_not_handled_twice(menu):
     """
     menu.cfg.set('GENERAL', 'vkeyboard', 'True')
     surface = menu.win.surface
-    # Finger positions are relative to the window, and the booth runs fullscreen
-    menu.win.display_size = surface.get_size()
     main = menu._main_menu
     process(menu)
 
@@ -236,3 +234,39 @@ def test_a_touch_is_not_handled_twice(menu):
 
     assert menu._keyboard.input.text == 'a', \
         "One touch inserted {!r}".format(menu._keyboard.input.text)
+
+
+def test_the_keyboard_survives_a_touch_in_a_window(menu):
+    """SDL gives finger positions relative to the window. Converted with the
+    size of the desktop, a touch on the virtual keyboard lands outside of it
+    and closes it, as soon as the booth does not run fullscreen.
+    """
+    menu.cfg.set('GENERAL', 'vkeyboard', 'True')
+    surface = menu.win.surface
+    # A booth running in a window on a bigger desktop
+    menu.win.display_size = (surface.get_width() * 2, surface.get_height() * 2)
+    main = menu._main_menu
+    process(menu)
+
+    for button in [w for w in main.get_widgets() if isinstance(w, pgm.widgets.Button)]:
+        main.select_widget(button)
+        process(menu, [menu.create_click_event()])
+        inputs = [w for w in main.get_current().get_widgets()
+                  if isinstance(w, pgm.widgets.TextInput) and not isinstance(w, pgm.widgets.ColorInput)]
+        if inputs:
+            break
+        process(menu, [menu.create_back_event()])
+    assert inputs, "No text input found in the menu"
+
+    main.get_current().select_widget(inputs[0])
+    inputs[0].set_value('')
+    process(menu)
+    process(menu, [_finger(surface, inputs[0].get_rect(to_real_position=True).center)])
+    assert menu._keyboard is not None and menu._keyboard.is_enabled()
+    process(menu)
+
+    key = menu._keyboard.layout.get_key('a')
+    process(menu, [_finger(surface, key.rect.center)])
+
+    assert menu._keyboard.is_enabled(), "Touching the keyboard closed it"
+    assert menu._keyboard.input.text == 'a'
