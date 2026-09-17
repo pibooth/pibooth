@@ -424,6 +424,10 @@ class PiConfigMenu(object):
     def process(self, events):
         """Process the events related to the menu.
         """
+        # SDL reports a touch both as a finger and as a mouse event, and the
+        # virtual keyboard handles the two of them: drop the mouse one
+        events = [event for event in events if not getattr(event, 'touch', False)]
+
         if self._keyboard is None or not self._keyboard.is_enabled():
             self._main_menu.update(events)
             if self._main_menu.is_enabled():  # Menu may have been closed
