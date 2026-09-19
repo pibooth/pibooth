@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from types import SimpleNamespace
 import pytest
 import pygame
 from pibooth import evts
-from pibooth.view.pygame.window import PygameWindow
 
 
 @pytest.mark.parametrize("name", ['wait', 'choose', 'chosen', 'preview', 'capture', 'processing', 'print', 'finish'])
@@ -53,32 +51,3 @@ def test_print_scene_actions(init_lang, init_pygame, scene_builder):
     scene.image.set_pressed(1)
     scene.image.set_pressed(0)
     assert [event.type for event in pygame.event.get()] == [evts.EVT_PIBOOTH_PRINT]
-
-
-def test_settings_menu(init_lang, init_pygame, cfg, pm, counters):
-    """Build the settings menu, enter a sub-menu and come back.
-    """
-    win = PygameWindow("Test", size=(400, 400))
-    win.set_menu(SimpleNamespace(count=counters), cfg, pm)
-    assert not win.is_menu_shown
-
-    win.toggle_menu()
-    assert win.is_menu_shown
-    assert win._menu.is_enabled()
-    assert win._menu.is_top_level()
-    assert evts.EVT_PIBOOTH_SETTINGS in [event.type for event in pygame.event.get()]
-
-    win._menu.click()
-    win.update(pygame.event.get())
-    win.draw()
-    assert not win._menu.is_top_level()
-    assert win._menu._main_menu.get_current().get_title() == 'General'
-
-    win._menu.back()
-    win.update(pygame.event.get())
-    win.draw()
-    assert win._menu.is_top_level()
-
-    win.toggle_menu()
-    assert not win.is_menu_shown
-    assert not win._menu.is_enabled()

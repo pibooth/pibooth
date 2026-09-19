@@ -27,18 +27,18 @@ def post(*args, **kwargs):
     return pygame.event.post(pygame.event.Event(*args, **kwargs))
 
 
-def get_event_pos(display_size, event):
+def get_event_pos(size, event):
     """
     Return the position from finger or mouse event on x-axis and y-axis (x, y).
 
-    :param display_size: size of display for relative positioning in finger events
+    :param size: size of the window, SDL gives finger positions relative to it
     :param event: pygame event object
 
     :return: position (x, y) in px
     :rtype: tuple
     """
     if event.type in (pygame.FINGERDOWN, pygame.FINGERMOTION, pygame.FINGERUP):
-        finger_pos = (event.x * display_size[0], event.y * display_size[1])
+        finger_pos = (event.x * size[0], event.y * size[1])
         return finger_pos
     return event.pos
 

@@ -63,6 +63,19 @@ SUBTHEME2_DARK.cursor_color = (255, 255, 255)
 SUBTHEME2_DARK.widget_font_color = (255, 255, 255)
 
 
+class _MenuSurface(pygame.Surface):
+
+    """Surface on which the settings menu is rendered. The alpha blitter of
+    pygame is ten times slower than the one of SDL on ARM boards, blits are
+    handed over to the latter.
+    """
+
+    def blit(self, source, dest, area=None, special_flags=0):
+        if not special_flags and source.get_flags() & pygame.SRCALPHA:
+            special_flags = pygame.BLEND_ALPHA_SDL2
+        return super().blit(source, dest, area, special_flags)
+
+
 def _find(choices, value):
     """Find index for the given value in choices.
     """
@@ -82,6 +95,12 @@ def _counters(counters):
     return [pattern.format(name.replace("_", " ").capitalize(), counters[name]) for name in counters]
 
 
+def _printer_tasks(printer):
+    """Return the formatted text for the printer queue state.
+    """
+    return '{:.<25} {: >4}'.format('Tasks in queue', len(printer.get_all_tasks()))
+
+
 class PygameMenu:
 
     def __init__(self, size, application, configuration, plugin_manager, callback=None):
@@ -92,6 +111,7 @@ class PygameMenu:
         self.size = size
         self._changed = False
         self._main_menu = None
+        self._surface = None
 
     def _build_menu(self):
         """Create all sub-menus"""
@@ -136,6 +156,7 @@ class PygameMenu:
                     menu.add.text_input(title,
                                         onchange=self.on_text_changed,
                                         default=self.cfg.get(section, name).strip('"'),
+                                        repeat_keys=False,  # Auto-repeat done by pygame
                                         # Parameters passed to callback:
                                         section=section,
                                         option=name)
@@ -147,6 +168,7 @@ class PygameMenu:
                                          input_separator=',',
                                          onchange=self.on_color_changed,
                                          previsualization_width=1,
+                                         repeat_keys=False,  # Auto-repeat done by pygame
                                          # Parameters passed to callback:
                                          section=section,
                                          option=name)
@@ -171,7 +193,26 @@ class PygameMenu:
                                 self._build_submenu_plugins("Plugins"),
                                 margin=(self.size[0] // 2 - 105, 0))
 
+        if section.lower() == 'printer' and self.app.printer.is_installed():
+            menu.add.vertical_margin(40)
+            menu.add.button("Printer queue",
+                            self._build_submenu_printer("Printer queue"),
+                            margin=(self.size[0] // 2 - 100, 0))
+
         menu.add.vertical_margin(20)
+        menu.enable_render()
+        return menu
+
+    def _build_submenu_printer(self, title):
+        menu = pgm.Menu(title=title.capitalize(),
+                        width=self.size[0],
+                        height=self.size[1],
+                        theme=SUBTHEME2_DARK,
+                        touchscreen=True)
+        menu.disable_render()
+        label = menu.add.label(_printer_tasks(self.app.printer))
+        menu.add.vertical_margin(40)
+        menu.add.button("Cancel all tasks", self.on_printer_cancel, label)
         menu.enable_render()
         return menu
 
@@ -243,6 +284,17 @@ class PygameMenu:
         for label, text in zip(labels, _counters(self.app.count)):
             label.set_title(text)
 
+    def on_printer_cancel(self, label):
+        """Called when all tasks in the printer queue are canceled.
+        """
+        try:
+            self.app.printer.cancel_all_tasks()
+            LOGGER.info("All tasks canceled in the printer queue")
+        except Exception as ex:  # pylint: disable=broad-exception-caught
+            # Any CUPS failure (printer disabled, server gone) shall not close the menu
+            LOGGER.warning("Can not cancel the printer queue: %s", ex)
+        label.set_title(_printer_tasks(self.app.printer))
+
     def on_plugin_toggled(self, activated, **kwargs):
         """Called when a plugin active state is toggled.
         """
@@ -266,6 +318,7 @@ class PygameMenu:
     def on_close(self):
         """Called when the menu is closed.
         """
+        pygame.key.set_repeat()  # Back to the default: no auto-repeat
         self._main_menu.disable()
         if self._changed:
             self.cfg.save()
@@ -284,14 +337,18 @@ class PygameMenu:
         """
         if not self._main_menu:
             self._build_menu()
+        # Without auto-repeat, a long press has no effect on the values
+        pygame.key.set_repeat(400, 60)
         self._main_menu.enable()
 
     def disable(self):
-        """Show the menu.
+        """Hide the menu.
         """
+        pygame.key.set_repeat()  # Back to the default: no auto-repeat
         if self._main_menu:
             self._main_menu.disable()
             self._main_menu = None  # Temp fix : waiting for pygame-menu resizes submenus
+        self._surface = None
 
     def is_enabled(self):
         """Return True if the menu is shown.
@@ -372,6 +429,15 @@ class PygameMenu:
                                 evts.post(EVT_MENU_TEXT_EDIT, text=selected.get_value())
                             return
 
+    def get_rect(self, surface):
+        """Return the rectangle of the given surface occupied by the menu.
+
+        :param surface: surface the menu is displayed at
+        :type surface: object
+        """
+        rect = self._main_menu.get_rect().union(self._main_menu.get_current().get_rect())
+        return rect.clip(surface.get_rect())
+
     def draw(self, surface):
         """Draw menu on surface.
 
@@ -380,5 +446,12 @@ class PygameMenu:
         """
         if not self._main_menu:
             return []
-        self._main_menu.draw(surface)
-        return [self._main_menu.get_rect()]
+        size = surface.get_size()
+        if self._surface is None or self._surface.get_size() != size:
+            self._surface = _MenuSurface(size)
+            # The menu does not paint every pixel of its own area
+            self._surface.blit(surface, (0, 0))
+        self._main_menu.draw(self._surface)
+        rect = self.get_rect(surface)
+        surface.blit(self._surface, rect, rect)
+        return [rect]
