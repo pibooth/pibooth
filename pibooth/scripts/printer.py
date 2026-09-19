@@ -79,7 +79,8 @@ def main():
                 for choice in choices[1:]:
                     print(f"                  {choice}")
             else:
-                print("     Choices:     {}".format(", ".join(option['choices'])))
+                choices = ", ".join(option['choices'])
+                print(f"     Choices:     {choices}")
 
             print()
 

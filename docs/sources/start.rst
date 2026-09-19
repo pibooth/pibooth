@@ -114,6 +114,35 @@ variables defined in the configuration (see :ref:`Configure` below):
 
             v4l2-ctl --list-formats-ext -d /dev/video0
 
+Autofocus
+^^^^^^^^^
+
+Cameras with a motorized lens (Raspberry Pi Camera Module 3, some Arducam modules)
+are driven by the ``[CAMERA][autofocus]`` option. It is required because
+**Picamera2** does not enable the autofocus by default: the lens stays at the
+position defined in the tuning file of the camera.
+
+* **continuous**: the camera focuses permanently, like ``rpicam-hello`` does. This
+  is the default value.
+* **capture**: an autofocus cycle is run just before each capture, the focus is
+  thus done on the people in front of the camera. It adds a short delay to the
+  capture, but the lens does not search during the preview.
+* **off**: the focus is fixed at ``[CAMERA][lens_position]``, given in diopters
+  (1/meters): ``0`` is the infinity, ``0.5`` is 2 meters and ``2`` is 50
+  centimeters. It is the most reproducible choice for a photobooth, where the
+  distance between the camera and the people does not change.
+
+.. code-block:: ini
+
+    [CAMERA]
+
+    # Autofocus of the camera (when it has a motorized lens): 'continuous', 'capture' or 'off'
+    autofocus = capture
+
+.. note:: Both options are ignored by the cameras having a fixed lens (Camera Module
+          1 and 2, HQ camera) and by the ``gphoto2`` ones (for a DSLR, see
+          :doc:`tutorials/dslr_tips`).
+
 Captures effects
 ^^^^^^^^^^^^^^^^
 

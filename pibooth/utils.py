@@ -233,7 +233,9 @@ def get_pkg_versions():
 def get_crash_message():
     """Format a message to give most information about environment.
     """
-    msg = "system='{}', node='{}', release='{}', version='{}', machine='{}', processor='{}', ".format(*platform.uname())
+    system, node, release, version, machine, processor = platform.uname()
+    msg = (f"system='{system}', node='{node}', release='{release}', "
+           f"version='{version}', machine='{machine}', processor='{processor}', ")
     msg += ", ".join(get_pkg_versions()) + "\n"
     msg += " " + "*" * 83 + "\n"
     msg += " * " + "Oops! It seems that pibooth has crashed".center(80) + "*\n"

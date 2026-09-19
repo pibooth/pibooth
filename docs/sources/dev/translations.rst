@@ -62,16 +62,10 @@ Things to know
 Checking
 ^^^^^^^^
 
-All sections should define exactly the same keys::
+``tests/test_consistency.py`` checks that all sections define exactly the same
+keys and that every language has its ``Natural Language ::`` classifier::
 
-    python - <<'EOF'
-    from pibooth.language import DEFAULT
-    reference = set(DEFAULT['en'])
-    for code, texts in DEFAULT.items():
-        missing, extra = reference - set(texts), set(texts) - reference
-        if missing or extra:
-            print(code, 'missing:', missing, 'extra:', extra)
-    EOF
+    pytest tests/test_consistency.py
 
 Then regenerate the translations file to see what users will get, without
 touching your own configuration::

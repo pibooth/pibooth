@@ -39,7 +39,7 @@ def desktop_quote(arg):
         return arg
     for char in ('\\', '"', '`', '$'):
         arg = arg.replace(char, '\\' + char)
-    return '"{}"'.format(arg)
+    return f'"{arg}"'
 
 
 class PiboothConfigParser(RawConfigParser):
@@ -117,7 +117,6 @@ class PiboothConfigParser(RawConfigParser):
                             fp.write(option_pattern.format(comment="Unknown option, maybe from a disabled plugin?",
                                                            name=name, value=value))
 
-
         self.handle_autostart()
 
     def load(self, clean=False):
@@ -146,10 +145,10 @@ class PiboothConfigParser(RawConfigParser):
             command = get_launch_command()
             content = "[Desktop Entry]\nName=pibooth\n"
             if delay > 0:
-                content += "Exec=bash -c {}\n".format(
-                    desktop_quote("sleep {} && {}".format(delay, shlex.quote(command))))
+                command = desktop_quote(f"sleep {delay} && {shlex.quote(command)}")
+                content += f"Exec=bash -c {command}\n"
             else:
-                content += "Exec={}\n".format(desktop_quote(command))
+                content += f"Exec={desktop_quote(command)}\n"
             content += "Type=application\n"
 
             regenerate = True

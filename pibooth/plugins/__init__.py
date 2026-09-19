@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import inspect
 import pluggy
 
 from pibooth.utils import LOGGER, load_module

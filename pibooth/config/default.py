@@ -11,7 +11,8 @@ DEFAULT = odict()
 def values_list_repr(values):
     """Concatenate a list of values to a readable string.
     """
-    return "'{}' or '{}'".format("', '".join([str(i) for i in values[:-1]]), values[-1])
+    head = "', '".join([str(i) for i in values[:-1]])
+    return f"'{head}' or '{values[-1]}'"
 
 
 def add_default_option(section, option, default, description, menu_name=None, menu_choices=None):
@@ -170,6 +171,12 @@ add_default_option("CAMERA", "rotation", 0,
 
 add_default_option("CAMERA", "resolution", (1934, 2464),
                    "Resolution for camera captures (preview will have same aspect ratio)")
+
+add_default_option("CAMERA", "autofocus", 'continuous',
+                   "Autofocus of the camera (when it has a motorized lens): 'continuous', 'capture' or 'off'")
+
+add_default_option("CAMERA", "lens_position", 0.0,
+                   "Focus distance in diopters (1/meters, 0 = infinity) when autofocus is 'off'")
 
 add_default_option("CAMERA", "delete_internal_memory", False,
                    "Delete captures from camera internal memory (when applicable)")

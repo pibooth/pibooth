@@ -39,13 +39,8 @@ class Printer:
     """
 
     def __init__(self, name='default', max_pages=-1, options=None, counters=None):
-        try:
-            self._conn = cups.Connection() if cups else None
-            self._notifier = Subscriber(self._conn) if cups and self._conn else None
-        except Exception as ex:
-            LOGGER.error("Failed to connect to CUPS: %s", ex)
-            self._conn = None
-            self._notifier = None
+        self._conn = None
+        self._notifier = None
         self.name = None
         self.max_pages = max_pages
         self.options = options
@@ -54,8 +49,15 @@ class Printer:
         if not cups:
             LOGGER.warning("No printer found (pycups or pycups-notify not installed)")
             return  # CUPS is not installed
-        if not self._conn:
-            return  # CUPS server not reachable
+
+        try:
+            self._conn = cups.Connection()
+            self._notifier = Subscriber(self._conn)
+        except Exception as ex:
+            LOGGER.warning("No printer found (can not connect to the CUPS server: %s)", ex)
+            self._conn = None
+            self._notifier = None
+            return
 
         if not name or name.lower() == 'default':
             self.name = self._conn.getDefault()
@@ -86,7 +88,8 @@ class Printer:
             LOGGER.info(notification.title)
             evts.post(evts.EVT_PIBOOTH_PRINTER_UPDATE, notification=notification)
         except Exception as ex:
-            LOGGER.warning("Error handling printer event: %s", ex)
+            # Called from the notifier thread, an exception would kill it silently
+            LOGGER.warning("Error while handling printer event: %s", ex)
 
     def is_installed(self):
         """Return True if the CUPS server is available for printing.

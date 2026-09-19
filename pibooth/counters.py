@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import json
 import os
 import os.path as osp
+import json
 import pickle
 from pibooth.utils import LOGGER
 
 
 class Counters:
 
-    """Persistent counters stored in a JSON file (a legacy ``.pickle`` file
-    is migrated on first load).
+    """Persistent counters stored in a JSON file. A ``.pickle`` file written
+    by a previous version of pibooth, next to the JSON one, is migrated on
+    first load.
     """
 
     def __init__(self, filename='', **kwargs):
@@ -59,14 +60,20 @@ class Counters:
         return [key for key in self.data]
 
     def _migrate_pickle(self):
-        """Migrate legacy pickle counters file to JSON format.
+        """Load the counters from the legacy pickle file and save them in
+        the JSON one.
         """
         try:
             with open(self.legacy_filename, 'rb') as fp:
-                self.data.update(pickle.load(fp))
-            LOGGER.info("Migrated counters from '%s' to JSON format", self.legacy_filename)
+                data = pickle.load(fp)
+            if not isinstance(data, dict):
+                raise ValueError(f"expected a dict, got {type(data).__name__}")
+            self.data.update(data)
+            LOGGER.info("Counters migrated from '%s' to '%s'", self.legacy_filename, self.filename)
         except Exception as ex:
-            LOGGER.warning("Could not migrate pickle counters: %s", ex)
+            LOGGER.warning("Can not migrate counters from '%s' (%s), resetting counters",
+                           self.legacy_filename, ex)
+            self.data = self.default.copy()
         self.save()
 
     def load(self):
@@ -74,10 +81,13 @@ class Counters:
         """
         if osp.isfile(self.filename):
             try:
-                with open(self.filename, 'r') as fp:
-                    self.data.update(json.load(fp))
-            except (json.JSONDecodeError, ValueError):
-                LOGGER.warning("File '%s' corrupted, resetting counters", self.filename)
+                with open(self.filename, 'r', encoding='utf-8') as fp:
+                    data = json.load(fp)
+                if not isinstance(data, dict):
+                    raise ValueError(f"expected a dict, got {type(data).__name__}")
+                self.data.update(data)
+            except (OSError, ValueError) as ex:
+                LOGGER.warning("File '%s' corrupted (%s), resetting counters", self.filename, ex)
                 self.data = self.default.copy()
                 self.save()
         elif osp.isfile(self.legacy_filename):
@@ -90,14 +100,14 @@ class Counters:
         self.save()
 
     def save(self):
-        """Save the current counters in a JSON file (atomic write).
+        """Save the current counters in the JSON file (atomic write).
         """
-        tmp_file = self.filename + '.tmp'
+        tmp_filename = self.filename + '.tmp'
         try:
-            with open(tmp_file, 'w') as fp:
+            with open(tmp_filename, 'w', encoding='utf-8') as fp:
                 json.dump(self.data, fp, indent=2)
-            os.replace(tmp_file, self.filename)
+            os.replace(tmp_filename, self.filename)
         except OSError as ex:
-            LOGGER.error("Failed to save counters: %s", ex)
-            if osp.isfile(tmp_file):
-                os.remove(tmp_file)
+            LOGGER.error("Failed to save counters in '%s': %s", self.filename, ex)
+            if osp.isfile(tmp_filename):
+                os.remove(tmp_filename)

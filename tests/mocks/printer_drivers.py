@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-"""Fake CUPS objects to test the printer without a CUPS server.
+"""Fake CUPS objects replacing the ``cups`` and ``cups_notify`` bindings
+of the ``pibooth.printer`` module.
 """
 
-from pibooth.printer import PRINTER_STATE_IDLE
+# States defined at: https://www.rfc-editor.org/rfc/rfc8011#section-5.4.11
+PRINTER_STATE_IDLE = 3
+PRINTER_STATE_PROCESSING = 4
+PRINTER_STATE_STOPPED = 5
 
 
 class CupsConnectionMock:
-
-    """Fake ``cups.Connection``.
-    """
 
     def __init__(self, printers=None, default=None):
         self.printers = printers if printers is not None else {}
@@ -43,9 +44,6 @@ class CupsConnectionMock:
 
 class CupsSubscriberMock:
 
-    """Fake ``cups_notify.Subscriber``.
-    """
-
     def __init__(self, conn):
         self.conn = conn
         self.callbacks = {}
@@ -62,9 +60,6 @@ class CupsSubscriberMock:
 
 class CupsEventMock:
 
-    """Fake ``cups_notify.event`` module.
-    """
-
     CUPS_EVT_JOB_COMPLETED = 'job-completed'
     CUPS_EVT_JOB_CREATED = 'job-created'
     CUPS_EVT_JOB_STOPPED = 'job-stopped'
@@ -74,11 +69,20 @@ class CupsEventMock:
 
 class CupsModuleMock:
 
-    """Fake ``cups`` module.
-    """
-
     def __init__(self, conn):
         self._conn = conn
 
     def Connection(self):
         return self._conn
+
+
+class CupsUnreachableModuleMock:
+
+    def Connection(self):
+        raise RuntimeError("failed to connect to server")
+
+
+class CupsNotificationMock:
+
+    def __init__(self, title="Job completed"):
+        self.title = title
