@@ -5,7 +5,7 @@ Install the test dependencies in the environment where ``pibooth`` was installed
 in editable mode (see :ref:`install_developing_version`)::
 
     pip install pytest pytest-cov flake8 pylint
-    pip install opencv-python
+    pip install opencv-python-headless
 
 Then run the suite::
 
@@ -27,15 +27,19 @@ The variables matter, for different reasons:
     the fixture looks for a real camera and the tests are skipped if none is
     connected.
 
-With all of them set and ``opencv-python`` installed, the whole suite passes on
-a machine without any photobooth hardware, so a failure is a real one. The usual
-cause of a mass failure is a missing ``opencv-python``, which takes out all of
+With all of them set and ``opencv-python-headless`` installed, the whole suite
+passes on a machine without any photobooth hardware, so a failure is a real one.
+The usual cause of a mass failure is a missing OpenCV, which takes out all of
 ``tests/test_factory.py``.
 
 Fixtures live in ``tests/conftest.py``. The camera ones — ``camera_gp``,
 ``camera_cv`` and the hybrid variant — are the only ones that can touch real
 hardware. The ``printer`` fixture replaces ``cups.Connection`` by a fake, so
 ``tests/test_printer.py`` does not need a CUPS server.
+
+``tests/test_consistency.py`` checks the files maintained by hand next to the
+code: the documented default configuration, the keys of every language and the
+``Natural Language ::`` classifiers of ``setup.py``.
 
 ``tests/dslr_diag/`` holds ``pibooth-diag`` outputs contributed by users for
 specific DSLR models. They are data files, not tests.
@@ -52,9 +56,9 @@ The continuous integration runs both, and both can fail the build::
     flake8
     pylint pibooth
 
-``flake8`` reads ``.flake8`` and must report nothing. ``pylint`` reads
-``.pylintrc``, which disables the messages contradicting the coding rules and
-sets ``fail-under``: the score may not drop under it. Raise it when the score
+``flake8`` reads ``.flake8`` and must report nothing, on the whole repository
+and not only on ``pibooth``. ``pylint`` reads ``.pylintrc``, which sets
+``fail-under``: the score may not drop under it. Raise it when the score
 improves, as for the coverage floor.
 
 Starting the application

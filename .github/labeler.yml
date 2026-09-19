@@ -29,7 +29,7 @@ view:
           - 'pibooth/view/**'
           - 'pibooth/pictures/**'
           - 'pibooth/fonts/**'
-          - 'pibooth/config/menu.py'
+          - 'pibooth/view/pygame/menu.py'
 
 plugins:
   - changed-files:
