@@ -12,8 +12,6 @@ from pibooth.utils import LOGGER, get_event_pos
 from pibooth.config.parser import DEFAULT
 
 
-pgm.controls.KEY_BACK = pygame.K_ESCAPE
-
 THEME_WHITE = pgm.themes.Theme(
     background_color=(255, 255, 255),
     scrollbar_thick=14,
@@ -399,9 +397,26 @@ class PiConfigMenu(object):
     def create_back_event(self):
         """Create a pygame event to back to the previous menu.
         """
-        return pygame.event.Event(pygame.KEYDOWN, key=pgm.controls.KEY_BACK,
+        return pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE,
                                   unicode=u'\x1b', mod=0, scancode=53,
                                   window=None, test=True)
+
+    def find_back_event(self, events):
+        """Return the first event asking to leave the current menu.
+        """
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                return event
+        return None
+
+    def back(self):
+        """Go back to the previous menu, or close the menu if the main one
+        is displayed.
+        """
+        if self._main_menu.get_current() is not self._main_menu:
+            self._main_menu.reset(1)
+        else:
+            self._on_close()
 
     def get_rect(self):
         """Return the rectangle of the window occupied by the menu.
@@ -421,6 +436,41 @@ class PiConfigMenu(object):
         rect = self.get_rect()
         self.win.surface.blit(self._surface, rect, rect)
 
+    def _process_keyboard(self, events):
+        """Process the events related to the virtual keyboard.
+        """
+        for event in events:
+            if (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3)
+                    or event.type == pygame.FINGERDOWN)\
+                    and not self._keyboard.get_rect().collidepoint(get_event_pos(self.win.get_rect().size, event)):
+                self._keyboard.disable()
+                self._keyboard.draw()
+                return
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                self._keyboard.disable()
+                self._keyboard.draw()
+                return
+
+        self._keyboard.update(events)
+        self._keyboard.draw(self.win.surface)
+
+    def _process_vkeyboard_request(self, events):
+        """Open the virtual keyboard when the selected text input is touched.
+        """
+        selected = self._main_menu.get_current().get_selected_widget()
+        if not isinstance(selected, pgm.widgets.TextInput) or not self.cfg.getboolean('GENERAL', 'vkeyboard'):
+            return
+        for event in events:
+            if event.type in (pygame.MOUSEBUTTONDOWN, pygame.FINGERDOWN)\
+                    and selected.get_scrollarea().collide(selected, event):
+                keyboard = self._get_keyboard()
+                keyboard.enable()
+                if isinstance(selected, pgm.widgets.ColorInput):
+                    keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
+                else:
+                    keyboard.set_text(selected.get_value())
+                return
+
     def process(self, events):
         """Process the events related to the menu.
         """
@@ -428,34 +478,19 @@ class PiConfigMenu(object):
         # virtual keyboard handles the two of them: drop the mouse one
         events = [event for event in events if not getattr(event, 'touch', False)]
 
-        if self._keyboard is None or not self._keyboard.is_enabled():
-            self._main_menu.update(events)
+        if self._keyboard is not None and self._keyboard.is_enabled():
+            self._process_keyboard(events)
+            return
+
+        if self.find_back_event(events):
+            # ESC is not given to pygame-menu: it is also the key deleting a
+            # character in the text inputs (see 'pygame_menu.controls.KEY_BACK')
+            self.back()
             if self._main_menu.is_enabled():  # Menu may have been closed
                 self._draw_menu()
-                selected = self._main_menu.get_current().get_selected_widget()
-                if isinstance(selected, pgm.widgets.TextInput) and self.cfg.getboolean('GENERAL', 'vkeyboard'):
-                    for event in events:
-                        if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.FINGERDOWN)\
-                                and selected.get_scrollarea().collide(selected, event):
-                            keyboard = self._get_keyboard()
-                            keyboard.enable()
-                            if isinstance(selected, pgm.widgets.ColorInput):
-                                keyboard.set_text(",".join([str(c) for c in selected.get_value()]))
-                            else:
-                                keyboard.set_text(selected.get_value())
-                            return
-        else:
-            for event in events:
-                if (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3)
-                        or event.type == pygame.FINGERDOWN)\
-                        and not self._keyboard.get_rect().collidepoint(get_event_pos(self.win.get_rect().size, event)):
-                    self._keyboard.disable()
-                    self._keyboard.draw()
-                    return
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    self._keyboard.disable()
-                    self._keyboard.draw()
-                    return
+            return
 
-            self._keyboard.update(events)
-            self._keyboard.draw(self.win.surface)
+        self._main_menu.update(events)
+        if self._main_menu.is_enabled():  # Menu may have been closed
+            self._draw_menu()
+            self._process_vkeyboard_request(events)
