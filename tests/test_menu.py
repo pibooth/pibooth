@@ -80,6 +80,34 @@ def test_enter_and_leave_submenu(menu):
     assert menu.is_shown()
 
 
+def _key(key, unicode=''):
+    """Build the event pygame reports for a physical key press."""
+    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode,
+                              mod=0, scancode=41, window=None, test=True)
+
+
+def select_in_submenu(menu, is_wanted):
+    """Enter the first submenu holding a wanted widget, and select it."""
+    main = menu._main_menu
+    process(menu)
+    for button in [w for w in main.get_widgets() if isinstance(w, pgm.widgets.Button)]:
+        if button.get_title() == 'Exit':
+            continue
+        main.select_widget(button)
+        process(menu, [menu.create_click_event()])
+        wanted = [w for w in main.get_current().get_widgets() if is_wanted(w)]
+        if wanted:
+            main.get_current().select_widget(wanted[0])
+            process(menu)
+            return wanted[0]
+        process(menu, [menu.create_back_event()])
+    raise AssertionError("No such widget found in the menu")
+
+
+def is_text_input(widget):
+    return isinstance(widget, pgm.widgets.TextInput) and not isinstance(widget, pgm.widgets.ColorInput)
+
+
 def test_close(menu):
     closed = []
     menu._close_callback = lambda: closed.append(True)
@@ -87,6 +115,67 @@ def test_close(menu):
     process(menu, [menu.create_back_event()])
     assert not menu.is_shown()
     assert closed == [True]
+
+
+def test_escape_leaves_a_text_input(menu):
+    """ESC is also the key deleting a character in the text inputs of
+    pygame-menu: given to them, it ate a character instead of leaving the
+    submenu.
+    """
+    text_input = select_in_submenu(menu, is_text_input)
+    submenu = menu._main_menu.get_current()
+    assert submenu is not menu._main_menu
+    value = text_input.get_value()
+
+    process(menu, [_key(pygame.K_ESCAPE, '\x1b')])
+
+    assert text_input.get_value() == value, "ESC deleted a character"
+    assert menu._main_menu.get_current() is menu._main_menu, "ESC did not leave the submenu"
+    assert menu.is_shown()
+
+
+def test_escape_leaves_a_color_input(menu):
+    """A color input is a text input of pygame-menu, ESC used to be eaten
+    by it as well.
+    """
+    color_input = select_in_submenu(menu, lambda w: isinstance(w, pgm.widgets.ColorInput))
+    assert menu._main_menu.get_current() is not menu._main_menu
+    value = color_input.get_value()
+
+    process(menu, [_key(pygame.K_ESCAPE, '\x1b')])
+
+    assert color_input.get_value() == value, "ESC changed the color"
+    assert menu._main_menu.get_current() is menu._main_menu, "ESC did not leave the submenu"
+    assert menu.is_shown()
+
+
+def test_escape_closes_the_menu_from_a_submenu(menu):
+    """Two ESC from a submenu: back to the main menu, then close.
+    """
+    closed = []
+    menu._close_callback = lambda: closed.append(True)
+    select_in_submenu(menu, is_text_input)
+
+    process(menu, [_key(pygame.K_ESCAPE, '\x1b')])
+    assert menu.is_shown()
+    process(menu, [_key(pygame.K_ESCAPE, '\x1b')])
+
+    assert not menu.is_shown()
+    assert closed == [True]
+
+
+def test_backspace_deletes_a_character(menu):
+    """Remapping the 'back' key of pygame-menu on ESC also stole the
+    backspace key of the text inputs.
+    """
+    text_input = select_in_submenu(menu, is_text_input)
+    text_input.set_value('pibooth')
+    process(menu)
+
+    process(menu, [_key(pygame.K_BACKSPACE, '\x08')])
+
+    assert text_input.get_value() == 'piboot'
+    assert menu._main_menu.get_current() is not menu._main_menu, "Backspace left the submenu"
 
 
 def test_printer_queue_entry(menu):

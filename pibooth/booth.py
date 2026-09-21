@@ -102,6 +102,7 @@ class PiApplication(object):
         self._menu = None
         self._multipress_timer = PoolingTimer(config.getfloat('CONTROLS', 'multi_press_delay'), False)
         self._fingerdown_events = []
+        self._escape_held = False
 
         # Define states of the application
         self._machine = StateMachine(self._pm, self._config, self, self._window)
@@ -268,7 +269,12 @@ class PiApplication(object):
         """
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                return event
+                if not self._escape_held:
+                    return event
+                # Auto-repeat of the key press which has closed the menu: pygame
+                # keeps the repetition it has already scheduled, even once the
+                # menu has restored the default (see 'PiConfigMenu._on_close')
+                continue
             if event.type == BUTTONDOWN and event.capture and event.printer:
                 return event
             if event.type == pygame.FINGERDOWN:
@@ -282,6 +288,9 @@ class PiApplication(object):
                 self._fingerdown_events = []
                 return pygame.event.Event(BUTTONDOWN, capture=1, printer=1,
                                           button=self.buttons)
+
+        if self._escape_held and not pygame.key.get_pressed()[pygame.K_ESCAPE]:
+            self._escape_held = False
         return None
 
     def find_fullscreen_event(self, events):
@@ -398,6 +407,8 @@ class PiApplication(object):
                     self._initialize()
                     self._machine.set_state('wait')
                     self._menu = None
+                    # The key which has closed the menu may still be held down
+                    self._escape_held = pygame.key.get_pressed()[pygame.K_ESCAPE]
                 else:
                     self._machine.process(events)
 
