@@ -20,7 +20,7 @@ from pibooth.counters import Counters
 from pibooth.states import StateMachine
 from pibooth.tasks import AsyncTasksPool
 from pibooth.view import get_scene
-from pibooth.utils import LOGGER, PollingTimer, get_crash_message, set_logging_level
+from pibooth.utils import LOGGER, PollingTimer, get_logging_filename, get_crash_message, set_logging_level
 
 
 def load_last_saved_picture(path):
@@ -106,10 +106,13 @@ class PiboothApplication:
         self.capture_choices = (4, 1)
 
         self.previous_animated = None
-        self.previous_picture = None
-        self.previous_picture_file = None
+        if config.getboolean('WINDOW', 'wait_picture_reload'):
+            self.previous_picture, self.previous_picture_file = load_last_saved_picture(
+                config.gettuple('GENERAL', 'directory', 'path')[0])
+        else:
+            self.previous_picture, self.previous_picture_file = (None, None)
 
-        self.count = Counters(self._config.join_path("counters.pickle"),
+        self.count = Counters(self._config.join_path("counters.json"),
                               taken=0, printed=0, forgotten=0,
                               remaining_duplicates=self._config.getint('PRINTER', 'max_duplicates'))
 
@@ -288,9 +291,14 @@ class PiboothApplication:
         finally:
 
             if enable_profiler:
+                profiler.disable()
+
                 stats = pstats.Stats(profiler).sort_stats('cumtime')
                 stats.print_stats()
-                profiler.disable()
+                if get_logging_filename():
+                    filename = osp.join(osp.dirname(get_logging_filename()), 'profile.dump')
+                    LOGGER.info("Save profile data in %s", filename)
+                    profiler.dump_stats(filename)
 
             self._pm.hook.pibooth_cleanup(app=self)
             self._tasks.quit()

@@ -14,8 +14,9 @@ created to store the single raw captures.
 
 .. note:: if you have both ``Pi`` and ``DSLR`` cameras connected to the Raspberry
           Pi, **both are used**, this is called the **Hybrid** mode. The preview
-          is taken using the ``Pi`` one for a better video rendering and the
-          capture is taken using the ``DSLR`` one for better picture rendering.
+          is taken using the ``Pi`` one (Picamera2) for a better video rendering
+          and the capture is taken using the ``DSLR`` one for better picture
+          rendering.
 
 You can display a basic help on application options by using the command:
 
@@ -105,13 +106,42 @@ variables defined in the configuration (see :ref:`Configure` below):
   the orientation is automatically chosen depending on the resolution.
 
 .. note:: The resolution is an important parameter, it is responsible for the quality of the final
-          picture. For ``Raspberry Pi`` camera, see the list of
-          `picamera possible resolutions <http://picamera.readthedocs.io/en/latest/fov.html#sensor-modes>`_ .
+          picture. On Raspberry Pi, the camera is used via **Picamera2** (libcamera); supported
+          resolutions depend on the sensor.
 
-          For ``gphoto2`` camera, the possible resolutions can be listed by executeing
+          For ``gphoto2`` camera, the possible resolutions can be listed by executing
           the following command (adapt device path as needed)::
 
             v4l2-ctl --list-formats-ext -d /dev/video0
+
+Autofocus
+^^^^^^^^^
+
+Cameras with a motorized lens (Raspberry Pi Camera Module 3, some Arducam modules)
+are driven by the ``[CAMERA][autofocus]`` option. It is required because
+**Picamera2** does not enable the autofocus by default: the lens stays at the
+position defined in the tuning file of the camera.
+
+* **continuous**: the camera focuses permanently, like ``rpicam-hello`` does. This
+  is the default value.
+* **capture**: an autofocus cycle is run just before each capture, the focus is
+  thus done on the people in front of the camera. It adds a short delay to the
+  capture, but the lens does not search during the preview.
+* **off**: the focus is fixed at ``[CAMERA][lens_position]``, given in diopters
+  (1/meters): ``0`` is the infinity, ``0.5`` is 2 meters and ``2`` is 50
+  centimeters. It is the most reproducible choice for a photobooth, where the
+  distance between the camera and the people does not change.
+
+.. code-block:: ini
+
+    [CAMERA]
+
+    # Autofocus of the camera (when it has a motorized lens): 'continuous', 'capture' or 'off'
+    autofocus = capture
+
+.. note:: Both options are ignored by the cameras having a fixed lens (Camera Module
+          1 and 2, HQ camera) and by the ``gphoto2`` ones (for a DSLR, see
+          :doc:`tutorials/dslr_tips`).
 
 Captures effects
 ^^^^^^^^^^^^^^^^
@@ -138,8 +168,8 @@ sequentially on the captures sequence.
 
 Have a look to the predefined effects available depending on the camera used:
 
-* `picamera effects <https://picamera.readthedocs.io/en/latest/api_camera.html#picamera.PiCamera.image_effect>`_
-* `gPhoto2 effects (PIL based) <https://pillow.readthedocs.io/en/latest/reference/ImageFilter.html>`_
+* **Picamera2** and **gPhoto2**: PIL-based effects (e.g. blur, contour, sharpen), see
+  `PIL ImageFilter <https://pillow.readthedocs.io/en/latest/reference/ImageFilter.html>`_
 
 Texts and fonts
 ^^^^^^^^^^^^^^^

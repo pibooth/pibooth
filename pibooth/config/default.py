@@ -11,7 +11,8 @@ DEFAULT = odict()
 def values_list_repr(values):
     """Concatenate a list of values to a readable string.
     """
-    return "'{}' or '{}'".format("', '".join([str(i) for i in values[:-1]]), values[-1])
+    head = "', '".join([str(i) for i in values[:-1]])
+    return f"'{head}' or '{values[-1]}'"
 
 
 def add_default_option(section, option, default, description, menu_name=None, menu_choices=None):
@@ -81,6 +82,10 @@ add_default_option("WINDOW", "animate_delay", 0.2,
 add_default_option("WINDOW", "wait_picture_delay", -1,
                    "On 'wait' state: how long is displayed the final picture in seconds before being hidden (-1 if never hidden)",
                    "Wait picture display time", ['-1'] + [str(i) for i in range(0, 121, 5)])
+
+add_default_option("WINDOW", "wait_picture_reload", False,
+                   "On 'wait' state: display the last picture saved on disk when the application starts",
+                   "Reload last picture at startup", ['True', 'False'])
 
 add_default_option("WINDOW", "chosen_delay", 4,
                    "How long is displayed the 'chosen' state:  (0 if never shown)",
@@ -166,6 +171,12 @@ add_default_option("CAMERA", "rotation", 0,
 
 add_default_option("CAMERA", "resolution", (1934, 2464),
                    "Resolution for camera captures (preview will have same aspect ratio)")
+
+add_default_option("CAMERA", "autofocus", 'continuous',
+                   "Autofocus of the camera (when it has a motorized lens): 'continuous', 'capture' or 'off'")
+
+add_default_option("CAMERA", "lens_position", 0.0,
+                   "Focus distance in diopters (1/meters, 0 = infinity) when autofocus is 'off'")
 
 add_default_option("CAMERA", "delete_internal_memory", False,
                    "Delete captures from camera internal memory (when applicable)")

@@ -1,41 +1,131 @@
 Release for Pypi
 ----------------
 
-1. Install packaging libraries:
+The package is built and uploaded to PyPI by the ``CI`` GitHub workflow
+(``.github/workflows/ci.yml``) when a version tag is pushed. The upload
+uses PyPI *trusted publishing*: PyPI trusts the OpenID Connect token issued
+by GitHub to the ``publish`` job, so no API token or password is stored
+anywhere.
+
+Release from GitHub Actions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. Update the version number in the ``pibooth/__init__.py`` file. It is the only
+   place where the version is declared: ``setup.py`` imports it, and the
+   ``download_url`` is built from it, so the git tag must match it exactly.
+
+2. Merge the pull request carrying the new version into ``master``. The
+   ``build`` and ``package`` jobs of the workflow run on the pull request: they
+   run the tests, build the source distribution and the wheel, check them with
+   ``twine`` and install the wheel in a clean environment.
+
+3. Tag the merge commit with exactly the version set in step 1 and push the
+   tag:
 
    ::
 
-        $ sudo pip install setuptools wheel twine
+        $ git checkout master
+        $ git pull
+        $ git tag <version>
+        $ git push origin <version>
 
-2. Update the version number in the ``pibooth/__init__.py`` file.
+   The workflow runs again on the tag. Once the ``build`` and ``package`` jobs
+   are green, the ``publish`` job checks that the packaged version is the tag
+   name and waits for a manual approval.
 
-3. Check the rendering of the README by generating the HTML page:
+4. Approve the deployment: open the workflow run in the *Actions* tab of the
+   repository, click on *Review deployments*, tick the ``pypi`` environment and
+   *Approve and deploy*. The job then uploads ``dist/*`` to PyPI.
+
+   .. warning:: This step is irreversible: a version number can never be reused
+                on PyPI. If the run fails after the upload, or if something is
+                wrong with the release, bump the version and start again.
+
+5. Write the release notes on GitHub (*Releases* → *Draft a new release*, pick
+   the pushed tag).
+
+.. note:: The ``publish`` job relies on two settings of the project, to redo
+          if the workflow file or the environment is renamed: on PyPI, a
+          GitHub trusted publisher for ``pibooth/pibooth``, workflow
+          ``ci.yml``, environment ``pypi``; on GitHub, the ``pypi``
+          environment with required reviewers.
+
+Manual release (fallback)
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If the workflow can not be used, the package can still be built and uploaded
+from a development machine. It requires a PyPI API token.
+
+1. Create a virtual environment and install the packaging tools in it:
 
    ::
 
-        $ python setup.py --long-description | rst2html.py > output.html
+        $ python3 -m venv /tmp/release-venv
+        $ /tmp/release-venv/bin/pip install build twine
 
-4. Clean previous packages (avoid upload of older package):
+   .. note:: Installing them system-wide with ``sudo pip install`` fails on
+             recent distributions, which mark the system Python as
+             externally managed (:pep:`668`).
 
-   ::
+2. Update the version number in the ``pibooth/__init__.py`` file, as in the
+   automated procedure.
 
-        $ rm -rf build/ dist/
-
-5. Generate the package:
-
-   ::
-
-        $ python setup.py bdist_wheel
-
-6. Check the package integrity:
+3. Clean previous packages (avoid upload of an older package):
 
    ::
 
-        $ twine check dist/*
+        $ rm -rf build/ dist/ pibooth.egg-info/
 
-7. Upload the package on Pypi (replace XXXXXX by username and password of your
-   Pypi account):
+4. Generate the package:
 
    ::
 
-        $ twine upload -u XXXXXX -p XXXXXX dist/*
+        $ /tmp/release-venv/bin/python -m build .
+
+   .. warning:: Do not use ``python setup.py bdist_wheel``. Direct invocation of
+                ``setup.py`` is deprecated and now fails with recent versions of
+                ``setuptools``.
+
+5. Check the package integrity. This also validates that the reStructuredText
+   ``long_description`` renders correctly, which PyPI rejects otherwise:
+
+   ::
+
+        $ /tmp/release-venv/bin/twine check --strict dist/*
+
+6. Check that the built package actually installs and starts, in a clean
+   environment. This is what catches a broken dependency pin before the users
+   do:
+
+   ::
+
+        $ python3 -m venv /tmp/install-check
+        $ /tmp/install-check/bin/pip install dist/pibooth-*.whl
+        $ SDL_VIDEODRIVER=dummy /tmp/install-check/bin/pibooth --reset /tmp/cfg-check
+
+7. Upload the package on PyPI:
+
+   ::
+
+        $ /tmp/release-venv/bin/twine upload dist/*
+
+   PyPI no longer accepts account passwords: authentication requires an API
+   token, used as the password with ``__token__`` as the username. ``twine``
+   prompts for it, or reads it from ``~/.pypirc`` or the ``TWINE_USERNAME`` /
+   ``TWINE_PASSWORD`` environment variables.
+
+   .. warning:: This step is irreversible: a version number can never be reused
+                on PyPI.
+
+8. Tag the release and push the tag, using exactly the version set in step 2:
+
+   ::
+
+        $ git tag <version>
+        $ git push origin <version>
+
+   .. note:: Pushing the tag still triggers the ``publish`` job, which waits
+             for the approval of the ``pypi`` environment. The package being
+             already on PyPI, reject the deployment. Without a required
+             reviewer the job runs and fails on the duplicate upload, which is
+             harmless.

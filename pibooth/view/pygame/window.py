@@ -45,15 +45,29 @@ class PygameWindow(BaseWindow):
         self.statusbar_sprite = sprites.StatusBarSprite(None, size=(50, 100),
                                                         layer=sprites.BasePygameScene.LAYER_STATUS)
 
-        self._keyboard = vkb.VKeyboard(self.surface,
-                                       self._on_keyboard_event,
-                                       vkb.VKeyboardLayout(vkb.VKeyboardLayout.QWERTY),
-                                       renderer=vkb.VKeyboardRenderer.DARK,
-                                       show_text=True,
-                                       joystick_navigation=True)
-        self._keyboard.disable()
+        # Slow to build, and useless when the 'vkeyboard' option is off
+        self._keyboard = None
         self._menu = None
         self._force_redraw = False
+        self._escape_held = False
+
+    def _get_keyboard(self):
+        """Return the virtual keyboard, built at the first call.
+        """
+        if self._keyboard is None:
+            self._keyboard = vkb.VKeyboard(self.surface,
+                                           self._on_keyboard_event,
+                                           vkb.VKeyboardLayout(vkb.VKeyboardLayout.QWERTY),
+                                           renderer=vkb.VKeyboardRenderer.DARK,
+                                           show_text=True,
+                                           joystick_navigation=True)
+            self._keyboard.disable()
+        return self._keyboard
+
+    def _is_keyboard_enabled(self):
+        """Return True if the virtual keyboard is built and shown.
+        """
+        return self._keyboard is not None and self._keyboard.is_enabled()
 
     def _on_keyboard_event(self, text):
         """Callback when new letter is typed on keyboard.
@@ -68,6 +82,8 @@ class PygameWindow(BaseWindow):
         """Callback when menu is closed by graphical action on menu.
         """
         self.is_menu_shown = False
+        # The key which has closed the menu may still be held down
+        self._escape_held = pygame.key.get_pressed()[pygame.K_ESCAPE]
         self._force_redraw = True  # Because pygame-menu does not manage direty rects
         evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
 
@@ -83,7 +99,8 @@ class PygameWindow(BaseWindow):
         """
         super().set_scene(name)
         self.set_background(self.bg_color_or_path)
-        self._keyboard.disable()
+        if self._keyboard:
+            self._keyboard.disable()
         self._force_redraw = True
 
     def set_menu(self, app, cfg, pm):
@@ -172,6 +189,8 @@ class PygameWindow(BaseWindow):
             else:
                 self._menu.disable()
                 self._force_redraw = True  # Because pygame-menu does not manage direty rects
+                # The key which has closed the menu may still be held down
+                self._escape_held = pygame.key.get_pressed()[pygame.K_ESCAPE]
                 evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
 
     def update(self, events):
@@ -180,6 +199,10 @@ class PygameWindow(BaseWindow):
         :param events: list of events to process.
         :type events: list
         """
+        # SDL reports a touch both as a finger and as a mouse event, and the
+        # virtual keyboard handles the two of them: drop the mouse one
+        events = [event for event in events if not getattr(event, 'touch', False)]
+
         for event in events:
             if event.type == pygame.VIDEORESIZE and not self.is_fullscreen:
                 # Manual resizing
@@ -192,19 +215,25 @@ class PygameWindow(BaseWindow):
                 self.toggle_fullscreen()
 
             elif event.type == menu.EVT_MENU_TEXT_EDIT:
-                self._keyboard.enable()
-                self._keyboard.set_text(event.text)
+                keyboard = self._get_keyboard()
+                keyboard.enable()
+                keyboard.set_text(event.text)
 
-            elif self._keyboard.is_enabled() and \
+            elif self._is_keyboard_enabled() and \
                     (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3) or event.type == pygame.FINGERDOWN)\
-                    and not self._keyboard.get_rect().collidepoint(evts.get_event_pos(self.display_size, event)):
+                    and not self._keyboard.get_rect().collidepoint(evts.get_event_pos(self.get_rect().size, event)):
                 self._keyboard.disable()
 
-            elif self._keyboard.is_enabled() and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            elif self._is_keyboard_enabled() and event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self._keyboard.disable()
 
             elif ((event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE) or evts.is_fingers_event(event, 4))\
                     and not self.is_menu_shown:
+                if self._escape_held:
+                    # Auto-repeat of the key press which has closed the menu: pygame
+                    # keeps the repetition it has already scheduled, even once the
+                    # menu has restored the default (see 'PygameMenu.on_close')
+                    continue
                 LOGGER.debug("Event triggered: KEY ESCAPE -> generate EVT_BUTTON_SETTINGS")
                 evts.post(evts.EVT_BUTTON_SETTINGS)  # Use HW event to update sprites if necessary
 
@@ -234,7 +263,10 @@ class PygameWindow(BaseWindow):
                 if self.is_menu_shown:
                     self._menu.next()
 
-        if self._keyboard.is_enabled():
+        if self._escape_held and not pygame.key.get_pressed()[pygame.K_ESCAPE]:
+            self._escape_held = False
+
+        if self._is_keyboard_enabled():
             # Events only acts on the keyboard
             self._keyboard.update(events)
         elif self._menu and self._menu.is_enabled():
@@ -251,9 +283,10 @@ class PygameWindow(BaseWindow):
         if self.scene and (not self._menu or not self._menu.is_enabled()):
             rects += self.scene.draw(self.surface, self._force_redraw)
 
-        rects += self._keyboard.draw(self.surface, self._force_redraw)
+        if self._keyboard:
+            rects += self._keyboard.draw(self.surface, self._force_redraw)
 
-        if not self._keyboard.is_enabled() and self._menu and self._menu.is_enabled():
+        if not self._is_keyboard_enabled() and self._menu and self._menu.is_enabled():
             rects += self._menu.draw(self.surface)
 
         self._force_redraw = False

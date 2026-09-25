@@ -1,7 +1,25 @@
 # -*- coding: utf-8 -*-
 
+import os
+import sys
+import shutil
 import os.path as osp
 import pytest
+
+from pibooth.config import parser
+from pibooth.config.parser import PiboothConfigParser, desktop_quote, get_launch_command
+
+
+@pytest.fixture
+def autostart_cfg(cfg_path, pm, tmpdir, monkeypatch):
+    """Return a config with autostart enabled and the auto-startup file it
+    generates in an isolated directory.
+    """
+    monkeypatch.setattr(parser, 'get_launch_command', lambda: '/venv/bin/pibooth')
+    config = PiboothConfigParser(cfg_path, pm)
+    config.autostart_filename = str(tmpdir.join('.config', 'autostart', 'pibooth.desktop'))
+    config.set('GENERAL', 'autostart', 'True')
+    return config, tmpdir.join('.config', 'autostart', 'pibooth.desktop')
 
 
 def test_join_path_to_config_directory(cfg):
@@ -98,3 +116,111 @@ def test_add_option(cfg):
         cfg.get('HELLO', 'world')
     cfg.add_option('HELLO', 'world', "beautiful", "This is a new dummy option")
     assert cfg.get('HELLO', 'world') == "beautiful"
+
+
+@pytest.mark.parametrize('path', ['/usr/local/bin/pibooth', '/home/pi/pibooth-venv/bin/pibooth'])
+def test_desktop_quote_usual_path(path):
+    assert desktop_quote(path) == path
+
+
+def test_desktop_quote_reserved_character():
+    assert desktop_quote('/home/my pi/venv/bin/pibooth') == '"/home/my pi/venv/bin/pibooth"'
+    assert desktop_quote("/home/o'pi/venv/bin/pibooth") == '"/home/o\'pi/venv/bin/pibooth"'
+
+
+def test_desktop_quote_escaped_character():
+    assert desktop_quote('/home/a"b/pibooth') == '"/home/a\\"b/pibooth"'
+    assert desktop_quote('/home/a\\b/pibooth') == '"/home/a\\\\b/pibooth"'
+    assert desktop_quote('/home/a`b/pibooth') == '"/home/a\\`b/pibooth"'
+    assert desktop_quote('/home/a$b/pibooth') == '"/home/a\\$b/pibooth"'
+
+
+def test_desktop_quote_percent_sign():
+    assert desktop_quote('/home/100%/bin/pibooth') == '/home/100%%/bin/pibooth'
+    assert desktop_quote('/home/100% pi/bin/pibooth') == '"/home/100%% pi/bin/pibooth"'
+
+
+def test_get_launch_command_next_to_interpreter(tmpdir, monkeypatch):
+    script = tmpdir.join('bin', 'pibooth')
+    script.write('', ensure=True)
+    monkeypatch.setattr(sys, 'executable', str(tmpdir.join('bin', 'python')))
+    assert get_launch_command() == str(script)
+
+
+def test_get_launch_command_from_path(tmpdir, monkeypatch):
+    monkeypatch.setattr(sys, 'executable', str(tmpdir.join('bin', 'python')))
+    monkeypatch.setattr(shutil, 'which', lambda name: '/usr/bin/' + name)
+    assert get_launch_command() == '/usr/bin/pibooth'
+
+
+def test_get_launch_command_not_resolved(tmpdir, monkeypatch):
+    monkeypatch.setattr(sys, 'executable', str(tmpdir.join('bin', 'python')))
+    monkeypatch.setattr(shutil, 'which', lambda name: None)
+    assert get_launch_command() == 'pibooth'
+
+
+def test_autostart_file_generated(autostart_cfg):
+    config, desktop_file = autostart_cfg
+    config.handle_autostart()
+    assert desktop_file.read() == ("[Desktop Entry]\n"
+                                   "Name=pibooth\n"
+                                   "Exec=/venv/bin/pibooth\n"
+                                   "Type=application\n")
+
+
+def test_autostart_file_generated_with_delay(autostart_cfg):
+    config, desktop_file = autostart_cfg
+    config.set('GENERAL', 'autostart_delay', '5')
+    config.handle_autostart()
+    assert 'Exec=bash -c "sleep 5 && /venv/bin/pibooth"\n' in desktop_file.read()
+
+
+def test_autostart_file_quotes_path_with_space(autostart_cfg, monkeypatch):
+    config, desktop_file = autostart_cfg
+    monkeypatch.setattr(parser, 'get_launch_command', lambda: '/home/my pi/venv/bin/pibooth')
+    config.handle_autostart()
+    assert 'Exec="/home/my pi/venv/bin/pibooth"\n' in desktop_file.read()
+
+    config.set('GENERAL', 'autostart_delay', '5')
+    config.handle_autostart()
+    assert 'Exec=bash -c "sleep 5 && \'/home/my pi/venv/bin/pibooth\'"\n' in desktop_file.read()
+
+
+def test_autostart_file_regenerated_on_command_change(autostart_cfg, monkeypatch):
+    config, desktop_file = autostart_cfg
+    config.handle_autostart()
+    monkeypatch.setattr(parser, 'get_launch_command', lambda: '/other/venv/bin/pibooth')
+    config.handle_autostart()
+    assert 'Exec=/other/venv/bin/pibooth\n' in desktop_file.read()
+
+
+def test_autostart_file_regenerated_from_bare_command(autostart_cfg):
+    config, desktop_file = autostart_cfg
+    desktop_file.write("[Desktop Entry]\nName=pibooth\nExec=pibooth\nType=application\n", ensure=True)
+    config.handle_autostart()
+    assert 'Exec=/venv/bin/pibooth\n' in desktop_file.read()
+
+
+def test_autostart_file_regenerated_on_delay_prefix_change(autostart_cfg):
+    config, desktop_file = autostart_cfg
+    config.set('GENERAL', 'autostart_delay', '50')
+    config.handle_autostart()
+    config.set('GENERAL', 'autostart_delay', '5')
+    config.handle_autostart()
+    assert 'sleep 5 &&' in desktop_file.read()
+
+
+def test_autostart_file_left_untouched(autostart_cfg):
+    config, desktop_file = autostart_cfg
+    config.handle_autostart()
+    os.utime(str(desktop_file), (0, 0))
+    config.handle_autostart()
+    assert desktop_file.stat().mtime == 0
+
+
+def test_autostart_file_removed(autostart_cfg):
+    config, desktop_file = autostart_cfg
+    config.handle_autostart()
+    config.set('GENERAL', 'autostart', 'False')
+    config.handle_autostart()
+    assert not desktop_file.check()

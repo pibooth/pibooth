@@ -83,12 +83,21 @@ The counters can be interactively updated/rest using the ``--update`` option:
 Errors diagnosis
 ----------------
 
-Use the following command to generate a debug report on your Raspberry-Pi, then
-paste it in a GitHb issue to gives details about your ``pibooth`` environment:
+Use the following command to generate a debug report on the DSLR camera
+connected to your Raspberry-Pi, then paste it in a GitHub issue to gives
+details about your ``pibooth`` environment:
 
 .. code-block:: bash
 
     pibooth-diag
+
+The settings menu feels slow? The following command reports the performances
+of the display, which is what drives the latency of every key press, in a
+separate ``diagnostic-display.log`` file:
+
+.. code-block:: bash
+
+    pibooth-diag --display
 
 List printer options
 --------------------
@@ -100,6 +109,9 @@ in the configuration:
 .. code-block:: bash
 
     pibooth-printer
+
+.. note:: ``pibooth-printcfg`` is an alias of this command, kept for the users
+          of the 2.x versions.
 
 *Output example*::
 
