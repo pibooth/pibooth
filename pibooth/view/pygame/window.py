@@ -49,6 +49,7 @@ class PygameWindow(BaseWindow):
         self._keyboard = None
         self._menu = None
         self._force_redraw = False
+        self._escape_held = False
 
     def _get_keyboard(self):
         """Return the virtual keyboard, built at the first call.
@@ -81,6 +82,8 @@ class PygameWindow(BaseWindow):
         """Callback when menu is closed by graphical action on menu.
         """
         self.is_menu_shown = False
+        # The key which has closed the menu may still be held down
+        self._escape_held = pygame.key.get_pressed()[pygame.K_ESCAPE]
         self._force_redraw = True  # Because pygame-menu does not manage direty rects
         evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
 
@@ -186,6 +189,8 @@ class PygameWindow(BaseWindow):
             else:
                 self._menu.disable()
                 self._force_redraw = True  # Because pygame-menu does not manage direty rects
+                # The key which has closed the menu may still be held down
+                self._escape_held = pygame.key.get_pressed()[pygame.K_ESCAPE]
                 evts.post(evts.EVT_PIBOOTH_SETTINGS, menu_shown=self.is_menu_shown)
 
     def update(self, events):
@@ -224,6 +229,11 @@ class PygameWindow(BaseWindow):
 
             elif ((event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE) or evts.is_fingers_event(event, 4))\
                     and not self.is_menu_shown:
+                if self._escape_held:
+                    # Auto-repeat of the key press which has closed the menu: pygame
+                    # keeps the repetition it has already scheduled, even once the
+                    # menu has restored the default (see 'PygameMenu.on_close')
+                    continue
                 LOGGER.debug("Event triggered: KEY ESCAPE -> generate EVT_BUTTON_SETTINGS")
                 evts.post(evts.EVT_BUTTON_SETTINGS)  # Use HW event to update sprites if necessary
 
@@ -252,6 +262,9 @@ class PygameWindow(BaseWindow):
             elif event.type == evts.EVT_BUTTON_PRINT:
                 if self.is_menu_shown:
                     self._menu.next()
+
+        if self._escape_held and not pygame.key.get_pressed()[pygame.K_ESCAPE]:
+            self._escape_held = False
 
         if self._is_keyboard_enabled():
             # Events only acts on the keyboard

@@ -12,7 +12,6 @@ from pibooth.utils import LOGGER
 from pibooth.config.default import DEFAULT
 
 
-pgm.controls.KEY_BACK = pygame.K_ESCAPE
 EVT_MENU_TEXT_EDIT = pygame.USEREVENT + 401
 
 THEME_WHITE = pgm.themes.Theme(
@@ -362,12 +361,22 @@ class PygameMenu:
         """
         return self._main_menu.get_current() == self._main_menu
 
-    def back(self):
-        """Simulate a back event to go previous menu.
+    def find_back_event(self, events):
+        """Return the first event asking to leave the current menu.
         """
-        LOGGER.debug("Generate MENU-NEXT event")
-        evts.post(pygame.KEYDOWN, key=pgm.controls.KEY_BACK, unicode=u'\x1b',
-                  mod=0, scancode=53, window=None, test=True)
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                return event
+        return None
+
+    def back(self):
+        """Go back to the previous menu, or close the menu if the main one
+        is displayed.
+        """
+        if not self.is_top_level():
+            self._main_menu.reset(1)
+        else:
+            self.on_close()
 
     def next(self):
         """Simulate a next event to change selected widget.
@@ -416,6 +425,11 @@ class PygameMenu:
         """Process the events related to the menu.
         """
         if self._main_menu:
+            if self.find_back_event(events):
+                # ESC is not given to pygame-menu: it is also the key deleting a
+                # character in the text inputs (see 'pygame_menu.controls.KEY_BACK')
+                self.back()
+                return
             self._main_menu.update(events)
             if self._main_menu and self._main_menu.is_enabled():  # Menu may have been closed
                 selected = self._main_menu.get_current().get_selected_widget()
