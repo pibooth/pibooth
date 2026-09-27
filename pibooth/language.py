@@ -206,7 +206,7 @@ DEFAULT = {
         'print_forget': "Glöm\nden här\nbilden",
         'finished': "Tack",
         'oops': "Oops, nånting blev fel",
-    },    
+    },
 }
 
 

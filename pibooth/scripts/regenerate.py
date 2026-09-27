@@ -63,7 +63,9 @@ def regenerate_all_images(plugin_manager, config, basepath):
 def main():
     """Application entry point.
     """
-    parser = argparse.ArgumentParser(usage="%(prog)s [options]", description="This script lets you regenerate the final pictures from the original captures present in the raw directory.")
+    parser = argparse.ArgumentParser(usage="%(prog)s [options]",
+                                     description="This script lets you regenerate the final pictures from "
+                                                 "the original captures present in the raw directory.")
 
     parser.add_argument("config_directory", nargs='?', default="~/.config/pibooth",
                         help=u"path to configuration directory (default: %(default)s)")
@@ -87,7 +89,7 @@ def main():
     # Initialize text variables (normally done by the app)
     picture_plugin = plugin_manager.get_plugin('pibooth-core:picture')
     picture_plugin.texts_vars['date'] = datetime.now()
-    picture_plugin.texts_vars['count'] = Counters(config.join_path("counters.pickle"),
+    picture_plugin.texts_vars['count'] = Counters(config.join_path("counters.json"),
                                                   taken=0, printed=0, forgotten=0,
                                                   remaining_duplicates=config.getint('PRINTER', 'max_duplicates'))
 

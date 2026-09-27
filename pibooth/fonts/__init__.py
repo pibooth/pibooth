@@ -157,9 +157,9 @@ def write_on_pil_image(image, text, posx=0, posy=0, max_width=None, max_height=N
     """
     draw = ImageDraw.Draw(image)
     if not max_width:
-        max_width= image.size[0]
+        max_width = image.size[0]
     if not max_height:
-        max_height= image.size[1]
+        max_height = image.size[1]
 
     font = get_pil_font(text, font_name, max_width, max_height)
     left, top, right, bottom = font.getbbox(text)

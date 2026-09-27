@@ -63,7 +63,10 @@ photos of your version.
    :hidden:
 
    sources/dev/install.rst
+   sources/dev/architecture.rst
    sources/dev/rules.rst
+   sources/dev/tests.rst
+   sources/dev/translations.rst
    sources/dev/release.rst
 
 Indices and tables
@@ -77,9 +80,9 @@ Indices and tables
    :target: https://www.pibooth.org
    :align: middle
 
-.. |PythonVersions| image:: https://img.shields.io/badge/python-3.6+-red.svg
+.. |PythonVersions| image:: https://img.shields.io/badge/python-3.10+-red.svg
    :target: https://www.python.org/downloads
-   :alt: Python 3.6+
+   :alt: Python 3.10+
 
 .. |PypiPackage| image:: https://badge.fury.io/py/pibooth.svg
    :target: https://pypi.org/project/pibooth
