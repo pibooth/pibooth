@@ -1,0 +1,267 @@
+# -*- coding: utf-8 -*-
+
+import time
+from io import BytesIO
+try:
+    from picamera2 import Picamera2
+    from libcamera import controls as libcamera_controls
+except Exception as ex:
+    # 'picamera2' is optional, it is only available on Raspberry Pi. Note that the
+    # import may fail with something else than an 'ImportError' when the package
+    # is installed but the 'libcamera' bindings are not usable.
+    Picamera2 = None
+    libcamera_controls = None
+    PICAMERA2_ERROR = ex
+else:
+    PICAMERA2_ERROR = None
+from PIL import Image, ImageFilter
+from pibooth.pictures import sizing
+from pibooth.utils import LOGGER
+from pibooth.camera.base import BaseCamera
+
+MAX_PREVIEW_SIZE = (1280, 720)
+
+
+def get_rpi2_camera_proxy(port=None):
+    """Return camera proxy if a Raspberry Pi camera (libcamera/picamera2) is found
+    else return None.
+
+    :param port: look on given camera number
+    :type port: int
+    """
+    if not Picamera2:
+        # picamera2 is not installed or can not be loaded
+        LOGGER.debug("Picamera2 not available: %s", PICAMERA2_ERROR)
+        return None
+    try:
+        if port is not None:
+            cam = Picamera2(port)
+        else:
+            cam = Picamera2()
+        cam.configure(cam.create_preview_configuration())
+        cam.start()
+        return cam
+    except Exception as ex:
+        LOGGER.debug("No Raspberry Pi camera detected: %s", ex)
+        return None
+
+
+class Rpi2Camera(BaseCamera):
+
+    """Raspberry Pi camera management, using picamera2 (libcamera).
+
+    The camera is only (re)configured from the main thread while no task is
+    running: the preview and the capture tasks are the only ones to read frames.
+    """
+
+    def __init__(self, camera_proxy):
+        super().__init__(camera_proxy)
+        self._preview_config = None
+        self._preview_size = None
+        self._still_config = None
+        self._preview_mode = None
+        self._capture_mode = None
+        self._af_controls = {}
+
+    def _select_sensor_modes(self):
+        """Return the two sensor modes having the widest (thus the same) field of
+        view: the smallest one for the preview (the fastest) and the biggest one for
+        the capture (the most detailed). Sharing the same field of view is what makes
+        the preview show exactly what is going to be captured.
+        """
+        try:
+            modes = [mode for mode in self._cam.sensor_modes if mode.get('size') and mode.get('crop_limits')]
+            widest = max(mode['crop_limits'][2] * mode['crop_limits'][3] for mode in modes)
+            modes = [mode for mode in modes if mode['crop_limits'][2] * mode['crop_limits'][3] == widest]
+            preview_mode = min(modes, key=lambda mode: mode['size'][0] * mode['size'][1])
+            capture_mode = max(modes, key=lambda mode: mode['size'][0] * mode['size'][1])
+        except Exception as ex:
+            LOGGER.warning("Can not choose the camera sensor modes (%s): the preview may not "
+                           "show the same field of view than the capture", ex)
+            return None, None
+        LOGGER.debug("Sensor modes with the widest field of view: %s for preview, %s for capture",
+                     preview_mode['size'], capture_mode['size'])
+        return preview_mode, capture_mode
+
+    def _get_autofocus_controls(self):
+        """Return the camera controls to apply the autofocus mode defined in the
+        configuration. Return an empty dict if the camera has no motorized lens
+        (Camera Module 1 and 2, HQ camera, ...), there is then nothing to drive.
+        """
+        if 'AfMode' not in self._cam.camera_controls:
+            if self.autofocus != 'off':
+                LOGGER.warning("Camera has no motorized lens, autofocus '%s' is ignored", self.autofocus)
+            return {}
+        LOGGER.debug("Camera autofocus mode set to '%s'", self.autofocus)
+        if self.autofocus == 'continuous':
+            return {'AfMode': libcamera_controls.AfModeEnum.Continuous}
+        if self.autofocus == 'capture':
+            # The focus is done by an autofocus cycle at each capture, see 'get_capture_image()'
+            return {'AfMode': libcamera_controls.AfModeEnum.Auto}
+        return {'AfMode': libcamera_controls.AfModeEnum.Manual, 'LensPosition': self.lens_position}
+
+    def _lock_autofocus(self):
+        """Run an autofocus cycle and lock the lens at the reached position for the
+        capture. The lens is locked because capturing switches the camera to the still
+        configuration, and picamera2 re-applies the controls of the new configuration
+        at each switch (which would start a new focus scan).
+        """
+        try:
+            if not self._cam.autofocus_cycle(wait=True):
+                LOGGER.warning("Camera can not focus, the capture may be blurred")
+            position = self._cam.capture_metadata().get('LensPosition')
+        except Exception as ex:
+            # Never lose a capture because of the focus
+            LOGGER.warning("Camera autofocus cycle failed (%s): the capture may be blurred", ex)
+            return
+        if position is not None:
+            self._still_config['controls'].update({'AfMode': libcamera_controls.AfModeEnum.Manual,
+                                                   'LensPosition': position})
+            LOGGER.debug("Camera focused at the lens position %s", position)
+
+    def _create_config(self, factory, size, sensor_mode, **kwargs):
+        """Return a camera configuration for the given main stream size, forcing the
+        given sensor mode (if any). The autofocus controls belong to the configuration
+        because picamera2 overwrites the camera controls at each (re)configuration.
+        """
+        main = {"size": (int(size[0]), int(size[1]))}
+        main.update(kwargs)
+        config = {'main': main, 'controls': dict(self._af_controls)}
+        if sensor_mode:
+            config['raw'] = {"size": sensor_mode['size'], "format": str(sensor_mode['format'])}
+        return factory(**config)
+
+    def _configure_preview(self, size):
+        """(Re)configure the preview stream at the given size. The frames are resized
+        by the camera ISP, which is far faster than resizing them in Python for each
+        displayed frame.
+        """
+        self._cam.stop()
+        self._preview_config = self._create_config(self._cam.create_preview_configuration,
+                                                   size, self._preview_mode, format="XBGR8888")
+        self._cam.configure(self._preview_config)
+        self._cam.start()
+        self._preview_size = size
+        LOGGER.debug("Picamera2 preview stream configured at %s (asked %s)",
+                     self._preview_config['main']['size'], size)
+
+    def _specific_initialization(self):
+        """Camera initialization.
+        """
+        self._cam.stop()
+        self._af_controls = self._get_autofocus_controls()
+        self._preview_mode, self._capture_mode = self._select_sensor_modes()
+        self._still_config = self._create_config(self._cam.create_still_configuration,
+                                                 self.resolution, self._capture_mode)
+        # Keep the aspect ratio of the capture resolution, else the preview would not
+        # show what is going to be captured. Resized at the displayed size when known.
+        self._configure_preview(sizing.new_size_keep_aspect_ratio(self.resolution, MAX_PREVIEW_SIZE))
+
+    def _rotate_image(self, image, rotation):
+        """Rotate a PIL image, same direction than the Raspberry Pi camera.
+        """
+        if rotation == 90:
+            return image.transpose(Image.Transpose.ROTATE_270)
+        elif rotation == 180:
+            return image.transpose(Image.Transpose.ROTATE_180)
+        elif rotation == 270:
+            return image.transpose(Image.Transpose.ROTATE_90)
+        return image
+
+    def preview(self, rect, flip=True):
+        """Start the preview fitting the given Rect object.
+        """
+        if self._worker and self._worker.is_alive():
+            # Already running
+            return
+
+        # Ask the camera for frames at the displayed size (swapped when the preview is
+        # rotated by a quarter turn), the ISP resize is free compared to a Python one
+        size = sizing.new_size_keep_aspect_ratio(self.resolution, (rect.width, rect.height))
+        if self.preview_rotation in (90, 270):
+            size = (size[1], size[0])
+        if size != self._preview_size:
+            self._configure_preview(size)
+
+        super().preview(rect, flip)
+
+    def get_preview_image(self):
+        """Capture a new preview image.
+        """
+        array = self._cam.capture_array("main")
+        if array is None:
+            raise IOError("Can not get camera preview image")
+        # Drop the 4th channel (XBGR8888 gives a RGBX array)
+        image = Image.fromarray(array[:, :, :3])
+        image = self._rotate_image(image, self.preview_rotation)
+
+        # Crop to keep aspect ratio of the resolution and resize to fit the available
+        # space in the window, in a single pass (nearly a no-op if the camera already
+        # delivers the displayed size)
+        box = sizing.new_size_by_croping_ratio(image.size, self.resolution)
+        size = sizing.new_size_keep_aspect_ratio((box[2] - box[0], box[3] - box[1]),
+                                                 (self._rect.width, self._rect.height), 'outer')
+        image = image.resize(size, Image.Resampling.BILINEAR, box)
+
+        if self.preview_flip:
+            image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+
+        overlay = self._overlay  # May be removed by the main thread in the meantime
+        if overlay:
+            image.paste(overlay, (0, 0), overlay)
+        return image
+
+    def _process_capture(self, capture_data):
+        """Rework capture data.
+
+        :param capture_data: couple (binary data as stream, effect)
+        :type capture_data: tuple
+        """
+        stream, effect = capture_data
+        # "Rewind" the stream to the beginning so we can read its content
+        stream.seek(0)
+        image = Image.open(stream)
+        image = self._rotate_image(image, self.capture_rotation)
+
+        # Crop to keep aspect ratio of the resolution
+        image = image.crop(sizing.new_size_by_croping_ratio(image.size, self.resolution))
+        # Resize to fit the resolution
+        image = image.resize(sizing.new_size_keep_aspect_ratio(image.size, self.resolution, 'outer'))
+
+        if self.capture_flip:
+            image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+
+        if effect != 'none':
+            image = image.filter(getattr(ImageFilter, effect.upper()))
+
+        return image
+
+    def get_capture_image(self, effect=None):
+        """Capture a new picture.
+        """
+        if self._af_controls and self.autofocus == 'capture':
+            self._lock_autofocus()
+
+        stream = BytesIO()
+        self._cam.switch_mode_and_capture_file(self._still_config, stream, format='jpeg')
+        self._captures.append((stream, effect))
+        time.sleep(0.2)  # Necessary to let the camera restart the preview mode
+        return stream
+
+    def reset(self):
+        """Restart the camera in the preview mode: a capture that failed may
+        have left it stopped or in the still configuration.
+        """
+        if self._worker:
+            self.stop_preview()
+        if self._preview_size:
+            self._configure_preview(self._preview_size)
+            LOGGER.info("Picamera2 camera reinitialized")
+
+    def _specific_cleanup(self):
+        """Close the camera driver, it's definitive.
+        """
+        if self._cam:
+            self._cam.stop()
+            self._cam.close()
+            self._cam = None

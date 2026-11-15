@@ -284,9 +284,10 @@ Most of the hardware-facing code cannot be exercised on a development machine:
 * **GPIO** — ``__main__.py`` catches ``BadPinFactory`` and falls back to
   ``gpiozero``'s mock factory, logging *without physical GPIO*. Button and LED
   code runs but has no effect.
-* **Pi Camera** — the ``picamera2`` driver of the 2.x versions is not ported
-  to the asynchronous camera API yet: on a Raspberry Pi the camera has to be
-  a webcam (OpenCV) or a DSLR (gPhoto2) for now.
+* **Pi Camera** — ``picamera2`` and its ``libcamera`` binding only exist on
+  Raspberry Pi OS, ``camera/rpi2.py`` guards their import. The tests of
+  ``tests/test_camera_rpi2.py`` replace the library by a stub, so the driver
+  logic is covered but neither the sensor nor the timings are.
 * **DSLR and printing** — need real hardware, plus ``gphoto2`` and a CUPS
   server. Both are optional extras, and the corresponding modules guard their
   imports. The tests replace them by the mocks of ``tests/mocks/``.
