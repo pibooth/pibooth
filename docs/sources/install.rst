@@ -114,6 +114,13 @@ Manual procedure
    Pick the method matching how the Raspberry Pi is used — see
    :ref:`which_install_method` if you are unsure:
 
+   .. warning:: ``pibooth`` 3 is in beta. The commands below install the
+                latest stable version, 2.1.x. To test the beta, add ``--pre``
+                to the ``pip`` command, for instance
+                ``pip install --pre pibooth[dslr,printer]``. The Raspberry Pi
+                camera is not supported yet by ``3.0.0b1``: only the
+                ``gPhoto2`` and ``OpenCV`` cameras are.
+
    **a. The Raspberry Pi is dedicated to the photobooth**
 
    .. code-block:: bash
