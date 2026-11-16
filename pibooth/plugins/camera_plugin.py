@@ -68,8 +68,13 @@ class CameraPlugin:
     @pibooth.hookimpl
     def state_preview_enter(self, cfg, app, win):
         LOGGER.info("Show preview before next capture")
-        border = 100
-        app.camera.preview(win.get_rect(absolute=True).inflate(-border, -border))
+        # Frames delivered at the displayed size: resizing them again in the view
+        # (here a small upscale) makes the details of the preview shimmer
+        rect = win.scene.get_image_rect()
+        if not rect:
+            border = 100
+            rect = win.get_rect(absolute=True).inflate(-border, -border)
+        app.camera.preview(rect)
         self.timer.start(cfg.getint('WINDOW', 'preview_delay'))
 
     @pibooth.hookimpl

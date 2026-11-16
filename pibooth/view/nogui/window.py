@@ -22,6 +22,8 @@ class NoGuiScene(BaseScene):
 
     def set_image(self, image=None): pass  # Avoid "NotImplemented" error
 
+    def get_image_rect(self): return None
+
     def set_text_color(self, color): pass  # Avoid "NotImplemented" error
 
     def set_arrows(self, location, offset): pass  # Avoid "NotImplemented" error

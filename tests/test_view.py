@@ -126,3 +126,50 @@ def test_refresh_display(init_pygame, monkeypatch):
     assert win.refresh_display([])
     assert not win.refresh_display([])  # Back to idle
     assert len(calls) == 3
+
+
+@pytest.mark.parametrize("resolution", [(1934, 2464), (3280, 2464)])
+def test_preview_frames_are_not_resized_again(init_lang, init_pygame, scene_builder, resolution):
+    """A preview frame computed for the place given by the scene is displayed
+    pixel for pixel (a second resize blurs and makes the details shimmer).
+    """
+    from pibooth.pictures import sizing
+    scene = scene_builder('preview')
+    rect = scene.get_image_rect()
+    size = sizing.new_size_keep_aspect_ratio(resolution, rect.size)
+    # One pixel checkerboard: any resampling would mix black and white pixels
+    frame = Image.new('L', size)
+    frame.putdata([255 * ((x + y) % 2) for y in range(size[1]) for x in range(size[0])])
+    frame = frame.convert('RGB')
+    scene.set_image(frame)
+
+    drawn = scene.image.image
+    area = pygame.Rect((0, 0), size)
+    area.center = drawn.get_rect().center
+    for x, y in [(0, 0), (1, 0), (size[0] // 2, size[1] // 2), (size[0] - 1, size[1] - 1)]:
+        assert drawn.get_at((area.x + x, area.y + y))[:3] == frame.getpixel((x, y))
+
+
+def test_camera_previews_at_the_displayed_size(cfg, pm, init_lang, init_pygame, scene_builder):
+    """The camera is asked for frames at the size of the place where they are
+    displayed, not at the size of the window minus a border.
+    """
+    from types import SimpleNamespace
+    from pibooth.plugins.camera_plugin import CameraPlugin
+
+    class FakeCamera:
+        rect = None
+
+        def preview(self, rect, flip=True):
+            self.rect = rect
+
+    scene = scene_builder('preview')
+    win = SimpleNamespace(scene=scene, get_rect=lambda absolute=False: pygame.Rect(0, 0, 400, 400))
+    app = SimpleNamespace(camera=FakeCamera())
+    CameraPlugin(pm).state_preview_enter(cfg, app, win)
+    assert app.camera.rect == scene.get_image_rect()
+
+    # A scene without place for the image (no GUI) falls back to the window
+    win.scene = SimpleNamespace(get_image_rect=lambda: None)
+    CameraPlugin(pm).state_preview_enter(cfg, app, win)
+    assert app.camera.rect == pygame.Rect(0, 0, 400, 400).inflate(-100, -100)

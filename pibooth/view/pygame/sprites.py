@@ -775,6 +775,11 @@ class BasePygameScene(BaseScene):
         else:
             self.image.hide()
 
+    def get_image_rect(self):
+        """Return the place of the main image.
+        """
+        return self.image.rect.copy()
+
     def set_arrows(self, location, offset):
         """Set arrows attributes.
 
