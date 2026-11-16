@@ -258,7 +258,8 @@ def diagnose_loop(window, duration=3.0):
         events.append(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN, unicode='',
                                          mod=0, scancode=0, test=True))
         window.update(events)
-        pygame.display.update(window.draw())
+        forced = window._force_redraw  # pylint: disable=protected-access
+        window.refresh_display(window.draw(), forced)
         works.append((time.perf_counter() - tick) * 1000)
         clock.tick(25)  # Same frame rate limit as the application
         periods.append((time.perf_counter() - tick) * 1000)

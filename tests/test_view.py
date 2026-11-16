@@ -104,3 +104,25 @@ def test_capture_scene_flash_over_a_scene_change(init_lang, init_pygame, scene_b
     assert scene.background.get_skin() == (255, 255, 255)
     scene.set_flash(False)
     assert scene.background.get_skin() == (0, 0, 0)
+
+
+def test_refresh_display(init_pygame, monkeypatch):
+    """The whole window is pushed when something changed, and during some frames
+    after a full redraw (a part of a push may be lost with some drivers).
+    """
+    from pibooth.view.pygame.window import PygameWindow
+    calls = []
+    monkeypatch.setattr(pygame.display, 'update', lambda *args: calls.append(args))
+    win = PygameWindow.__new__(PygameWindow)  # Only the refresh state is needed
+    win._full_refresh_frames = 0
+
+    assert not win.refresh_display([])  # Nothing changed
+    assert win.refresh_display([pygame.Rect(0, 0, 10, 10)])
+    assert calls == [()]  # Whole window, not the given rectangle
+
+    calls.clear()
+    assert win.refresh_display([pygame.Rect(0, 0, 800, 480)], forced=True, frames=3)
+    assert win.refresh_display([])
+    assert win.refresh_display([])
+    assert not win.refresh_display([])  # Back to idle
+    assert len(calls) == 3
