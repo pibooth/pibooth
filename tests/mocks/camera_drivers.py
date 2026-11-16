@@ -15,9 +15,18 @@ class CvCameraProxyMock:
         self.frame = cv2.imread(filename)
         self.props = {}
         self.released = False
+        self.failures = 0  # Number of next reads which fail
+        self.broken = False  # All reads fail until the camera is reopened
+        self.opened_ports = []
 
     def isOpened(self):
         return not self.released
+
+    def open(self, port):
+        self.opened_ports.append(port)
+        self.released = False
+        self.broken = False
+        return True
 
     def get(self, prop):
         if prop == cv2.CAP_PROP_FRAME_WIDTH:
@@ -31,6 +40,11 @@ class CvCameraProxyMock:
         return True
 
     def read(self):
+        if self.released or self.broken:
+            return False, None
+        if self.failures:
+            self.failures -= 1
+            return False, None
         return True, self.frame.copy()
 
     def release(self):
