@@ -13,7 +13,6 @@ from pibooth.view.base import BaseWindow, BaseScene
 
 class NoGuiScene(BaseScene):
 
-    count_flash = 3
     selection = None
     choices = []
 

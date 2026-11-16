@@ -17,6 +17,7 @@ class ViewPlugin:
         self._pm = plugin_manager
         self.capture_count = 0
         self.capture_finished = False
+        self.last_preview = None
         self.forgotten = False
         # Seconds to display the failed message
         self.failed_view_timer = PollingTimer(2)
@@ -133,26 +134,31 @@ class ViewPlugin:
     @pibooth.hookimpl
     def state_preview_do(self, win, events):
         event = evts.find_event(events, evts.EVT_PIBOOTH_CAM_PREVIEW)
-        if event:
+        if event and event.result:
+            self.last_preview = event.result
             win.scene.set_image(event.result)
 
     @pibooth.hookimpl
     def state_capture_enter(self, cfg, app, win):
         self.capture_finished = False
-        if cfg.getboolean('WINDOW', 'flash'):
-            win.scene.trigger_flash()
+        # Keep the last preview frame displayed while the capture is taken
+        win.scene.set_image(self.last_preview)
+        self.last_preview = None
         win.scene.set_capture_number(self.capture_count + 1, app.capture_nbr)
+        # The background stays lit until the capture is done
+        win.scene.set_flash(cfg.getboolean('WINDOW', 'flash'))
 
     @pibooth.hookimpl
-    def state_capture_do(self, events):
+    def state_capture_do(self, win, events):
         event = evts.find_event(events, evts.EVT_PIBOOTH_CAM_CAPTURE)
         if event:
             self.capture_finished = True
             self.capture_count += 1
+            win.scene.set_flash(False)
 
     @pibooth.hookimpl
-    def state_capture_validate(self, cfg, app, win):
-        if self.capture_finished and (not cfg.getboolean('WINDOW', 'flash') or win.scene.count_flash >= 2):
+    def state_capture_validate(self, cfg, app):
+        if self.capture_finished:
             if self.capture_count >= app.capture_nbr:
                 return 'processing'
             if cfg.getint('WINDOW', 'preview_delay') > 0:

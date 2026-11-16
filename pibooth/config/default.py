@@ -69,7 +69,7 @@ add_default_option("WINDOW", "text_color", (255, 255, 255),
                    "Text RGB color", (255, 255, 255))
 
 add_default_option("WINDOW", "flash", True,
-                   "Blinking background when a capture is taken",
+                   "Light the background up while a capture is taken",
                    "Flash on capture", ['True', 'False'])
 
 add_default_option("WINDOW", "animate", False,

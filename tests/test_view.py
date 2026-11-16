@@ -2,6 +2,7 @@
 
 import pytest
 import pygame
+from PIL import Image
 from pibooth import evts
 
 
@@ -51,3 +52,55 @@ def test_print_scene_actions(init_lang, init_pygame, scene_builder):
     scene.image.set_pressed(1)
     scene.image.set_pressed(0)
     assert [event.type for event in pygame.event.get()] == [evts.EVT_PIBOOTH_PRINT]
+
+
+def test_capture_scene_flash(init_lang, init_pygame, scene_builder):
+    """Only the background is lit during the capture, the last preview frame
+    stays displayed.
+    """
+    screen = init_pygame
+    scene = scene_builder('capture')
+    scene.set_image(Image.new('RGB', (200, 200), (255, 0, 0)))
+    scene.update([])
+    scene.draw(screen, True)
+    # A point of the background out of any sprite (and of the outlines)
+    corner, center = (20, 20), scene.image.rect.center
+    assert screen.get_at(corner)[:3] == (0, 0, 0)
+    assert screen.get_at(center)[:3] == (255, 0, 0)
+
+    scene.set_flash(True)
+    scene.set_flash(True)  # Lit once, whatever the number of calls
+    for _ in range(3):  # The flash is steady, it does not blink
+        scene.update([])
+        scene.draw(screen)
+        assert screen.get_at(corner)[:3] == (255, 255, 255)
+        assert screen.get_at(center)[:3] == (255, 0, 0)
+
+    scene.set_flash(False)
+    scene.update([])
+    scene.draw(screen)
+    assert screen.get_at(corner)[:3] == (0, 0, 0)
+    assert screen.get_at(center)[:3] == (255, 0, 0)
+
+
+def test_capture_scene_no_flash(init_lang, init_pygame, scene_builder):
+    screen = init_pygame
+    scene = scene_builder('capture')
+    scene.set_flash(False)
+    for _ in range(3):
+        scene.update([])
+        scene.draw(screen, True)
+        assert screen.get_at((20, 20))[:3] == (0, 0, 0)
+
+
+def test_capture_scene_flash_over_a_scene_change(init_lang, init_pygame, scene_builder):
+    """The window puts the background back when the scene is left during a flash
+    (the background sprite is shared): the next flash shall work the same.
+    """
+    scene = scene_builder('capture')
+    scene.set_flash(True)
+    scene.background.set_skin((0, 0, 0))  # As 'PygameWindow.set_scene()' does
+    scene.set_flash(True)
+    assert scene.background.get_skin() == (255, 255, 255)
+    scene.set_flash(False)
+    assert scene.background.get_skin() == (0, 0, 0)

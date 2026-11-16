@@ -1,42 +1,39 @@
 # -*- coding: utf-8 -*-
 
-from pibooth.utils import PollingTimer
-from pibooth.view.pygame.sprites import BasePygameScene
+from pibooth.view.pygame.scenes.preview import PreviewScene
 
 
-class CaptureScene(BasePygameScene):
+class CaptureScene(PreviewScene):
+
+    """Scene displayed while a capture is taken. It has the layout of the
+    preview scene, so that the last preview frame stays at the same place
+    during the capture.
+    """
+
+    FLASH_COLOR = (255, 255, 255)
 
     def __init__(self):
         super().__init__()
-        self.count_flash = 0
         self.is_flash_on = False
         self.saved_skin = None
 
-        # Seconds between each flash
-        self.flash_timer = PollingTimer(0.3)
+    def set_flash(self, enable=True):
+        """Light the background up, or put it back as it was. Only the
+        background flashes: the image and the counter stay displayed.
 
-    def resize(self, size):
-        # Hide status bar
-        self.status_bar.hide()
+        The background sprite is shared by all the scenes, the window puts the
+        configured one back at each scene change.
 
-        # Capture
-        self.image.set_rect(self.rect.width // 6, 10,
-                            self.rect.width * 2 // 3, self.rect.height * 7 // 8)
-
-    def update(self, events):
-        if self.flash_timer.is_started() and self.flash_timer.is_timeout():
-            self.trigger_flash()
-        super().update(events)
-
-    def set_capture_number(self, current, total):
-        self.count_flash = 0
-
-    def trigger_flash(self):
-        self.flash_timer.start()
-        self.is_flash_on = not self.is_flash_on
-        if self.is_flash_on:
-            self.count_flash += 1
-            self.saved_skin = self.background.get_skin()
-            self.background.set_skin((255, 255, 255))
+        :param enable: turn the flash on / off
+        :type enable: bool
+        """
+        if enable:
+            if self.background.get_skin() != self.FLASH_COLOR:
+                self.saved_skin = self.background.get_skin()
+                self.background.set_skin(self.FLASH_COLOR)
+            self.is_flash_on = True
         else:
-            self.background.set_skin(self.saved_skin)
+            if self.is_flash_on and self.saved_skin is not None \
+                    and self.background.get_skin() == self.FLASH_COLOR:
+                self.background.set_skin(self.saved_skin)
+            self.is_flash_on = False
