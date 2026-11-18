@@ -45,6 +45,13 @@ class BaseScene:
         """
         raise NotImplementedError
 
+    def get_image_rect(self):
+        """Return the place of the main image (a pygame.Rect object), or None
+        if the scene has no such place. The camera delivers the preview frames
+        at this size, so that they are displayed without being resized again.
+        """
+        return None
+
     def set_text_color(self, color):
         """Set text font color.
 

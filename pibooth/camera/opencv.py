@@ -49,6 +49,11 @@ class CvCamera(BaseCamera):
     """OpenCV camera management.
     """
 
+    # A webcam may not deliver the first frames after a change of resolution:
+    # number of reads (and delay in seconds between them) before giving up
+    READ_ATTEMPTS = 10
+    READ_RETRY_DELAY = 0.05
+
     def __init__(self, camera_proxy):
         super().__init__(camera_proxy)
         self._overlay_alpha = 255
@@ -81,11 +86,24 @@ class CvCamera(BaseCamera):
             return cv2.flip(image, 0)
         return image
 
+    def _read(self):
+        """Return a new frame, retrying when the webcam does not deliver one.
+        Return None if no frame is delivered after all the attempts.
+        """
+        for attempt in range(self.READ_ATTEMPTS):
+            ret, image = self._cam.read()
+            if ret:
+                if attempt:
+                    LOGGER.debug("Camera frame read after %s failed attempt(s)", attempt)
+                return image
+            time.sleep(self.READ_RETRY_DELAY)
+        return None
+
     def get_preview_image(self):
         """Capture a new preview image.
         """
-        ret, image = self._cam.read()
-        if not ret:
+        image = self._read()
+        if image is None:
             raise IOError("Can not get camera preview image")
         image = self._rotate_image(image, self.preview_rotation)
 
@@ -152,8 +170,8 @@ class CvCamera(BaseCamera):
             self._cam.read()
 
         LOGGER.debug("Taking capture at resolution %s", self.resolution)
-        ret, image = self._cam.read()
-        if not ret:
+        image = self._read()
+        if image is None:
             raise IOError("Can not capture frame")
         image = self._rotate_image(image, self.capture_rotation)
 
@@ -164,8 +182,28 @@ class CvCamera(BaseCamera):
         if self.capture_iso != self.preview_iso:
             self._cam.set(cv2.CAP_PROP_ISO_SPEED, self.preview_iso)
 
+        # Restart the stream at the preview resolution now: a webcam which does
+        # not support the switch back is reported here, not at the next preview
+        if self._read() is None:
+            LOGGER.warning("Camera does not deliver frames after the capture, it will be reopened")
+
         self._captures.append((image, effect))
         return image
+
+    def reset(self):
+        """Close and reopen the webcam: it may stop delivering frames after a
+        change of resolution, and only a new connection makes it work again.
+        """
+        if self._worker:
+            self.stop_preview()
+        self._cam.release()
+        for port in range(3):  # Same ports than the detection
+            if self._cam.open(port) and self._cam.isOpened():
+                break
+        else:
+            raise IOError("Can not reopen the OpenCV camera")
+        self._specific_initialization()
+        LOGGER.info("OpenCV camera connection reinitialized")
 
     def _specific_cleanup(self):
         """Close the camera driver, it's definitive.

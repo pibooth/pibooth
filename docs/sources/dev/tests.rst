@@ -27,6 +27,10 @@ The variables matter, for different reasons:
     the fixture looks for a real camera and the tests are skipped if none is
     connected.
 
+The Raspberry Pi camera needs no variable: ``tests/test_camera_rpi2.py`` always
+replaces ``picamera2`` by a stub defined in the test file, on a Raspberry Pi
+too.
+
 With all of them set and ``opencv-python-headless`` installed, the whole suite
 passes on a machine without any photobooth hardware, so a failure is a real one.
 The usual cause of a mass failure is a missing OpenCV, which takes out all of

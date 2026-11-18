@@ -50,6 +50,7 @@ class PygameWindow(BaseWindow):
         self._menu = None
         self._force_redraw = False
         self._escape_held = False
+        self._full_refresh_frames = 0
 
     def _get_keyboard(self):
         """Return the virtual keyboard, built at the first call.
@@ -292,6 +293,33 @@ class PygameWindow(BaseWindow):
         self._force_redraw = False
         return rects
 
+    def refresh_display(self, rects, forced=False, frames=25):
+        """Push the drawn surface to the screen.
+
+        The whole window is pushed, not only the given rectangles: with some
+        drivers (X11 on Raspberry Pi), parts of a push can be lost, and a
+        partial refresh would then leave the previous page on screen. It
+        costs the same: SDL pushes the whole window anyway with these drivers.
+
+        :param rects: areas which have been drawn since the previous call
+        :type rects: list
+        :param forced: True if the whole surface has been redrawn
+        :type forced: bool
+        :param frames: number of calls during which the window is pushed after
+                       a full redraw, even if nothing has changed
+        :type frames: int
+
+        :return: True if the screen has been refreshed
+        :rtype: bool
+        """
+        if forced:
+            self._full_refresh_frames = frames
+        if not rects and self._full_refresh_frames <= 0:
+            return False  # Nothing changed, keep the CPU idle
+        self._full_refresh_frames -= 1
+        pygame.display.update()
+        return True
+
     def eventloop(self, app_update):
         """Main GUI events loop (blocking).
         """
@@ -315,10 +343,11 @@ class PygameWindow(BaseWindow):
             self.update(events)
 
             # 3. Draw on buffer view elements which have changed
+            forced = self._force_redraw
             rects = self.draw()
 
-            # 4. Update dirty rects on screen (the most time-consuming action)
-            pygame.display.update(rects)
+            # 4. Update the screen (the most time-consuming action)
+            self.refresh_display(rects, forced, fps)
 
             # 5. Ensure the program will never run at more than <fps> frames per second
             clock.tick(fps)

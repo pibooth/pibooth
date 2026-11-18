@@ -13,7 +13,6 @@ from pibooth.view.base import BaseWindow, BaseScene
 
 class NoGuiScene(BaseScene):
 
-    count_flash = 3
     selection = None
     choices = []
 
@@ -22,6 +21,8 @@ class NoGuiScene(BaseScene):
     def set_outlines(self, enable=True): pass  # Avoid "NotImplemented" error
 
     def set_image(self, image=None): pass  # Avoid "NotImplemented" error
+
+    def get_image_rect(self): return None
 
     def set_text_color(self, color): pass  # Avoid "NotImplemented" error
 
