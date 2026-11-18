@@ -118,8 +118,7 @@ Manual procedure
                 latest stable version, 2.1.x. To test the beta, add ``--pre``
                 to the ``pip`` command, for instance
                 ``pip install --pre pibooth[dslr,printer]``. The Raspberry Pi
-                camera is not supported by ``3.0.0b1`` (only the ``gPhoto2``
-                and ``OpenCV`` cameras are), it comes with ``3.0.0b2``.
+                camera is supported since ``3.0.0b2``.
 
    **a. The Raspberry Pi is dedicated to the photobooth**
 
