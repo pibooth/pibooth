@@ -173,3 +173,37 @@ def test_camera_previews_at_the_displayed_size(cfg, pm, init_lang, init_pygame, 
     win.scene = SimpleNamespace(get_image_rect=lambda: None)
     CameraPlugin(pm).state_preview_enter(cfg, app, win)
     assert app.camera.rect == pygame.Rect(0, 0, 400, 400).inflate(-100, -100)
+
+
+def test_choose_scene_tap_on_layout(init_lang, init_pygame, scene_builder):
+    """Tapping the displayed layout chooses it, as the capture button (issue #647).
+    """
+    scene = scene_builder('choose')
+    scene.set_choices((1, 4))
+    scene.update([])
+    scene.draw(init_pygame, True)
+    slide = scene.slider.layout.get_visible_slides()[0]
+
+    pygame.event.clear()
+    scene.update([pygame.event.Event(pygame.MOUSEBUTTONDOWN, pos=slide.rect.center, button=1)])
+    assert [event.type for event in pygame.event.get()] == [evts.EVT_PIBOOTH_CAPTURE]
+
+    # A tap out of the layout, or with the mouse wheel, does nothing
+    pygame.event.clear()
+    scene.update([pygame.event.Event(pygame.MOUSEBUTTONDOWN, pos=(1, 1), button=1),
+                  pygame.event.Event(pygame.MOUSEBUTTONDOWN, pos=slide.rect.center, button=4)])
+    assert evts.EVT_PIBOOTH_CAPTURE not in [event.type for event in pygame.event.get()]
+
+
+def test_choose_scene_finger_on_layout(init_lang, init_pygame, scene_builder):
+    scene = scene_builder('choose')
+    scene.set_choices((1, 4))
+    scene.update([])
+    scene.draw(init_pygame, True)
+    slide = scene.slider.layout.get_visible_slides()[0]
+    width, height = pygame.display.get_surface().get_size()
+
+    pygame.event.clear()
+    scene.update([pygame.event.Event(pygame.FINGERDOWN, x=slide.rect.centerx / width,
+                                     y=slide.rect.centery / height, touch_id=0, finger_id=0)])
+    assert evts.EVT_PIBOOTH_CAPTURE in [event.type for event in pygame.event.get()]

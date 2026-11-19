@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import pygame
 from pygame_imslider import ImSlider, ImSliderRenderer, STYPE_LOOP
 
 from pibooth import evts
@@ -109,6 +110,21 @@ class ChooseScene(BasePygameScene):
     def update(self, events):
         super().update(events)
         self.slider.update(events)
+        for event in events:
+            if (event.type == pygame.MOUSEBUTTONDOWN and event.button in (1, 2, 3))\
+                    or event.type == pygame.FINGERDOWN:
+                if self.is_slide_at(evts.get_event_pos(pygame.display.get_surface().get_size(), event)):
+                    # Same action than the capture button: choose the displayed layout
+                    evts.post(evts.EVT_PIBOOTH_CAPTURE)
+
+    def is_slide_at(self, pos):
+        """Return True if the displayed layout is at the given position. Nothing is
+        returned while the slider moves: the slide under the finger is not the
+        selected one yet.
+        """
+        if self.slider.layout.is_animated():
+            return False
+        return any(slide.rect.collidepoint(pos) for slide in self.slider.layout.get_visible_slides())
 
     def draw(self, surface, force=False):
         rects = super().draw(surface, force)
