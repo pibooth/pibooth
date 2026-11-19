@@ -75,7 +75,7 @@ def test_boolean(cfg):
 
 
 def test_integer(cfg):
-    assert cfg.getint('CONTROLS', 'picture_btn_pin') == 11
+    assert cfg.getint('CONTROLS', 'capture_btn_pin') == 11
 
 
 def test_float(cfg):
@@ -224,3 +224,54 @@ def test_autostart_file_removed(autostart_cfg):
     config.set('GENERAL', 'autostart', 'False')
     config.handle_autostart()
     assert not desktop_file.check()
+
+
+CONFIG_2X = """[CONTROLS]
+picture_btn_pin = 21
+picture_led_pin = 22
+print_btn_pin = 23
+
+[WINDOW]
+preview_stop_on_capture = True
+preview_delay = 5
+"""
+
+
+def test_migrate_2x_configuration(tmpdir, pm):
+    filename = tmpdir.join('pibooth.cfg')
+    filename.write(CONFIG_2X)
+    config = PiboothConfigParser(str(filename), pm)
+    config.autostart_filename = str(tmpdir.join('autostart'))
+
+    # Values of the renamed options are kept, the removed option is dropped
+    assert config.getint('CONTROLS', 'capture_btn_pin') == 21
+    assert config.getint('CONTROLS', 'capture_led_pin') == 22
+    assert config.getint('CONTROLS', 'print_btn_pin') == 23
+    assert config.getint('WINDOW', 'preview_delay') == 5
+    assert not config.has_option('CONTROLS', 'picture_btn_pin')
+    assert not config.has_option('WINDOW', 'preview_stop_on_capture')
+
+    # The file is rewritten once, the original one is kept aside
+    assert tmpdir.join('pibooth.cfg.bak').read() == CONFIG_2X
+    content = filename.read()
+    assert 'capture_btn_pin = 21' in content
+    assert 'picture_btn_pin' not in content
+    assert 'preview_stop_on_capture' not in content
+    reloaded = PiboothConfigParser(str(filename), pm)
+    assert not reloaded.migrate()
+
+
+def test_migrate_keeps_the_new_name(tmpdir, pm):
+    filename = tmpdir.join('pibooth.cfg')
+    filename.write("[CONTROLS]\npicture_btn_pin = 21\ncapture_btn_pin = 5\n")
+    config = PiboothConfigParser(str(filename), pm)
+    assert config.getint('CONTROLS', 'capture_btn_pin') == 5
+    assert not config.has_option('CONTROLS', 'picture_btn_pin')
+
+
+def test_no_migration_of_a_3x_configuration(tmpdir, pm):
+    filename = tmpdir.join('pibooth.cfg')
+    filename.write("[CONTROLS]\ncapture_btn_pin = 5\n")
+    PiboothConfigParser(str(filename), pm)
+    assert not tmpdir.join('pibooth.cfg.bak').check()
+    assert filename.read() == "[CONTROLS]\ncapture_btn_pin = 5\n"

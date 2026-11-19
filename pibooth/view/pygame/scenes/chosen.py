@@ -15,7 +15,7 @@ class ChosenScene(BasePygameScene):
         texts = []
         if get_translated_text('chosen'):
             texts.append(get_translated_text('chosen'))
-        if get_translated_text(str(self.choice)):
+        if self.choice and get_translated_text(str(self.choice)):  # No choice when the scene is built
             texts.append(get_translated_text(str(self.choice)))
         return "\n".join(texts)
 
