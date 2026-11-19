@@ -17,6 +17,18 @@ from pibooth.config.default import DEFAULT, add_default_option
 from pibooth.utils import LOGGER, open_text_editor
 
 
+# Options of the 2.x versions renamed in 3.x: (section, old name) -> new name
+RENAMED_OPTIONS = {
+    ('CONTROLS', 'picture_btn_pin'): 'capture_btn_pin',
+    ('CONTROLS', 'picture_led_pin'): 'capture_led_pin',
+}
+
+# Options of the 2.x versions removed in 3.x: (section, name) -> reason
+REMOVED_OPTIONS = {
+    ('WINDOW', 'preview_stop_on_capture'): "the preview is always stopped during the capture",
+}
+
+
 def get_launch_command():
     """Return the command to start pibooth, as an absolute path when it can be
     resolved. The desktop session reading the auto-startup file does not
@@ -66,6 +78,37 @@ class PiboothConfigParser(RawConfigParser):
 
         if osp.isfile(self.filename) and load:
             self.load()
+            if self.migrate():
+                backup = self.filename + '.bak'
+                shutil.copyfile(self.filename, backup)
+                LOGGER.warning("Configuration file migrated from pibooth 2.x, the previous one is saved in '%s'",
+                               backup)
+                self.save()
+
+    def migrate(self):
+        """Rename the options of the 2.x versions and drop the removed ones.
+
+        :return: True if the configuration has been changed
+        :rtype: bool
+        """
+        changed = False
+        for (section, old), new in RENAMED_OPTIONS.items():
+            if self.has_section(section) and self.has_option(section, old):
+                value = super().get(section, old)
+                if not self.has_option(section, new):
+                    self.set(section, new, value)
+                    LOGGER.warning("Option [%s][%s] is renamed '%s' (value '%s' kept)", section, old, new, value)
+                else:
+                    LOGGER.warning("Option [%s][%s] is renamed '%s', already defined: '%s' is dropped",
+                                   section, old, new, value)
+                self.remove_option(section, old)
+                changed = True
+        for (section, name), reason in REMOVED_OPTIONS.items():
+            if self.has_section(section) and self.has_option(section, name):
+                LOGGER.warning("Option [%s][%s] is removed: %s", section, name, reason)
+                self.remove_option(section, name)
+                changed = True
+        return changed
 
     def _get_abs_path(self, path):
         """Return absolute path. In case of relative path given, the absolute

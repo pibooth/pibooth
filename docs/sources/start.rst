@@ -81,6 +81,13 @@ upgrading ``pibooth``):
 
     pibooth --reset
 
+.. note:: A configuration file of the 2.x versions is migrated at the first start
+          of ``pibooth`` 3: ``[CONTROLS][picture_btn_pin]`` and ``picture_led_pin``
+          are renamed ``capture_btn_pin`` and ``capture_led_pin`` (their values are
+          kept), and ``[WINDOW][preview_stop_on_capture]`` is removed. The previous
+          file is saved next to it as ``pibooth.cfg.bak`` and a warning is logged
+          for each change.
+
 The configuration directory can be chosen at startup. This feature gives the possibility
 to keep several configurations on the same Raspberry Pi and quickly switch from one
 configuration to another. The following command will start ``pibooth`` using configuration
